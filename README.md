@@ -42,16 +42,20 @@ The project is organized as follows:
    cd interviewgrade
    
 2. Install Dependecies
+   ```bash
    pnpm install
 
 3. Set up your environment variables: Create a .env.local file and add your Supabase credentials and other environment variables:
+   ```bash
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 4.Run the development server:
-  pnpm run dev
+   ```bash
+   pnpm run dever
 
 5.Open the application in your browser:
+  ```bash
   http://localhost:3000
 
 

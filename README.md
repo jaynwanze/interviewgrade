@@ -57,10 +57,3 @@ The project is organized as follows:
 5. Open the application in your browser:
    ```bash
    http://localhost:3000
-
-  
-   
-
-
-
- 

@@ -49,9 +49,18 @@ The project is organized as follows:
    ```bash
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-
-4.Run the development server:
+   
+4. Run the development server:
    ```bash
    pnpm run dev
+
+5. Open the application in your browser:
+   ```bash
+   http://localhost:3000
+
+  
+   
+
+
 
  

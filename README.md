@@ -52,11 +52,6 @@ The project is organized as follows:
 
 4.Run the development server:
    ```bash
-   pnpm run dever
-
-5.Open the application in your browser:
-  ```bash
-  http://localhost:3000
-
+   pnpm run dev
 
  

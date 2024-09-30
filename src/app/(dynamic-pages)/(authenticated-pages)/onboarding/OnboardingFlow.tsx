@@ -422,7 +422,6 @@ export function UserOnboardingFlow({
     if (currentStep === 'COMPLETE') {
       // Redirect based on user type
       if (userType === 'candidate') {
-        console.log('usertype', currentStep);
         router.replace('/candidate/dashboard');
       } else {
         router.replace('/dashboard');

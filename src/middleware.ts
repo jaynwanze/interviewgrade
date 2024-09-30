@@ -42,11 +42,10 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
       onboardingHasCreatedOrganization,
-      userType,
     } = userMetadata;
 
     // Check if user is a candidate
-    const isCandidate = userType === 'candidate'; // Assuming userType is part of user metadata
+    const isCandidate = userMetadata.userType === 'candidate'; // Assuming userType is part of user metadata
     if (
       !onboardingHasAcceptedTerms ||
       !onboardingHasCompletedProfile ||

@@ -1,3 +1,4 @@
+import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
@@ -19,8 +20,22 @@ export async function GET(request: Request) {
       // Potentially return an error response here
     }
   }
+
   revalidatePath('/');
-  let redirectTo = new URL('/dashboard', requestUrl.origin);
+  // Initialize redirectTo variable
+  let redirectTo: URL;
+  // Retrieve user metadata from cookies
+  const user = await serverGetLoggedInUser();
+
+  const userType: string = user.user_metadata.userType;
+
+  // Determine redirect based on userType
+  if (userType === 'candidate') {
+    redirectTo = new URL('/candidate/dashboard', requestUrl.origin); // Redirect candidate to their dashboard
+  } else {
+    redirectTo = new URL('/dashboard', requestUrl.origin); // Redirect employer to their dashboard
+  }
+
   if (next) {
     // decode next param
     const decodedNext = decodeURIComponent(next);

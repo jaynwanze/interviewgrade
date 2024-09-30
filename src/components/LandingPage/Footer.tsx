@@ -54,7 +54,7 @@ export function Footer() {
             <p className="text-slate-500  w-full dark:text-slate-400 text-sm">
               © 2024
               <a
-                href="https://usenextbase.com/"
+                href="https://interviewgrade.io/"
                 className="underline mx-2 decoration-slate-500 dark:decoration-slate-400 underline-offset-1 dec"
                 target="_blank"
               >

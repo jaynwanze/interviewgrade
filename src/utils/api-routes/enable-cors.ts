@@ -5,10 +5,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 const allowedOrigins = [
   `http://localhost:${DEV_PORT}`,
   `https://localhost:${DEV_PORT}`,
-  'http://demo.usenextbase.com',
-  'https://demo.usenextbase.com',
-  'http://usenextbase.com',
-  'https://usenextbase.com',
 ];
 
 export const enableCors = (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,7 +14,7 @@ export const enableCors = (req: NextApiRequest, res: NextApiResponse) => {
   } else {
     res.setHeader(
       'Access-Control-Allow-Origin',
-      'https://demo.usenextbase.com',
+      'https://interviewgrade.io',
     );
   }
 

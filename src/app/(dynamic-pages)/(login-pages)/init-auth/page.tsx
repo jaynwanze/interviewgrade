@@ -17,10 +17,14 @@ export default function HomePage() {
   useDidMount(() => {
     if (session?.user) {
       setLoadingState('logged-in');
-      router.push('/dashboard');
+      if (session.user.user_metadata.user_type === 'candidate') {
+        router.push('/candidate/dashboard');
+      } else if (session.user.user_metadata.user_type === 'employer') {
+        router.push('/dashboard');
+      }
     } else {
       setLoadingState('logged-out');
-      router.push('/candidate/login');
+      router.push('/');
     }
   });
 

@@ -42,11 +42,11 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
       onboardingHasCreatedOrganization,
+      userType,
     } = userMetadata;
 
     // Check if user is a candidate
-    const isCandidate = userMetadata.userType === 'candidate'; // Assuming userType is part of user metadata
-
+    const isCandidate = userType === 'candidate'; // Assuming userType is part of user metadata
     if (
       !onboardingHasAcceptedTerms ||
       !onboardingHasCompletedProfile ||
@@ -66,7 +66,6 @@ export async function middleware(req: NextRequest) {
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
   if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
-    console.log('redirecting to onboarding');
     return NextResponse.redirect(toSiteURL('/onboarding'));
   }
   if (isProtectedPage(req.nextUrl.pathname) && maybeUser) {

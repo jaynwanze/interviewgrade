@@ -11,7 +11,7 @@ export async function OrganizationPageHeading({
   return (
     <PageHeading
       title={organizationTitle}
-      titleHref={`/organization/${organizationId}`}
+      titleHref={`/employer/${organizationId}`}
     />
   );
 }

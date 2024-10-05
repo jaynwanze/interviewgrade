@@ -1,6 +1,6 @@
 'use client';
 
-import { InviteOrganizationMemberDialog } from '@/app/(dynamic-pages)/(authenticated-pages)/(application-pages)/organization/[organizationId]/(specific-organization-pages)/settings/members/InviteOrganizationMemberDialog';
+import { InviteOrganizationMemberDialog } from '@/app/(dynamic-pages)/(authenticated-pages)/(application-pages)/employer/[organizationId]/(specific-organization-pages)/settings/members/InviteOrganizationMemberDialog';
 import { createInvitationHandler } from '@/data/user/invitation';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import type { Enum } from '@/types';

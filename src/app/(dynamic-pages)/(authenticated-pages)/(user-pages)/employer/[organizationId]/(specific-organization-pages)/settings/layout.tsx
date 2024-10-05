@@ -17,17 +17,17 @@ export default function OrganizationSettingsLayout({
   const tabs = [
     {
       label: 'General',
-      href: `/organization/${organizationId}/settings`,
+      href: `/employer/${organizationId}/settings`,
       icon: <SquarePen />,
     },
     {
       label: 'Organization Members',
-      href: `/organization/${organizationId}/settings/members`,
+      href: `/employer/${organizationId}/settings/members`,
       icon: <UserRound />,
     },
     {
       label: 'Billing',
-      href: `/organization/${organizationId}/settings/billing`,
+      href: `/employer/${organizationId}/settings/billing`,
       icon: <DollarSign />,
     },
   ];

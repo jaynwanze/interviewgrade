@@ -32,27 +32,27 @@ async function OrganizationSidebarInternal({
           <div>
             <SidebarLink
               label="Home"
-              href={`/organization/${organizationId}`}
+              href={`/employer/${organizationId}`}
               icon={<Home className="h-5 w-5" />}
             />
             <SidebarLink
               label="Interviews"
-              href={`/organization/${organizationId}/properties`}
+              href={`/employer/${organizationId}/interviews`}
               icon={<Building2 className="h-5 w-5" />}
             />
             <SidebarLink
               label="Settings"
-              href={`/organization/${organizationId}/settings`}
+              href={`/employer/${organizationId}/settings`}
               icon={<Settings className="h-5 w-5" />}
             />
             <SidebarLink
               label="Members"
-              href={`/organization/${organizationId}/settings/members`}
+              href={`/employer/${organizationId}/settings/members`}
               icon={<UserRound className="h-5 w-5" />}
             />
             <SidebarLink
               label="Billing"
-              href={`/organization/${organizationId}/settings/billing`}
+              href={`/employer/${organizationId}/settings/billing`}
               icon={<DollarSign className="h-5 w-5" />}
             />
           </div>

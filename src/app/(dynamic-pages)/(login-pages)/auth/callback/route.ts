@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
   revalidatePath('/');
   // Initialize redirectTo variable
-  let redirectTo: URL;
+  let redirectTo: URL = new URL('/', requestUrl.origin);
   // Retrieve user metadata from cookies
   const user = await serverGetLoggedInUser();
 
@@ -31,9 +31,9 @@ export async function GET(request: Request) {
 
   // Determine redirect based on userType
   if (userType === 'candidate') {
-    redirectTo = new URL('/candidate/dashboard', requestUrl.origin); // Redirect candidate to their dashboard
-  } else {
-    redirectTo = new URL('/dashboard', requestUrl.origin); // Redirect employer to their dashboard
+    redirectTo = new URL('/dashboard/candidate', requestUrl.origin); // Redirect candidate to their dashboard
+  } else  {
+      redirectTo = new URL('/employer/dashboard', requestUrl.origin); // Redirect employer to their dashboard
   }
 
   if (next) {

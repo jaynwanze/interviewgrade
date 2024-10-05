@@ -22,7 +22,7 @@ export default async function OrganizationPage({
             <PageHeading
               title={'Loading...'}
               isLoading
-              titleHref={`/organization/${organizationId}`}
+              titleHref={`/employer/${organizationId}`}
             />
           }
         >

@@ -104,7 +104,7 @@
     "slugify": "^1.6.6",
     "sonner": "^1.4.0",
     "stripe": "11.18.0",
-    "supabase": "^1.187.10",
+    "supabase": "^1.200.3",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "url-join": "^5.0.0",

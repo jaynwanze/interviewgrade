@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   if (userType === 'candidate') {
     redirectTo = new URL('/dashboard/candidate', requestUrl.origin); // Redirect candidate to their dashboard
   } else  {
-      redirectTo = new URL('/employer/dashboard', requestUrl.origin); // Redirect employer to their dashboard
+      redirectTo = new URL('/dashboard/employer', requestUrl.origin); // Redirect employer to their dashboard
   }
 
   if (next) {

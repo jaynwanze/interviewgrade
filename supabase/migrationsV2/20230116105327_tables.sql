@@ -18,7 +18,6 @@ ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 
 CREATE TABLE "public"."candidate" (
   "id" "uuid" NOT NULL,
-  "user_id" "uuid" NOT NULL,
   "token_id" "uuid" NOT NULL
 );
 ALTER TABLE "public"."candidate" OWNER TO "postgres";
@@ -45,7 +44,6 @@ ALTER TABLE "public"."products" OWNER TO "postgres";
 CREATE TABLE "public"."tokens" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "tokens_available" bigint,
-  "description" text,
   "total_tokens_used" bigint,
   "total_tokens_purchased" bigint,
   "last_purchase_date" timestamp with time zone
@@ -170,7 +168,7 @@ CREATE TABLE "public"."template_questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "template_id" "uuid" NOT NULL,
   "question_id" "uuid" NOT NULL,
-  "sequence" integer,
+  "sequence" integer
 );
 
 ALTER TABLE "public"."template_questions" OWNER TO "postgres";
@@ -238,7 +236,7 @@ ALTER TABLE "public"."skills" OWNER TO "postgres";
 CREATE TABLE "public"."job_skills" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "job_id" "uuid" NOT NULL,
-  "skill_id" "uuid" NOT NULL,
+  "skill_id" "uuid" NOT NULL
 );
 
 ALTER TABLE "public"."job_skills" OWNER TO "postgres";
@@ -382,13 +380,13 @@ ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."use
 --
 
 ALTER TABLE ONLY "public"."candidate"
-ADD CONSTRAINT "candidate_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "candidate_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 --
 -- Name: candidate candidate_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."candidate"
-ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE SET NULL;
 
 --
 -- Name: interviews interviews_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres

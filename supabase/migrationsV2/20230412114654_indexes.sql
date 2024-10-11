@@ -46,3 +46,6 @@ CREATE INDEX idx_interview_answers_interview_question_id ON "public"."interview_
 
 -- Indexes for job_application_tracker
 CREATE INDEX idx_job_application_tracker_candidate_id ON "public"."job_application_tracker" ("candidate_id");
+
+-- Index on account_delete_tokens(user_id)
+CREATE INDEX idx_account_delete_tokens_user_id ON public.account_delete_tokens(user_id);-

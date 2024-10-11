@@ -32,6 +32,7 @@ CREATE TABLE "public"."products" (
   "title" character varying,
   "description" text,
   "price" integer,
+  "status" "public"."product_status" DEFAULT 'active'::product_status NOT NULL,
   "tokens_bundle" bigint,
   "subscription_duration" character varying
 );
@@ -136,7 +137,7 @@ ALTER TABLE "public"."interview_feedback" OWNER TO "postgres";
 --
 CREATE TABLE "public"."templates" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "user_id" "uuid" NOT NULL,
+  "user_id" "uuid",
   "job_id" "uuid",
   "title" character varying,
   "description" text,
@@ -154,9 +155,11 @@ ALTER TABLE "public"."templates" OWNER TO "postgres";
 --
 CREATE TABLE "public"."questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
   "text" text,
   "difficulty" "public"."question_difficulty",
-  "category" "public"."question_category"
+  "category" "public"."question_category",
+  "is_system_defined" boolean DEFAULT false
 );
 
 ALTER TABLE "public"."questions" OWNER TO "postgres";
@@ -204,6 +207,7 @@ CREATE TABLE "public"."interview_answers" (
 --
 CREATE TABLE "public"."jobs" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
   "title" character varying,
   "description" text,
   "industry" character varying,
@@ -221,6 +225,7 @@ ALTER TABLE "public"."jobs" OWNER TO "postgres";
 --
 CREATE TABLE "public"."skills" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
   "name" character varying,
   "description" text,
   "category" "public"."skill_category",
@@ -376,17 +381,17 @@ ADD CONSTRAINT "job_application_tracker_pkey" PRIMARY KEY ("id");
 ALTER TABLE ONLY "public"."user_profiles"
 ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 --
--- Name: candidate candidate_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: candidate candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."candidate"
-ADD CONSTRAINT "candidate_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "candidate_id_fkey" FOREIGN KEY ("id") REFERENCES "user_profiles"("id") ON DELETE CASCADE;
 --
 -- Name: candidate candidate_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."candidate"
-ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE SET NULL;
+ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
 
 --
 -- Name: interviews interviews_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -438,7 +443,41 @@ ADD CONSTRAINT "templates_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user
 ALTER TABLE ONLY "public"."templates"
 ADD CONSTRAINT "templates_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id")  ON DELETE SET NULL;
 --
+-- Name: templates templates_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+--
+-- Name: questions questions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL;
+--
+-- Name: template_questions one_template_per_question; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."template_questions"
+ADD CONSTRAINT "one_template_per_question" UNIQUE ("question_id");
+--
+-- Name: questions questions_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+
+--
 -- Name: template_questions template_questions_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
 
 ALTER TABLE ONLY "public"."template_questions"
 ADD CONSTRAINT "template_questions_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id")  ON DELETE CASCADE;
@@ -460,6 +499,38 @@ ADD CONSTRAINT "interview_questions_interview_id_fkey" FOREIGN KEY ("interview_i
 
 ALTER TABLE ONLY "public"."interview_answers"
 ADD CONSTRAINT "interview_answers_interview_question_id_fkey" FOREIGN KEY ("interview_question_id") REFERENCES "interview_questions"("id")  ON DELETE CASCADE;
+--
+-- Name: jobs jobs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."jobs"
+ADD CONSTRAINT "jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id")  ON DELETE SET NULL;
+--
+-- Name: jobs jobs_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."jobs"
+ADD CONSTRAINT "jobs_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+-- Name: skills skills_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."skills"
+ADD CONSTRAINT "skills_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL;
+--
+-- Name: skills skills_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."skills"
+ADD CONSTRAINT "skills_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+--
 --
 -- Name: job_skills job_skills_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -522,4 +593,9 @@ ADD CONSTRAINT "skills_category_check" CHECK ("category" = ANY (ARRAY['general':
 ALTER TABLE ONLY "public"."job_application_tracker"
 ADD CONSTRAINT "job_application_tracker_status_check" CHECK ("status" = ANY (ARRAY['not_started'::job_application_tracker_status, 'applied'::job_application_tracker_status, 'in_progress'::job_application_tracker_status, 'rejected'::job_application_tracker_status, 'offered'::job_application_tracker_status, 'hired'::job_application_tracker_status]));
 
+--
+-- Name: prdoucts products_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
 
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::product_status, 'inactive'::product_status]));

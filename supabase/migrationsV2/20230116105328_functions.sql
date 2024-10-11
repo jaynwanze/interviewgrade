@@ -27,8 +27,8 @@ DECLARE
     new_token_id UUID;
 BEGIN
     -- Insert into user_profiles
-    INSERT INTO public.user_profiles (id)
-    VALUES (NEW.id);
+    INSERT INTO public.user_profiles (id, user_type)
+    VALUES (NEW.id, user_type_value );
     
     -- Extract userType from raw metadata
     user_type_value := (NEW.raw_user_meta_data->>'userType')::public.user_types;
@@ -46,5 +46,8 @@ BEGIN
     END IF;
     
     RETURN NEW;
+EXCEPTION WHEN others THEN
+    RAISE NOTICE 'Error in handle_auth_user_created: %', SQLERRM;
+    RETURN NULL;
 END;
 $$;

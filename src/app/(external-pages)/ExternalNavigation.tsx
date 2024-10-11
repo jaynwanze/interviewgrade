@@ -82,7 +82,7 @@ export function ExternalNavigation() {
             <div className="w-full flex justify-center p-4">
               {/* Updated width to match Log In button */}
             </div>
-            <Link href="/employer/login" className="px-4 w-full">
+            <Link href="/candidate/login" className="px-4 w-full">
               <Button variant="default" size="default" className="group w-full">
                 Log In
                 <svg

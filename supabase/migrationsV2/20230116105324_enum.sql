@@ -76,3 +76,12 @@ CREATE TYPE "public"."skill_category" AS ENUM (
   'behavioural'
 );
 ALTER TYPE "public"."skill_category" OWNER TO "postgres";
+
+--
+-- Name: product_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."product_status" AS ENUM (
+  'active',
+  'inactive'
+);

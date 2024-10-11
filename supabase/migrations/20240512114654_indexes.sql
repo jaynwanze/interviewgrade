@@ -1,6 +1,5 @@
 -- Indexes for user_profiles
 CREATE INDEX idx_user_profiles_id ON "public"."user_profiles" ("id");
-CREATE INDEX idx_user_profiles_role ON "public"."user_profiles" ("role");
 
 -- Indexes for candidate
 CREATE INDEX idx_candidate_id ON "public"."candidate" ("id");
@@ -47,5 +46,5 @@ CREATE INDEX idx_interview_answers_interview_question_id ON "public"."interview_
 -- Indexes for job_application_tracker
 CREATE INDEX idx_job_application_tracker_candidate_id ON "public"."job_application_tracker" ("candidate_id");
 
--- Index on account_delete_tokens(user_id)
-CREATE INDEX idx_account_delete_tokens_user_id ON public.account_delete_tokens(user_id);-
+-- Index on account_delete_tokens
+CREATE INDEX idx_account_delete_tokens_user_id ON public.account_delete_tokens("user_id");

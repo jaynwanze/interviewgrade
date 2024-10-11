@@ -1,282 +1,601 @@
-CREATE TABLE "public"."organization_members" (
-  "id" bigint NOT NULL,
-  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,
-  "member_id" "uuid" NOT NULL,
-  "member_role" "public"."organization_member_role" NOT NULL,
-  "organization_id" "uuid" NOT NULL
-);
-ALTER TABLE "public"."organization_members" OWNER TO "postgres";
---
--- Name: organizations; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE "public"."organizations" (
-  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "title" character varying DEFAULT 'Test Organization'::character varying NOT NULL,
-  "created_by" "uuid" NOT NULL
-);
-ALTER TABLE "public"."organizations" OWNER TO "postgres";
 --
 -- Name: user_profiles; Type: TABLE; Schema: public; Owner: postgres
 --
-
 
 CREATE TABLE "public"."user_profiles" (
   "id" "uuid" NOT NULL,
   "full_name" character varying,
   "avatar_url" character varying,
   "user_type" "public"."user_types" DEFAULT 'candidate'::user_types NOT NULL,
+  "stripe_customer_id" character varying,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 
-
-CREATE TABLE "public"."customers" (
-  "stripe_customer_id" character varying NOT NULL,
-  "organization_id" "uuid" NOT NULL
-);
-ALTER TABLE "public"."customers" OWNER TO "postgres";
 --
--- Name: organization_join_invitations; Type: TABLE; Schema: public; Owner: supabase_admin
+-- Name: candidate; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE "public"."organization_join_invitations" (
-  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,
-  "inviter_user_id" "uuid" NOT NULL,
-  "status" "public"."organization_join_invitation_link_status" DEFAULT 'active'::"public"."organization_join_invitation_link_status" NOT NULL,
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "invitee_user_email" character varying NOT NULL,
-  "organization_id" "uuid" NOT NULL,
-  "invitee_organization_role" "public"."organization_member_role" NOT NULL DEFAULT 'member'::organization_member_role,
-  "invitee_user_id" "uuid"
-);
--- ALTER TABLE "public"."organization_join_invitations" OWNER TO "supabase_admin";
---
--- Name: organizations_private_info; Type: TABLE; Schema: public; Owner: supabase_admin
---
-
-CREATE TABLE "public"."organizations_private_info" (
+CREATE TABLE "public"."candidate" (
   "id" "uuid" NOT NULL,
-  "billing_address" "json",
-  "payment_method" "json"
+  "token_id" "uuid" NOT NULL
 );
--- ALTER TABLE "public"."organizations_private_info" OWNER TO "supabase_admin";
---
--- Name: prices; Type: TABLE; Schema: public; Owner: postgres
---
+ALTER TABLE "public"."candidate" OWNER TO "postgres";
 
-CREATE TABLE "public"."prices" (
-  "id" character varying NOT NULL,
-  "product_id" character varying,
-  "active" boolean,
-  "description" character varying,
-  "unit_amount" bigint,
-  "currency" character varying,
-  "type" "public"."pricing_type",
-  "interval" "public"."pricing_plan_interval",
-  "interval_count" bigint,
-  "trial_period_days" bigint,
-  "metadata" "jsonb"
-);
-ALTER TABLE "public"."prices" OWNER TO "postgres";
 --
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE "public"."products" (
-  "id" character varying NOT NULL,
-  "active" boolean,
-  "name" character varying,
-  "description" character varying,
-  "image" character varying,
-  "metadata" "jsonb"
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "product_type" "public"."product_type",
+  "title" character varying,
+  "description" text,
+  "price" integer,
+  "status" "public"."product_status" DEFAULT 'active'::product_status NOT NULL,
+  "tokens_bundle" bigint,
+  "subscription_duration" character varying
 );
 ALTER TABLE "public"."products" OWNER TO "postgres";
+
 --
--- Name: subscriptions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: tokens; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE "public"."subscriptions" (
-  "id" character varying NOT NULL,
-  "status" "public"."subscription_status",
-  "metadata" "json",
-  "price_id" character varying,
-  "quantity" bigint,
-  "cancel_at_period_end" boolean,
-  "created" timestamp WITH time zone NOT NULL,
-  "current_period_start" timestamp WITH time zone NOT NULL,
-  "current_period_end" timestamp WITH time zone NOT NULL,
-  "ended_at" timestamp WITH time zone,
-  "cancel_at" timestamp WITH time zone,
-  "canceled_at" timestamp WITH time zone,
-  "trial_start" timestamp WITH time zone,
-  "trial_end" timestamp WITH time zone,
-  "organization_id" "uuid"
+CREATE TABLE "public"."tokens" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "tokens_available" bigint,
+  "total_tokens_used" bigint,
+  "total_tokens_purchased" bigint,
+  "last_purchase_date" timestamp with time zone
 );
-ALTER TABLE "public"."subscriptions" OWNER TO "postgres";
+ALTER TABLE "public"."tokens" OWNER TO "postgres";
+
 --
--- Name: organization_members_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: interviews; Type: TABLE; Schema: public; Owner: postgres
 --
 
-ALTER TABLE "public"."organization_members"
-ALTER COLUMN "id"
-ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME "public"."organization_members_id_seq" START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1
-  );
+CREATE TABLE "public"."interviews" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "template_id" "uuid",
+  "candidate_id" "uuid" NOT NULL,
+  "job_id" "uuid",
+  "title" character varying,
+  "description" text,
+  "start_time" timestamp with time zone,
+  "end_time" timestamp with time zone,
+  "status" "public"."interview_status" DEFAULT 'not_started'::interview_status NOT NULL,
+  created_at timestamp with time zone DEFAULT "now"() NOT NULL
+);
+ALTER TABLE "public"."interviews" OWNER TO "postgres";
+
 --
--- Name: user_private_info; Type: TABLE; Schema: public; Owner: supabase_admin
+-- Name: interview_evaluations; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE "public"."user_private_info" (
-  "id" "uuid" NOT NULL,
-  "created_at" timestamp WITH time zone DEFAULT "now"()
+CREATE TABLE "public"."interview_evaluations" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "interview_id" "uuid" NOT NULL,
+  "overall_score" decimal(4,2),
+  "communication_score" decimal(4,2),	
+  "technical_score" decimal(4,2),
+  "soft_skills_score" decimal(4,2),
+  "response_time" decimal(5,2),
+  "target_overall_score" decimal(4,2),
+  "target_communication_score" decimal(4,2),	
+  "target_technical_score" decimal(4,2),
+  "target_soft_skills_score" decimal(4,2),
+  "target_response_time" decimal(5,2)
+);
+ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
+
+--
+-- Name: interview_analytics; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE "public"."interview_analytics" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "interview_id" "uuid" NOT NULL,
+  "overall_performance" decimal(4,2),
+  "overall_communication_score" decimal(4,2),	
+  "overall_technical_score" decimal(4,2),
+  "overall_soft_skills_score" decimal(4,2),
+  "overall_response_time" decimal(5,2),
+  "overall_percentile" decimal(5,2),
+  "areas_for_improvement" text,
+  "strengths" text,
+  "weaknesses" text,
+  "recommendations" text
+);
+
+ALTER TABLE "public"."interview_analytics" OWNER TO "postgres";
+
+--
+-- Name: interview_feedback; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE "public"."interview_feedback" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "interview_id" "uuid" NOT NULL,
+  "comments" text,
+  "problem_solving_skills" text,
+  "technical_proficiency" text,
+  "soft_skills" text,
+  "clarity_of_response" text,
+  "timeliness" text,
+  "response_accuracy" text,
+  "custom_feedback" text,
+  "areas_for_improvement" text,
+  "strengths" text,
+  "weaknesses" text,
+  "recommendations" text
+);
+
+ALTER TABLE "public"."interview_feedback" OWNER TO "postgres";
+
+--
+-- Name: templates; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE "public"."templates" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
+  "job_id" "uuid",
+  "title" character varying,
+  "description" text,
+  "industry" character varying,
+  "duration" character varying,
+  "is_system_defined" boolean DEFAULT false,
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
+  
+);
+
+ALTER TABLE "public"."templates" OWNER TO "postgres";
+
+--
+-- Name: questions; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE "public"."questions" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
+  "text" text,
+  "difficulty" "public"."question_difficulty",
+  "category" "public"."question_category",
+  "is_system_defined" boolean DEFAULT false
+);
+
+ALTER TABLE "public"."questions" OWNER TO "postgres";
+
+--
+-- Name: template_questions; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE "public"."template_questions" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "template_id" "uuid" NOT NULL,
+  "question_id" "uuid" NOT NULL,
+  "sequence" integer
+);
+
+ALTER TABLE "public"."template_questions" OWNER TO "postgres";
+
+--
+-- Name: interview_questions; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE "public"."interview_questions" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "interview_id" "uuid" NOT NULL,
+  "text" text,
+  "difficulty" "public"."question_difficulty",
+  "category" "public"."question_category"
+);
+
+ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
+
+--
+-- Name: interview_answers; Type: TABLE; Schema: public; Owner: postgres
+--
+CREATE TABLE "public"."interview_answers" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "interview_question_id" "uuid" NOT NULL,
+  "text" text,
+  "response_time" decimal(5,2),
+  "score" decimal(5,2),
+  "accuracy" decimal(5,2),
+  "clarity" decimal(5,2)
 );
 
 --
--- Name: customers customers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: jobs; Type: TABLE; Schema: public; Owner: postgres
 --
+CREATE TABLE "public"."jobs" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
+  "title" character varying,
+  "description" text,
+  "industry" character varying,
+  "location" character varying,
+  "salary" bigint,
+  "job_type" character varying,
+  "is_system_defined" boolean DEFAULT false,
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
+);
 
-ALTER TABLE ONLY "public"."customers"
-ADD CONSTRAINT "customers_pkey" PRIMARY KEY ("stripe_customer_id", "organization_id");
---
--- Name: customers customers_stripe_customer_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."customers"
-ADD CONSTRAINT "customers_stripe_customer_id_key" UNIQUE ("stripe_customer_id");
---
--- Name: prices price_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."prices"
-ADD CONSTRAINT "price_pkey" PRIMARY KEY ("id");
---
--- Name: products product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."products"
-ADD CONSTRAINT "product_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."jobs" OWNER TO "postgres";
 
 --
--- Name: subscriptions subscription_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skills; Type: TABLE; Schema: public; Owner: postgres
 --
+CREATE TABLE "public"."skills" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
+  "name" character varying,
+  "description" text,
+  "category" "public"."skill_category",
+  "is_system_defined" boolean DEFAULT false,
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
+);
 
-ALTER TABLE ONLY "public"."subscriptions"
-ADD CONSTRAINT "subscription_pkey" PRIMARY KEY ("id");
---
--- Name: organization_join_invitations organization_invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: supabase_admin
---
+ALTER TABLE "public"."skills" OWNER TO "postgres";
 
-ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_invitations_pkey" PRIMARY KEY ("id");
 --
--- Name: organization_members organization_members_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: job_skills; Type: TABLE; Schema: public; Owner: postgres
 --
+CREATE TABLE "public"."job_skills" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "job_id" "uuid" NOT NULL,
+  "skill_id" "uuid" NOT NULL
+);
 
-ALTER TABLE ONLY "public"."organization_members"
-ADD CONSTRAINT "organization_members_pkey" PRIMARY KEY ("id");
---
--- Name: organizations organizations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
+ALTER TABLE "public"."job_skills" OWNER TO "postgres";
 
-ALTER TABLE ONLY "public"."organizations"
-ADD CONSTRAINT "organizations_pkey" PRIMARY KEY ("id");
 --
--- Name: user_private_info user_private_info_pkey; Type: CONSTRAINT; Schema: public; Owner: supabase_admin
+-- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres
 --
+CREATE TABLE "public"."job_application_tracker" (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "candidate_id" "uuid" NOT NULL,
+  "job_title" character varying,
+  "status" "public"."job_application_tracker_status" DEFAULT 'not_started'::job_application_tracker_status NOT NULL,
+  "company" character varying,
+  "industry" character varying,
+  "location" character varying,
+  "job_type" character varying,
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
+);
 
-ALTER TABLE ONLY "public"."user_private_info"
-ADD CONSTRAINT "user_private_info_pkey" PRIMARY KEY ("id");
+ALTER TABLE "public"."job_application_tracker" OWNER TO "postgres";
+
 --
 -- Name: user_profiles user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."user_profiles"
 ADD CONSTRAINT "user_profiles_pkey" PRIMARY KEY ("id");
-
 --
--- Name: organizations on_organization_created; Type: TRIGGER; Schema: public; Owner: postgres
---
-
---
--- Name: customers customers_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_profiles user_profiles_stripe_customer_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."customers"
-ADD CONSTRAINT "customers_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
+ALTER TABLE ONLY "public"."user_profiles"
+ADD CONSTRAINT "user_profiles_stripe_customer_id_key" UNIQUE ("stripe_customer_id");
 --
--- Name: organization_join_invitations organization_join_invitations_invitee_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
---
-
-ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_join_invitations_invitee_user_id_fkey" FOREIGN KEY ("invitee_user_id") REFERENCES "public"."user_profiles"("id");
---
--- Name: organization_join_invitations organization_join_invitations_inviter_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
+-- Name: candidate candidate_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_join_invitations_inviter_user_id_fkey" FOREIGN KEY ("inviter_user_id") REFERENCES "public"."user_profiles"("id");
+ALTER TABLE ONLY "public"."candidate"
+ADD CONSTRAINT "candidate_pkey" PRIMARY KEY ("id");
 --
--- Name: organization_join_invitations organization_join_invitations_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
---
-
-ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_join_invitations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
---
--- Name: organization_members organization_members_member_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: products product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."organization_members"
-ADD CONSTRAINT "organization_members_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "public"."user_profiles"("id");
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "product_pkey" PRIMARY KEY ("id");
 --
--- Name: organization_members organization_members_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."organization_members"
-ADD CONSTRAINT "organization_members_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
---
--- Name: organizations organizations_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: tokens tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."organizations"
-ADD CONSTRAINT "organizations_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."user_profiles"("id");
+ALTER TABLE ONLY "public"."tokens"
+ADD CONSTRAINT "tokens_pkey" PRIMARY KEY ("id");
 --
--- Name: organizations_private_info organizations_private_info_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
---
-
-ALTER TABLE ONLY "public"."organizations_private_info"
-ADD CONSTRAINT "organizations_private_info_id_fkey" FOREIGN KEY ("id") REFERENCES "public"."organizations"("id");
---
--- Name: prices prices_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interviews interviews_pkey; Type: CONSTRAINT; Schema: public; Owner: supabase_admin
 --
 
-ALTER TABLE ONLY "public"."prices"
-ADD CONSTRAINT "prices_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id");
+ALTER TABLE ONLY "public"."interviews"
+ADD CONSTRAINT "interviews_pkey" PRIMARY KEY ("id");
 --
--- Name: subscriptions subscriptions_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."subscriptions"
-ADD CONSTRAINT "subscriptions_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
---
--- Name: subscriptions subscriptions_price_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interview_evaluations interview_evaluations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."subscriptions"
-ADD CONSTRAINT "subscriptions_price_id_fkey" FOREIGN KEY ("price_id") REFERENCES "public"."prices"("id");
+ALTER TABLE ONLY "public"."interview_evaluations"
+ADD CONSTRAINT "interview_evaluations_pkey" PRIMARY KEY ("id");
 --
--- Name: user_private_info user_private_info_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
+-- Name: interview_analytics interview_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."user_private_info"
-ADD CONSTRAINT "user_private_info_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id");
+ALTER TABLE ONLY "public"."interview_analytics"
+ADD CONSTRAINT "interview_analytics_pkey" PRIMARY KEY ("id");
+
+--
+-- Name: interview_feedback interview_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_feedback"
+ADD CONSTRAINT "interview_feedback_pkey" PRIMARY KEY ("id");
+--
+-- Name: templates templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_pkey" PRIMARY KEY ("id");
+
+--
+-- Name: questions questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_pkey" PRIMARY KEY ("id");
+--
+-- Name: template_questions template_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."template_questions"
+ADD CONSTRAINT "template_questions_pkey" PRIMARY KEY ("id");
+--
+-- Name: interview_questions interview_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_questions"
+ADD CONSTRAINT "interview_questions_pkey" PRIMARY KEY ("id");
+--
+-- Name: interview_answers interview_answers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_answers"
+ADD CONSTRAINT "interview_answers_pkey" PRIMARY KEY ("id");
+--
+-- Name: jobs jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."jobs"
+ADD CONSTRAINT "jobs_pkey" PRIMARY KEY ("id");
+--
+-- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."skills"
+ADD CONSTRAINT "skills_pkey" PRIMARY KEY ("id");
+--
+-- Name: job_skills job_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."job_skills"
+ADD CONSTRAINT "job_skills_pkey" PRIMARY KEY ("id");
+--
+-- Name: job_application_tracker job_application_tracker_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."job_application_tracker"
+ADD CONSTRAINT "job_application_tracker_pkey" PRIMARY KEY ("id");
+
 --
 -- Name: user_profiles user_profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."user_profiles"
-ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id");
+ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 --
--- Name: products Active products are visible to everyone; Type: POLICY; Schema: public; Owner: postgres
+-- Name: candidate candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
+
+ALTER TABLE ONLY "public"."candidate"
+ADD CONSTRAINT "candidate_id_fkey" FOREIGN KEY ("id") REFERENCES "user_profiles"("id") ON DELETE CASCADE;
+--
+-- Name: candidate candidate_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."candidate"
+ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
+
+--
+-- Name: interviews interviews_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interviews"
+ADD CONSTRAINT "interviews_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id") ON DELETE SET NULL;
+--
+-- Name: interviews interviews_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interviews"
+ADD CONSTRAINT "interviews_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidate"("id") ON DELETE CASCADE;
+--
+-- Name: interviews interviews_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interviews"
+ADD CONSTRAINT "interviews_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL;
+
+--
+-- Name: interview_evaluations interview_evaluations_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_evaluations"
+ADD CONSTRAINT "interview_evaluations_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
+--
+-- Name: interview_analytics interview_analytics_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_analytics"
+ADD CONSTRAINT "interview_analytics_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
+--
+-- Name: interview_feedback interview_feedback_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_feedback"
+ADD CONSTRAINT "interview_feedback_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
+--
+-- Name: templates templates_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id")  ON DELETE CASCADE;
+--
+-- Name: templates templates_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id")  ON DELETE SET NULL;
+--
+-- Name: templates templates_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+--
+-- Name: questions questions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL;
+--
+-- Name: template_questions one_template_per_question; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."template_questions"
+ADD CONSTRAINT "one_template_per_question" UNIQUE ("question_id");
+--
+-- Name: questions questions_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+
+--
+-- Name: template_questions template_questions_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."template_questions"
+ADD CONSTRAINT "template_questions_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id")  ON DELETE CASCADE;
+--
+-- Name: template_questions template_questions_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."template_questions"
+ADD CONSTRAINT "template_questions_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "questions"("id")  ON DELETE CASCADE;
+--
+-- Name: interview_questions interview_questions_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_questions"
+ADD CONSTRAINT "interview_questions_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id")  ON DELETE CASCADE;
+--
+-- Name: interview_answers interview_answers_interview_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_answers"
+ADD CONSTRAINT "interview_answers_interview_question_id_fkey" FOREIGN KEY ("interview_question_id") REFERENCES "interview_questions"("id")  ON DELETE CASCADE;
+--
+-- Name: jobs jobs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."jobs"
+ADD CONSTRAINT "jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id")  ON DELETE SET NULL;
+--
+-- Name: jobs jobs_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."jobs"
+ADD CONSTRAINT "jobs_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+-- Name: skills skills_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."skills"
+ADD CONSTRAINT "skills_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL;
+--
+-- Name: skills skills_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."skills"
+ADD CONSTRAINT "skills_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+--
+--
+-- Name: job_skills job_skills_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."job_skills"
+ADD CONSTRAINT "job_skills_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE CASCADE;
+--
+-- Name: job_skills job_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."job_skills"
+ADD CONSTRAINT "job_skills_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skills"("id")  ON DELETE CASCADE;
+--
+-- Name: job_application_tracker job_application_tracker_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."job_application_tracker"
+ADD CONSTRAINT "job_application_tracker_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidate"("id") ON DELETE CASCADE;
+--
+-- Name: user_profiles user_profiles_user_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."user_profiles"
+ADD CONSTRAINT "user_profiles_user_type_check" CHECK ("user_type" = ANY (ARRAY['candidate'::user_types, 'employer'::user_types]));
+--
+-- Name: products products_product_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_product_type_check" CHECK ("product_type" = ANY (ARRAY['token'::product_type, 'subscription'::product_type]));
+--
+-- Name: interviews interviews_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interviews"
+ADD CONSTRAINT "interviews_status_check" CHECK ("status" = ANY (ARRAY['not_started'::interview_status, 'in_progress'::interview_status, 'completed'::interview_status]));
+--
+-- Name: questions questions_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_difficulty_check" CHECK ("difficulty" = ANY (ARRAY['easy'::question_difficulty, 'medium'::question_difficulty, 'hard'::question_difficulty]));
+--
+-- Name: questions questions_category_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_category_check" CHECK ("category" = ANY (ARRAY['general'::question_category,'problem_solving'::question_category, 'technical'::question_category, 'soft_skills'::question_category, 'behavioural'::question_category]));
+--
+--Name skills skills_category_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."skills"
+ADD CONSTRAINT "skills_category_check" CHECK ("category" = ANY (ARRAY['general'::skill_category,'problem_solving'::skill_category, 'technical'::skill_category, 'soft_skills'::skill_category, 'behavioural'::skill_category]));
+
+--
+-- Name: job_application_tracker job_application_tracker_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."job_application_tracker"
+ADD CONSTRAINT "job_application_tracker_status_check" CHECK ("status" = ANY (ARRAY['not_started'::job_application_tracker_status, 'applied'::job_application_tracker_status, 'in_progress'::job_application_tracker_status, 'rejected'::job_application_tracker_status, 'offered'::job_application_tracker_status, 'hired'::job_application_tracker_status]));
+
+--
+-- Name: prdoucts products_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::product_status, 'inactive'::product_status]));

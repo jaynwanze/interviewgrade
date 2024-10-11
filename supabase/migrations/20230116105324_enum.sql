@@ -1,50 +1,24 @@
-CREATE TYPE "public"."pricing_plan_interval" AS ENUM ('day', 'week', 'month', 'year');
-ALTER TYPE "public"."pricing_plan_interval" OWNER TO "postgres";
 --
--- Name: pricing_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: product_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."pricing_type" AS ENUM ('one_time', 'recurring');
-ALTER TYPE "public"."pricing_type" OWNER TO "postgres";
+CREATE TYPE "public"."product_type" AS ENUM ('token', 'subscription');
+ALTER TYPE "public"."product_type" OWNER TO "postgres";
+
 --
--- Name: subscription_status; Type: TYPE; Schema: public; Owner: postgres
+-- Name: interview_status; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."subscription_status" AS ENUM (
-  'trialing',
-  'active',
-  'canceled',
-  'incomplete',
-  'incomplete_expired',
-  'past_due',
-  'unpaid',
-  'paused'
+CREATE TYPE "public"."interview_status" AS ENUM (
+  'not_started',
+  'in_progress',
+  'completed'
 );
-ALTER TYPE "public"."subscription_status" OWNER TO "postgres";
---
--- Name: organization_join_invitation_link_status; Type: TYPE; Schema: public; Owner: postgres
---
 
-CREATE TYPE "public"."organization_join_invitation_link_status" AS ENUM (
-  'active',
-  'finished_accepted',
-  'finished_declined',
-  'inactive'
-);
-ALTER TYPE "public"."organization_join_invitation_link_status" OWNER TO "postgres";
---
--- Name: organization_joining_status; Type: TYPE; Schema: public; Owner: postgres
---
+ALTER TYPE "public"."interview_status" OWNER TO "postgres";
 
-CREATE TYPE "public"."organization_joining_status" AS ENUM (
-  'invited',
-  'joinied',
-  'declined_invitation',
-  'joined'
-);
-ALTER TYPE "public"."organization_joining_status" OWNER TO "postgres";
 --
--- Name: organization_member_role; Type: TYPE; Schema: public; Owner: postgres
+-- Name: user_types; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE "public"."user_types" AS ENUM (
@@ -53,5 +27,61 @@ CREATE TYPE "public"."user_types" AS ENUM (
 );
 ALTER TYPE "public"."user_types" OWNER TO "postgres";
 
-CREATE TYPE "public"."organization_member_role" AS ENUM ('owner', 'admin', 'member', 'readonly');
-ALTER TYPE "public"."organization_member_role" OWNER TO "postgres";
+--
+-- Name: job_application_tracker_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."job_application_tracker_status" AS ENUM (
+  'not_started',
+  'applied',
+  'in_progress',
+  'rejected',
+  'offered',
+  'hired'
+);
+ALTER TYPE "public"."job_application_tracker_status" OWNER TO "postgres";
+
+--
+-- Name: question_difficulty; Type: TYPE; Schema: public; Owner: postgres
+--
+CREATE TYPE "public"."question_difficulty" AS ENUM (
+  'easy',
+  'medium',
+  'hard'
+);
+ALTER TYPE "public"."question_difficulty" OWNER TO "postgres";
+
+--
+-- Name: question_category; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."question_category" AS ENUM (
+  'general',
+  'problem_solving',
+  'technical',
+  'soft_skills',
+  'behavioural'
+);
+ALTER TYPE "public"."question_category" OWNER TO "postgres";
+
+--
+-- Name: question_category; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."skill_category" AS ENUM (
+  'general',
+  'problem_solving',
+  'technical',
+  'soft_skills',
+  'behavioural'
+);
+ALTER TYPE "public"."skill_category" OWNER TO "postgres";
+
+--
+-- Name: product_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."product_status" AS ENUM (
+  'active',
+  'inactive'
+);

@@ -44,7 +44,7 @@ ALTER TABLE "public"."products" OWNER TO "postgres";
 
 CREATE TABLE "public"."tokens" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "tokens_available" bigint,
+  "tokens_available" bigint DEFAULT 5,
   "total_tokens_used" bigint,
   "total_tokens_purchased" bigint,
   "last_purchase_date" timestamp with time zone

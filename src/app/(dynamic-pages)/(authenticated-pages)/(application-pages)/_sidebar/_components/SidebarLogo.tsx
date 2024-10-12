@@ -10,7 +10,7 @@ export function SidebarLogoAndToggle() {
   return (
     <div className="flex justify-between items-center w-full mb-5">
       <Link
-        href="/dashboard"
+        href="/candidate"
         className="ml-2 cursor-pointer flex items-center gap-1 w-full"
       >
         <Image

@@ -33,15 +33,13 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
 }
 
 const getOnboardingConditions = async (userId: string) => {
-  const [userProfile, defaultOrganizationId, userType] = await Promise.all([
+  const [userProfile, userType] = await Promise.all([
     getUserProfile(userId),
-    getDefaultOrganizationOrSet(),
     getUserType(userId),
   ]);
 
   return {
     userProfile,
-    defaultOrganizationId,
     userType,
   };
 };

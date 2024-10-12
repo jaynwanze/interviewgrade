@@ -1,5 +1,11 @@
 import { cn } from '@/utils/cn';
-import { Home, TableProperties, NotepadText, Settings, Shield } from 'lucide-react';
+import {
+  Home,
+  NotepadText,
+  Settings,
+  Shield,
+  TableProperties,
+} from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
 
@@ -20,9 +26,9 @@ export async function UserSidebar() {
           href={`/candidate/interviews`}
           icon={<NotepadText className="h-5 w-5" />}
         />
-         <SidebarLink
+        <SidebarLink
           label="Job Tracker"
-          href="/candidate/invitations"
+          href="/candidate/jobtracker"
           icon={<TableProperties className="h-5 w-5" />}
         />
         <SidebarLink

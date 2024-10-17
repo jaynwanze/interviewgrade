@@ -11,31 +11,26 @@ CREATE INDEX idx_tokens_id ON "public"."tokens" ("id");
 -- Indexes for interviews
 CREATE INDEX idx_interviews_candidate_id ON "public"."interviews" ("candidate_id");
 CREATE INDEX idx_interviews_template_id ON "public"."interviews" ("template_id");
-CREATE INDEX idx_interviews_job_id ON "public"."interviews" ("job_id");
 
 -- Indexes for templates
 CREATE INDEX idx_templates_user_id ON "public"."templates" ("user_id");
+CREATE INDEX idx_templates_is_company_specific ON "public"."templates" ("is_company_specific");
+CREATE INDEX idx_templates_is_industry_specific ON "public"."templates" ("is_industry_specific");
+CREATE INDEX idx_templates_is_general ON "public"."templates" ("is_general");
 CREATE INDEX idx_templates_is_system_defined ON "public"."templates" ("is_system_defined");
 
 -- Indexes for questions
-CREATE INDEX idx_questions_user_id ON "public"."questions" ("user_id");
+CREATE INDEX idx_questions_template_id ON "public"."questions" ("template_id");
 CREATE INDEX idx_questions_is_system_defined ON "public"."questions" ("is_system_defined");
 
--- Indexes for jobs
-CREATE INDEX idx_jobs_user_id ON "public"."jobs" ("user_id");
-CREATE INDEX idx_jobs_is_system_defined ON "public"."jobs" ("is_system_defined");
+-- Indexes for interview_evaluations
+CREATE INDEX idx_interview_evaluations_interview_id ON "public"."interview_evaluations" ("interview_id");
 
--- Indexes for skills
-CREATE INDEX idx_skills_user_id ON "public"."skills" ("user_id");
-CREATE INDEX idx_skills_is_system_defined ON "public"."skills" ("is_system_defined");
+-- Indexes for interview_feedback
+CREATE INDEX idx_interview_feedback_interview_id ON "public"."interview_feedback" ("interview_id");
 
--- Indexes for job_skills
-CREATE INDEX idx_job_skills_job_id ON "public"."job_skills" ("job_id");
-CREATE INDEX idx_job_skills_skill_id ON "public"."job_skills" ("skill_id");
-
--- Indexes for template_questions
-CREATE INDEX idx_template_questions_template_id ON "public"."template_questions" ("template_id");
-CREATE INDEX idx_template_questions_question_id ON "public"."template_questions" ("question_id");
+-- Indexes for interview_analytics
+CREATE INDEX idx_interview_analytics_interview_id ON "public"."interview_analytics" ("interview_id");
 
 -- Indexes for interview_questions
 CREATE INDEX idx_interview_questions_interview_id ON "public"."interview_questions" ("interview_id");

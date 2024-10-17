@@ -42,41 +42,46 @@ CREATE TYPE "public"."job_application_tracker_status" AS ENUM (
 ALTER TYPE "public"."job_application_tracker_status" OWNER TO "postgres";
 
 --
--- Name: question_difficulty; Type: TYPE; Schema: public; Owner: postgres
+-- Name: template_difficulty; Type: TYPE; Schema: public; Owner: postgres
 --
-CREATE TYPE "public"."question_difficulty" AS ENUM (
-  'easy',
-  'medium',
-  'hard'
+CREATE TYPE "public"."template_difficulty" AS ENUM (
+  'Easy',
+  'Medium',
+  'Hard'
 );
-ALTER TYPE "public"."question_difficulty" OWNER TO "postgres";
+ALTER TYPE "public"."template_difficulty" OWNER TO "postgres";
 
 --
--- Name: question_category; Type: TYPE; Schema: public; Owner: postgres
+-- Name: template_category; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."question_category" AS ENUM (
-  'general',
-  'problem_solving',
-  'technical',
-  'soft_skills',
-  'behavioural'
+CREATE TYPE "public"."template_category" AS ENUM (
+  'General Skills-Based',
+  'General Job-Based',
+  'Accounting / Finance',
+  'Admin / Customer Service',
+  'Computing / IT',
+  'HR / Legal / Education / Training',
+  'Real Estate / Engineering / Construction',
+  'Healthcare / Pharma',
+  'Hospitality / Travel',
+  'Law Enforcement / Security / Logistics',
+  'Marketing / PR / Media',
+  'Sales / Retail / Business Development'
 );
-ALTER TYPE "public"."question_category" OWNER TO "postgres";
-
+ALTER TYPE "public"."template_category" OWNER TO "postgres";
 --
--- Name: question_category; Type: TYPE; Schema: public; Owner: postgres
+-- Name: question_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."skill_category" AS ENUM (
-  'general',
-  'problem_solving',
-  'technical',
-  'soft_skills',
-  'behavioural'
+CREATE TYPE "public"."question_type" AS ENUM (
+  'General',
+  'Behavioral',
+  'Situational',
+  'Role-Specific',
+  'Operational'
 );
-ALTER TYPE "public"."skill_category" OWNER TO "postgres";
-
+ALTER TYPE "public"."question_type" OWNER TO "postgres";
 --
 -- Name: product_status; Type: TYPE; Schema: public; Owner: postgres
 --

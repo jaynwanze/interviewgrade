@@ -59,7 +59,6 @@ CREATE TABLE "public"."interviews" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "template_id" "uuid",
   "candidate_id" "uuid" NOT NULL,
-  "job_id" "uuid",
   "title" character varying,
   "description" text,
   "start_time" timestamp with time zone,
@@ -138,14 +137,18 @@ ALTER TABLE "public"."interview_feedback" OWNER TO "postgres";
 CREATE TABLE "public"."templates" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "user_id" "uuid",
-  "job_id" "uuid",
+  "category" "public"."template_category",
   "title" character varying,
+  "role" character varying,
   "description" text,
-  "industry" character varying,
   "duration" character varying,
+  "difficulty" "public"."template_difficulty",
+  "company" character varying,
+  "is_company_specific" boolean DEFAULT false,
+  "is_industry_specific" boolean DEFAULT false,
+  "is_general" boolean DEFAULT false,
   "is_system_defined" boolean DEFAULT false,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
-  
 );
 
 ALTER TABLE "public"."templates" OWNER TO "postgres";
@@ -155,27 +158,14 @@ ALTER TABLE "public"."templates" OWNER TO "postgres";
 --
 CREATE TABLE "public"."questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "user_id" "uuid",
+  "template_id" "uuid" NOT NULL,
+  "type" "public"."question_type",
   "text" text,
-  "difficulty" "public"."question_difficulty",
-  "category" "public"."question_category",
+  "sample_answer" text,
   "is_system_defined" boolean DEFAULT false
 );
 
 ALTER TABLE "public"."questions" OWNER TO "postgres";
-
---
--- Name: template_questions; Type: TABLE; Schema: public; Owner: postgres
---
-CREATE TABLE "public"."template_questions" (
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "template_id" "uuid" NOT NULL,
-  "question_id" "uuid" NOT NULL,
-  "sequence" integer
-);
-
-ALTER TABLE "public"."template_questions" OWNER TO "postgres";
-
 --
 -- Name: interview_questions; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -183,8 +173,7 @@ CREATE TABLE "public"."interview_questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
   "text" text,
-  "difficulty" "public"."question_difficulty",
-  "category" "public"."question_category"
+  "type" "public"."question_type"
 );
 
 ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
@@ -201,51 +190,6 @@ CREATE TABLE "public"."interview_answers" (
   "accuracy" decimal(5,2),
   "clarity" decimal(5,2)
 );
-
---
--- Name: jobs; Type: TABLE; Schema: public; Owner: postgres
---
-CREATE TABLE "public"."jobs" (
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "user_id" "uuid",
-  "title" character varying,
-  "description" text,
-  "industry" character varying,
-  "location" character varying,
-  "salary" bigint,
-  "job_type" character varying,
-  "is_system_defined" boolean DEFAULT false,
-  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
-);
-
-ALTER TABLE "public"."jobs" OWNER TO "postgres";
-
---
--- Name: skills; Type: TABLE; Schema: public; Owner: postgres
---
-CREATE TABLE "public"."skills" (
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "user_id" "uuid",
-  "name" character varying,
-  "description" text,
-  "category" "public"."skill_category",
-  "is_system_defined" boolean DEFAULT false,
-  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
-);
-
-ALTER TABLE "public"."skills" OWNER TO "postgres";
-
---
--- Name: job_skills; Type: TABLE; Schema: public; Owner: postgres
---
-CREATE TABLE "public"."job_skills" (
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "job_id" "uuid" NOT NULL,
-  "skill_id" "uuid" NOT NULL
-);
-
-ALTER TABLE "public"."job_skills" OWNER TO "postgres";
-
 --
 -- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -332,12 +276,6 @@ ADD CONSTRAINT "templates_pkey" PRIMARY KEY ("id");
 ALTER TABLE ONLY "public"."questions"
 ADD CONSTRAINT "questions_pkey" PRIMARY KEY ("id");
 --
--- Name: template_questions template_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."template_questions"
-ADD CONSTRAINT "template_questions_pkey" PRIMARY KEY ("id");
---
 -- Name: interview_questions interview_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -349,24 +287,6 @@ ADD CONSTRAINT "interview_questions_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."interview_answers"
 ADD CONSTRAINT "interview_answers_pkey" PRIMARY KEY ("id");
---
--- Name: jobs jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."jobs"
-ADD CONSTRAINT "jobs_pkey" PRIMARY KEY ("id");
---
--- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."skills"
-ADD CONSTRAINT "skills_pkey" PRIMARY KEY ("id");
---
--- Name: job_skills job_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."job_skills"
-ADD CONSTRAINT "job_skills_pkey" PRIMARY KEY ("id");
 --
 -- Name: job_application_tracker job_application_tracker_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -406,13 +326,6 @@ ADD CONSTRAINT "interviews_template_id_fkey" FOREIGN KEY ("template_id") REFEREN
 ALTER TABLE ONLY "public"."interviews"
 ADD CONSTRAINT "interviews_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidate"("id") ON DELETE CASCADE;
 --
--- Name: interviews interviews_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interviews"
-ADD CONSTRAINT "interviews_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE SET NULL;
-
---
 -- Name: interview_evaluations interview_evaluations_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -437,12 +350,6 @@ ADD CONSTRAINT "interview_feedback_interview_id_fkey" FOREIGN KEY ("interview_id
 ALTER TABLE ONLY "public"."templates"
 ADD CONSTRAINT "templates_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id")  ON DELETE CASCADE;
 --
--- Name: templates templates_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."templates"
-ADD CONSTRAINT "templates_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id")  ON DELETE SET NULL;
---
 -- Name: templates templates_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -453,40 +360,11 @@ ADD CONSTRAINT "templates_user_id_system_defined_check" CHECK (
     (is_system_defined = FALSE AND user_id IS NOT NULL)
 );
 --
--- Name: questions questions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: questions questions_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."questions"
-ADD CONSTRAINT "questions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL;
---
--- Name: template_questions one_template_per_question; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE "public"."template_questions"
-ADD CONSTRAINT "one_template_per_question" UNIQUE ("question_id");
---
--- Name: questions questions_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."questions"
-ADD CONSTRAINT "questions_user_id_system_defined_check" CHECK (
-    (is_system_defined = TRUE AND user_id IS NULL)
-    OR
-    (is_system_defined = FALSE AND user_id IS NOT NULL)
-);
-
---
--- Name: template_questions template_questions_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."template_questions"
-ADD CONSTRAINT "template_questions_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id")  ON DELETE CASCADE;
---
--- Name: template_questions template_questions_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."template_questions"
-ADD CONSTRAINT "template_questions_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "questions"("id")  ON DELETE CASCADE;
+ADD CONSTRAINT "questions_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id") ON DELETE CASCADE;
 --
 -- Name: interview_questions interview_questions_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -499,50 +377,6 @@ ADD CONSTRAINT "interview_questions_interview_id_fkey" FOREIGN KEY ("interview_i
 
 ALTER TABLE ONLY "public"."interview_answers"
 ADD CONSTRAINT "interview_answers_interview_question_id_fkey" FOREIGN KEY ("interview_question_id") REFERENCES "interview_questions"("id")  ON DELETE CASCADE;
---
--- Name: jobs jobs_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."jobs"
-ADD CONSTRAINT "jobs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id")  ON DELETE SET NULL;
---
--- Name: jobs jobs_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."jobs"
-ADD CONSTRAINT "jobs_user_id_system_defined_check" CHECK (
-    (is_system_defined = TRUE AND user_id IS NULL)
-    OR
-    (is_system_defined = FALSE AND user_id IS NOT NULL)
-);
--- Name: skills skills_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."skills"
-ADD CONSTRAINT "skills_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id") ON DELETE SET NULL;
---
--- Name: skills skills_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."skills"
-ADD CONSTRAINT "skills_user_id_system_defined_check" CHECK (
-    (is_system_defined = TRUE AND user_id IS NULL)
-    OR
-    (is_system_defined = FALSE AND user_id IS NOT NULL)
-);
---
---
--- Name: job_skills job_skills_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."job_skills"
-ADD CONSTRAINT "job_skills_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "jobs"("id") ON DELETE CASCADE;
---
--- Name: job_skills job_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."job_skills"
-ADD CONSTRAINT "job_skills_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skills"("id")  ON DELETE CASCADE;
 --
 -- Name: job_application_tracker job_application_tracker_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -568,24 +402,29 @@ ADD CONSTRAINT "products_product_type_check" CHECK ("product_type" = ANY (ARRAY[
 ALTER TABLE ONLY "public"."interviews"
 ADD CONSTRAINT "interviews_status_check" CHECK ("status" = ANY (ARRAY['not_started'::interview_status, 'in_progress'::interview_status, 'completed'::interview_status]));
 --
+-- Name: templates templates_difficulty_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_difficulty_check" CHECK ("difficulty" = ANY (ARRAY['Easy'::template_difficulty, 'Medium'::template_difficulty, 'Hard'::template_difficulty]));
+--
 -- Name: questions questions_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."questions"
-ADD CONSTRAINT "questions_difficulty_check" CHECK ("difficulty" = ANY (ARRAY['easy'::question_difficulty, 'medium'::question_difficulty, 'hard'::question_difficulty]));
+ADD CONSTRAINT "questions_type_check" CHECK ("type" = ANY (ARRAY['General'::question_type, 'Behavioral'::question_type, 'Situational'::question_type, 'Role-Specific'::question_type, 'Operational'::question_type]));
 --
--- Name: questions questions_category_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."questions"
-ADD CONSTRAINT "questions_category_check" CHECK ("category" = ANY (ARRAY['general'::question_category,'problem_solving'::question_category, 'technical'::question_category, 'soft_skills'::question_category, 'behavioural'::question_category]));
---
---Name skills skills_category_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interview_questions interview_questions_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."skills"
-ADD CONSTRAINT "skills_category_check" CHECK ("category" = ANY (ARRAY['general'::skill_category,'problem_solving'::skill_category, 'technical'::skill_category, 'soft_skills'::skill_category, 'behavioural'::skill_category]));
+ALTER TABLE ONLY "public"."interview_questions"
+ADD CONSTRAINT "interview_questions_type_check" CHECK ("type" = ANY (ARRAY['General'::question_type, 'Behavioral'::question_type, 'Situational'::question_type, 'Role-Specific'::question_type, 'Operational'::question_type]));
+--
+-- Name: templates templates_category_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
 
+ALTER TABLE ONLY "public"."templates"
+ADD CONSTRAINT "templates_category_check" CHECK ("category" = ANY (ARRAY['General Skills-Based'::template_category, 'General Job-Based'::template_category, 'Accounting / Finance'::template_category, 'Admin / Customer Service'::template_category, 'Computing / IT'::template_category, 'HR / Legal / Education / Training'::template_category, 'Real Estate / Engineering / Construction'::template_category, 'Healthcare / Pharma'::template_category, 'Hospitality / Travel'::template_category, 'Law Enforcement / Security / Logistics'::template_category, 'Marketing / PR / Media'::template_category, 'Sales / Retail / Business Development'::template_category]));
 --
 -- Name: job_application_tracker job_application_tracker_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -594,7 +433,7 @@ ALTER TABLE ONLY "public"."job_application_tracker"
 ADD CONSTRAINT "job_application_tracker_status_check" CHECK ("status" = ANY (ARRAY['not_started'::job_application_tracker_status, 'applied'::job_application_tracker_status, 'in_progress'::job_application_tracker_status, 'rejected'::job_application_tracker_status, 'offered'::job_application_tracker_status, 'hired'::job_application_tracker_status]));
 
 --
--- Name: prdoucts products_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: products products_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."products"

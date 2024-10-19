@@ -1,8 +1,4 @@
-import {
-  Card,
-  CardDescription,
-  CardTitle
-} from '@/components/ui/card';
+import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { InterviewTemplate } from '@/types';
 import { Button } from '../ui/button';
 
@@ -17,7 +13,7 @@ export const InterviewCardTemplate = (interview: InterviewTemplate) => {
         {interview.description}
       </CardDescription>
       <p className="text-sm mt-2">Difficulty: {interview.difficulty}</p>
-      <p className="text-sm">Questions: {interview.questionsCount}</p>
+      <p className="text-sm">Questions: {interview.questions_count}</p>
       <p className="text-sm">Duration: {interview.duration} min</p>
       <Button
         className="mt-4"

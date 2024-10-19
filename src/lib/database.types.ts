@@ -57,246 +57,6 @@ export type Database = {
           },
         ]
       }
-      organization_join_invitations: {
-        Row: {
-          created_at: string
-          id: string
-          invitee_organization_role: Database["public"]["Enums"]["organization_member_role"]
-          invitee_user_email: string
-          invitee_user_id: string | null
-          inviter_user_id: string
-          organization_id: string
-          status: Database["public"]["Enums"]["organization_join_invitation_link_status"]
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          invitee_organization_role?: Database["public"]["Enums"]["organization_member_role"]
-          invitee_user_email: string
-          invitee_user_id?: string | null
-          inviter_user_id: string
-          organization_id: string
-          status?: Database["public"]["Enums"]["organization_join_invitation_link_status"]
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          invitee_organization_role?: Database["public"]["Enums"]["organization_member_role"]
-          invitee_user_email?: string
-          invitee_user_id?: string | null
-          inviter_user_id?: string
-          organization_id?: string
-          status?: Database["public"]["Enums"]["organization_join_invitation_link_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_join_invitations_invitee_user_id_fkey"
-            columns: ["invitee_user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_join_invitations_inviter_user_id_fkey"
-            columns: ["inviter_user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_join_invitations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organization_members: {
-        Row: {
-          created_at: string
-          id: number
-          member_id: string
-          member_role: Database["public"]["Enums"]["organization_member_role"]
-          organization_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          member_id: string
-          member_role: Database["public"]["Enums"]["organization_member_role"]
-          organization_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          member_id?: string
-          member_role?: Database["public"]["Enums"]["organization_member_role"]
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_members_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_members_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organizations: {
-        Row: {
-          created_at: string
-          id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          title?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          title?: string
-        }
-        Relationships: []
-      }
-      organizations_private_info: {
-        Row: {
-          billing_address: Json | null
-          id: string
-          payment_method: Json | null
-        }
-        Insert: {
-          billing_address?: Json | null
-          id: string
-          payment_method?: Json | null
-        }
-        Update: {
-          billing_address?: Json | null
-          id?: string
-          payment_method?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organizations_private_info_id_fkey"
-            columns: ["id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      subscriptions: {
-        Row: {
-          cancel_at: string | null
-          cancel_at_period_end: boolean | null
-          canceled_at: string | null
-          created: string
-          current_period_end: string
-          current_period_start: string
-          ended_at: string | null
-          id: string
-          metadata: Json | null
-          organization_id: string | null
-          price_id: string | null
-          quantity: number | null
-          status: Database["public"]["Enums"]["subscription_status"] | null
-          trial_end: string | null
-          trial_start: string | null
-        }
-        Insert: {
-          cancel_at?: string | null
-          cancel_at_period_end?: boolean | null
-          canceled_at?: string | null
-          created: string
-          current_period_end: string
-          current_period_start: string
-          ended_at?: string | null
-          id: string
-          metadata?: Json | null
-          organization_id?: string | null
-          price_id?: string | null
-          quantity?: number | null
-          status?: Database["public"]["Enums"]["subscription_status"] | null
-          trial_end?: string | null
-          trial_start?: string | null
-        }
-        Update: {
-          cancel_at?: string | null
-          cancel_at_period_end?: boolean | null
-          canceled_at?: string | null
-          created?: string
-          current_period_end?: string
-          current_period_start?: string
-          ended_at?: string | null
-          id?: string
-          metadata?: Json | null
-          organization_id?: string | null
-          price_id?: string | null
-          quantity?: number | null
-          status?: Database["public"]["Enums"]["subscription_status"] | null
-          trial_end?: string | null
-          trial_start?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_price_id_fkey"
-            columns: ["price_id"]
-            isOneToOne: false
-            referencedRelation: "prices"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_private_info: {
-        Row: {
-          created_at: string | null
-          default_organization: string | null
-          id: string
-        }
-        Insert: {
-          created_at?: string | null
-          default_organization?: string | null
-          id: string
-        }
-        Update: {
-          created_at?: string | null
-          default_organization?: string | null
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_private_info_default_organization_fkey"
-            columns: ["default_organization"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_private_info_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -329,6 +89,214 @@ export type Database = {
           },
         ]
       }
+      candidates: {
+        Row: {
+          id: string
+          token_id: string
+        }
+        Insert: {
+          id: string
+          token_id: string
+        }
+        Update: {
+          id?: string
+          token_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidates_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: true
+            referencedRelation: "account_delete_tokens"
+            referencedColumns: ["token"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          id: string
+          product_type: Database["public"]["Enums"]["product_type"]
+          title: string | null
+          description: string | null
+          price: number | null
+          status: Database["public"]["Enums"]["product_status"]
+          tokens: number | null
+          subscription_duration: string | null
+        }
+        Insert: {
+          id: string
+          product_type: Database["public"]["Enums"]["product_type"]
+          title?: string | null
+          description?: string | null
+          price?: number | null
+          status: Database["public"]["Enums"]["product_status"]
+          tokens?: number | null
+          subscription_duration?: string | null
+        }
+        Update: {
+          id?: string
+          product_type?: Database["public"]["Enums"]["product_type"]
+          title?: string | null
+          description?: string | null
+          price?: number | null
+          status?: Database["public"]["Enums"]["product_status"]
+          tokens?: number | null
+          subscription_duration?: string | null
+        }
+      }
+      tokens: {
+        Row: {
+          id: string
+          tokens_available: string
+          total_tokens_used: string | null
+          total_tokens_purchased: string | null
+          last_token_purchase_date: string | null
+        }
+        Insert: {
+          id: string
+          tokens_available: string
+          total_tokens_used?: string | null
+          total_tokens_purchased?: string | null
+          last_token_purchase_date?: string | null
+        }
+        Update: {
+          id?: string
+          tokens_available?: string
+          total_tokens_used?: string | null
+          total_tokens_purchased?: string | null
+          last_token_purchase_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interviews: {
+        Row: {
+          id: string
+          template_id: string
+          candidate_id: string
+          title: string
+          description: string
+          start_time: string
+          end_time: string
+          status: Database["public"]["Enums"]["interview_status"]
+        }
+        Insert: {
+          id: string
+          template_id: string
+          candidate_id: string
+          title: string
+          description?: string
+          start_time: string
+          end_time?: string
+          status: Database["public"]["Enums"]["interview_status"]
+        }
+        Update: {
+          id?: string
+          template_id?: string
+          candidate_id?: string
+          title?: string
+          description?: string
+          start_time?: string
+          end_time?: string
+          status?: Database["public"]["Enums"]["interview_status"]
+        }
+      }
+      //interview evals,feedbacks and analytics
+      templates: {
+        Row: {
+          id: string
+          user_id: string
+          category: Database["public"]["Enums"]["template_category"]
+          title: string
+          role: string
+          description: string
+          duration: number
+          difficulty: Database["public"]["Enums"]["template_difficulty"]
+          questions_count: number;
+          company: string
+          is_company_specific: boolean
+          is_industry_specific: boolean
+          is_general: boolean
+          is_system_defined: boolean
+          created_at: string
+          }
+        Insert: {
+          id: string
+          user_id?: string
+          category: Database["public"]["Enums"]["template_category"]
+          title: string
+          role: string
+          description: string
+          duration: number
+          difficulty: Database["public"]["Enums"]["template_difficulty"]
+          questions_count: number;
+          company?: string
+          is_company_specific: boolean
+          is_industry_specific: boolean
+          is_general: boolean
+          is_system_defined: boolean
+          created_at: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          category?: Database["public"]["Enums"]["template_category"]
+          title?: string
+          role?: string
+          description?: string
+          duration?: number
+          difficulty?: Database["public"]["Enums"]["template_difficulty"]
+          questions_count: number;
+          company?: string
+          is_company_specific?: boolean
+          is_industry_specific?: boolean
+          is_general?: boolean
+          is_system_defined?: boolean
+          created_at?: string
+        }
+      }
+
+      questions: {
+        Row: {
+          id: string
+          template_id: string
+          type: Database["public"]["Enums"]["question_type"]
+          text: string
+          sample_answer: string
+          is_system_defined: boolean
+          }
+        Insert: {
+          id: string
+          template_id: string
+          type: Database["public"]["Enums"]["question_type"]
+          sample_answer: string
+          is_system_defined: boolean
+        }
+        Update: {
+          id?: string
+          template_id?: string
+          type: Database["public"]["Enums"]["question_type"]
+          text?: string
+          sample_answer: string
+          is_system_defined: boolean
+        }
+      }
+      // interview questions and answers and job status
+        
     }
     Views: {
       [_ in never]: never
@@ -346,64 +314,16 @@ export type Database = {
         }
         Returns: boolean
       }
-      get_invited_organizations_for_user_v2: {
-        Args: {
-          user_id: string
-          user_email: string
-        }
-        Returns: {
-          organization_id: string
-        }[]
-      }
-      get_organization_admin_ids: {
-        Args: {
-          organization_id: string
-        }
-        Returns: {
-          member_id: string
-        }[]
-      }
-      get_organization_member_ids: {
-        Args: {
-          organization_id: string
-        }
-        Returns: {
-          member_id: string
-        }[]
-      }
-      get_organizations_for_user: {
-        Args: {
-          user_id: string
-        }
-        Returns: {
-          organization_id: string
-        }[]
-      }
     }
     Enums: {
-      organization_join_invitation_link_status:
-      | "active"
-      | "finished_accepted"
-      | "finished_declined"
-      | "inactive"
-      organization_joining_status:
-      | "invited"
-      | "joinied"
-      | "declined_invitation"
-      | "joined"
-      organization_member_role: "owner" | "admin" | "member" | "readonly"
-      pricing_plan_interval: "day" | "week" | "month" | "year"
-      pricing_type: "one_time" | "recurring"
-      subscription_status:
-      | "trialing"
-      | "active"
-      | "canceled"
-      | "incomplete"
-      | "incomplete_expired"
-      | "past_due"
-      | "unpaid"
-      | "paused"
       user_types: "employer" | "candidate"
+      product_type: "subscription" | "token"
+      product_status: "active" | "inactive"
+      interview_status: "not_started" | "in_progress" | "completed"
+      template_difficulty: "Easy" | "Medium" | "Hard"
+      template_category: "General Skills-Based" | "General Job-Based" | "Accounting" | "Finance" | "Admin"  | "Customer Service" | "IT" | "HR" | "Legal" | "Education" | "Training" | "Real Estate" | "Engineering" | "Construction"  | "Healthcare" | "Pharma" | "Hospitality" | "Travel" | "Law Enforcement" | "Security" | "Logistics" | "Real Estate" | "Marketing" | "PR" | "Media" | "Sales" | "Retail" | "Other"
+      question_type: "General" | "Behavioral" | "Role-Specific" | "Operational"
+      job_application_tracker_status: "not_started" | "applied" | "in_progress" | "rejected" | "offered" | "hired"
     }
     CompositeTypes: {
       [_ in never]: never

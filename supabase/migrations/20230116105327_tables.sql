@@ -61,6 +61,8 @@ CREATE TABLE "public"."interviews" (
   "candidate_id" "uuid" NOT NULL,
   "title" character varying,
   "description" text,
+  //difficulty
+  //questions count
   "start_time" timestamp with time zone,
   "end_time" timestamp with time zone,
   "status" "public"."interview_status" DEFAULT 'not_started'::interview_status NOT NULL,
@@ -143,6 +145,7 @@ CREATE TABLE "public"."templates" (
   "description" text,
   "duration" character varying,
   "difficulty" "public"."template_difficulty",
+  'question_count' integer,
   "company" character varying,
   "is_company_specific" boolean DEFAULT false,
   "is_industry_specific" boolean DEFAULT false,
@@ -161,7 +164,7 @@ CREATE TABLE "public"."questions" (
   "template_id" "uuid" NOT NULL,
   "type" "public"."question_type",
   "text" text,
-  "sample_answer" text,
+  "sample_answer" text DEFAULT 'No sample answer provided',  
   "is_system_defined" boolean DEFAULT false
 );
 
@@ -450,7 +453,8 @@ ADD CONSTRAINT "templates_category_check" CHECK ("category" = ANY (ARRAY[
   'PR'::template_category, 
   'Media'::template_category, 
   'Sales'::template_category, 
-  'Retail'::template_category
+  'Retail'::template_category,
+  'Other'::template_category
 ]));
 --
 -- Name: job_application_tracker job_application_tracker_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres

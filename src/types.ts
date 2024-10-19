@@ -34,6 +34,31 @@ export interface SupabaseFileUploadOptions {
   upsert?: boolean;
 }
 
+export type InterviewTemplate = {
+  id: string;
+  user_id: string;
+  category: Database['public']['Enums']['template_category'];
+  title: string;
+  role: string;
+  description: string;
+  questions_count: number;
+  duration: number;
+  difficulty: Database['public']['Enums']['template_difficulty'];
+  question_count: number;
+  company: string;
+  is_company_specific: boolean;
+  is_industry_specific: boolean;
+  is_general: boolean;
+  is_system_defined: boolean;
+  created_at: string;
+};
+
+export type InterviewTemplateCategory = {
+  category: Database['public']['Enums']['template_category'];
+};
+
+export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
+
 /** One of the providers supported by GoTrue. */
 export type AuthProvider =
   | 'apple'

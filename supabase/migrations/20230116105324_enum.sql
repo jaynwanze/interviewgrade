@@ -80,7 +80,8 @@ CREATE TYPE "public"."template_category" AS ENUM (
   'PR',
   'Media',
   'Sales',
-  'Retail'
+  'Retail',
+  'Other'
 );
 ALTER TYPE "public"."template_category" OWNER TO "postgres";
 --

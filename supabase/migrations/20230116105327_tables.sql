@@ -424,7 +424,34 @@ ADD CONSTRAINT "interview_questions_type_check" CHECK ("type" = ANY (ARRAY['Gene
 --
 
 ALTER TABLE ONLY "public"."templates"
-ADD CONSTRAINT "templates_category_check" CHECK ("category" = ANY (ARRAY['General Skills-Based'::template_category, 'General Job-Based'::template_category, 'Accounting / Finance'::template_category, 'Admin / Customer Service'::template_category, 'Computing / IT'::template_category, 'HR / Legal / Education / Training'::template_category, 'Real Estate / Engineering / Construction'::template_category, 'Healthcare / Pharma'::template_category, 'Hospitality / Travel'::template_category, 'Law Enforcement / Security / Logistics'::template_category, 'Marketing / PR / Media'::template_category, 'Sales / Retail / Business Development'::template_category]));
+ADD CONSTRAINT "templates_category_check" CHECK ("category" = ANY (ARRAY[
+  'General Skills-Based'::template_category, 
+  'General Job-Based'::template_category, 
+  'Accounting'::template_category, 
+  'Finance'::template_category, 
+  'Admin'::template_category, 
+  'Customer Service'::template_category, 
+  'IT'::template_category, 
+  'HR'::template_category, 
+  'Legal'::template_category, 
+  'Education'::template_category, 
+  'Training'::template_category, 
+  'Real Estate'::template_category, 
+  'Engineering'::template_category, 
+  'Construction'::template_category, 
+  'Healthcare'::template_category, 
+  'Pharma'::template_category, 
+  'Hospitality'::template_category, 
+  'Travel'::template_category, 
+  'Law Enforcement'::template_category, 
+  'Security'::template_category, 
+  'Logistics'::template_category, 
+  'Marketing'::template_category, 
+  'PR'::template_category, 
+  'Media'::template_category, 
+  'Sales'::template_category, 
+  'Retail'::template_category
+]));
 --
 -- Name: job_application_tracker job_application_tracker_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --

@@ -50,7 +50,6 @@ CREATE TYPE "public"."template_difficulty" AS ENUM (
   'Hard'
 );
 ALTER TYPE "public"."template_difficulty" OWNER TO "postgres";
-
 --
 -- Name: template_category; Type: TYPE; Schema: public; Owner: postgres
 --
@@ -58,16 +57,30 @@ ALTER TYPE "public"."template_difficulty" OWNER TO "postgres";
 CREATE TYPE "public"."template_category" AS ENUM (
   'General Skills-Based',
   'General Job-Based',
-  'Accounting / Finance',
-  'Admin / Customer Service',
-  'Computing / IT',
-  'HR / Legal / Education / Training',
-  'Real Estate / Engineering / Construction',
-  'Healthcare / Pharma',
-  'Hospitality / Travel',
-  'Law Enforcement / Security / Logistics',
-  'Marketing / PR / Media',
-  'Sales / Retail / Business Development'
+  'Accounting',
+  'Finance',
+  'Admin',
+  'Customer Service',
+  'IT',
+  'HR',
+  'Legal',
+  'Education',
+  'Training',
+  'Real Estate',
+  'Engineering',
+  'Construction',
+  'Healthcare',
+  'Pharma',
+  'Hospitality',
+  'Travel',
+  'Law Enforcement',
+  'Security',
+  'Logistics',
+  'Marketing',
+  'PR',
+  'Media',
+  'Sales',
+  'Retail'
 );
 ALTER TYPE "public"."template_category" OWNER TO "postgres";
 --

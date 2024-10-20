@@ -1,5 +1,9 @@
-import InterviewsCategories from './InterviewsCategories';
+import { redirect } from 'next/navigation';
 
-export default async function InterviewsCategoriesPage() {
-  return <InterviewsCategories />;
+async function RedirectToDefaultInterviewsPage() {
+  return redirect(`/candidate/interviews/library`);
+}
+
+export default async function DashboardPage() {
+  return <RedirectToDefaultInterviewsPage />;
 }

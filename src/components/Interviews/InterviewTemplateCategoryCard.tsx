@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { InterviewTemplateCategoriesType } from '@/types/interviewTemplateCategories';
 import { useRouter } from 'next/navigation';
@@ -11,7 +10,7 @@ export const InterviewCategoryCard = (
 ) => {
   const router = useRouter();
   const handleClick = () => {
-    router.push(`/candidate/interviews/${interviewCategory.id}`);
+    router.push(`/candidate/interviews/library/${interviewCategory.id}`);
   };
 
   return (

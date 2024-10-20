@@ -69,40 +69,6 @@ export const getUserAvatarUrl = async (userId: string) => {
   return data.avatar_url;
 };
 
-export const getUserPendingInvitationsByEmail = async (userEmail: string) => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from('organization_join_invitations')
-    .select(
-      '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)',
-    )
-    .ilike('invitee_user_email', `%${userEmail}%`)
-    .eq('status', 'active');
-
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
-};
-
-export const getUserPendingInvitationsById = async (userId: string) => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from('organization_join_invitations')
-    .select(
-      '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)',
-    )
-    .eq('invitee_user_id', userId)
-    .eq('status', 'active');
-
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
-};
-
 export const uploadPublicUserAvatar = async (
   formData: FormData,
   fileName: string,

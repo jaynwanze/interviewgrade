@@ -10,7 +10,7 @@ export default async function Layout({
 }) {
   return (
     // move navbar elsehere
-    <div className="flex flex-col min-h-screen">
+    <div className="relative flex-1 h-auto mt-6 w-full overflow-auto">
       <nav className="p-4 flex justify-between">
         <div>
           <Button variant="secondary">

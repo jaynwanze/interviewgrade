@@ -11,6 +11,7 @@ export default async function Layout({
   navbar: ReactNode;
 }) {
   return (
+    // look at using client shell insetad of server shell
     <ApplicationLayoutShell sidebar={<UserSidebar />}>
       <div>
         <InternalNavbar>

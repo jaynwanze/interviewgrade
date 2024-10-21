@@ -12,7 +12,7 @@ const categories: InterviewTemplateFilter[] = [
   'General',
 ];
 
-export async function InterviewTemplates() {
+export default function InterviewTemplates() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Select Interview</h1>
@@ -35,11 +35,12 @@ export async function InterviewTemplates() {
       {/* Interview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {InterviewTemplateCategories.map((interviewTemplateCategory) => (
-          <InterviewCategoryCard {...interviewTemplateCategory} />
+          <InterviewCategoryCard
+            key={interviewTemplateCategory.id}
+            {...interviewTemplateCategory}
+          />
         ))}
       </div>
     </div>
   );
 }
-
-export default InterviewTemplates;

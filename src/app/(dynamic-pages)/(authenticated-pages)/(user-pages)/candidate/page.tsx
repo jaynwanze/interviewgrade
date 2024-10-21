@@ -1,4 +1,6 @@
-export default async function DashboardPage() {
+'use client';
+
+export default function DashboardPage() {
   return (
     <div>
       <h1>Welcome to the Candidate Dashboard</h1>

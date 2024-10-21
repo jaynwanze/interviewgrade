@@ -1,7 +1,9 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { ReactNode } from 'react';
 
-export default async function Layout({
+export default function Layout({
   children,
   navbar,
 }: {

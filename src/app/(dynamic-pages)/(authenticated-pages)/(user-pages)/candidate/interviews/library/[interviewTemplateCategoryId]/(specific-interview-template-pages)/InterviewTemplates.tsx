@@ -23,7 +23,6 @@ export function InterviewTemplates({
     const fetchInterviews = async () => {
       const interviewTemplates: InterviewTemplate[] =
         await getInterviewsTemplatesByCategory(categoryName);
-      console.log(interviewTemplates);
       setInterviews(interviewTemplates);
     };
 

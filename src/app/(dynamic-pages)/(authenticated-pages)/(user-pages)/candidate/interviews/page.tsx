@@ -1,9 +1,26 @@
-import { redirect } from 'next/navigation';
+'use client';
+import { useRouter } from 'next/navigation';
+import { z } from 'zod';
+import { useEffect } from 'react';
 
-async function RedirectToDefaultInterviewsPage() {
-  return redirect(`/candidate/interviews/library`);
-}
+const paramsSchema = z.object({
+  interviewId: z.string().optional(),
+});
 
-export default async function DashboardPage() {
-  return <RedirectToDefaultInterviewsPage />;
+export default function InterviewSessionPage({
+  params,
+}: {
+  params: { interviewId?: string };
+}) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!params || !params.interviewId) {
+      router.push('/candidate/interviews/library');
+    }
+  }, [params, router]);
+
+  if (!params || !params.interviewId) {
+    return null; // Render nothing while redirecting
+  }
 }

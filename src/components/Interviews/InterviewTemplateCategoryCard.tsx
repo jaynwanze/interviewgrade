@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { InterviewTemplateCategoriesType } from '@/types/interviewTemplateCategories';
 import { useRouter } from 'next/navigation';

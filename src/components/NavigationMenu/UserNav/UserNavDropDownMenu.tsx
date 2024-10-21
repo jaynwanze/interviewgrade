@@ -99,12 +99,10 @@ export function UserNavDropDownMenu({
             src={avatarUrl}
             width={24}
             height={24}
-            placeholder="blur"
             blurDataURL={avatarUrl}
             quality={100}
             sizes="100vw"
             alt="User avatar"
-            objectFit="cover"
             className="h-full w-full"
             style={{
               borderRadius: '50%',

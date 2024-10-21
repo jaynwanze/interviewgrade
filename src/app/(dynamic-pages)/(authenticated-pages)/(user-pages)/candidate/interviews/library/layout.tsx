@@ -12,7 +12,7 @@ export default function Layout({
 }) {
   return (
     // move navbar elsehere
-    <div className="relative flex-1 h-auto mt-6 w-full overflow-auto">
+    <div>
       <nav className="p-4 flex justify-between">
         <div>
           <Button variant="secondary">

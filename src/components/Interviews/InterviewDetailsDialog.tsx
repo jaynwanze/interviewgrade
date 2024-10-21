@@ -1,6 +1,6 @@
 'use client';
 
-import { T } from '@/components/ui/Typography';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 
 export default function InterviewDetailsDialog({ isOpen, onClose }) {
   const router = useRouter();
@@ -22,21 +21,39 @@ export default function InterviewDetailsDialog({ isOpen, onClose }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>How it Works</DialogTitle>
-          <DialogDescription>
-            <div>
-              <T.Subtle>Questions</T.Subtle>
-              <p>You can view upcoming interview questions on the sidebar to the left.</p>
-            </div>
-            <div>
-              <T.Subtle>Get Ready</T.Subtle>
-              <p>You will get 5 seconds before recording, once you receive the question.</p>
-            </div>
-            <div>
-              <T.Subtle>Feedback</T.Subtle>
-              <p>You will receive feedback on your questions after you’ve completed all the questions.</p>
-            </div>
-          </DialogDescription>
         </DialogHeader>
+        <DialogDescription>
+          <div className="flex justify-center text-align">
+            <div>
+              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                Questions
+              </span>
+              <p>
+                You can view upcoming interview questions on the sidebar to the
+                left.
+              </p>
+            </div>
+
+            <div>
+              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                Get Ready
+              </span>
+              <p>
+                You will get 5 seconds before recording, once you receive the
+                question.
+              </p>
+            </div>
+            <div>
+              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                Feedback
+              </span>
+              <p>
+                You will receive feedback on your questions after you’ve
+                completed all the questions.
+              </p>
+            </div>
+          </div>
+        </DialogDescription>
         <Button className="mt-4" onClick={handleClick}>
           Start Interview
         </Button>

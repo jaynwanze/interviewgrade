@@ -68,9 +68,9 @@ export const UserCamera = ({ isCameraOn, onRecordEnd }) => {
       <video
         ref={videoRef}
         muted
-        className="w-full h-auto border border-gray-300 rounded"
+        className="w-full h-auto border-4 border-gray-300 rounded" //change team
       ></video>
-      <Button onClick={handleRecord} disabled={isRecording}>
+      <Button className="mt-4 mr-4" onClick={handleRecord} disabled={isRecording}>
         Start Recording
       </Button>
       <Button onClick={handleEndRecord} disabled={!isRecording}>

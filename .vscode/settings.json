@@ -31,7 +31,4 @@
   "[sql]": {
     "editor.defaultFormatter": "mtxr.sqltools"
   },
-  "deno.enable": true,
-  "deno.lint": true,
-  "deno.unstable": true
 }

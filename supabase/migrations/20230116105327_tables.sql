@@ -60,12 +60,15 @@ CREATE TABLE "public"."interviews" (
   "template_id" "uuid",
   "candidate_id" "uuid" NOT NULL,
   "title" character varying,
+  "role" character varying,
   "description" text,
-  //difficulty
-  //questions count
+  "difficulty" "public"."template_difficulty",
+  "question_count" integer,
+  "evaluation_criteria" jsonb,
   "start_time" timestamp with time zone,
   "end_time" timestamp with time zone,
   "status" "public"."interview_status" DEFAULT 'not_started'::interview_status NOT NULL,
+  "is_general" boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."interviews" OWNER TO "postgres";
@@ -78,18 +81,12 @@ CREATE TABLE "public"."interview_evaluations" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
   "overall_score" decimal(4,2),
-  "communication_score" decimal(4,2),	
-  "technical_score" decimal(4,2),
-  "soft_skills_score" decimal(4,2),
-  "response_time" decimal(5,2),
-  "target_overall_score" decimal(4,2),
-  "target_communication_score" decimal(4,2),	
-  "target_technical_score" decimal(4,2),
-  "target_soft_skills_score" decimal(4,2),
-  "target_response_time" decimal(5,2)
+  "evaluation_scores" jsonb,
+  "strengths" text,
+  "areas_for_improvement" text,
+  "recommendations" text
 );
 ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
-
 --
 -- Name: interview_analytics; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -97,42 +94,11 @@ ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 CREATE TABLE "public"."interview_analytics" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
-  "overall_performance" decimal(4,2),
-  "overall_communication_score" decimal(4,2),	
-  "overall_technical_score" decimal(4,2),
-  "overall_soft_skills_score" decimal(4,2),
-  "overall_response_time" decimal(5,2),
-  "overall_percentile" decimal(5,2),
-  "areas_for_improvement" text,
-  "strengths" text,
-  "weaknesses" text,
-  "recommendations" text
+  "avg_overall_score" decimal(4,2),
+  "avg_evaluation_criteria" jsonb
 );
 
 ALTER TABLE "public"."interview_analytics" OWNER TO "postgres";
-
---
--- Name: interview_feedback; Type: TABLE; Schema: public; Owner: postgres
---
-CREATE TABLE "public"."interview_feedback" (
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "interview_id" "uuid" NOT NULL,
-  "comments" text,
-  "problem_solving_skills" text,
-  "technical_proficiency" text,
-  "soft_skills" text,
-  "clarity_of_response" text,
-  "timeliness" text,
-  "response_accuracy" text,
-  "custom_feedback" text,
-  "areas_for_improvement" text,
-  "strengths" text,
-  "weaknesses" text,
-  "recommendations" text
-);
-
-ALTER TABLE "public"."interview_feedback" OWNER TO "postgres";
-
 --
 -- Name: templates; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -145,7 +111,8 @@ CREATE TABLE "public"."templates" (
   "description" text,
   "duration" character varying,
   "difficulty" "public"."template_difficulty",
-  'question_count' integer,
+  "evaluation_criteria" jsonb,
+  "question_count" integer,
   "company" character varying,
   "is_company_specific" boolean DEFAULT false,
   "is_industry_specific" boolean DEFAULT false,
@@ -155,6 +122,26 @@ CREATE TABLE "public"."templates" (
 );
 
 ALTER TABLE "public"."templates" OWNER TO "postgres";
+--
+-- Name: evaluation_criteria; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.evaluation_criteria (
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "user_id" "uuid",
+  "name" character varying,          
+  "description" text,
+  "is_system_defined" boolean DEFAULT false,
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
+);
+--
+-- Name: template_evaluation_criteria; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.template_evaluation_criteria (
+    "template_id" "uuid" NOT NULL,
+    "evaluation_criteria_id" "uuid" NOT NULL
+);
 
 --
 -- Name: questions; Type: TABLE; Schema: public; Owner: postgres
@@ -258,20 +245,24 @@ ADD CONSTRAINT "interview_evaluations_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."interview_analytics"
 ADD CONSTRAINT "interview_analytics_pkey" PRIMARY KEY ("id");
-
---
--- Name: interview_feedback interview_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_feedback"
-ADD CONSTRAINT "interview_feedback_pkey" PRIMARY KEY ("id");
 --
 -- Name: templates templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
+
 
 ALTER TABLE ONLY "public"."templates"
 ADD CONSTRAINT "templates_pkey" PRIMARY KEY ("id");
+--
+-- Name: evaluation_criteria evaluation_criteria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
 
+ALTER TABLE ONLY "public"."evaluation_criteria"
+ADD CONSTRAINT "evaluation_criteria_pkey" PRIMARY KEY ("id");
+--
+-- Name: template_evaluation_criteria template_evaluation_criteria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."template_evaluation_criteria"
+ADD CONSTRAINT "template_evaluation_criteria_pkey" PRIMARY KEY ("template_id", "evaluation_criteria_id");
 --
 -- Name: questions questions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -341,12 +332,6 @@ ADD CONSTRAINT "interview_evaluations_interview_id_fkey" FOREIGN KEY ("interview
 ALTER TABLE ONLY "public"."interview_analytics"
 ADD CONSTRAINT "interview_analytics_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
 --
--- Name: interview_feedback interview_feedback_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_feedback"
-ADD CONSTRAINT "interview_feedback_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
---
 -- Name: templates templates_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -362,6 +347,36 @@ ADD CONSTRAINT "templates_user_id_system_defined_check" CHECK (
     OR
     (is_system_defined = FALSE AND user_id IS NOT NULL)
 );
+--
+-- Name: evaluation_criteria evaluation_criteria_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."evaluation_criteria"
+ADD CONSTRAINT "evaluation_criteria_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_profiles"("id")  ON DELETE CASCADE;
+--
+-- Name: evaluation_criteria evaluation_criteria_user_id_system_defined_check; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."evaluation_criteria"
+ADD CONSTRAINT "evaluation_criteria_user_id_system_defined_check" CHECK (
+    (is_system_defined = TRUE AND user_id IS NULL)
+    OR
+    (is_system_defined = FALSE AND user_id IS NOT NULL)
+);
+
+--
+-- Name: template_evaluation_criteria template_evaluation_criteria_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."template_evaluation_criteria"
+ADD CONSTRAINT "template_evaluation_criteria_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id") ON DELETE CASCADE;
+--
+-- Name: template_evaluation_criteria template_evaluation_criteria_evaluation_criteria_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."template_evaluation_criteria"
+ADD CONSTRAINT "template_evaluation_criteria_evaluation_criteria_id_fkey" FOREIGN KEY ("evaluation_criteria_id") REFERENCES "evaluation_criteria"("id") ON DELETE CASCADE;
+--
 --
 -- Name: questions questions_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

@@ -1,129 +1,103 @@
 'use client';
+import { AIQuestionSpeaker } from '@/components/Interviews/AIQuestionSpeaker';
+import { InterviewFeedback } from '@/components/Interviews/InterviewFeedback';
 import { UserCamera } from '@/components/Interviews/UserCamera';
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { useEffect, useRef, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { InterviewEvaulation } from '@/types';
+import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Mock AI component for speaking questions
-const AIQuestionSpeaker = ({ question, currentIndex, questionsLength }) => {
-  // Mock AI component for speaking questions
-  const speechRef = useRef(null);
-
-  useEffect(() => {
-    // intro text
-    const introText: string =
-      'Welcome to the interview session. I will ask you a series of questions. Please answer them to the best of your ability. Let’s begin.';
-    const questionSpeechText: string =
-      'Question ' + (currentIndex + 1) + ': ' + question;
-    const speechText: string =
-      currentIndex === 0
-        ? introText + ' ' + questionSpeechText
-        : questionSpeechText;
-    const utterance = new SpeechSynthesisUtterance(speechText);
-
-    utterance.rate = 0.65; // Set rate (0.1 to 10)
-    utterance.pitch = 1; // Set pitch (0 to 2)
-    utterance.volume = 1; // Set volume (0 to 1)
-
-    utterance.onend = () => {
-      console.log('Speech has finished.');
-    };
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-    };
-
-    // Check for browser support
-    if (window.speechSynthesis) {
-      speechRef.current = window.speechSynthesis;
-      speechRef.current.speak(utterance);
-    } else {
-      console.error('Speech synthesis not supported in this browser.');
-    }
-
-    // Cleanup function to stop any ongoing speech when the question changes
-    return () => {
-      if (speechRef.current && speechRef.current.speaking) {
-        speechRef.current.cancel(); // Stop any ongoing speech
-      }
-    };
-  }, [question]);
-  return (
-    <div className="ai-speaker">
-      <Card className="max-w-md text-center">
-        <CardHeader>
-          <CardTitle>Interviewer</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center items-center">
-            <Card className="max-w-25 text-center mb-10">
-              <CardHeader>
-                <CardTitle>Animated Charter</CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
-          <div className="flex justify-center items-center">
-            <Card className=" max-w-25 text-center">
-              <CardHeader>
-                <CardTitle>Question {currentIndex + 1}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <T.Subtle>{question}</T.Subtle>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-        <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-          Progress
-        </span>
-        <CardFooter>
-          <Progress
-            className="mt-5"
-            value={((currentIndex + 1) / questionsLength) * 100}
-            total={questionsLength}
-          ></Progress>
-        </CardFooter>
-      </Card>
-    </div>
-  );
-};
-
+// InterviewFlow component
 export default function InterviewFlow() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isInterviewComplete, setIsInterviewComplete] = useState(false);
-  const [isCameraOn, setIsCameraOn] = useState(false); // Track if the camera is on
+  const [isQuestionsComplete, setIsQuestionsComplete] = useState(false);
+  const [answersLength, setAnswersLength] = useState(0);
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const answers = useRef<string[]>([]);
+  const [interviewFeedback, setInterviewFeedback] =
+    useState<InterviewEvaulation | null>(null);
+  const [isFetchingFeedback, setIsFetchingFeedback] = useState(false);
 
-  // Example questions array (you might fetch this from an API)
+  const interviewTitle = 'Behavioral Interview';
+
   const questions = [
-    'What is your experience with JavaScript?',
+    'How do you approach problems?',
     'Can you describe a time when you faced a challenge?',
     'How do you prioritize your tasks?',
   ];
 
-  const handleNextQuestion = () => {
-    // Save fresponse to the current question
-    // remove feedback
+  const evaluationCriteria = [
+    {
+      id: 'criteria_uuid_1',
+      name: 'Communication Skills',
+      description: 'Ability to convey ideas clearly and effectively.',
+    },
+    {
+      id: 'criteria_uuid_2',
+      name: 'Problem-Solving Ability',
+      description:
+        'Skill in analyzing situations and developing effective solutions.',
+    },
+    {
+      id: 'criteria_uuid_3',
+      name: 'Adaptability',
+      description:
+        'Capacity to adjust to new conditions and environments with ease.',
+    },
+  ];
 
-    // Check if the interview is complete
+  // Callback function to get answer from after each recording
+  const handleAnswer = useCallback((answer: string) => {
+    answers.current.push(answer);
+    setAnswersLength(answers.current.length); // Update state with the new length
+  }, []);
+
+  // Function to move to the next question
+  const handleNextQuestion = () => {
+    // Save response to the current question
+    // Increment current question index
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setIsInterviewComplete(true);
-      setIsCameraOn(false); // Turn off the camera when interview is complete
+      setIsQuestionsComplete(true); // Mark questions as complete
     }
   };
 
-  const handleSaveInterviewState = () => {
+  // Effect to handle completion of the interview when questions are done
+  useEffect(() => {
+    if (isQuestionsComplete && answersLength === questions.length) {
+      handleSaveInterviewState(); // Save the interview state
+    }
+  }, [isQuestionsComplete, answersLength]); // Dependencies to trigger effect when questions are complete
+
+  const handleSaveInterviewState = async () => {
     // Implement logic to save interview state
     // You could call an API to save the state here
+    setIsFetchingFeedback(true);
+    console.log('Fetching feedback for the interview...');
+    try {
+      const feedback: InterviewEvaulation = await getInterviewFeedback(
+        interviewTitle, // Interview title
+        questions,
+        answers.current,
+        evaluationCriteria,
+      );
+
+      console.log('Feedback received:', feedback); // Log feedback for debugging
+      setInterviewFeedback(feedback);
+      setIsInterviewComplete(true); // Mark the interview as complete
+      setIsCameraOn(false); // Turn off the camera when interview is complete
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+    } finally {
+      setIsFetchingFeedback(false);
+    }
   };
+
+  const getInterviewState = () => { };
 
   return (
     <div className="interview-flow-container flex justify-center items-center min-h-screen">
@@ -143,13 +117,9 @@ export default function InterviewFlow() {
               </CardHeader>
               <CardContent>
                 <UserCamera
+                  answerCallback={handleAnswer}
                   isCameraOn={true}
                   onRecordEnd={handleNextQuestion}
-                />
-                <textarea
-                  placeholder="Transcript"
-                  className="mt-4 w-full p-2 border border-gray-300 rounded"
-                  disabled
                 />
                 <Button className="mt-4" onClick={handleNextQuestion}>
                   Next Question
@@ -161,7 +131,14 @@ export default function InterviewFlow() {
       ) : (
         <div className="flex flex-col items-center">
           <T.Subtle>Interview Completed!</T.Subtle>
-          <T.Subtle className="text-2xl mt-4">AI Score: 90%</T.Subtle>
+          {interviewFeedback ? (
+            <InterviewFeedback
+              interviewTitle={interviewTitle}
+              feedback={interviewFeedback}
+            />
+          ) : (
+            <p>Loading feedback...</p>
+          )}
         </div>
       )}
     </div>

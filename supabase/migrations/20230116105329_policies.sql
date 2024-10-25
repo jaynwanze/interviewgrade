@@ -75,16 +75,6 @@ SELECT TO "authenticated" USING (
     )
 );
 --
--- Name: interview_feedback Only the candidates can view their own interviews feedback; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "candidates_can_view_own_interview_feedback" ON "public"."interview_feedback" FOR
-SELECT TO "authenticated" USING (
-    EXISTS (
-        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_feedback"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
-    )
-);
---
 -- Name: interview_questions: Only Candidates can view their own interview questions; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
@@ -117,7 +107,7 @@ SELECT TO "authenticated" USING (
     is_system_defined = FALSE AND "user_id" = "auth"."uid"()
 );
 --
--- Name: templates Only users can insert update and delete their own templates; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: templates Only users can insert their own templates; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 CREATE POLICY "users_can_manage_own_templates_insert" ON "public"."templates" FOR
 INSERT
@@ -125,6 +115,9 @@ TO "authenticated"
 WITH CHECK (
     is_system_defined = FALSE AND "user_id" = "auth"."uid"()
 );
+--
+-- Name: templates Only users can update their own templates; Type: POLICY; Schema: public; Owner: supabase_admin
+--
 
 CREATE POLICY "users_can_manage_own_templates_update" ON "public"."templates" FOR
 UPDATE
@@ -135,8 +128,54 @@ USING (
 WITH CHECK (
     is_system_defined = FALSE AND "user_id" = "auth"."uid"()
 );
+--
+-- Name: templates Only users can delete their own templates; Type: POLICY; Schema: public; Owner: supabase_admin
+--
 
 CREATE POLICY "users_can_manage_own_templates_delete" ON "public"."templates" FOR
+DELETE
+TO "authenticated"
+USING (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: evaluation_criteria Only users can view system defined and their own evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_evaluation_criteria" ON "public"."evaluation_criteria" FOR
+SELECT TO "authenticated" USING (
+    is_system_defined = TRUE AND "user_id" IS NULL
+    OR
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: evaluation_criteria Only users can insert their own evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_evaluation_criteria_insert" ON "public"."evaluation_criteria" FOR
+INSERT
+TO "authenticated"
+WITH CHECK (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: evaluation_criteria Only users can update their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_evaluation_criteria_update" ON "public"."evaluation_criteria" FOR
+UPDATE
+TO "authenticated"
+USING (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+)
+WITH CHECK (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: evaluation_criteria Only users can delete their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_evaluation_criteria_delete" ON "public"."evaluation_criteria" FOR
 DELETE
 TO "authenticated"
 USING (
@@ -149,7 +188,7 @@ USING (
 CREATE POLICY "candidates_can_view_own_job_applications" ON "public"."job_application_tracker" FOR
 SELECT TO "authenticated" USING (("auth"."uid"() = "candidate_id"));
 --
--- Name: job_application_tracker Only candidates can insert update and delete their own job application; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: job_application_tracker Only candidates can insert their own job application; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
 CREATE POLICY "candidates_can_manage_own_job_applications_insert" ON "public"."job_application_tracker" FOR
@@ -158,6 +197,9 @@ TO "authenticated"
 WITH CHECK (
     "auth"."uid"() = "candidate_id"
 );
+--
+-- Name: job_application_tracker Only candidates can update their own job application; Type: POLICY; Schema: public; Owner: supabase_admin
+--
 
 CREATE POLICY "candidates_can_manage_own_job_applications_update" ON "public"."job_application_tracker" FOR
 UPDATE
@@ -168,6 +210,9 @@ USING (
 WITH CHECK (
     "auth"."uid"() = "candidate_id"
 );
+--
+-- Name: job_application_tracker Only candidates can delete their own job application; Type: POLICY; Schema: public; Owner: supabase_admin
+--
 
 CREATE POLICY "candidates_can_manage_own_job_applications_delete" ON "public"."job_application_tracker" FOR
 DELETE
@@ -213,10 +258,15 @@ ALTER TABLE "public"."interview_evaluations" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."interview_analytics" ENABLE ROW LEVEL SECURITY;
 --
--- Name: interview_feedback; Type: ROW SECURITY; Schema: public; Owner: postgres
+-- Name: evalutation_criteria; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
-ALTER TABLE "public"."interview_feedback" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."evaluation_criteria" ENABLE ROW LEVEL SECURITY;
+--
+-- Name: template_evaluation_criteria; Type: ROW SECURITY; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."template_evaluation_criteria" ENABLE ROW LEVEL SECURITY;
 --
 -- Name: templates; Type: ROW SECURITY; Schema: public; Owner: postgres
 --

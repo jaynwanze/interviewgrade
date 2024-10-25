@@ -25,17 +25,13 @@ export default function InterviewDetailsDialog({ isOpen, onClose }) {
         <DialogDescription>
           <div className="flex justify-center text-align">
             <div>
-              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+              <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                 Questions
               </span>
-              <p>
-                You can view upcoming interview questions on the sidebar to the
-                left.
-              </p>
+              <p>Current interview questions on the container to the left.</p>
             </div>
-
             <div>
-              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+              <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                 Get Ready
               </span>
               <p>
@@ -44,7 +40,7 @@ export default function InterviewDetailsDialog({ isOpen, onClose }) {
               </p>
             </div>
             <div>
-              <span class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+              <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                 Feedback
               </span>
               <p>

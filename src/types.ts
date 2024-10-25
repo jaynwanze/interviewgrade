@@ -41,6 +41,20 @@ export type InterviewTemplateCategory = {
 
 export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
 
+export type InterviewEvaulation = {
+  overall_score: number;
+  evaluation_scores: EvaluationScores;
+  strengths: string;
+  areas_for_improvement: string;
+  recommendations: string;
+}
+
+export type EvaluationScores = {
+  [key: string]: {
+    score: number;
+    feedback: string;
+  };
+}
 /** One of the providers supported by GoTrue. */
 export type AuthProvider =
   | 'apple'

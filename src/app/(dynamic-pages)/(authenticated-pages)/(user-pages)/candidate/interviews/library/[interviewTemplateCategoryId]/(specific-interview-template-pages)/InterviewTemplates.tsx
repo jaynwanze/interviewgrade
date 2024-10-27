@@ -12,7 +12,9 @@ export function InterviewTemplates({
 }: {
   interviewTemplateCategoryId: string;
 }) {
-  const [interviews, setInterviews] = useState<InterviewTemplate[]>([]);
+  const [interviewTemplates, setInterviewTemplates] = useState<
+    InterviewTemplate[]
+  >([]);
 
   useEffect(() => {
     const categoryName: string =
@@ -23,7 +25,7 @@ export function InterviewTemplates({
     const fetchInterviews = async () => {
       const interviewTemplates: InterviewTemplate[] =
         await getInterviewsTemplatesByCategory(categoryName);
-      setInterviews(interviewTemplates);
+      setInterviewTemplates(interviewTemplates);
     };
 
     fetchInterviews();
@@ -31,7 +33,7 @@ export function InterviewTemplates({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Select Interview</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Select Interview</h1>
 
       {/* Filters Section */}
       <div className="flex items-center justify-between mb-4">
@@ -43,7 +45,7 @@ export function InterviewTemplates({
 
       {/* Interview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {interviews.map((interview) => (
+        {interviewTemplates.map((interview) => (
           <InterviewCardTemplate key={interview.id} {...interview} />
         ))}
       </div>

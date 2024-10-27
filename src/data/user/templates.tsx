@@ -13,7 +13,29 @@ export const getInterviewsTemplatesByCategory = async (
   if (error) {
     throw error;
   }
+  return data;
+};
 
-  console.log(data);
+
+export const getTemplateEvaluationCriteria = async (templateId) => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('template_evaluation_criteria')
+    .select(`
+      evaluation_criteria (
+        id,
+        name,
+        description,
+        is_system_defined,
+        created_at
+      )
+    `)
+    .eq('template_id', templateId);
+
+  if (error) {
+    throw error;
+  }
+
   return data;
 };

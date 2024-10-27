@@ -3,6 +3,7 @@ import { PRODUCT_NAME } from '@/constants';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type { SAPayload, SupabaseFileUploadOptions, Table } from '@/types';
+import { UserType } from '@/types/userTypes';
 import { sendEmail } from '@/utils/api-routes/utils';
 import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
@@ -12,7 +13,6 @@ import slugify from 'slugify';
 import urlJoin from 'url-join';
 import ConfirmAccountDeletionEmail from '../../../emails/account-deletion-request';
 import { refreshSessionAction } from './session';
-import { UserType } from '@/types/userTypes';
 
 export async function getIsAppAdmin(): Promise<boolean> {
   const user = await serverGetLoggedInUser();
@@ -263,4 +263,19 @@ export const getUserType = async (userId: string): Promise<UserType> => {
   }
 
   return data.user_type;
+};
+
+export const getCandidateUserProfile = async (
+  userId: string,
+): Promise<Table<'candidates'>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('candidates')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data;
 };

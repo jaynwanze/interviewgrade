@@ -10,11 +10,20 @@ import {
 } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
 
-export default function InterviewDetailsDialog({ isOpen, onClose }) {
+export default function InterviewDetailsDialog({ isOpen, onClose, interviewTemplate}) {
   const router = useRouter();
   const handleClick = () => {
+    // Redirect to the interview session page
+
     router.push(`/candidate/interviews/session/id`);
   };
+
+  const prepareInterview = async (interviewTemplate) => {
+    // Fetch interview template by ID
+    // pass interview template to the interview db
+    const newInterview = await createInterview(interviewTemplate);
+  }
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

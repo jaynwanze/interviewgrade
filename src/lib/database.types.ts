@@ -189,147 +189,250 @@ export type Database = {
           template_id: string
           candidate_id: string
           title: string
+          role: string
           description: string
+          difficulty: Database["public"]["Enums"]["template_difficulty"]
+          questions_count: number
+          duration: number
+          evaluation_criteria: Json[]
           start_time: string
           end_time: string
           status: Database["public"]["Enums"]["interview_status"]
+          is_general: boolean
+          created_at: string
         }
         Insert: {
-          id: string
           template_id: string
           candidate_id: string
           title: string
+          role: string
           description?: string
+          difficulty: Database["public"]["Enums"]["template_difficulty"]
+          questions_count: number
+          duration: number
+          evaluation_criteria: Json[]
           start_time: string
           end_time?: string
           status: Database["public"]["Enums"]["interview_status"]
+          is_general: boolean
+          created_at?: string
         }
         Update: {
-          id?: string
           template_id?: string
           candidate_id?: string
           title?: string
+          role?: string
           description?: string
+          difficulty?: Database["public"]["Enums"]["template_difficulty"]
+          questions_count?: number
+          duration?: number
+          evaluation_criteria?: Json[]
           start_time?: string
           end_time?: string
           status?: Database["public"]["Enums"]["interview_status"]
+          is_general?: boolean
+          created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "interviews_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: true
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       //interview evals,feedbacks and analytics
-      templates: {
+
+      evaluation_criteria: {
         Row: {
           id: string
-          user_id: string
-          category: Database["public"]["Enums"]["template_category"]
-          title: string
-          role: string
+          name: string
           description: string
-          duration: number
-          difficulty: Database["public"]["Enums"]["template_difficulty"]
-          questions_count: number;
-          company: string
-          is_company_specific: boolean
-          is_industry_specific: boolean
-          is_general: boolean
           is_system_defined: boolean
           created_at: string
-          }
+        }
         Insert: {
-          id: string
-          user_id?: string
-          category: Database["public"]["Enums"]["template_category"]
-          title: string
-          role: string
+          name: string
           description: string
-          duration: number
-          difficulty: Database["public"]["Enums"]["template_difficulty"]
-          questions_count: number;
-          company?: string
-          is_company_specific: boolean
-          is_industry_specific: boolean
-          is_general: boolean
           is_system_defined: boolean
           created_at: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          category?: Database["public"]["Enums"]["template_category"]
-          title?: string
-          role?: string
+          name?: string
           description?: string
-          duration?: number
-          difficulty?: Database["public"]["Enums"]["template_difficulty"]
-          questions_count: number;
-          company?: string
-          is_company_specific?: boolean
-          is_industry_specific?: boolean
-          is_general?: boolean
           is_system_defined?: boolean
           created_at?: string
         }
       }
 
-      questions: {
+      template_evaluation_criteria: {
         Row: {
-          id: string
           template_id: string
-          type: Database["public"]["Enums"]["question_type"]
-          text: string
-          sample_answer: string
-          is_system_defined: boolean
-          }
+          evaluation_criteria_id: string
+        }
         Insert: {
-          id: string
           template_id: string
-          type: Database["public"]["Enums"]["question_type"]
-          sample_answer: string
-          is_system_defined: boolean
+          evaluation_criteria_id: string
         }
         Update: {
-          id?: string
           template_id?: string
-          type: Database["public"]["Enums"]["question_type"]
-          text?: string
-          sample_answer: string
-          is_system_defined: boolean
+          evaluation_criteria_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_evaluation_criteria_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: true
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_evaluation_criteria_evaluation_criteria_id_fkey"
+            columns: ["evaluation_criteria_id"]
+            isOneToOne: true
+            referencedRelation: "evaluation_criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      
+        templates: {
+          Row: {
+            id: string
+            user_id: string
+            category: Database["public"]["Enums"]["template_category"]
+            title: string
+            role: string
+            description: string
+            duration: number
+            difficulty: Database["public"]["Enums"]["template_difficulty"]
+            questions_count: number;
+            company: string
+            is_company_specific: boolean
+            is_industry_specific: boolean
+            is_general: boolean
+            is_system_defined: boolean
+            created_at: string
+          }
+          Insert: {
+            user_id?: string
+            category: Database["public"]["Enums"]["template_category"]
+            title: string
+            role: string
+            description: string
+            duration: number
+            difficulty: Database["public"]["Enums"]["template_difficulty"]
+            questions_count: number;
+            company?: string
+            is_company_specific: boolean
+            is_industry_specific: boolean
+            is_general: boolean
+            is_system_defined: boolean
+            created_at?: string
+          }
+          Update: {
+            user_id?: string
+            category?: Database["public"]["Enums"]["template_category"]
+            title?: string
+            role?: string
+            description?: string
+            duration?: number
+            difficulty?: Database["public"]["Enums"]["template_difficulty"]
+            questions_count: number;
+            company?: string
+            is_company_specific?: boolean
+            is_industry_specific?: boolean
+            is_general?: boolean
+            is_system_defined?: boolean
+            created_at?: string
+          }
+          Relationships: [
+            {
+              foreignKeyName: "templates_user_id_fkey"
+              columns: ["user_id"]
+              isOneToOne: true
+              referencedRelation: "user_profiles"
+              referencedColumns: ["id"]
+            },
+          ]
+        }
+
+        questions: {
+          Row: {
+            id: string
+            template_id: string
+            type: Database["public"]["Enums"]["question_type"]
+            text: string
+            sample_answer: string
+            is_system_defined: boolean
+          }
+          Insert: {
+            template_id: string
+            type: Database["public"]["Enums"]["question_type"]
+            sample_answer: string
+            is_system_defined: boolean
+          }
+          Update: {
+            template_id?: string
+            type: Database["public"]["Enums"]["question_type"]
+            text?: string
+            sample_answer: string
+            is_system_defined: boolean
+          }
+          Relationships: [
+            {
+              foreignKeyName: "questions_template_id_fkey"
+              columns: ["template_id"]
+              isOneToOne: true
+              referencedRelation: "templates"
+              referencedColumns: ["id"]
+            },
+          ]
+        }
+        // interview questions and answers and job status
+
+      }
+      Views: {
+        [_ in never]: never
+      }
+      Functions: {
+        app_admin_get_user_id_by_email: {
+          Args: {
+            emailarg: string
+          }
+          Returns: string
+        }
+        check_if_authenticated_user_owns_email: {
+          Args: {
+            email: string
+          }
+          Returns: boolean
         }
       }
-      // interview questions and answers and job status
-        
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      app_admin_get_user_id_by_email: {
-        Args: {
-          emailarg: string
-        }
-        Returns: string
+      Enums: {
+        user_types: "employer" | "candidate"
+        product_type: "subscription" | "token"
+        product_status: "active" | "inactive"
+        interview_status: "not_started" | "in_progress" | "completed"
+        template_difficulty: "Easy" | "Medium" | "Hard"
+        template_category: "General Skills-Based" | "General Job-Based" | "Accounting" | "Finance" | "Admin" | "Customer Service" | "IT" | "HR" | "Legal" | "Education" | "Training" | "Real Estate" | "Engineering" | "Construction" | "Healthcare" | "Pharma" | "Hospitality" | "Travel" | "Law Enforcement" | "Security" | "Logistics" | "Real Estate" | "Marketing" | "PR" | "Media" | "Sales" | "Retail" | "Other"
+        question_type: "General" | "Behavioral" | "Role-Specific" | "Operational"
+        job_application_tracker_status: "not_started" | "applied" | "in_progress" | "rejected" | "offered" | "hired"
       }
-      check_if_authenticated_user_owns_email: {
-        Args: {
-          email: string
-        }
-        Returns: boolean
+      CompositeTypes: {
+        [_ in never]: never
       }
-    }
-    Enums: {
-      user_types: "employer" | "candidate"
-      product_type: "subscription" | "token"
-      product_status: "active" | "inactive"
-      interview_status: "not_started" | "in_progress" | "completed"
-      template_difficulty: "Easy" | "Medium" | "Hard"
-      template_category: "General Skills-Based" | "General Job-Based" | "Accounting" | "Finance" | "Admin"  | "Customer Service" | "IT" | "HR" | "Legal" | "Education" | "Training" | "Real Estate" | "Engineering" | "Construction"  | "Healthcare" | "Pharma" | "Hospitality" | "Travel" | "Law Enforcement" | "Security" | "Logistics" | "Real Estate" | "Marketing" | "PR" | "Media" | "Sales" | "Retail" | "Other"
-      question_type: "General" | "Behavioral" | "Role-Specific" | "Operational"
-      job_application_tracker_status: "not_started" | "applied" | "in_progress" | "rejected" | "offered" | "hired"
-    }
-    CompositeTypes: {
-      [_ in never]: never
     }
   }
-}
 
 type PublicSchema = Database[Extract<keyof Database, "public">]
 

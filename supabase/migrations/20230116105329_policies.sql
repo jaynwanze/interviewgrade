@@ -18,16 +18,16 @@ WITH CHECK ((auth.uid() = "id"));
 CREATE POLICY "users_can_view_own_profile" ON "public"."user_profiles" FOR
 SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
 --
--- Name: candidate Only the candidates can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: candidates Only the candidates can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "candidates_can_view_own_information" ON "public"."candidate" FOR
+CREATE POLICY "candidates_can_view_own_information" ON "public"."candidates" FOR
 SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
 --
--- Name: candidate Only the candidates can update their information; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: candidates Only the candidates can update their information; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "candidates_can_update_own_information" ON "public"."candidate" FOR
+CREATE POLICY "candidates_can_update_own_information" ON "public"."candidates" FOR
 UPDATE TO "authenticated" USING (("auth"."uid"() = "id"))
 WITH CHECK (("auth"."uid"() = "id"));
 --
@@ -36,7 +36,7 @@ WITH CHECK (("auth"."uid"() = "id"));
 
 CREATE POLICY "candidates_can_view_own_tokens" ON "public"."tokens" FOR
 SELECT TO "authenticated" USING (EXISTS (
-    SELECT 1 FROM "public"."candidate" WHERE "candidate"."token_id" = "tokens"."id" AND "candidate"."id" = "auth"."uid"()
+    SELECT 1 FROM "public"."candidates" WHERE "candidates"."token_id" = "tokens"."id" AND "candidates"."id" = "auth"."uid"()
 ));
 --
 -- Name: tokens Only the candidates can update their own tokens; Type: POLICY; Schema: public; Owner: supabase_admin
@@ -44,10 +44,10 @@ SELECT TO "authenticated" USING (EXISTS (
 
 CREATE POLICY "candidates_can_update_own_tokens" ON "public"."tokens" FOR
 UPDATE TO "authenticated" USING (EXISTS (
-    SELECT 1 FROM "public"."candidate" WHERE "candidate"."token_id" = "tokens"."id" AND "candidate"."id" = "auth"."uid"()
+    SELECT 1 FROM "public"."candidates" WHERE "candidates"."token_id" = "tokens"."id" AND "candidates"."id" = "auth"."uid"()
 ))
 WITH CHECK (EXISTS (
-    SELECT 1 FROM "public"."candidate" WHERE "candidate"."token_id" = "tokens"."id" AND "candidate"."id" = "auth"."uid"()
+    SELECT 1 FROM "public"."candidates" WHERE "candidates"."token_id" = "tokens"."id" AND "candidates"."id" = "auth"."uid"()
 ));
 --
 -- Name: interviews Only the candidates can view their own interviews; Type: POLICY; Schema: public; Owner: supabase_admin
@@ -55,11 +55,65 @@ WITH CHECK (EXISTS (
 
 CREATE POLICY "candidates_can_view_own_interviews" ON "public"."interviews" FOR
 SELECT TO "authenticated" USING (("auth"."uid"() = "candidate_id"));
+
+--
+-- Name: interviews Only the candidates can insert their own interviews; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interviews_insert" ON "public"."interviews" FOR
+INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "candidate_id"));
+--
+-- Name: interviews Only the candidates can update their own interviews; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interviews_update" ON "public"."interviews" FOR
+UPDATE TO "authenticated" USING (("auth"."uid"() = "candidate_id")) WITH CHECK (("auth"."uid"() = "candidate_id"));
+--
+-- Name: interviews Only the candidates can delete their own interviews; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interviews_delete" ON "public"."interviews" FOR
+DELETE TO "authenticated" USING (("auth"."uid"() = "candidate_id"));
 --
 -- Name: interview_evaluations Only the candidates can view their own interviews evaluations; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 CREATE POLICY "candidates_can_view_own_interview_evaluations" ON "public"."interview_evaluations" FOR
 SELECT TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_evaluations"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_evaluations Only the candidates can insert their own interviews evaluations; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_evaluations_insert" ON "public"."interview_evaluations" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_evaluations"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_evaluations Only the candidates can update their own interviews evaluations; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_evaluations_update" ON "public"."interview_evaluations" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_evaluations"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+)
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_evaluations"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_evaluations Only the candidates can delete their own interviews evaluations; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_evaluations_delete" ON "public"."interview_evaluations" FOR
+DELETE TO "authenticated" USING (
     EXISTS (
         SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_evaluations"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
@@ -75,6 +129,41 @@ SELECT TO "authenticated" USING (
     )
 );
 --
+-- Name: interview_analytics Only the candidates can insert their own interviews analytics; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_analytics_insert" ON "public"."interview_analytics" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_analytics Only the candidates can update their own interviews analytics; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_analytics_update" ON "public"."interview_analytics" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+)
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_analytics Only the candidates can delete their own interviews analytics; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_analytics_delete" ON "public"."interview_analytics" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
 -- Name: interview_questions: Only Candidates can view their own interview questions; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
@@ -84,6 +173,42 @@ SELECT TO "authenticated" USING (
         SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_questions"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
 );
+--
+-- Name: interview_questions: Only Candidates can insert their own interview questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_questions_insert" ON "public"."interview_questions" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_questions"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_questions: Only Candidates can update their own interview questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_questions_update" ON "public"."interview_questions" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_questions"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+)
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_questions"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_questions: Only Candidates can delete their own interview questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_questions_delete" ON "public"."interview_questions" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_questions"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
 -- Name: interview_answers: Candidates can view their own interview answers; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
@@ -94,6 +219,144 @@ SELECT TO "authenticated" USING (
         JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
         WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
           AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_answers: Candidates can insert their own interview answers; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_answers_insert" ON "public"."interview_answers" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_questions" 
+        JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
+        WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
+          AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: interview_answers: Candidates can update their own interview answers; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "candidates_can_manage_own_interview_answers_update" ON "public"."interview_answers" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_questions" 
+        JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
+        WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
+          AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+
+CREATE POLICY "candidates_can_manage_own_interview_answers_delete" ON "public"."interview_answers" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_questions"
+        JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
+        WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
+          AND "interviews"."candidate_id" = "auth"."uid"()
+    )
+);
+--
+-- Name: questions Only users can view system defined and their own questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_questions" ON "public"."questions" FOR
+SELECT TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "questions"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() OR "templates"."is_system_defined" = TRUE)
+    )
+);
+--
+-- Name: questions Only users can insert their own questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_questions_insert" ON "public"."questions" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "questions"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: questions Only users can update their own questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_questions_update" ON "public"."questions" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "questions"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
+    )
+) WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "questions"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: questions Only users can delete their own questions; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_questions_delete" ON "public"."questions" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "questions"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: template_evaluation_criteria Only users can view system defined and their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_template_evaluation_criteria" ON "public"."template_evaluation_criteria" FOR
+SELECT TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "template_evaluation_criteria"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() OR "templates"."is_system_defined" = TRUE)
+    )
+);
+--
+-- Name: template_evaluation_criteria Only users can insert their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--  
+
+CREATE POLICY "users_can_manage_own_template_evaluation_criteria_insert" ON "public"."template_evaluation_criteria" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "template_evaluation_criteria"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: template_evaluation_criteria Only users can update their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_template_evaluation_criteria_update" ON "public"."template_evaluation_criteria" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "template_evaluation_criteria"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: template_evaluation_criteria Only users can delete their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_template_evaluation_criteria_delete" ON "public"."template_evaluation_criteria" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."templates"
+        WHERE "templates"."id" = "template_evaluation_criteria"."template_id"
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE)
     )
 );
 --
@@ -228,10 +491,10 @@ USING (
 
 ALTER TABLE "public"."user_profiles" ENABLE ROW LEVEL SECURITY;
 --
--- Name: candidate; Type: ROW SECURITY; Schema: public; Owner: postgres
+-- Name: candidates; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
-ALTER TABLE "public"."candidate" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."candidates" ENABLE ROW LEVEL SECURITY;
 --
 -- Name: products; Type: ROW SECURITY; Schema: public; Owner: postgres
 --

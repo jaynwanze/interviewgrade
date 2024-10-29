@@ -35,6 +35,9 @@ export interface SupabaseFileUploadOptions {
 }
 
 export type InterviewTemplate = Table<'templates'>;
+export type Questions = Table<'questions'>;
+export type Interview = Table<'interviews'>;
+export type InterviewQuestion = Table<'interview_questions'>;
 export type InterviewTemplateCategory = {
   category: Database['public']['Enums']['template_category'];
 };
@@ -47,14 +50,14 @@ export type InterviewEvaulation = {
   strengths: string;
   areas_for_improvement: string;
   recommendations: string;
-}
+};
 
 export type EvaluationScores = {
   [key: string]: {
     score: number;
     feedback: string;
   };
-}
+};
 /** One of the providers supported by GoTrue. */
 export type AuthProvider =
   | 'apple'

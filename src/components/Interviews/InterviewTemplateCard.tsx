@@ -32,9 +32,7 @@ export const InterviewCardTemplate = (interviewTemplate: InterviewTemplate) => {
         <p className="text-sm mt-2">
           Difficulty: {interviewTemplate.difficulty}
         </p>
-        <p className="text-sm">
-          Questions: {interviewTemplate.questions_count}
-        </p>
+        <p className="text-sm">Questions: {interviewTemplate.question_count}</p>
         <p className="text-sm">Duration: {interviewTemplate.duration} min</p>
         <Button className="mt-4" onClick={handleClick}>
           Start Interview

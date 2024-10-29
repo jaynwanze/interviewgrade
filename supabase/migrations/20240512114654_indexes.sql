@@ -2,8 +2,8 @@
 CREATE INDEX idx_user_profiles_id ON "public"."user_profiles" ("id");
 
 -- Indexes for candidate
-CREATE INDEX idx_candidate_id ON "public"."candidate" ("id");
-CREATE INDEX idx_candidate_token_id ON "public"."candidate" ("token_id");
+CREATE INDEX idx_candidates_id ON "public"."candidates" ("id");
+CREATE INDEX idx_candidates_token_id ON "public"."candidates" ("token_id");
 
 -- Indexes for tokens
 CREATE INDEX idx_tokens_id ON "public"."tokens" ("id");
@@ -24,7 +24,6 @@ CREATE INDEX idx_templates_is_system_defined ON "public"."templates" ("is_system
 -- Indexes for questions
 CREATE INDEX idx_questions_id ON "public"."questions" ("id");
 CREATE INDEX idx_questions_template_id ON "public"."questions" ("template_id");
-CREATE INDEX idx_questions_is_system_defined ON "public"."questions" ("is_system_defined");
 
 -- Indexes for interview_evaluations
 CREATE INDEX idx_interview_evaluations_id ON "public"."interview_evaluations" ("id");

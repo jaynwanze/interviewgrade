@@ -8,22 +8,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  createInterview,
+  createInterviewQuestions,
+} from '@/data/user/interviews';
+import { useToastMutation } from '@/hooks/useToastMutation';
+import { InterviewTemplate } from '@/types';
 import { useRouter } from 'next/navigation';
 
-export default function InterviewDetailsDialog({ isOpen, onClose, interviewTemplate}) {
+export default function InterviewDetailsDialog({
+  isOpen,
+  onClose,
+  interviewTemplate,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  interviewTemplate: InterviewTemplate;
+}) {
   const router = useRouter();
-  const handleClick = () => {
-    // Redirect to the interview session page
-
-    router.push(`/candidate/interviews/session/id`);
-  };
-
-  const prepareInterview = async (interviewTemplate) => {
-    // Fetch interview template by ID
-    // pass interview template to the interview db
-    const newInterview = await createInterview(interviewTemplate);
-  }
-
+  const { mutate: handleClick } = useToastMutation(
+    async () => {
+      // Redirect to the interview session page
+      const interview = await createInterview(interviewTemplate);
+      await createInterviewQuestions(interview.id, interviewTemplate);
+      router.push(`/candidate/interviews/session/id`);
+    },
+    {
+      loadingMessage: 'Creating interview...',
+      successMessage: 'Interview Prepared, Bringing you to session!',
+      errorMessage: 'Failed to prepare Interview',
+    },
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

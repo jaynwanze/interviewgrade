@@ -41,7 +41,7 @@ BEGIN
         RETURNING id INTO new_token_id;
         
         -- Insert into candidate with the newly created token
-        INSERT INTO public.candidate (id, token_id)
+        INSERT INTO public.candidates (id, token_id)
         VALUES (NEW.id, new_token_id);
     END IF;
     

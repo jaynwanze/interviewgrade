@@ -16,11 +16,11 @@ ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 -- Name: candidate; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE "public"."candidate" (
+CREATE TABLE "public"."candidates" (
   "id" "uuid" NOT NULL,
   "token_id" "uuid" NOT NULL
 );
-ALTER TABLE "public"."candidate" OWNER TO "postgres";
+ALTER TABLE "public"."candidates" OWNER TO "postgres";
 
 --
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres
@@ -70,6 +70,7 @@ CREATE TABLE "public"."interviews" (
   "end_time" timestamp with time zone,
   "status" "public"."interview_status" DEFAULT 'not_started'::interview_status NOT NULL,
   "is_general" boolean DEFAULT false,
+  "is_system_defined" boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."interviews" OWNER TO "postgres";
@@ -151,8 +152,7 @@ CREATE TABLE "public"."questions" (
   "template_id" "uuid" NOT NULL,
   "type" "public"."question_type",
   "text" text,
-  "sample_answer" text DEFAULT 'No sample answer provided',  
-  "is_system_defined" boolean DEFAULT false
+  "sample_answer" text DEFAULT 'No sample answer provided'
 );
 
 ALTER TABLE "public"."questions" OWNER TO "postgres";
@@ -162,8 +162,9 @@ ALTER TABLE "public"."questions" OWNER TO "postgres";
 CREATE TABLE "public"."interview_questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
+  "type" "public"."question_type",
   "text" text,
-  "type" "public"."question_type"
+  "sample_answer" text DEFAULT 'No sample answer provided'
 );
 
 ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
@@ -174,11 +175,7 @@ ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
 CREATE TABLE "public"."interview_answers" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_question_id" "uuid" NOT NULL,
-  "text" text,
-  "response_time" decimal(5,2),
-  "score" decimal(5,2),
-  "accuracy" decimal(5,2),
-  "clarity" decimal(5,2)
+  "text" text
 );
 --
 -- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres
@@ -213,7 +210,7 @@ ADD CONSTRAINT "user_profiles_stripe_customer_id_key" UNIQUE ("stripe_customer_i
 -- Name: candidate candidate_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."candidate"
+ALTER TABLE ONLY "public"."candidates"
 ADD CONSTRAINT "candidate_pkey" PRIMARY KEY ("id");
 --
 -- Name: products product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -298,13 +295,13 @@ ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."use
 -- Name: candidate candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."candidate"
+ALTER TABLE ONLY "public"."candidates"
 ADD CONSTRAINT "candidate_id_fkey" FOREIGN KEY ("id") REFERENCES "user_profiles"("id") ON DELETE CASCADE;
 --
 -- Name: candidate candidate_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."candidate"
+ALTER TABLE ONLY "public"."candidates"
 ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
 
 --
@@ -318,7 +315,7 @@ ADD CONSTRAINT "interviews_template_id_fkey" FOREIGN KEY ("template_id") REFEREN
 --
 
 ALTER TABLE ONLY "public"."interviews"
-ADD CONSTRAINT "interviews_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidate"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "interviews_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidates"("id") ON DELETE CASCADE;
 --
 -- Name: interview_evaluations interview_evaluations_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -400,7 +397,7 @@ ADD CONSTRAINT "interview_answers_interview_question_id_fkey" FOREIGN KEY ("inte
 --
 
 ALTER TABLE ONLY "public"."job_application_tracker"
-ADD CONSTRAINT "job_application_tracker_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidate"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "job_application_tracker_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidates"("id") ON DELETE CASCADE;
 --
 -- Name: user_profiles user_profiles_user_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --

@@ -13,6 +13,7 @@ export const UserCamera = ({ answerCallback, isCameraOn, onRecordEnd }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
   const timerRef = useRef<number | null>(null); // Ref for timer
+  const whisperFinalTranscript = useRef<string>(''); // Ref for final transcript
   // Use speech recognition
   const { startRecognition, stopRecognition, finalTranscript } =
     useSpeechRecognition();
@@ -55,7 +56,10 @@ export const UserCamera = ({ answerCallback, isCameraOn, onRecordEnd }) => {
     mediaRecorderHandlerRef.current = new MediaRecorderHandler(
       async (audioBlob) => {
         const transcript = await transcribeInterviewAudio(audioBlob); // Transcribe the audio
-        //answerCallback(transcript); // Pass the final transcript back to the parent
+        if (transcript) {
+          whisperFinalTranscript.current = transcript; // Store the final transcript
+          handleAnswer(transcript); // Pass the final transcript back to the parent
+        }
       },
     );
 
@@ -69,14 +73,19 @@ export const UserCamera = ({ answerCallback, isCameraOn, onRecordEnd }) => {
     }
   };
 
+  const handleAnswer = (answer: string) => {
+    answerCallback(answer);
+    whisperFinalTranscript.current = ''; // Reset the final transcript
+  };
+
   const handleEndRecord = () => {
     setIsRecording(false);
     stopRecognition(); // Stop speech recognition
     // Pass the final transcript back to the parent
     const transcript = finalTranscript.trim(); // Get the final transcript
-    answerCallback(transcript);
-    // if null get open ai transcript
-    console.log('Final transcript:', transcript);
+    if (!whisperFinalTranscript.current && transcript) {
+      handleAnswer(transcript);
+    }
     clearInterval(timerRef.current!); // Clear timer when recording ends
     if (mediaRecorderHandlerRef.current) {
       mediaRecorderHandlerRef.current.stop(); // Stop recording and trigger onstop

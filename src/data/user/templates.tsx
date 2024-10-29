@@ -9,20 +9,21 @@ export const getInterviewsTemplatesByCategory = async (
   const { data, error } = await supabase
     .from('templates')
     .select('*')
-    .eq('category', category);
+    .eq('category', category)
+    .order('title', { ascending: true });
   if (error) {
     throw error;
   }
   return data;
 };
 
-
-export const getTemplateEvaluationCriteria = async (templateId) => {
+export const getTemplateEvaluationCriteria = async (templateId: string) => {
   const supabase = createSupabaseUserServerComponentClient();
 
   const { data, error } = await supabase
     .from('template_evaluation_criteria')
-    .select(`
+    .select(
+      `
       evaluation_criteria (
         id,
         name,
@@ -30,8 +31,27 @@ export const getTemplateEvaluationCriteria = async (templateId) => {
         is_system_defined,
         created_at
       )
-    `)
+    `,
+    )
     .eq('template_id', templateId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const getTemplateQuestions = async (
+  templateId: string,
+): Promise<Table<'questions'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('template_id', templateId)
+    .select('*');
 
   if (error) {
     throw error;

@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { InterviewQuestion } from '@/types';
 import { useEffect, useRef } from 'react';
 
 // Mock AI component for speaking questions
@@ -16,6 +17,10 @@ export const AIQuestionSpeaker = ({
   question,
   currentIndex,
   questionsLength,
+}: {
+  question: InterviewQuestion;
+  currentIndex: number;
+  questionsLength: number;
 }) => {
   const speechRef = useRef<SpeechSynthesis | null>(null);
 
@@ -24,7 +29,7 @@ export const AIQuestionSpeaker = ({
     const introText: string =
       'Welcome to the interview session. I will ask you a series of questions. Please answer them to the best of your ability. Let’s begin.';
     const questionSpeechText: string =
-      'Question ' + (currentIndex + 1) + ': ' + question;
+      'Question ' + (currentIndex + 1) + ': ' + question.text;
     const speechText: string =
       currentIndex === 0
         ? introText + ' ' + questionSpeechText
@@ -77,7 +82,7 @@ export const AIQuestionSpeaker = ({
                 <CardTitle>Question {currentIndex + 1}</CardTitle>
               </CardHeader>
               <CardContent>
-                <T.Subtle>{question}</T.Subtle>
+                <T.Subtle>{question.text}</T.Subtle>
               </CardContent>
             </Card>
           </div>

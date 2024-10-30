@@ -5,12 +5,10 @@ import { fetchFile } from '@ffmpeg/util';
 export class MediaRecorderHandler {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
-  private onStopCallback: (audioBlob: Blob) => void;
   private ffmpeg: FFmpeg;
 
-  constructor(onStopCallback: (audioBlob: Blob) => void) {
-    this.onStopCallback = onStopCallback;
-    this.ffmpeg = new FFmpeg();
+  constructor() {
+    this.ffmpeg = new FFmpeg(); // Enable logging for debugging
   }
 
   async convertAudioFormat(
@@ -49,30 +47,40 @@ export class MediaRecorderHandler {
       this.audioChunks.push(event.data);
     };
 
-    this.mediaRecorder.onstop = async () => {
-      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-      this.audioChunks = []; // Reset for the next recording
-      const convertedAudioBlob = await this.convertAudioFormat(
-        audioBlob,
-        () => {},
-      ); // Convert audio before transcribing
-      if (convertedAudioBlob) {
-        this.onStopCallback(convertedAudioBlob); // Call the callback with the audio blob
-      } else {
-        console.error('Converted audio blob is undefined');
-      }
-    };
-
     this.mediaRecorder.start();
+    console.log('MediaRecorder started');
   }
 
-  stop() {
+  async stop(
+    setLoadingFFmpeg: (loading: boolean) => void,
+  ): Promise<Blob | undefined> {
     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-      this.mediaRecorder.stop();
+      return new Promise<Blob | undefined>((resolve) => {
+        this.mediaRecorder!.onstop = async () => {
+          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+          this.audioChunks = []; // Reset for the next recording
+          console.log('MediaRecorder stopped, processing audio blob');
+
+          const convertedAudioBlob = await this.convertAudioFormat(
+            audioBlob,
+            setLoadingFFmpeg,
+          );
+          if (convertedAudioBlob) {
+            resolve(convertedAudioBlob); // Return the converted audio blob
+          } else {
+            console.error('Converted audio blob is undefined');
+            resolve(undefined);
+          }
+        };
+        this.mediaRecorder!.stop();
+      });
     }
+    return undefined;
   }
 
-  isRecording() {
-    return this.mediaRecorder && this.mediaRecorder.state === 'recording';
+  isRecording(): boolean {
+    return this.mediaRecorder
+      ? this.mediaRecorder.state === 'recording'
+      : false;
   }
 }

@@ -35,7 +35,7 @@ export const useSpeechRecognition = () => {
       // Append new transcript results without duplication
       const transcript = event.results[event.resultIndex][0].transcript;
       setFinalTranscript((prev) => prev + ' ' + transcript); // Append new transcript
-      console.log('Final transcription result:', transcript);
+      console.log('Current transcription result:', transcript);
     };
 
     recognition.current.onerror = (event) => {

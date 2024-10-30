@@ -5,7 +5,12 @@ import {
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { InterviewTemplate, SAPayload, Table } from '@/types';
+import type {
+  InterviewEvaulation,
+  InterviewTemplate,
+  SAPayload,
+  Table,
+} from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
@@ -20,9 +25,9 @@ export const createInterview = async (
     interviewTemplate.id,
   );
   // Extract the evaluation criteria from the data
-  const interviewEvaluationCriteria = templateEvaluationCriteria.map(
-    (item) => item.evaluation_criteria,
-  );
+  const interviewEvaluationCriteria = templateEvaluationCriteria
+    .map((item) => item.evaluation_criteria)
+    .filter((criteria) => criteria !== null);
 
   //maybe add in description
 
@@ -50,6 +55,8 @@ export const createInterview = async (
   if (!data) {
     throw new Error('Failed to insert interview data');
   }
+
+  await createInterviewQuestions(data[0].id, interviewTemplate);
 
   return data[0];
 };
@@ -86,12 +93,7 @@ export const createInterviewQuestions = async (
       throw new Error(`Error inserting interview question: ${error.message}`);
     }
 
-    if (data && data.length > 0) {
-      lastInsertData = data[0];
-      console.warn('Inserted Interview Question:', data[0]);
-    } else {
-      console.warn('No data returned after inserting interview question');
-    }
+    lastInsertData = data ? data[0] : null;
   }
 
   if (!lastInsertData) {
@@ -117,29 +119,65 @@ export const getInterviewQuestions = async (
     throw error;
   }
 
-  if (!data) {
-    throw new Error('Failed to fetch interview questions');
-  }
-
   return data;
 };
 
-const insertInterviewAnswer = async (
-  interviewQuestionId: string,
-  answer: string,
-): Promise<Table<'interview_answers'>> => {
+export const getInterview = async (
+  interviewId: string,
+): Promise<Table<'interviews'> | null> => {
   const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase.from('interview_answers').insert({
-    interview_question_id: interviewQuestionId,
-    answer,
-  });
+  const { data, error } = await supabase
+    .from('interviews')
+    .select('*')
+    .eq('id', interviewId)
+    .single();
 
   if (error) {
     throw error;
   }
 
-  if (!data) {
-    throw new Error('Failed to insert interview answer');
+  return data;
+};
+
+export const insertInterviewAnswer = async (
+  interviewQuestionId: string,
+  answer: string,
+): Promise<Table<'interview_answers'>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_answers')
+    .insert({
+      interview_question_id: interviewQuestionId,
+      text: answer,
+    })
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const insertInterviewEvaluation = async (
+  interviewId: string,
+  interviewEvaluation: InterviewEvaulation,
+): Promise<Table<'interview_evaluations'>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_evaluations')
+    .insert({
+      interview_id: interviewId,
+      overall_score: interviewEvaluation.overall_score,
+      evaluation_scores: interviewEvaluation.evaluation_scores,
+      strengths: interviewEvaluation.strengths,
+      areas_for_improvement: interviewEvaluation.areas_for_improvement,
+      recommendations: interviewEvaluation.recommendations,
+    })
+    .single();
+
+  if (error) {
+    throw error;
   }
 
   return data;

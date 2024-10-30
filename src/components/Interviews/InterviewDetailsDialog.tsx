@@ -8,10 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  createInterview,
-  createInterviewQuestions,
-} from '@/data/user/interviews';
+import { createInterview } from '@/data/user/interviews';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { InterviewTemplate } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -30,13 +27,12 @@ export default function InterviewDetailsDialog({
     async () => {
       // Redirect to the interview session page
       const interview = await createInterview(interviewTemplate);
-      await createInterviewQuestions(interview.id, interviewTemplate);
-      router.push(`/candidate/interviews/session/id`);
+      router.push(`/candidate/interviews/session/${interview.id}`);
     },
     {
       loadingMessage: 'Creating interview...',
-      successMessage: 'Interview Prepared, Bringing you to session!',
-      errorMessage: 'Failed to prepare Interview',
+      successMessage: 'Interview prepared, Bringing you to session!',
+      errorMessage: 'Failed to prepare interview',
     },
   );
 
@@ -74,7 +70,7 @@ export default function InterviewDetailsDialog({
             </div>
           </div>
         </DialogDescription>
-        <Button className="mt-4" onClick={handleClick}>
+        <Button className="mt-4" onClick={() => handleClick()}>
           Start Interview
         </Button>
       </DialogContent>

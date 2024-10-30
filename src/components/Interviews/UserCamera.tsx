@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { transcribeInterviewAudio } from '@/utils/openai/transcribeInterviewAudio';
 import { MediaRecorderHandler } from '@/utils/webspeech/mediaRecorder';
 import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // UserCamera component to handle video and audio recording
 export const UserCamera = ({ answerCallback, isCameraOn, onRecordEnd }) => {
@@ -14,6 +14,8 @@ export const UserCamera = ({ answerCallback, isCameraOn, onRecordEnd }) => {
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
   const timerRef = useRef<number | null>(null); // Ref for timer
   const whisperFinalTranscript = useRef<string>(''); // Ref for final transcript
+  const [isLoadingFFmpeg, setIsLoadingFFmpeg] = useState(false); // Loading state for FFmpeg
+
   // Use speech recognition
   const { startRecognition, stopRecognition, finalTranscript } =
     useSpeechRecognition();
@@ -45,53 +47,54 @@ export const UserCamera = ({ answerCallback, isCameraOn, onRecordEnd }) => {
         const tracks = stream.getTracks();
         tracks.forEach((track) => track.stop());
       }
-      mediaRecorderHandlerRef.current?.stop(); // Ensure the recorder stops
+      mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg); // Ensure the recorder stops
     };
   }, [isCameraOn]);
-
-  const handleRecord = () => {
-    setIsRecording(true);
-    setRecordingTime(0);
-    startRecognition(); // Start speech recognition
-    mediaRecorderHandlerRef.current = new MediaRecorderHandler(
-      async (audioBlob) => {
-        const transcript = await transcribeInterviewAudio(audioBlob); // Transcribe the audio
-        if (transcript) {
-          whisperFinalTranscript.current = transcript; // Store the final transcript
-          handleAnswer(transcript); // Pass the final transcript back to the parent
-        }
-      },
-    );
-
-    if (mediaRecorderHandlerRef.current) {
-      mediaRecorderHandlerRef.current.start(
-        videoRef.current!.srcObject as MediaStream,
-      );
-      timerRef.current = window.setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
-    }
-  };
 
   const handleAnswer = (answer: string) => {
     answerCallback(answer);
     whisperFinalTranscript.current = ''; // Reset the final transcript
   };
 
-  const handleEndRecord = () => {
-    setIsRecording(false);
-    stopRecognition(); // Stop speech recognition
-    // Pass the final transcript back to the parent
-    const transcript = finalTranscript.trim(); // Get the final transcript
-    if (!whisperFinalTranscript.current && transcript) {
-      handleAnswer(transcript);
-    }
-    clearInterval(timerRef.current!); // Clear timer when recording ends
-    if (mediaRecorderHandlerRef.current) {
-      mediaRecorderHandlerRef.current.stop(); // Stop recording and trigger onstop
-    }
-    onRecordEnd(); // Notify the parent component that recording has ended
+  const handleRecord = () => {
+    setIsRecording(true);
+    setRecordingTime(0);
+    startRecognition(); // Start speech recognition
+
+    const mediaHandler = new MediaRecorderHandler();
+    mediaRecorderHandlerRef.current = mediaHandler;
+    mediaHandler.start(videoRef.current!.srcObject as MediaStream);
+    timerRef.current = window.setInterval(() => {
+      setRecordingTime((prev) => prev + 1);
+    }, 1000);
+    console.log('Recording started');
   };
+
+  const handleEndRecord = useCallback(async () => {
+    setIsRecording(false);
+    clearInterval(timerRef.current!); // Clear timer when recording ends
+    stopRecognition(); // Stop speech recognition
+
+    if (mediaRecorderHandlerRef.current) {
+      const convertedAudioBlob =
+        await mediaRecorderHandlerRef.current.stop(setIsLoadingFFmpeg);
+
+      if (convertedAudioBlob) {
+        const formData = new FormData();
+        formData.append('file', convertedAudioBlob, 'audio.webm'); // Add the audio file
+        formData.append('model', 'whisper-1'); // Specify the model here
+        whisperFinalTranscript.current =
+          await transcribeInterviewAudio(formData); // Save the final transcript
+      }
+    }
+
+    const webSpeechTranscript = finalTranscript.trim(); // Get the final transcript
+    whisperFinalTranscript.current != '' || null || undefined
+      ? handleAnswer(whisperFinalTranscript.current)
+      : handleAnswer(webSpeechTranscript);
+
+    onRecordEnd(); // Notify the parent component that recording has ended
+  }, [stopRecognition, finalTranscript, answerCallback, onRecordEnd]);
 
   return (
     <div className="user-camera">

@@ -1,45 +1,65 @@
 'use client';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InterviewEvaulation } from '@/types';
+import { InterviewEvaulation, EvaluationScores } from '@/types';
+import { FC } from 'react';
 
-export const InterviewFeedback: React.FC<{
+interface InterviewFeedbackProps {
   interviewTitle: string;
-  feedback: InterviewEvaulation;
-}> = ({ interviewTitle, feedback }) => {
+  feedback: InterviewEvaulation | null;
+}
+
+export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
+  interviewTitle,
+  feedback,
+}) => {
+  if (!feedback) {
+    return <div>Feedback not available</div>;
+  }
+
   return (
-    <>
-      {feedback ? (
-        <div className="text-center">
-          <Card>
-            <CardHeader>
-              <CardTitle>Interview Feedback : {interviewTitle} </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <h2>Overall Score: {feedback.overall_score}</h2>
-              <h3>Strengths</h3>
-              <p>{feedback.strengths}</p>
-              <h3>Areas for Improvement</h3>
-              <p>{feedback.areas_for_improvement}</p>
-              <h3>Recommendations</h3>
-              <p>{feedback.recommendations}</p>
-              <h3>Evaluation Scores</h3>
-              <ul>
-                {Object.entries(feedback.evaluation_scores).map(
-                  ([criterionName, data]) => (
-                    <li key={criterionName}>
-                      <strong>{criterionName}</strong>: Score {data.score}
-                      <br />
-                      Feedback: {data.feedback}
-                    </li>
-                  ),
-                )}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        <div>Feedback not available</div>
-      )}
-    </>
+    <div className="text-center p-4">
+      <Card className="mx-auto max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Interview Feedback: {interviewTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <section className="mb-4">
+            <h2 className="text-xl font-semibold">Overall Score</h2>
+            <p className="text-lg">{feedback.overall_score}</p>
+          </section>
+
+          <section className="mb-4">
+            <h3 className="text-lg font-semibold">Strengths</h3>
+            <p>{feedback.strengths}</p>
+          </section>
+
+          <section className="mb-4">
+            <h3 className="text-lg font-semibold">Areas for Improvement</h3>
+            <p>{feedback.areas_for_improvement}</p>
+          </section>
+
+          <section className="mb-4">
+            <h3 className="text-lg font-semibold">Recommendations</h3>
+            <p>{feedback.recommendations}</p>
+          </section>
+
+          <section>
+            <h3 className="text-lg font-semibold">Evaluation Scores</h3>
+            <ul className="list-disc list-inside">
+              {feedback.evaluation_scores.map((score: EvaluationScores) => (
+                <li key={score.name} className="mb-2">
+                  <strong>{score.name}</strong>: Score {score.score}
+                  <br />
+                  <span className="italic">Feedback: {score.feedback}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

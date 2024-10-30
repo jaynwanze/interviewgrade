@@ -1,14 +1,9 @@
 'use server';
 
+import { EvaluationCriteriaType, InterviewEvaulation } from '@/types';
 import axios from 'axios';
 
-interface EvaluationCriteriaType {
-  id: string;
-  name: string;
-  description: string;
-}
-
-const openAiKey = process.env.NEXT_PUBLIC_OPENAI_SECRET_KEY;
+const openAiKey = process.env.OPENAI_SECRET_KEY;
 if (!openAiKey) {
   throw new Error('OpenAI API key is missing');
 }
@@ -19,7 +14,7 @@ export const getInterviewFeedback = async (
   questions: string[],
   answers: string[],
   evaluationCriteria: EvaluationCriteriaType[],
-) => {
+): Promise<InterviewEvaulation> => {
   // Construct the formatted responses
   const formattedResponses = questions
     .map((question, index) => {
@@ -37,10 +32,12 @@ export const getInterviewFeedback = async (
   // Construct a placeholder for evaluation_scores in the Output Format
   const evaluationScoresPlaceholder = evaluationCriteria
     .map((criterion) => {
-      return `"${criterion.name}": {
-      "score": number,
-      "feedback": "string"
-    }`;
+      return `{
+        "id": "${criterion.id}",
+        "name": "${criterion.name}",
+        "score": number,
+        "feedback": "string"
+      }`;
     })
     .join(',\n    ');
 
@@ -71,9 +68,9 @@ Please present your evaluation in the following JSON format:
 \`\`\`json
 {
   "overall_score": number,
-  "evaluation_scores": {
+  "evaluation_scores": [
     ${evaluationScoresPlaceholder}
-  },
+  ],
   "strengths": "string",
   "areas_for_improvement": "string",
   "recommendations": "string"
@@ -90,7 +87,7 @@ Thank you!`;
       {
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 500,
+        max_tokens: 750,
         temperature: 0.7,
       },
       {
@@ -102,18 +99,15 @@ Thank you!`;
     );
 
     // Extract the AI's response
-    const aiResponse = response.data.choices[0].message.content;
+    const aiResponse: string = response.data.choices[0].message.content;
 
     // Parse the JSON from the AI's response
     const jsonStartIndex = aiResponse.indexOf('{');
     const jsonEndIndex = aiResponse.lastIndexOf('}') + 1;
     const jsonString = aiResponse.substring(jsonStartIndex, jsonEndIndex);
 
-    const feedbackData = JSON.parse(jsonString);
-
-    console.log('Parsed Feedback Data:', feedbackData);
-
-    return feedbackData; // Return the parsed JSON data
+    const feedbackData: InterviewEvaulation = JSON.parse(jsonString);
+    return feedbackData;
   } catch (error) {
     console.error('Error fetching feedback from OpenAI:', error);
     throw new Error('Failed to fetch feedback');

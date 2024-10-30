@@ -1,3 +1,4 @@
+import { EvaluationCriteriaType, EvaluationScores } from '@/types'
 export type Json =
   | string
   | number
@@ -194,7 +195,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number
           duration: number
-          evaluation_criteria: Json[]
+          evaluation_criteria: EvaluationCriteriaType[]
           start_time: string
           end_time: string
           status: Database["public"]["Enums"]["interview_status"]
@@ -211,7 +212,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number
           duration: number
-          evaluation_criteria: Json[]
+          evaluation_criteria: EvaluationCriteriaType[]
           start_time: string
           end_time?: string
           status: Database["public"]["Enums"]["interview_status"]
@@ -228,7 +229,7 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
           question_count?: number
           duration?: number
-          evaluation_criteria?: Json[]
+          evaluation_criteria?: EvaluationCriteriaType[]
           start_time?: string
           end_time?: string
           status?: Database["public"]["Enums"]["interview_status"]
@@ -253,7 +254,74 @@ export type Database = {
           },
         ]
       }
-      //interview evals,feedbacks and analytics
+
+      interview_evaluations: {
+        Row: {
+          id: string
+          interview_id: string
+          overall_score: number
+          evaluation_scores: EvaluationScores[]
+          strengths: string
+          areas_for_improvement: string
+          recommendations: string
+        }
+
+        Insert: {
+          interview_id: string
+          overall_score: number
+          evaluation_scores: EvaluationScores[]
+          strengths: string
+          areas_for_improvement: string
+          recommendations: string
+        }
+        Update: {
+          interview_id?: string
+          overall_score?: number
+          evaluation_scores?: EvaluationScores[]
+          strengths?: string
+          areas_for_improvement?: string
+          recommendations?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_evaluations_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: true
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      interview_analytics: {
+        Row: {
+          id: string
+          interview_id: string
+          avg_overall_Score: number
+          avg_evaluation_scores: AvgEvaluationScores[]
+
+        }
+        Insert: {
+          interview_id: string
+          avg_overall_Score: number
+          avg_evaluation_scores: AvgEvaluationScores[]
+
+        }
+        Update: {
+          interview_id?: string
+          avg_overall_Score?: number
+          avg_evaluation_scores?: AvgEvaluationScores[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_analytics_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: true
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
 
       evaluation_criteria: {
         Row: {
@@ -433,15 +501,15 @@ export type Database = {
         Row: {
           id: string
           interview_question_id: string
-          answer: string
+          text: string
         }
         Insert: {
           interview_question_id: string
-          answer: string
+          text: string
         }
         Update: {
           interview_question_id?: string
-          answer?: string
+          text?: string
         }
         Relationships: [
           {

@@ -50,8 +50,7 @@ export const getTemplateQuestions = async (
   const { data, error } = await supabase
     .from('questions')
     .select('*')
-    .eq('template_id', templateId)
-    .select('*');
+    .eq('template_id', templateId);
 
   if (error) {
     throw error;

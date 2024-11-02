@@ -1,7 +1,7 @@
 'use client';
-import { AIQuestionSpeaker } from '@/components/Interviews/AIQuestionSpeaker';
-import { InterviewFeedback } from '@/components/Interviews/InterviewFeedback';
-import { UserCamera } from '@/components/Interviews/UserCamera';
+import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
+import { InterviewFeedback } from '@/components/Interviews/InterviewFlow/InterviewFeedback';
+import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';

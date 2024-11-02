@@ -19,8 +19,4 @@ export default function InterviewSessionPage({
       router.push('/candidate/interviews/library');
     }
   }, [params, router]);
-
-  if (!params || !params.interviewId) {
-    return null; // Render nothing while redirecting
-  }
 }

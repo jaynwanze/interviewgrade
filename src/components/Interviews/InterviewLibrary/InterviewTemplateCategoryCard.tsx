@@ -3,7 +3,7 @@
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { InterviewTemplateCategoriesType } from '@/types/interviewTemplateCategories';
 import { useRouter } from 'next/navigation';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 
 export const InterviewCategoryCard = (
   interviewCategory: InterviewTemplateCategoriesType,

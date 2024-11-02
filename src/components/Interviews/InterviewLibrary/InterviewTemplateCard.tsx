@@ -1,10 +1,10 @@
 'use client';
 
-import InterviewDetailsDialog from '@/components/Interviews/InterviewDetailsDialog'; // Corrected import
+import InterviewDetailsDialog from '@/components/Interviews/InterviewLibrary/InterviewDetailsDialog'; // Corrected import
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { InterviewTemplate } from '@/types';
 import { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 
 export const InterviewCardTemplate = (interviewTemplate: InterviewTemplate) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

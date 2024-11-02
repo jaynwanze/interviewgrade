@@ -52,7 +52,7 @@ export type InterviewTemplateCategory = {
 
 export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
 
-export type InterviewEvaulation = {
+export type InterviewEvaluation = {
   overall_score: number;
   evaluation_scores: EvaluationScores[];
   strengths: string;

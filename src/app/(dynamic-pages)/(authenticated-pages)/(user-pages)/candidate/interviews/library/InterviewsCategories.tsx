@@ -1,6 +1,6 @@
 'use client';
 
-import { InterviewCategoryCard } from '@/components/Interviews/InterviewTemplateCategoryCard';
+import { InterviewCategoryCard } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCategoryCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InterviewTemplateFilter } from '@/types';

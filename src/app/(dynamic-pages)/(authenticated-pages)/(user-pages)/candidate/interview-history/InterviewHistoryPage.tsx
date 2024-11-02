@@ -1,0 +1,40 @@
+'use client';
+import { InterviewHistoryFilter } from '@/components/Interviews/InterviewHistory/InterviewHistoryFilter';
+import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/InterviewHistoryList';
+import { useInterviewHistory } from '@/hooks/useInterviewHistory';
+
+export default function InterviewHistoryPage({
+  candidateId,
+}: {
+  candidateId: string;
+}) {
+  const {
+    interviews,
+    filteredInterviews,
+    activeTab,
+    counts,
+    loading,
+    error,
+    handleTabChange,
+  } = useInterviewHistory({ candidateId });
+
+  if (loading) {
+    return <div className="text-center p-4">Loading interview history...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 p-4">{error}</div>;
+  }
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Interview History</h1>
+      <InterviewHistoryFilter
+        activeTab={activeTab}
+        counts={counts}
+        onTabChange={handleTabChange}
+      />
+      <InterviewHistoryList interviews={filteredInterviews} />
+    </div>
+  );
+}

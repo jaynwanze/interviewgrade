@@ -22,9 +22,14 @@ export async function UserSidebar() {
           icon={<Home className="h-5 w-5" />}
         />
         <SidebarLink
-          label="Interviews"
+          label="Mock Interviews"
           href={`/candidate/interviews`}
           icon={<NotepadText className="h-5 w-5" />}
+        />
+        <SidebarLink
+          label="Interview History"
+          href="/candidate/interview-history"
+          icon={<TableProperties className="h-5 w-5" />}
         />
         <SidebarLink
           label="Job Tracker"

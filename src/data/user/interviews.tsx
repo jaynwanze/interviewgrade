@@ -25,7 +25,7 @@ export const createInterview = async (
     interviewTemplate.id,
   );
   // Extract the evaluation criteria from the data
-  const interviewEvaluationCriteria = templateEvaluationCriteria
+  const InterviewEvaluationCriteria = templateEvaluationCriteria
     .map((item) => item.evaluation_criteria)
     .filter((criteria) => criteria !== null);
 
@@ -41,7 +41,7 @@ export const createInterview = async (
       difficulty: interviewTemplate.difficulty,
       question_count: interviewTemplate.question_count,
       duration: interviewTemplate.duration,
-      evaluation_criteria: interviewEvaluationCriteria,
+      evaluation_criteria: InterviewEvaluationCriteria,
       start_time: moment().toISOString(), // Ensure the time is in ISO format
       status: 'not_started',
       is_general: interviewTemplate.is_general,
@@ -161,18 +161,18 @@ export const insertInterviewAnswer = async (
 
 export const insertInterviewEvaluation = async (
   interviewId: string,
-  interviewEvaluation: InterviewEvaulation,
+  InterviewEvaluation: InterviewEvaulation,
 ): Promise<Table<'interview_evaluations'>> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interview_evaluations')
     .insert({
       interview_id: interviewId,
-      overall_score: interviewEvaluation.overall_score,
-      evaluation_scores: interviewEvaluation.evaluation_scores,
-      strengths: interviewEvaluation.strengths,
-      areas_for_improvement: interviewEvaluation.areas_for_improvement,
-      recommendations: interviewEvaluation.recommendations,
+      overall_score: InterviewEvaluation.overall_score,
+      evaluation_scores: InterviewEvaluation.evaluation_scores,
+      strengths: InterviewEvaluation.strengths,
+      areas_for_improvement: InterviewEvaluation.areas_for_improvement,
+      recommendations: InterviewEvaluation.recommendations,
     })
     .single();
 

@@ -25,9 +25,15 @@ export default function InterviewDetailsDialog({
   const router = useRouter();
   const { mutate: handleClick } = useToastMutation(
     async () => {
-      // Redirect to the interview session page
-      const interview = await createInterview(interviewTemplate);
-      router.push(`/candidate/interviews/session/${interview.id}`);
+      try {
+        // Create an interview session
+        const interview = await createInterview(interviewTemplate);
+        router.push(`/candidate/interviews/session/${interview.id}`);
+      }
+      catch (error) {
+        console.error('Error creating interview:', error);
+      }
+
     },
     {
       loadingMessage: 'Creating interview...',

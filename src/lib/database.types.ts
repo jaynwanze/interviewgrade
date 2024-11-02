@@ -1,4 +1,4 @@
-import { EvaluationCriteriaType, EvaluationScores } from '@/types'
+import { AvgEvaluationScores, EvaluationCriteriaType, EvaluationScores } from '@/types'
 export type Json =
   | string
   | number
@@ -199,6 +199,7 @@ export type Database = {
           start_time: string
           end_time: string
           status: Database["public"]["Enums"]["interview_status"]
+          current_question_index: number
           is_general: boolean
           is_system_defined: boolean
           created_at: string
@@ -216,6 +217,7 @@ export type Database = {
           start_time: string
           end_time?: string
           status: Database["public"]["Enums"]["interview_status"]
+          current_question_index: number
           is_general: boolean
           is_system_defined: boolean
           created_at?: string
@@ -233,6 +235,7 @@ export type Database = {
           start_time?: string
           end_time?: string
           status?: Database["public"]["Enums"]["interview_status"]
+          current_question_index?: number
           is_general?: boolean
           is_system_defined?: boolean
           created_at?: string
@@ -292,26 +295,32 @@ export type Database = {
           },
         ]
       }
-
       interview_analytics: {
         Row: {
           id: string
           interview_id: string
-          avg_overall_Score: number
+          avg_overall_score: number
           avg_evaluation_scores: AvgEvaluationScores[]
-
+          total_interviews: number
+          created_at: string
+          updated_at: string
         }
         Insert: {
           interview_id: string
-          avg_overall_Score: number
+          avg_overall_score: number
           avg_evaluation_scores: AvgEvaluationScores[]
-
+          total_interviews: number
+          created_at: string
+          updated_at: string
         }
         Update: {
           interview_id?: string
           avg_overall_Score?: number
           avg_evaluation_scores?: AvgEvaluationScores[]
+          total_interviews?: number
+          created_at?: string
         }
+
         Relationships: [
           {
             foreignKeyName: "interview_analytics_interview_id_fkey"
@@ -322,7 +331,6 @@ export type Database = {
           },
         ]
       }
-
       evaluation_criteria: {
         Row: {
           id: string

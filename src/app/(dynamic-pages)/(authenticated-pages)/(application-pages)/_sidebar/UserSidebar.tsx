@@ -1,10 +1,11 @@
 import { cn } from '@/utils/cn';
 import {
-  Home,
+  LucideHistory,
   NotepadText,
   Settings,
   Shield,
   TableProperties,
+  BarChart3Icon,
 } from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
@@ -17,11 +18,6 @@ export async function UserSidebar() {
       </div>
       <div className="">
         <SidebarLink
-          label="Home"
-          href="/candidate"
-          icon={<Home className="h-5 w-5" />}
-        />
-        <SidebarLink
           label="Mock Interviews"
           href={`/candidate/interviews`}
           icon={<NotepadText className="h-5 w-5" />}
@@ -29,7 +25,12 @@ export async function UserSidebar() {
         <SidebarLink
           label="Interview History"
           href="/candidate/interview-history"
-          icon={<TableProperties className="h-5 w-5" />}
+          icon={<LucideHistory className="h-5 w-5" />}
+        />
+        <SidebarLink
+          label="Interview Analytics"
+          href="/candidate/interview-analytics"
+          icon={<BarChart3Icon className="h-5 w-5" />}
         />
         <SidebarLink
           label="Job Tracker"

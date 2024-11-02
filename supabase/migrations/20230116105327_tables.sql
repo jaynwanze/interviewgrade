@@ -69,6 +69,7 @@ CREATE TABLE "public"."interviews" (
   "start_time" timestamp with time zone,
   "end_time" timestamp with time zone,
   "status" "public"."interview_status" DEFAULT 'not_started'::interview_status NOT NULL,
+  "current_question_index" integer DEFAULT 0,
   "is_general" boolean DEFAULT false,
   "is_system_defined" boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT "now"() NOT NULL
@@ -96,8 +97,11 @@ ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 CREATE TABLE "public"."interview_analytics" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
-  "avg_overall_score" decimal(4,2),
-  "avg_evaluation_criteria" jsonb
+  "avg_overall_score" DECIMAL(4,2) NOT NULL DEFAULT 0.00,
+  "avg_evaluation_criteria" NOT NULL DEFAULT jsonb,
+  "total_interviews" INTEGER NOT NULL DEFAULT 0,
+  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 ALTER TABLE "public"."interview_analytics" OWNER TO "postgres";

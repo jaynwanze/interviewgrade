@@ -1,7 +1,9 @@
 'use client';
 import { InterviewHistoryFilter } from '@/components/Interviews/InterviewHistory/InterviewHistoryFilter';
 import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/InterviewHistoryList';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useInterviewHistory } from '@/hooks/useInterviewHistory';
+import LoadingCircle from '@/icons/loading-circle';
 
 export default function InterviewHistoryPage({
   candidateId,
@@ -19,11 +21,11 @@ export default function InterviewHistoryPage({
   } = useInterviewHistory({ candidateId });
 
   if (loading) {
-    return <div className="text-center p-4">Loading interview history...</div>;
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return <div className="text-center text-red-500 p-4">{error}</div>;
+    return <div className="text-center p-4">{error}</div>;
   }
 
   return (

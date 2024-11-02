@@ -1,10 +1,12 @@
 'use client';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  return (
-    <div>
-      <h1>Welcome to the Candidate Dashboard</h1>
-      {/* TODO: return analytics dashboard*/}
-    </div>
-  );
+  const router = useRouter();
+
+  const intialRedirect = () => {
+    router.push('/candidate/interviews');
+  };
+
+  return intialRedirect();
 }

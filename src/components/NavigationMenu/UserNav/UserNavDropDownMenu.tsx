@@ -12,67 +12,67 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { OnboardingModal } from './OnboardingModal';
 
-const onboardingFeatures = [
+// TODO: Add valid pics
+const applicationFeatures = [
   {
-    title: 'Organisations, Teams and Invitations',
+    title: 'Mock Interviews',
     description: (
       <p>
-        Organisations, team members and team invitations is built-in. This means
-        that your next SAAS project will allow your customers to manage
-        organisations right off the bat. InterviewGrade comes with Supabase
-        configured with all the necessary tables to manage members of an
-        organization. Every organization also has it's own Stripe plan.
+        Conduct realistic, AI-powered mock interviews that simulate real-world
+        scenarios. Get personalized questions and responses to help users
+        prepare for job interviews effectively. Each mock interview session is
+        tailored to improve skills and confidence.
       </p>
     ),
-    image: '/assets/login-asset-dashboard.png',
+    image: '',
   },
   {
-    title: 'User Authentication built in',
+    title: 'Interview History',
     description: (
       <p>
-        Start building your app with InterviewGrade and you'll get a
-        full-featured authentication system, out of the box. More than 15
-        authentication providers such as Google, GitHub, Twitter, Facebook,
-        Apple, Discord etc are supported.
+        Track and revisit all past interview sessions in one place. Interview
+        history allows users to review previous responses, identify areas for
+        improvement, and measure progress over time, helping them better prepare
+        for future interviews.
       </p>
     ),
-    image: '/assets/onboardingFeatures/authentication.png',
+    image: '',
   },
   {
-    title: 'Admin Panel',
+    title: 'Interview Analytics',
     description: (
       <p>
-        Admin Panel is built in. This means that you can manage a secret area
-        within your app where you can manage users and organizations, etc.
+        Gain insights into performance with detailed analytics on interview
+        sessions. View metrics like accuracy, response time, and communication
+        skills to understand strengths and areas needing improvement, enabling a
+        data-driven approach to interview preparation.
       </p>
     ),
-    image: '/assets/onboardingFeatures/adminPanel.png',
+    image: '',
   },
   {
-    title: 'Next.js 13, Supabase and Typescript',
+    title: 'Interview Feedback',
     description: (
       <p>
-        You get all of the latest features and performance improvements that
-        come with Next.js 13. These include the new Image component, built-in
-        TypeScript support, the new app folder, layouts, server components and
-        more! Your frontend will automatically update types and keep the project
-        in sync when you update Supabase tables.
+        Receive comprehensive feedback after each interview session. Feedback
+        includes AI-generated suggestions and benchmarks to help users refine
+        their answers and presentation skills, ensuring they’re ready for the
+        real interview experience.
       </p>
     ),
-    image: '/assets/onboardingFeatures/nextjs-type-supa.png',
+    image: '',
   },
   {
-    title: 'Incredible performance with layouts, server components',
+    title: 'Job Tracker',
     description: (
       <p>
-        InterviewGrade offers world-class features such as app folder, layouts,
-        server components, and server-side rendering to optimize data fetching
-        and provide the best user experience. Layouts such as authenticated
-        layout, external page layout, login layout, application admin layout
-        authenticated, external, login, and admin are pre-configured.
+        Keep track of job applications with the integrated job tracker. Users
+        can log job applications, manage interview stages, and monitor their
+        progress across different opportunities, making it easier to stay
+        organized in the job search process.
       </p>
     ),
-    image: '/assets/onboardingFeatures/layout.png',
+    image: '',
   },
 ];
 
@@ -141,13 +141,16 @@ export function UserNavDropDownMenu({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/settings" className="flex cursor-pointer">
+            <Link href="/candidate/settings" className="flex cursor-pointer">
               <User className="mr-2 h-5 w-5" />
               <span>Account settings</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/settings/security" className="flex cursor-pointer">
+            <Link
+              href="/candidate/settings/security"
+              className="flex cursor-pointer"
+            >
               <Lock className="mr-2 h-5 w-5" />
               <span>Security Settings</span>
             </Link>
@@ -157,7 +160,7 @@ export function UserNavDropDownMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <OnboardingModal
-            featureList={onboardingFeatures}
+            featureList={applicationFeatures}
             className="cursor-pointer flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
           >
             <div data-testid="">

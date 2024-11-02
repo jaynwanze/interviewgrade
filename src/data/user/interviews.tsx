@@ -7,6 +7,8 @@ import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
   InterviewEvaluation,
+  InterviewUpdate,
+  InterviewComplete,
   InterviewTemplate,
   SAPayload,
   Table,
@@ -44,6 +46,7 @@ export const createInterview = async (
       evaluation_criteria: InterviewEvaluationCriteria,
       start_time: moment().toISOString(), // Ensure the time is in ISO format
       status: 'not_started',
+      current_question_index: 0,
       is_general: interviewTemplate.is_general,
       is_system_defined: interviewTemplate.is_system_defined,
     })
@@ -104,6 +107,38 @@ export const createInterviewQuestions = async (
     status: 'success',
     data: lastInsertData,
   };
+};
+
+export const updateInterview = async (
+  data: InterviewUpdate,
+): Promise<Table<'interviews'>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error } = await supabase
+    .from('interviews')
+    .update(data)
+    .eq('id', data.id);
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Table<'interviews'>;
+};
+
+export const completeInterview = async (
+  data: InterviewComplete,
+): Promise<Table<'interviews'>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error } = await supabase
+    .from('interviews')
+    .update(data)
+    .eq('id', data.id);
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Table<'interviews'>;
 };
 
 export const getInterviewQuestions = async (

@@ -1,4 +1,5 @@
 'use client';
+
 import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
 import { InterviewFeedback } from '@/components/Interviews/InterviewFlow/InterviewFeedback';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
@@ -11,22 +12,22 @@ import {
   getInterviewQuestions,
   insertInterviewAnswer,
   insertInterviewEvaluation,
+  updateInterview,
 } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
+  Interview,
   InterviewEvaluation,
   InterviewQuestion,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// InterviewFlow component
 export default function InterviewFlow({
   interviewId,
 }: {
   interviewId: string;
 }) {
-  /// State to manage the interview flow
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isInterviewComplete, setIsInterviewComplete] = useState(false);
   const [isQuestionsComplete, setIsQuestionsComplete] = useState(false);
@@ -36,86 +37,102 @@ export default function InterviewFlow({
   const [interviewFeedback, setInterviewFeedback] =
     useState<InterviewEvaluation | null>(null);
   const [isFetchingFeedback, setIsFetchingFeedback] = useState(false);
-  const [interviewTitle, setInterviewTitle] = useState<string>('');
+  const [interview, setInterview] = useState<Interview | null>(null);
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
   const [evaluationCriteria, setEvaluationCriteria] = useState<
     EvaluationCriteriaType[]
   >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [completionMessage, setCompletionMessage] = useState<string | null>(
+    null,
+  );
 
-  //use mutation
   const fetchInterview = async () => {
-    // Fetch interview details
-    const interview = await getInterview(interviewId);
-    if (!interview) {
-      throw new Error('Interview not found');
-    }
-    const interviewTitle: string = interview.title;
-    setInterviewTitle(interviewTitle);
+    setIsLoading(true);
+    try {
+      const interview = await getInterview(interviewId);
+      if (!interview) {
+        console.error('Interview not found.');
+        return;
+      }
+      setInterview(interview);
 
-    const interviewQuestions = await getInterviewQuestions(interviewId);
-    if (!interviewQuestions || interviewQuestions.length === 0) {
-      throw new Error('No questions found for this interview');
-    }
-    setQuestions(interviewQuestions);
+      // Check if the interview is already completed
+      if (interview.status === 'completed') {
+        setCompletionMessage(
+          'This interview has already been completed. Please go back to view the interview history section to view details.',
+        );
+        return;
+      }
 
-    const evaluationCriteria = interview.evaluation_criteria ?? [];
-    setEvaluationCriteria(evaluationCriteria);
+      const interviewQuestions = await getInterviewQuestions(interviewId);
+      if (interviewQuestions.length === 0) {
+        console.error('No interview questions found.');
+        return;
+      }
+      setQuestions(interviewQuestions);
+      setCurrentQuestionIndex(interview.current_question_index);
+
+      if (interview.current_question_index !== 0) {
+        answers.current = interviewQuestions
+          .slice(0, interview.current_question_index)
+          .map(() => '');
+        setAnswersLength(answers.current.length);
+      }
+      setEvaluationCriteria(interview.evaluation_criteria ?? []);
+    } catch (error) {
+      console.error('Error fetching interview:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getInterviewState = () => { };
-
-  // Fetch interview details when component mounts
   useEffect(() => {
-    getInterviewState();
     fetchInterview();
   }, []);
 
-  // Effect to handle completion of the interview when questions are done
   useEffect(() => {
     if (isQuestionsComplete && answersLength === questions.length) {
-      handleSaveInterviewState(); // Save the interview state
+      handleInterviewComplete();
     }
   }, [isQuestionsComplete, answersLength, questions.length]);
 
-  // Callback function to get answer from after each recording
   const handleAnswer = useCallback(
     (answer: string) => {
       answers.current.push(answer);
-      setAnswersLength(answers.current.length); // Update state with the new length
+      setAnswersLength(answers.current.length);
       insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+      updateInterviewState(currentQuestionIndex + 1);
     },
-    [questions],
+    [questions, currentQuestionIndex],
   );
 
-  // Function to move to the next question
   const handleNextQuestion = useCallback(() => {
     setCurrentQuestionIndex((prevIndex) => {
       if (prevIndex < questions.length - 1) {
         return prevIndex + 1;
       } else {
-        setIsQuestionsComplete(true); // Mark questions as complete
+        setIsQuestionsComplete(true);
         return prevIndex;
       }
     });
   }, [questions.length]);
 
-  const handleSaveInterviewState = async () => {
-    // Implement logic to save interview state
-    // You could call an API to save the state here
+  const handleInterviewComplete = async () => {
     setIsFetchingFeedback(true);
     const questionsText = questions.map((question) => question.text);
-    console.log('Fetching feedback for the interview...');
     try {
-      const feedback: InterviewEvaluation = await getInterviewFeedback(
-        interviewTitle, // Interview title
+      const feedback = await getInterviewFeedback(
+        interview?.title ?? '',
         questionsText,
         answers.current,
         evaluationCriteria,
       );
 
-      handleFeedback(feedback); // Handle the feedback
-      setIsInterviewComplete(true); // Mark the interview as complete
-      setIsCameraOn(false); // Turn off the camera when interview is complete
+      await insertInterviewEvaluation(interviewId, feedback);
+      setInterviewFeedback(feedback);
+      setIsInterviewComplete(true);
+      setIsCameraOn(false);
     } catch (error) {
       console.error('Error fetching feedback:', error);
     } finally {
@@ -123,14 +140,46 @@ export default function InterviewFlow({
     }
   };
 
-  const handleFeedback = useCallback(async (feedback: InterviewEvaluation) => {
-    // Insert into database
-    // TODO: Implement database insertion logic here
+  const updateInterviewState = async (nextQuestionIndex: number) => {
+    if (interview) {
+      const newStatus: 'in_progress' | 'completed' =
+        nextQuestionIndex < questions.length ? 'in_progress' : 'completed';
+      const updateData = {
+        id: interview.id,
+        status: newStatus,
+        current_question_index: nextQuestionIndex,
+        ...(newStatus === 'completed' && {
+          end_time: new Date().toISOString(),
+        }),
+      };
 
-    // Set the interview feedback
-    const response = await insertInterviewEvaluation(interviewId, feedback);
-    setInterviewFeedback(feedback);
-  }, []);
+      await updateInterview(updateData);
+      setCurrentQuestionIndex(nextQuestionIndex);
+    }
+  };
+  if (completionMessage) {
+    return (
+        <div className="text-center p-4">
+          {completionMessage}
+      </div>
+    );
+  }
+
+  if (!interview && isLoading) {
+    return (
+      <div className="interview-flow-container flex justify-center items-center min-h-screen">
+        <LoadingSpinner />;
+      </div>
+    );
+  } else if (!interview && !isLoading) {
+    return (
+      <div className="interview-flow-container flex justify-center items-center min-h-screen">
+        <h1 className="text-3xl font-bold text-center">
+          Interview not found. Please check the interview link
+        </h1>
+      </div>
+    );
+  }
 
   return (
     <div className="interview-flow-container flex justify-center items-center min-h-screen">
@@ -174,9 +223,9 @@ export default function InterviewFlow({
       ) : (
         <div className="flex flex-col items-center">
           <T.Subtle>Interview Completed!</T.Subtle>
-          {interviewFeedback ? (
+          {interviewFeedback && interview ? (
             <InterviewFeedback
-              interviewTitle={interviewTitle}
+              interviewTitle={interview.title ?? ''}
               feedback={interviewFeedback}
             />
           ) : (

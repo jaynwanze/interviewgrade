@@ -1,19 +1,14 @@
 'use client';
 
-import { z } from 'zod';
 import InterviewHistoryPage from './InterviewHistoryPage';
+import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
-const paramsSchema = z.object({
-  candidateId: z.string(),
-});
+export default async function InterviewHistory() {
+  const user = await serverGetLoggedInUser();
+  
+  if (!user) {
+    throw new Error('User not found');
+  }
 
-export default function InterviewHistory({
-  params,
-}: {
-  params: { candidateId: string };
-}) {
-  const parsedParams = paramsSchema.parse(params);
-  const { candidateId } = parsedParams;
-
-  return <InterviewHistoryPage candidateId={candidateId} />;
+  return <InterviewHistoryPage candidateId={user.id} />;
 }

@@ -1,4 +1,5 @@
 'use client';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Interview, InterviewEvaluation } from '@/types';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -26,14 +27,9 @@ export const InterviewHistoryDetails = ({
       if (data.evaluation) {
         setEvaluation(data.evaluation);
       }
-    } catch (err: any) {
-      console.error(
-        'Error fetching interview details:',
-        err.response?.data?.error || err.message,
-      );
-      setError(
-        err.response?.data?.error || 'Failed to fetch interview details',
-      );
+    } catch (error) {
+      console.error('Error fetching interview details:', error);
+      setError('Failed to fetch interview details');
     } finally {
       setLoading(false);
     }
@@ -46,11 +42,11 @@ export const InterviewHistoryDetails = ({
   }, [interviewId]);
 
   if (loading) {
-    return <div className="text-center p-4">Loading interview details...</div>;
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return <div className="text-center text-red-500 p-4">{error}</div>;
+    return <div className="text-center p-4">{error}</div>;
   }
 
   if (!interview) {

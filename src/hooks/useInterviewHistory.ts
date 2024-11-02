@@ -3,7 +3,11 @@ import { Interview } from '@/types';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-export const useInterviewHistory = ({ candidateId }: {candidateId : string}) => {
+export const useInterviewHistory = ({
+  candidateId,
+}: {
+  candidateId: string;
+}) => {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [filteredInterviews, setFilteredInterviews] = useState<Interview[]>([]);
   const [activeTab, setActiveTab] = useState<

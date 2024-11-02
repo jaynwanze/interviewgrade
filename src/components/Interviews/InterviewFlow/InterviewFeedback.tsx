@@ -1,12 +1,11 @@
 'use client';
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InterviewEvaulation, EvaluationScores } from '@/types';
+import { EvaluationScores, InterviewEvaluation } from '@/types';
 import { FC } from 'react';
 
 interface InterviewFeedbackProps {
   interviewTitle: string;
-  feedback: InterviewEvaulation | null;
+  feedback: InterviewEvaluation | null;
 }
 
 export const InterviewFeedback: FC<InterviewFeedbackProps> = ({

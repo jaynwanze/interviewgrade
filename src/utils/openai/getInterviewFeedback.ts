@@ -1,6 +1,6 @@
 'use server';
 
-import { EvaluationCriteriaType, InterviewEvaulation } from '@/types';
+import { EvaluationCriteriaType, InterviewEvaluation } from '@/types';
 import axios from 'axios';
 
 const openAiKey = process.env.OPENAI_SECRET_KEY;
@@ -14,7 +14,7 @@ export const getInterviewFeedback = async (
   questions: string[],
   answers: string[],
   evaluationCriteria: EvaluationCriteriaType[],
-): Promise<InterviewEvaulation> => {
+): Promise<InterviewEvaluation> => {
   // Construct the formatted responses
   const formattedResponses = questions
     .map((question, index) => {
@@ -106,7 +106,7 @@ Thank you!`;
     const jsonEndIndex = aiResponse.lastIndexOf('}') + 1;
     const jsonString = aiResponse.substring(jsonStartIndex, jsonEndIndex);
 
-    const feedbackData: InterviewEvaulation = JSON.parse(jsonString);
+    const feedbackData: InterviewEvaluation = JSON.parse(jsonString);
     return feedbackData;
   } catch (error) {
     console.error('Error fetching feedback from OpenAI:', error);

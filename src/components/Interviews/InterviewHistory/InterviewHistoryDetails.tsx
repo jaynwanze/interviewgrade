@@ -1,15 +1,12 @@
 'use client';
 import { Interview, InterviewEvaluation } from '@/types';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { s } from 'vitest/dist/reporters-5f784f42';
+import { useEffect, useState } from 'react';
 
-interface HistoryDetailsProps {
-  interviewId: string;
-}
-
-export const InterviewHistoryDetails: React.FC<HistoryDetailsProps> = ({
+export const InterviewHistoryDetails = ({
   interviewId,
+}: {
+  interviewId: string;
 }) => {
   const [interview, setInterview] = useState<Interview | null>(null);
   const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(

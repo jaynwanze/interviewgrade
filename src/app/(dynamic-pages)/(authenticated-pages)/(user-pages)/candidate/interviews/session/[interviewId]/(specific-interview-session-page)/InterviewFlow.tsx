@@ -14,7 +14,7 @@ import {
 } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
-  InterviewEvaulation,
+  InterviewEvaluation,
   InterviewQuestion,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
@@ -34,7 +34,7 @@ export default function InterviewFlow({
   const [isCameraOn, setIsCameraOn] = useState(false);
   const answers = useRef<string[]>([]);
   const [interviewFeedback, setInterviewFeedback] =
-    useState<InterviewEvaulation | null>(null);
+    useState<InterviewEvaluation | null>(null);
   const [isFetchingFeedback, setIsFetchingFeedback] = useState(false);
   const [interviewTitle, setInterviewTitle] = useState<string>('');
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
@@ -106,7 +106,7 @@ export default function InterviewFlow({
     const questionsText = questions.map((question) => question.text);
     console.log('Fetching feedback for the interview...');
     try {
-      const feedback: InterviewEvaulation = await getInterviewFeedback(
+      const feedback: InterviewEvaluation = await getInterviewFeedback(
         interviewTitle, // Interview title
         questionsText,
         answers.current,
@@ -123,7 +123,7 @@ export default function InterviewFlow({
     }
   };
 
-  const handleFeedback = useCallback(async (feedback: InterviewEvaulation) => {
+  const handleFeedback = useCallback(async (feedback: InterviewEvaluation) => {
     // Insert into database
     // TODO: Implement database insertion logic here
 

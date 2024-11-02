@@ -6,7 +6,7 @@ import {
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
-  InterviewEvaulation,
+  InterviewEvaluation,
   InterviewTemplate,
   SAPayload,
   Table,
@@ -161,7 +161,7 @@ export const insertInterviewAnswer = async (
 
 export const insertInterviewEvaluation = async (
   interviewId: string,
-  InterviewEvaluation: InterviewEvaulation,
+  InterviewEvaluation: InterviewEvaluation,
 ): Promise<Table<'interview_evaluations'>> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase

@@ -9,7 +9,5 @@ export default function Layout({
   children: ReactNode;
   navbar: ReactNode;
 }) {
-  return (
-    <div className="flex-1px-6 space-y-6 pb-8"> {children} </div>
-  );
+  return <div className="flex-1px-6 space-y-6 pb-8"> {children} </div>;
 }

@@ -5,20 +5,18 @@ import { InterviewFeedback } from '@/components/Interviews/InterviewFlow/Intervi
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { T } from '@/components/ui/Typography';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   getInterview,
   getInterviewQuestions,
   insertInterviewAnswer,
-  insertInterviewEvaluation,
-  updateInterview,
+  updateInterview
 } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
   Interview,
   InterviewEvaluation,
-  InterviewQuestion,
+  InterviewQuestion
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -123,13 +121,13 @@ export default function InterviewFlow({
     const questionsText = questions.map((question) => question.text);
     try {
       const feedback = await getInterviewFeedback(
+        interview?.id ?? '',
         interview?.title ?? '',
         questionsText,
         answers.current,
         evaluationCriteria,
       );
 
-      await insertInterviewEvaluation(interviewId, feedback);
       setInterviewFeedback(feedback);
       setIsInterviewComplete(true);
       setIsCameraOn(false);
@@ -158,11 +156,7 @@ export default function InterviewFlow({
     }
   };
   if (completionMessage) {
-    return (
-        <div className="text-center p-4">
-          {completionMessage}
-      </div>
-    );
+    return <div className="text-center p-4">{completionMessage}</div>;
   }
 
   if (!interview && isLoading) {
@@ -205,19 +199,14 @@ export default function InterviewFlow({
                       isCameraOn={true}
                       onRecordEnd={handleNextQuestion}
                     />
-                    <Button
-                      className="mt-4"
-                      onClick={handleNextQuestion}
-                      disabled={isFetchingFeedback}
-                    >
-                      Next Question
-                    </Button>
                   </CardContent>
                 </Card>
               </div>
             </>
           ) : (
-            <LoadingSpinner />
+            <div className="interview-flow-container flex justify-center items-center min-h-screen">
+              <LoadingSpinner />
+            </div>
           )}
         </div>
       ) : (

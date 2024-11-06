@@ -72,7 +72,7 @@ CREATE TABLE "public"."interviews" (
   "current_question_index" integer DEFAULT 0,
   "is_general" boolean DEFAULT false,
   "is_system_defined" boolean DEFAULT false,
-  created_at timestamp with time zone DEFAULT "now"() NOT NULL
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."interviews" OWNER TO "postgres";
 
@@ -83,7 +83,7 @@ ALTER TABLE "public"."interviews" OWNER TO "postgres";
 CREATE TABLE "public"."interview_evaluations" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
-  "overall_score" decimal(4,2),
+  "overall_score" decimal(5,2),
   "evaluation_scores" jsonb,
   "strengths" text,
   "areas_for_improvement" text,
@@ -96,10 +96,15 @@ ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 
 CREATE TABLE "public"."interview_analytics" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "interview_id" "uuid" NOT NULL,
-  "avg_overall_score" DECIMAL(4,2) NOT NULL DEFAULT 0.00,
-  "avg_evaluation_criteria" NOT NULL DEFAULT jsonb,
+  "template_id" "uuid",
+  "interview_title" character varying,
+  "interview_description" text,
   "total_interviews" INTEGER NOT NULL DEFAULT 0,
+  "avg_overall_score" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  "avg_evaluation_criteria" NOT NULL DEFAULT jsonb,
+  "strengths_summary", text[]
+  "areas_for_improvement_summary", text[]
+  "recommendations_summary", text[]
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -180,6 +185,8 @@ CREATE TABLE "public"."interview_answers" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_question_id" "uuid" NOT NULL,
   "text" text
+  "score" integer
+  "feedback" text
 );
 --
 -- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres

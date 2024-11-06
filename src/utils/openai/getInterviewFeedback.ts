@@ -1,47 +1,73 @@
 'use server';
 
-import { EvaluationCriteriaType, InterviewEvaluation } from '@/types';
-import axios from 'axios';
+import {
+  EvaluationCriteriaType,
+  FeedbackData,
+  InterviewEvaluation,
+} from '@/types';
+
+import { insertInterviewEvaluation } from '@/data/user/interviews';
+import OpenAI from 'openai';
 
 const openAiKey = process.env.OPENAI_SECRET_KEY;
+
 if (!openAiKey) {
-  throw new Error('OpenAI API key is missing');
+  throw new Error(
+    'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
+  );
 }
 
-// Function to get interview feedback from OpenAI
-export const getInterviewFeedback = async (
+const openai = new OpenAI({
+  apiKey: openAiKey,
+});
+/**
+ * Constructs the prompt for OpenAI based on the interview details
+ */
+const constructPrompt = (
   interviewTitle: string,
   questions: string[],
   answers: string[],
   evaluationCriteria: EvaluationCriteriaType[],
-): Promise<InterviewEvaluation> => {
-  // Construct the formatted responses
+): string => {
   const formattedResponses = questions
-    .map((question, index) => {
-      return `**Question**: ${question}\n**Answer**: "${answers[index]}"`;
-    })
+    .map(
+      (question, index) =>
+        `**Question**: ${question}\n**Answer**: "${answers[index]}"`,
+    )
     .join('\n\n');
 
-  // Construct the evaluation criteria section
   const formattedCriteria = evaluationCriteria
-    .map((criterion, index) => {
-      return `${index + 1}. **${criterion.name}**: ${criterion.description}`;
-    })
+    .map(
+      (criterion, index) =>
+        `${index + 1}. **${criterion.name}**: ${criterion.description}`,
+    )
     .join('\n');
 
-  // Construct a placeholder for evaluation_scores in the Output Format
-  const evaluationScoresPlaceholder = evaluationCriteria
+  // Construct the evaluation scores template without type annotations
+  const evaluationScoresTemplate = evaluationCriteria
     .map((criterion) => {
       return `{
-        "id": "${criterion.id}",
-        "name": "${criterion.name}",
-        "score": number,
-        "feedback": "string"
-      }`;
+      "id": "${criterion.id}",
+      "name": "${criterion.name}",
+      "percent": number,
+      "feedback": "string"
+    }`;
     })
     .join(',\n    ');
 
-  // Construct the prompt
+  // Construct the evaluation scores template without type annotations
+  const questionAnswerFeedbackTemplate = questions
+    .map((question, index) => {
+      return `{
+    "question": "${question}",
+    "answer": "${answers[index]}",	
+    "percent": number,
+    "feedback": "string"
+  }`;
+    })
+    .join(',\n    ');
+
+  // Construct the prompt with enhanced instructions
   const prompt = `### Interview Context
 You are an AI evaluation assistant for an interview simulation platform. The following interview was conducted for a **${interviewTitle}**.
 
@@ -56,60 +82,136 @@ ${formattedResponses}
 ### Instructions
 Provide a detailed evaluation of the candidate's performance based on the above criteria. Your response should include:
 
-- **Overall Score**: An overall rating on a scale of 1 to 10 (1 = Poor, 10 = Excellent).
+- **Overall Score**: An overall grade on a scale of 1 to 100 (1 = Poor, 100 = Excellent).
 - **Evaluation Scores**: Individual scores for each evaluation criterion (on a scale of 1 to 10).
 - **Strengths**: Specific areas where the candidate excelled.
 - **Areas for Improvement**: Specific areas where the candidate could improve.
 - **Recommendations**: Any suggestions or next steps for the candidate.
+- **Question Answer Feedback**: The grade and specific feedback based on corresponding evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
+
+**Guidelines:**
+
+1. **Link Feedback to Specific Answers**: When evaluating each criterion, reference the specific answer related to that criterion. For example, if assessing "Problem Solving," mention how the candidate's answer to "How do you approach problems?" demonstrates their skills in that area.
+
+2. **Balanced Feedback**: Ensure that both strengths and areas for improvement are addressed for each criterion, especially if the candidate performed variably across different questions.
+
+3. **Avoid Generalizations**: Provide concrete examples from the candidate's answers to support your evaluations.
 
 **Output Format**:
-Please present your evaluation in the following JSON format:
+Please present your evaluation in the following JSON format without any additional text:
 
 \`\`\`json
 {
   "overall_score": number,
   "evaluation_scores": [
-    ${evaluationScoresPlaceholder}
+    ${evaluationScoresTemplate}
   ],
   "strengths": "string",
   "areas_for_improvement": "string",
-  "recommendations": "string"
+  "recommendations": "string",
+  "question_answer_feedback": [
+    ${questionAnswerFeedbackTemplate}
+  ]
 }
 \`\`\`
 
 **Note**: Ensure the JSON is properly formatted for parsing.
+`;
 
-Thank you!`;
+  return prompt;
+};
 
+/**
+ * Calls the OpenAI API with the constructed prompt
+ */
+const callOpenAI = async (prompt: string): Promise<string> => {
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 750,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${openAiKey}`, // Use Bearer token for authorization
-        },
-      },
-    );
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1500,
+      temperature: 0.7,
+    });
 
-    // Extract the AI's response
-    const aiResponse: string = response.data.choices[0].message.content;
+    if (
+      !completion.choices ||
+      completion.choices.length === 0 ||
+      !completion.choices[0].message.content
+    ) {
+      throw new Error('No completion choices returned from OpenAI.');
+    }
 
-    // Parse the JSON from the AI's response
-    const jsonStartIndex = aiResponse.indexOf('{');
-    const jsonEndIndex = aiResponse.lastIndexOf('}') + 1;
-    const jsonString = aiResponse.substring(jsonStartIndex, jsonEndIndex);
+    return completion.choices[0].message.content;
+  } catch (error) {
+    // Handle specific OpenAI API errors
+    if (error.response) {
+      console.error(
+        'OpenAI API Error:',
+        error.response.status,
+        error.response.data,
+      );
+      throw new Error(
+        `OpenAI API Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
+      );
+    } else {
+      console.error('OpenAI API Error:', error.message);
+      throw new Error(`OpenAI API Error: ${error.message}`);
+    }
+  }
+};
 
-    const feedbackData: InterviewEvaluation = JSON.parse(jsonString);
+/**
+ * Parses the AI's JSON response safely
+ */
+const parseAIResponse = (aiResponse: string): FeedbackData => {
+  try {
+    // Use a regex to extract JSON from code blocks
+    const jsonRegex = /```json([\s\S]*?)```/;
+    const match = aiResponse.match(jsonRegex);
+
+    if (!match || match.length < 2) {
+      throw new Error('JSON response not found in the AI output.');
+    }
+
+    const jsonString = match[1].trim();
+
+    const feedbackData: FeedbackData = JSON.parse(jsonString);
+
+    // Optional: Validate the structure of feedbackData here
+
     return feedbackData;
   } catch (error) {
-    console.error('Error fetching feedback from OpenAI:', error);
-    throw new Error('Failed to fetch feedback');
+    console.error('Error parsing AI response:', error.message);
+    throw new Error('Failed to parse AI response into JSON.');
   }
+};
+/**
+ * Main function to get interview feedback from OpenAI
+ */
+export const getInterviewFeedback = async (
+  interviewId: string,
+  interviewTitle: string,
+  questions: string[],
+  answers: string[],
+  evaluationCriteria: EvaluationCriteriaType[],
+): Promise<FeedbackData> => {
+  if (questions.length !== answers.length) {
+    throw new Error('The number of questions and answers must be the same.');
+  }
+
+  const prompt = constructPrompt(
+    interviewTitle,
+    questions,
+    answers,
+    evaluationCriteria,
+  );
+
+  const aiResponse = await callOpenAI(prompt);
+  const feedbackData = parseAIResponse(aiResponse);
+  await insertInterviewEvaluation(interviewId, feedbackData);
+  // insert into answer table feedback and score
+
+  console.log(feedbackData);
+
+  return feedbackData;
 };

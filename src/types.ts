@@ -34,6 +34,13 @@ export interface SupabaseFileUploadOptions {
   upsert?: boolean;
 }
 
+export type QuestionAnswerFeedback = {
+  question: string;
+  answer: string;
+  percent: number;
+  feedback: string;
+};
+
 export type EvaluationScores = {
   id: string;
   name: string;
@@ -65,14 +72,17 @@ export type AvgEvaluationScores = {
 };
 export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
 
-export type InterviewEvaluation = {
+export type InterviewEvaluation = Table<'interview_evaluations'>;
+export type FeedbackData = {
+  id: string;
+  interview_id: string;
   overall_score: number;
   evaluation_scores: EvaluationScores[];
   strengths: string;
   areas_for_improvement: string;
   recommendations: string;
+  question_answer_feedback: QuestionAnswerFeedback[];
 };
-
 /** One of the providers supported by GoTrue. */
 export type AuthProvider =
   | 'apple'

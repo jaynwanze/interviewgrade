@@ -73,6 +73,7 @@ CREATE TABLE "public"."interviews" (
   "is_general" boolean DEFAULT false,
   "is_system_defined" boolean DEFAULT false,
   "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+  "is_template_deleted" boolean DEFAULT false
 );
 ALTER TABLE "public"."interviews" OWNER TO "postgres";
 
@@ -97,11 +98,11 @@ ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 CREATE TABLE "public"."interview_analytics" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "template_id" "uuid",
-  "interview_title" character varying,
-  "interview_description" text,
+  "period_start" date NOT NULL,
+  "period_end" date NOT NULL,
   "total_interviews" INTEGER NOT NULL DEFAULT 0,
   "avg_overall_score" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  "avg_evaluation_criteria" NOT NULL DEFAULT jsonb,
+  "avg_evaluation_criteria_scoresdata" NOT NULL DEFAULT jsonb,
   "strengths_summary", text[]
   "areas_for_improvement_summary", text[]
   "recommendations_summary", text[]
@@ -334,11 +335,11 @@ ADD CONSTRAINT "interviews_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFER
 ALTER TABLE ONLY "public"."interview_evaluations"
 ADD CONSTRAINT "interview_evaluations_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
 --
--- Name: interview_analytics interview_analytics_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interview_analytics interview_analytics_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "interview_analytics_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "template"("id") ON DELETE CASCADE;
 --
 -- Name: templates templates_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

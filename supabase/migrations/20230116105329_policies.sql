@@ -125,7 +125,7 @@ DELETE TO "authenticated" USING (
 CREATE POLICY "candidates_can_view_own_interview_analytics" ON "public"."interview_analytics" FOR
 SELECT TO "authenticated" USING (
     EXISTS (
-        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."template_id" = "interview_analytics"."template_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
 );
 --
@@ -135,7 +135,7 @@ SELECT TO "authenticated" USING (
 CREATE POLICY "candidates_can_manage_own_interview_analytics_insert" ON "public"."interview_analytics" FOR
 INSERT TO "authenticated" WITH CHECK (
     EXISTS (
-        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."template_id" = "interview_analytics"."template_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
 );
 --
@@ -145,12 +145,12 @@ INSERT TO "authenticated" WITH CHECK (
 CREATE POLICY "candidates_can_manage_own_interview_analytics_update" ON "public"."interview_analytics" FOR
 UPDATE TO "authenticated" USING (
     EXISTS (
-        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."template_id" = "interview_analytics"."template_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
 )
 WITH CHECK (
     EXISTS (
-        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."template_id" = "interview_analytics"."template_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
 );
 --
@@ -160,7 +160,7 @@ WITH CHECK (
 CREATE POLICY "candidates_can_manage_own_interview_analytics_delete" ON "public"."interview_analytics" FOR
 DELETE TO "authenticated" USING (
     EXISTS (
-        SELECT 1 FROM "public"."interviews" WHERE "interviews"."id" = "interview_analytics"."interview_id" AND "interviews"."candidate_id" = "auth"."uid"()
+        SELECT 1 FROM "public"."interviews" WHERE "interviews"."template_id" = "interview_analytics"."template_id" AND "interviews"."candidate_id" = "auth"."uid"()
     )
 );
 --

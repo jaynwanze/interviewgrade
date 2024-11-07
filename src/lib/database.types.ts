@@ -298,35 +298,51 @@ export type Database = {
       interview_analytics: {
         Row: {
           id: string
-          interview_id: string
-          avg_overall_score: number
-          avg_evaluation_scores: AvgEvaluationScores[]
+          template_id: string
+          period_start: string
+          period_end: string
           total_interviews: number
+          avg_overall_score: number
+          avg_evaluation_criteria_scores: AvgEvaluationScores[]
+          strengths_summary: string[]
+          areas_for_improvement_summary: string[]
+          recommendations_summary: string[]
           created_at: string
           updated_at: string
         }
         Insert: {
-          interview_id: string
-          avg_overall_score: number
-          avg_evaluation_scores: AvgEvaluationScores[]
+          template_id: string
+          period_start: string
+          period_end: string
           total_interviews: number
-          created_at: string
-          updated_at: string
+          avg_overall_score: number
+          avg_evaluation_criteria_scores: AvgEvaluationScores[]
+          strengths_summary: string[]
+          areas_for_improvement_summary: string[]
+          recommendations_summary: string[]
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          interview_id?: string
+          template_id?: string
+          period_start?: string
+          period_end?: string
+          total_interviews: number
           avg_overall_Score?: number
-          avg_evaluation_scores?: AvgEvaluationScores[]
-          total_interviews?: number
+          avg_evaluation_criteria_scores?: AvgEvaluationScores[]
+          strengths_summary?: string[]
+          areas_for_improvement_summary?: string[]
+          recommendations_summary?: string[]
           created_at?: string
+          updated_at?: string
         }
 
         Relationships: [
           {
-            foreignKeyName: "interview_analytics_interview_id_fkey"
-            columns: ["interview_id"]
+            foreignKeyName: "interview_analytics_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: true
-            referencedRelation: "interviews"
+            referencedRelation: "templates"
             referencedColumns: ["id"]
           },
         ]
@@ -370,14 +386,14 @@ export type Database = {
           {
             foreignKeyName: "template_evaluation_criteria_template_id_fkey"
             columns: ["template_id"]
-            isOneToOne: true
+            isManyToMany: true
             referencedRelation: "templates"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "template_evaluation_criteria_evaluation_criteria_id_fkey"
             columns: ["evaluation_criteria_id"]
-            isOneToOne: true
+            isManyToMany: true
             referencedRelation: "evaluation_criteria"
             referencedColumns: ["id"]
           },

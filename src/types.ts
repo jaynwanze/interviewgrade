@@ -68,8 +68,11 @@ export type InterviewTemplateCategory = {
 };
 export type InterviewAnalytics = Table<'interview_analytics'>;
 export type AvgEvaluationScores = {
-  [key: string]: number; // Allows for dynamic evaluation criteria
-};
+  id: string;
+  name: string;
+  avg_score: number;
+  feedback_summary: string[];
+}
 export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
 
 export type InterviewEvaluation = Table<'interview_evaluations'>;

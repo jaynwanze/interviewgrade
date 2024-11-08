@@ -4,16 +4,16 @@ import { z } from 'zod';
 import InterviewHistoryDetailsPage from './InterviewHistoryDetailsPage';
 
 const paramsSchema = z.object({
-  historyId: z.string(),
+  interviewId: z.string(),
 });
 
 export default function InterviewHistory({
   params,
 }: {
-  params: { historyId: string };
+  params: { interviewId: string };
 }) {
   const parsedParams = paramsSchema.parse(params);
-  const { historyId } = parsedParams;
+  const { interviewId } = parsedParams;
 
-  return <InterviewHistoryDetailsPage historyId={historyId} />;
+  return <InterviewHistoryDetailsPage interviewId={interviewId} />;
 }

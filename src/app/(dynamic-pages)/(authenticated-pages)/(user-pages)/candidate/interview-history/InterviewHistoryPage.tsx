@@ -3,7 +3,6 @@ import { InterviewHistoryFilter } from '@/components/Interviews/InterviewHistory
 import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/InterviewHistoryList';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useInterviewHistory } from '@/hooks/useInterviewHistory';
-import LoadingCircle from '@/icons/loading-circle';
 
 export default function InterviewHistoryPage({
   candidateId,

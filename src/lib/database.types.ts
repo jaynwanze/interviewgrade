@@ -267,6 +267,7 @@ export type Database = {
           strengths: string
           areas_for_improvement: string
           recommendations: string
+          created_at: string
         }
 
         Insert: {
@@ -276,6 +277,7 @@ export type Database = {
           strengths: string
           areas_for_improvement: string
           recommendations: string
+          created_at?: string
         }
         Update: {
           interview_id?: string
@@ -284,6 +286,7 @@ export type Database = {
           strengths?: string
           areas_for_improvement?: string
           recommendations?: string
+          created_at?: string
         }
         Relationships: [
           {
@@ -298,7 +301,10 @@ export type Database = {
       interview_analytics: {
         Row: {
           id: string
+          candidate_id: string
           template_id: string
+          interview_title: string
+          interview_description: string
           period_start: string
           period_end: string
           total_interviews: number
@@ -312,6 +318,9 @@ export type Database = {
         }
         Insert: {
           template_id: string
+          candidate_id: string
+          interview_title: string
+          interview_description: string
           period_start: string
           period_end: string
           total_interviews: number
@@ -325,6 +334,9 @@ export type Database = {
         }
         Update: {
           template_id?: string
+          candidate_id?: string
+          interview_title?: string
+          interview_description?: string
           period_start?: string
           period_end?: string
           total_interviews: number
@@ -343,6 +355,13 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: true
             referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_analytics_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "candidates"
             referencedColumns: ["id"]
           },
         ]

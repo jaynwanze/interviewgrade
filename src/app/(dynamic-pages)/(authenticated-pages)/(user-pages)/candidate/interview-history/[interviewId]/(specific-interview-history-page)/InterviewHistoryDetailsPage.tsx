@@ -2,13 +2,13 @@
 import { InterviewHistoryDetails } from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
 
 export default function InterviewHistoryDetailsPage({
-  historyId,
+  interviewId,
 }: {
-  historyId: string;
+  interviewId: string;
 }) {
-  if (!historyId || typeof historyId !== 'string') {
+  if (!interviewId || typeof interviewId !== 'string') {
     return <div className="text-center p-4">Invalid interview ID.</div>;
   }
 
-  return <InterviewHistoryDetails interviewId={historyId} />;
+  return <InterviewHistoryDetails interviewId={interviewId} />;
 }

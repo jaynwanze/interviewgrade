@@ -1,6 +1,6 @@
 'use client';
+import { getInterviewHistory } from '@/data/user/interviews';
 import { Interview } from '@/types';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 export const useInterviewHistory = ({
@@ -21,14 +21,9 @@ export const useInterviewHistory = ({
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchInterviews = async () => {
-    setLoading(true);
+  const fetchInterviewHistory = async () => {
     try {
-      const response = await axios.get('/api/interviews/history', {
-        params: { candidate_id: candidateId },
-      });
-      const data: Interview[] = response.data;
+      const data = await getInterviewHistory(candidateId);
       setInterviews(data);
       setFilteredInterviews(data);
       setCounts({
@@ -37,21 +32,16 @@ export const useInterviewHistory = ({
         notCompleted: data.filter((i) => i.status === 'in_progress').length,
         notStarted: data.filter((i) => i.status === 'completed').length,
       });
-    } catch (err: any) {
-      console.error(
-        'Error fetching interview history:',
-        err.response?.data?.error || err.message,
-      );
-      setError(
-        err.response?.data?.error || 'Failed to fetch interview history',
-      );
+    } catch (error) {
+      console.error('Error fetching interview history:', error);
+      setError(error || 'Failed to fetch interview history');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInterviews();
+    fetchInterviewHistory();
   }, [candidateId]);
 
   const handleTabChange = (
@@ -90,6 +80,5 @@ export const useInterviewHistory = ({
     loading,
     error,
     handleTabChange,
-    fetchInterviews, // Exposed for re-fetching if needed
   };
 };

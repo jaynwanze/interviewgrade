@@ -72,7 +72,7 @@ CREATE TABLE "public"."interviews" (
   "current_question_index" integer DEFAULT 0,
   "is_general" boolean DEFAULT false,
   "is_system_defined" boolean DEFAULT false,
-  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
   "is_template_deleted" boolean DEFAULT false
 );
 ALTER TABLE "public"."interviews" OWNER TO "postgres";
@@ -88,7 +88,8 @@ CREATE TABLE "public"."interview_evaluations" (
   "evaluation_scores" jsonb,
   "strengths" text,
   "areas_for_improvement" text,
-  "recommendations" text
+  "recommendations" text,
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 --
@@ -97,15 +98,18 @@ ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 
 CREATE TABLE "public"."interview_analytics" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "template_id" "uuid",
+  "candidate_id" "uuid", NOT NULL
+  "template_id" "uuid", NOT NULL
+  "interview_title" character varying,
+  "interview_description" text,
   "period_start" date NOT NULL,
   "period_end" date NOT NULL,
   "total_interviews" INTEGER NOT NULL DEFAULT 0,
   "avg_overall_score" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  "avg_evaluation_criteria_scoresdata" NOT NULL DEFAULT jsonb,
-  "strengths_summary", text[]
-  "areas_for_improvement_summary", text[]
-  "recommendations_summary", text[]
+  "avg_evaluation_criteria_scores" NOT NULL DEFAULT jsonb,
+  "strengths_summary", text[] NOT NULL DEFAULT '{}'
+  "areas_for_improvement_summary", text[] NOT NULL DEFAULT '{}'
+  "recommendations_summary", text[] NOT NULL DEFAULT '{}'
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -341,6 +345,12 @@ ADD CONSTRAINT "interview_evaluations_interview_id_fkey" FOREIGN KEY ("interview
 ALTER TABLE ONLY "public"."interview_analytics"
 ADD CONSTRAINT "interview_analytics_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "template"("id") ON DELETE CASCADE;
 --
+-- Name: interview_analytics interview_analytics_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_analytics"
+ADD CONSTRAINT "interview_analytics_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidates"("id") ON DELETE CASCADE;
+--
 -- Name: templates templates_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -493,3 +503,17 @@ ADD CONSTRAINT "job_application_tracker_status_check" CHECK ("status" = ANY (ARR
 
 ALTER TABLE ONLY "public"."products"
 ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::product_status, 'inactive'::product_status]));
+
+--
+-- Name: interview_analytics interview_analytics_period_start_end_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_analytics"
+ADD CONSTRAINT "interview_analytics_period_start_end_check" CHECK ("period_start" <= "period_end");
+
+--
+-- Name: interview_analytics interview_analytics_avg_overall_score_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_analytics"
+ADD CONSTRAINT "interview_analytics_avg_overall_score_check" CHECK ("avg_overall_score" >= 0 AND "avg_overall_score" <= 100);

@@ -1,7 +1,10 @@
 'use client';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import {
+  getInterviewById,
+  getInterviewEvaluation,
+} from '@/data/user/interviews';
 import { Interview, InterviewEvaluation } from '@/types';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 export const InterviewHistoryDetails = ({
@@ -20,12 +23,12 @@ export const InterviewHistoryDetails = ({
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/api/interviews/${interviewId}`);
-      const data: Interview & { evaluation?: InterviewEvaluation } =
-        response.data;
-      setInterview(data);
-      if (data.evaluation) {
-        setEvaluation(data.evaluation);
+      const interview = await getInterviewById(interviewId);
+      const interviewEvaluation = await getInterviewEvaluation(interviewId);
+
+      setInterview(interview);
+      if (interviewEvaluation) {
+        setEvaluation(interviewEvaluation);
       }
     } catch (error) {
       console.error('Error fetching interview details:', error);
@@ -78,9 +81,9 @@ export const InterviewHistoryDetails = ({
       </div>
 
       {status === 'completed' && evaluation && (
-        <div className="mt-6">
+        <div className="mt-6 text-center">
           <h2 className="text-xl font-semibold mb-2">Interview Feedback</h2>
-          <div className="bg-gray-100 p-4 rounded-lg">
+          <div className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg">
             <p>
               <strong>Overall Score:</strong> {evaluation.overall_score}
             </p>

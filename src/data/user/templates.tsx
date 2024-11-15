@@ -1,6 +1,6 @@
 'use server';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { Table } from '@/types';
+import type { EvaluationCriteriaType, Table } from '@/types';
 
 export const getInterviewsTemplatesByCategory = async (
   category: string,
@@ -17,7 +17,9 @@ export const getInterviewsTemplatesByCategory = async (
   return data;
 };
 
-export const getTemplateEvaluationCriteria = async (templateId: string) => {
+export const getTemplateEvaluationCriteriasJsonFormat = async (
+  templateId: string,
+): Promise<EvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   const { data, error } = await supabase
@@ -39,7 +41,16 @@ export const getTemplateEvaluationCriteria = async (templateId: string) => {
     throw error;
   }
 
-  return data;
+  if (!data) {
+    return [];
+  }
+
+  return data
+    .filter(
+      (item): item is { evaluation_criteria: EvaluationCriteriaType } =>
+        item.evaluation_criteria !== null,
+    )
+    .map((item) => item.evaluation_criteria);
 };
 
 export const getTemplateQuestions = async (

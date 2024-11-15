@@ -65,7 +65,7 @@ CREATE TABLE "public"."interviews" (
   "difficulty" "public"."template_difficulty",
   "question_count" integer,
   "duration" integer,
-  "evaluation_criteria" jsonb,
+  "evaluation_criterias" jsonb,
   "start_time" timestamp with time zone,
   "end_time" timestamp with time zone,
   "status" "public"."interview_status" DEFAULT 'not_started'::interview_status NOT NULL,
@@ -89,6 +89,7 @@ CREATE TABLE "public"."interview_evaluations" (
   "strengths" text,
   "areas_for_improvement" text,
   "recommendations" text,
+  "question_answer_feedback" jsonb,
   "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
@@ -98,18 +99,18 @@ ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 
 CREATE TABLE "public"."interview_analytics" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "candidate_id" "uuid", NOT NULL
-  "template_id" "uuid", NOT NULL
+  "candidate_id" "uuid" NOT NULL,
+  "template_id" "uuid" NOT NULL,
   "interview_title" character varying,
   "interview_description" text,
   "period_start" date NOT NULL,
   "period_end" date NOT NULL,
   "total_interviews" INTEGER NOT NULL DEFAULT 0,
   "avg_overall_score" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  "avg_evaluation_criteria_scores" NOT NULL DEFAULT jsonb,
-  "strengths_summary", text[] NOT NULL DEFAULT '{}'
-  "areas_for_improvement_summary", text[] NOT NULL DEFAULT '{}'
-  "recommendations_summary", text[] NOT NULL DEFAULT '{}'
+  "avg_evaluation_criteria_scores" jsonb NOT NULL DEFAULT '{}',
+  "strengths_summary" text[] NOT NULL DEFAULT '{}',
+  "areas_for_improvement_summary" text[] NOT NULL DEFAULT '{}',
+  "recommendations_summary" text[] NOT NULL DEFAULT '{}',
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -165,6 +166,7 @@ CREATE TABLE "public"."questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "template_id" "uuid" NOT NULL,
   "type" "public"."question_type",
+  "evaluation_criteria_id" "uuid",
   "text" text,
   "sample_answer" text DEFAULT 'No sample answer provided'
 );
@@ -177,6 +179,7 @@ CREATE TABLE "public"."interview_questions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
   "type" "public"."question_type",
+  "evaluation_criteria" jsonb,
   "text" text,
   "sample_answer" text DEFAULT 'No sample answer provided'
 );
@@ -189,9 +192,7 @@ ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
 CREATE TABLE "public"."interview_answers" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_question_id" "uuid" NOT NULL,
-  "text" text
-  "score" integer
-  "feedback" text
+  "text" text,
 );
 --
 -- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres
@@ -325,7 +326,7 @@ ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "to
 --
 
 ALTER TABLE ONLY "public"."interviews"
-ADD CONSTRAINT "interviews_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id") ON DELETE SET NULL;
+ADD CONSTRAINT "interviews_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id");
 --
 -- Name: interviews interviews_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -343,7 +344,7 @@ ADD CONSTRAINT "interview_evaluations_interview_id_fkey" FOREIGN KEY ("interview
 --
 
 ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "template"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "interview_analytics_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id");
 --
 -- Name: interview_analytics interview_analytics_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -402,6 +403,12 @@ ADD CONSTRAINT "template_evaluation_criteria_evaluation_criteria_id_fkey" FOREIG
 
 ALTER TABLE ONLY "public"."questions"
 ADD CONSTRAINT "questions_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id") ON DELETE CASCADE;
+--
+-- Name: questions questions_evaluation_criteria_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."questions"
+ADD CONSTRAINT "questions_evaluation_criteria_id_fkey" FOREIGN KEY ("evaluation_criteria_id") REFERENCES "evaluation_criteria"("id") ON DELETE SET NULL;
 --
 -- Name: interview_questions interview_questions_interview_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

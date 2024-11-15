@@ -24,6 +24,7 @@ CREATE INDEX idx_templates_is_system_defined ON "public"."templates" ("is_system
 -- Indexes for questions
 CREATE INDEX idx_questions_id ON "public"."questions" ("id");
 CREATE INDEX idx_questions_template_id ON "public"."questions" ("template_id");
+CREATE INDEX idx_questions_evaluation_criteria_id ON "public"."questions" ("evaluation_criteria_id");
 
 -- Indexes for interview_evaluations
 CREATE INDEX idx_interview_evaluations_id ON "public"."interview_evaluations" ("id");

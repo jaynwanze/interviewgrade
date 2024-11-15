@@ -10,15 +10,18 @@ import {
   getInterview,
   getInterviewQuestions,
   insertInterviewAnswer,
-  updateInterview
+  updateInterview,
 } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
+  FeedbackData,
   Interview,
-  InterviewEvaluation,
-  InterviewQuestion
+  InterviewAnswerDetail,
+  InterviewQuestion,
+  InterviewAnswer,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { get } from 'http';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function InterviewFlow({
@@ -33,7 +36,7 @@ export default function InterviewFlow({
   const [isCameraOn, setIsCameraOn] = useState(false);
   const answers = useRef<string[]>([]);
   const [interviewFeedback, setInterviewFeedback] =
-    useState<InterviewEvaluation | null>(null);
+    useState<FeedbackData | null>(null);
   const [isFetchingFeedback, setIsFetchingFeedback] = useState(false);
   const [interview, setInterview] = useState<Interview | null>(null);
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
@@ -77,7 +80,7 @@ export default function InterviewFlow({
           .map(() => '');
         setAnswersLength(answers.current.length);
       }
-      setEvaluationCriteria(interview.evaluation_criteria ?? []);
+      setEvaluationCriteria(interview.evaluation_criterias ?? []);
     } catch (error) {
       console.error('Error fetching interview:', error);
     } finally {
@@ -118,21 +121,44 @@ export default function InterviewFlow({
 
   const handleInterviewComplete = async () => {
     setIsFetchingFeedback(true);
-    const questionsText = questions.map((question) => question.text);
+    // Ensure synchronization between questions and answers
+    if (questions.length !== answers.current.length) {
+      console.error('Mismatch between number of questions and answers.');
+      setIsFetchingFeedback(false);
+      return;
+    }
+
+    const interviewAnswersDetails: InterviewAnswerDetail[] = 
+    questions.map(
+      (question, index) => (
+        {
+        question: question.text,
+        answer: answers.current[index],
+        evaluation_criteria_name: question.evaluation_criteria.name,
+      }),
+    );
+
     try {
-      const feedback = await getInterviewFeedback(
-        interview?.id ?? '',
-        interview?.title ?? '',
-        questionsText,
-        answers.current,
+      // Validate interview data before proceeding
+      if (!interview?.id || !interview?.title) {
+        throw new Error('Interview ID or Title is missing.');
+      }
+
+      const feedback: FeedbackData = await getInterviewFeedback(
+        interview.id,
+        interview.title,
         evaluationCriteria,
+        interviewAnswersDetails,
       );
 
       setInterviewFeedback(feedback);
       setIsInterviewComplete(true);
       setIsCameraOn(false);
     } catch (error) {
-      console.error('Error fetching feedback:', error);
+      // Handle error better
+      console.error('Error fetching feedback:', error.message || error);
+      
+  
     } finally {
       setIsFetchingFeedback(false);
     }
@@ -162,7 +188,7 @@ export default function InterviewFlow({
   if (!interview && isLoading) {
     return (
       <div className="interview-flow-container flex justify-center items-center min-h-screen">
-        <LoadingSpinner />;
+        <LoadingSpinner />
       </div>
     );
   } else if (!interview && !isLoading) {

@@ -1,6 +1,6 @@
 'use server';
 import {
-  getTemplateEvaluationCriteria,
+  getTemplateEvaluationCriteriasJsonFormat,
   getTemplateQuestions,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
@@ -8,13 +8,15 @@ import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user
 import type {
   AvgEvaluationScores,
   EvaluationScores,
+  FeedbackData,
   Interview,
   InterviewComplete,
   InterviewEvaluation,
   InterviewTemplate,
   InterviewUpdate,
+  QuestionAnswerFeedback,
   SAPayload,
-  Table,
+  Table
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
@@ -26,16 +28,10 @@ export const createInterview = async (
   const user = await serverGetLoggedInUser();
   const candidateProfile = await getCandidateUserProfile(user.id);
   const candidateProfileId = candidateProfile.id;
-  const templateEvaluationCriteria = await getTemplateEvaluationCriteria(
-    interviewTemplate.id,
-  );
-  // Extract the evaluation criteria from the data
-  const InterviewEvaluationCriteria = templateEvaluationCriteria
-    .map((item) => item.evaluation_criteria)
-    .filter((criteria) => criteria !== null);
+  const templateEvaluationCriterias =
+    await getTemplateEvaluationCriteriasJsonFormat(interviewTemplate.id);
 
   //maybe add in description
-
   const { data, error } = await supabase
     .from('interviews')
     .insert({
@@ -46,7 +42,7 @@ export const createInterview = async (
       difficulty: interviewTemplate.difficulty,
       question_count: interviewTemplate.question_count,
       duration: interviewTemplate.duration,
-      evaluation_criteria: InterviewEvaluationCriteria,
+      evaluation_criterias: templateEvaluationCriterias,
       start_time: moment().toISOString(), // Ensure the time is in ISO format
       status: 'not_started',
       current_question_index: 0,
@@ -79,9 +75,21 @@ export const createInterviewQuestions = async (
     throw new Error('Failed to fetch template questions or no questions found');
   }
 
+  const templateEvaluationCriterias =
+    await getTemplateEvaluationCriteriasJsonFormat(interviewTemplate.id);
+
   let lastInsertData: Table<'interview_questions'> | null = null;
 
   for (const question of templateQuestions) {
+    // Find the corresponding evaluation criteria
+    const evaluationCriteria = templateEvaluationCriterias.find(
+      (criteria) => criteria.id === question.evaluation_criteria_id,
+    );
+    if (!evaluationCriteria) {
+      throw new Error(
+        `Evaluation criteria not found for question: ${question.text}`,
+      );
+    }
     const { data, error } = await supabase
       .from('interview_questions')
       .insert([
@@ -89,6 +97,7 @@ export const createInterviewQuestions = async (
           interview_id: interviewId,
           type: question.type,
           text: question.text,
+          evaluation_criteria: evaluationCriteria,
           sample_answer: question.sample_answer,
         },
       ])
@@ -103,7 +112,10 @@ export const createInterviewQuestions = async (
   }
 
   if (!lastInsertData) {
-    throw new Error('No interview questions were inserted');
+    return {
+      status: 'error',
+      message: 'No interview questions were inserted',
+    };
   }
 
   return {
@@ -196,21 +208,73 @@ export const insertInterviewAnswer = async (
 
   return data;
 };
+/*
+export const updateInterviewAnswer = async (
+  data: QuestionAnswerFeedback[],
+): Promise<SAPayload<Table<'interview_answers'>[]>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  let lastInsertData: Table<'interview_answers'> | null = null;
+
+  for (const answer of data) {
+    const { data, error } = await supabase
+      .from('interview_answers')
+      .update({
+        score: answer.score,
+        feedback: answer.feedback,
+      })
+      .eq('id', answer.interview_answer_id);
+    if (error) {
+      throw error;
+    }
+
+    lastInsertData = data ? data[0] : null;
+  }
+
+  if (!lastInsertData) {
+    return {
+      status: 'error',
+      message: 'No interview answer were updated',
+    };
+  }
+
+  return {
+    status: 'success',
+    data: lastInsertData,
+  };
+};
+
+export const getInterviewAnswers = async (
+  interviewId: string,
+): Promise<Table<'interview_answers'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_answers')
+    .select('*')
+    .eq('interview_id', interviewId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+*/
 
 export const insertInterviewEvaluation = async (
   interviewId: string,
-  InterviewEvaluation: InterviewEvaluation,
+  interviewEvaluation: FeedbackData,
 ): Promise<Table<'interview_evaluations'>> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interview_evaluations')
     .insert({
       interview_id: interviewId,
-      overall_score: InterviewEvaluation.overall_score,
-      evaluation_scores: InterviewEvaluation.evaluation_scores,
-      strengths: InterviewEvaluation.strengths,
-      areas_for_improvement: InterviewEvaluation.areas_for_improvement,
-      recommendations: InterviewEvaluation.recommendations,
+      overall_score: interviewEvaluation.overall_score,
+      evaluation_scores: interviewEvaluation.evaluation_scores,
+      strengths: interviewEvaluation.strengths,
+      areas_for_improvement: interviewEvaluation.areas_for_improvement,
+      recommendations: interviewEvaluation.recommendations,
+      question_answer_feedback: interviewEvaluation.question_answer_feedback,
     })
     .single();
 
@@ -499,7 +563,7 @@ export const getInterviewAnalytics = async (
   }
 
   return data;
-}
+};
 
 export const getInterviewHistory = async (
   candidateId: string,
@@ -515,7 +579,7 @@ export const getInterviewHistory = async (
   }
 
   return data;
-}
+};
 
 export const getInterviewById = async (
   interviewId: string,
@@ -532,7 +596,7 @@ export const getInterviewById = async (
   }
 
   return data;
-}
+};
 
 export const getInterviewEvaluation = async (
   interviewId: string,
@@ -549,4 +613,4 @@ export const getInterviewEvaluation = async (
   }
 
   return data;
-}
+};

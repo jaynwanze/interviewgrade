@@ -1,4 +1,4 @@
-import { AvgEvaluationScores, EvaluationCriteriaType, EvaluationScores } from '@/types'
+import { AvgEvaluationScores, EvaluationCriteriaType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
   | number
@@ -195,7 +195,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number
           duration: number
-          evaluation_criteria: EvaluationCriteriaType[]
+          evaluation_criterias: EvaluationCriteriaType[]
           start_time: string
           end_time: string
           status: Database["public"]["Enums"]["interview_status"]
@@ -213,7 +213,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number
           duration: number
-          evaluation_criteria: EvaluationCriteriaType[]
+          evaluation_criterias: EvaluationCriteriaType[]
           start_time: string
           end_time?: string
           status: Database["public"]["Enums"]["interview_status"]
@@ -231,7 +231,7 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
           question_count?: number
           duration?: number
-          evaluation_criteria?: EvaluationCriteriaType[]
+          evaluation_criterias?: EvaluationCriteriaType[]
           start_time?: string
           end_time?: string
           status?: Database["public"]["Enums"]["interview_status"]
@@ -267,6 +267,7 @@ export type Database = {
           strengths: string
           areas_for_improvement: string
           recommendations: string
+          question_answer_feedback: QuestionAnswerFeedback[];
           created_at: string
         }
 
@@ -277,6 +278,7 @@ export type Database = {
           strengths: string
           areas_for_improvement: string
           recommendations: string
+          question_answer_feedback: QuestionAnswerFeedback[];
           created_at?: string
         }
         Update: {
@@ -286,6 +288,7 @@ export type Database = {
           strengths?: string
           areas_for_improvement?: string
           recommendations?: string
+          question_answer_feedback?: QuestionAnswerFeedback[];
           created_at?: string
         }
         Relationships: [
@@ -485,18 +488,21 @@ export type Database = {
           id: string
           template_id: string
           type: Database["public"]["Enums"]["question_type"]
+          evaluation_criteria_id: string
           text: string
           sample_answer: string
         }
         Insert: {
           template_id: string
           type: Database["public"]["Enums"]["question_type"]
+          evaluation_criteria_id: string
           text?: string
           sample_answer: string
         }
         Update: {
           template_id?: string
           type?: Database["public"]["Enums"]["question_type"]
+          evaluation_criteria_id?: string
           text?: string
           sample_answer?: string
         }
@@ -508,6 +514,13 @@ export type Database = {
             referencedRelation: "templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "questions_evaluation_criteria_id_fkey"
+            columns: ["evaluation_criteria_id"]
+            isOneToOne: true
+            referencedRelation: "evaluation_criteria"
+            referencedColumns: ["id"]
+          },
         ]
       }
       interview_questions: {
@@ -515,18 +528,21 @@ export type Database = {
           id: string
           interview_id: string
           type: Database["public"]["Enums"]["question_type"]
+          evaluation_criteria: EvaluationCriteriaType
           text: string
           sample_answer: string
         }
         Insert: {
           interview_id: string
           type: Database["public"]["Enums"]["question_type"]
+          evaluation_criteria: EvaluationCriteriaType
           text: string
           sample_answer: string
         }
         Update: {
           interview_id?: string
           type?: Database["public"]["Enums"]["question_type"]
+          evaluation_criteria?: EvaluationCriteriaType
           text?: string
           sample_answer?: string
         }
@@ -545,14 +561,20 @@ export type Database = {
           id: string
           interview_question_id: string
           text: string
+          score: number
+          feedback: string
         }
         Insert: {
           interview_question_id: string
           text: string
+          score?: number
+          feedback?: string
         }
         Update: {
           interview_question_id?: string
           text?: string
+          score?: number
+          feedback?: string
         }
         Relationships: [
           {

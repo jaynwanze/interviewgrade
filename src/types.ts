@@ -37,7 +37,7 @@ export interface SupabaseFileUploadOptions {
 export type QuestionAnswerFeedback = {
   question: string;
   answer: string;
-  percent: number;
+  score: number;
   feedback: string;
 };
 
@@ -47,7 +47,6 @@ export type EvaluationScores = {
   score: number;
   feedback: string;
 };
-// types.ts
 
 export type InterviewUpdate = Pick<
   Table<'interviews'>,
@@ -57,6 +56,18 @@ export type InterviewComplete = Pick<
   Table<'interviews'>,
   'id' | 'end_time' | 'status' | 'current_question_index'
 >;
+
+export type UpdateInterviewAnswer = Pick<
+  Table<'interview_answers'>,
+  'score' | 'feedback'
+>;
+export type InterviewAnswerDetail = {
+  question: string;
+  answer: string;
+  evaluation_criteria_name: string;
+};
+
+export type InterviewAnswer = Table<'interview_answers'>;
 
 export type EvaluationCriteriaType = Table<'evaluation_criteria'>;
 export type InterviewTemplate = Table<'templates'>;
@@ -72,13 +83,11 @@ export type AvgEvaluationScores = {
   name: string;
   avg_score: number;
   feedback_summary: string[];
-}
+};
 export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
 
 export type InterviewEvaluation = Table<'interview_evaluations'>;
 export type FeedbackData = {
-  id: string;
-  interview_id: string;
   overall_score: number;
   evaluation_scores: EvaluationScores[];
   strengths: string;
@@ -86,6 +95,7 @@ export type FeedbackData = {
   recommendations: string;
   question_answer_feedback: QuestionAnswerFeedback[];
 };
+
 /** One of the providers supported by GoTrue. */
 export type AuthProvider =
   | 'apple'

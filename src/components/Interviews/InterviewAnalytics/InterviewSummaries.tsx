@@ -13,9 +13,14 @@ export const InterviewSummaries = ({
   recommendations: string[];
 }) => {
   return (
+    
     <div className="space-y-4">
+    
       {/* Strengths */}
       <div>
+      <h4 className="text-sm text-gray-500 dark:text-gray-300 text-center mb-2">
+        Evaluation Criteria Feedback Summaries
+        </h4>
         <HighlightedItem items={strengths} label="Strengths" />
       </div>
 

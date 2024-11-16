@@ -1,10 +1,11 @@
 'use client';
+import { InterviewAnalytics } from '@/types';
 import { motion } from 'framer-motion';
-import { AreaChartInteractiveLarge } from './AreaChartInteractive';
-import { BarChartActive } from './BarChartActive';
-import { BarChartInteractive } from './BarChartInteractive';
-import { RadarChartGridCircleFilled } from './RadarChartGridCircleFilled';
-import { RadialChartGrid } from './RadialChartGrid';
+import { BarChartActive } from '../BarChartActive';
+import { RadarChartGridCircleFilled } from '../RadarChartGridCircleFilled';
+import { RadialChartGrid } from '../RadialChartGrid';
+import { AreaChartInteractiveLarge } from './AreaChartInteractiveInterviewTotal';
+import { Card } from '@/components/ui/card';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -28,7 +29,11 @@ const itemVariants = {
   },
 };
 
-export function InterviewGraphs() {
+export function InterviewGraphsOverview({
+  analyticsData,
+}: {
+  analyticsData: InterviewAnalytics[];
+}) {
   return (
     <motion.div
       className="flex flex-col gap-6"
@@ -36,8 +41,13 @@ export function InterviewGraphs() {
       initial="hidden"
       animate="visible"
     >
+      {/*<motion.div variants={itemVariants}>
+        <BarChartInteractive /> 
+      </motion.div>*/}
       <motion.div variants={itemVariants}>
-        <BarChartInteractive />
+        <Card>
+          !-- Remove this Separator --! Latest Interview Analytics -- Card
+        </Card>
       </motion.div>
       <motion.div variants={itemVariants}>
         <AreaChartInteractiveLarge />

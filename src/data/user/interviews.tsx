@@ -614,3 +614,36 @@ export const getInterviewEvaluation = async (
 
   return data;
 };
+
+export const getCompletedInterviews = async (
+  candidateId: string,
+): Promise<Table<'interviews'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interviews')
+    .select('*')
+    .eq('candidate_id', candidateId)
+    .eq('status', 'completed');
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export const getInterviewEvaluations = async (
+  interviewId: string,
+): Promise<Table<'interview_evaluations'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_evaluations')
+    .select('*')
+    .eq('candidate_id', interviewId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

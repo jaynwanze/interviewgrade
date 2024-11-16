@@ -41,7 +41,7 @@ export const InterviewKeyMetrics = ({
     return () => intervals.forEach(clearInterval);
   }, [avgEvaluationCriteria]);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center items-center ">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
       {/* Total Interviews , Avg overeall score and avg score per mark */}
       <Card className=" p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
@@ -81,7 +81,7 @@ export const InterviewKeyMetrics = ({
       {/* Average Evaluation Criteria Scores */}
       <Card className="p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
-          Average Evaluation Criteria Feedback
+        Evaluation Criteria Feedback Summaries
         </h4>
         <ul className="space-y-2">
           {avgEvaluationCriteria.map((criteria, index) => (

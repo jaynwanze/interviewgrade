@@ -12,7 +12,7 @@ export const InterviewAnalyticsCard = ({
     data: InterviewAnalytics;
 }) => {
     return (
-        <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 transition-colors duration-300">
+        <Card className="shadow rounded-lg p-6 flex flex-col space-y-4">
             <div className="text-center">
                 <InterviewInfo
                     title={

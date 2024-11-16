@@ -30,7 +30,7 @@ export const HighlightedItem = ({
             <h4 className="text-sm font-medium text-gray-500 dark:text-gray-300">
                 {label}
             </h4>
-            <span className="text-xl font-medium me-2 px-2.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+            <span className="text-xl font-medium me-2 px-2.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700">
                 {randomItem}
             </span>
         </div>

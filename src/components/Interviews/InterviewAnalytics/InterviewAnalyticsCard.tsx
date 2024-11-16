@@ -1,28 +1,34 @@
 'use client';
 
+import { Card } from '@/components/ui/card';
 import { InterviewAnalytics } from '@/types';
 import { InterviewInfo } from './InterviewInfo';
 import { InterviewKeyMetrics } from './InterviewKeyMetrics';
 import { InterviewSummaries } from './InterviewSummaries';
-import { Card } from '@/components/ui/card';
 
-export const InterviewAnalyticsCard = ({ data }: { data: InterviewAnalytics }) => {
+export const InterviewAnalyticsCard = ({
+    data,
+}: {
+    data: InterviewAnalytics;
+}) => {
     return (
         <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 transition-colors duration-300">
-            <InterviewInfo
-                title={
-                    data.interview_title
-                        ? data.interview_title
-                        : 'Deleted interview template'
-                }
-                description={
-                    data.template_id
-                        ? data.interview_description
-                        : 'No description available.'
-                }
-                periodStart={data.period_start}
-                periodEnd={data.period_end}
-            />
+            <div className="text-center">
+                <InterviewInfo
+                    title={
+                        data.interview_title
+                            ? data.interview_title
+                            : 'Deleted interview template'
+                    }
+                    description={
+                        data.template_id
+                            ? data.interview_description
+                            : 'No description available.'
+                    }
+                    periodStart={data.period_start}
+                    periodEnd={data.period_end}
+                />
+            </div>
             <InterviewKeyMetrics
                 totalInterviews={data.total_interviews}
                 avgOverallScore={data.avg_overall_score}

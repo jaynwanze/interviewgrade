@@ -1,7 +1,9 @@
 'use client';
 
+import { Card } from '@/components/ui/card';
 import { AvgEvaluationScores } from '@/types';
 import { useEffect, useState } from 'react';
+import { RadialChart } from './RadialChart';
 
 const getRandomItem = (arr: string[]): string => {
   if (arr.length === 0) return 'No data available.';
@@ -39,40 +41,57 @@ export const InterviewKeyMetrics = ({
     return () => intervals.forEach(clearInterval);
   }, [avgEvaluationCriteria]);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Total Interviews */}
-      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center items-center ">
+      {/* Total Interviews , Avg overeall score and avg score per mark */}
+      <Card className=" p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
           Total Interviews
         </h4>
         <p className="text-2xl font-bold">{totalInterviews}</p>
-      </div>
-
-      {/* Average Overall Score */}
-      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded">
-        <h4 className="text-sm text-gray-500 dark:text-gray-300">
-          Average Overall Score
+        <h4 className="text-sm text-gray-500 dark:text-gray-300 text">
+          Average Overall Grade
         </h4>
         <p className="text-2xl font-bold ">
           {avgOverallScore.toFixed(2)} / 100
         </p>
-      </div>
+        <h4 className="text-sm text-gray-500 dark:text-gray-300 text">
+          Average Mark Per Question
+        </h4>
+        <p className="text-2xl font-bold ">
+          avg grade/ question.length / 100/ question.length
+        </p>
+      </Card>
 
       {/* Average Evaluation Criteria Scores */}
-      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded">
+      <Card className=" p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
-          Average Evaluation Criteria Scores
+          Average Evaluation Criteria Scores (Out of 10)
+        </h4>
+        <div className="grid grid-cols-2 gap-1 text-ellipsis text-wrap">
+          {avgEvaluationCriteria.map((criteria, index) => (
+            <div key={index}>
+              <div className="mb">
+                <RadialChart avgEvaluationCriteria={[criteria]} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Average Evaluation Criteria Scores */}
+      <Card className="p-4 rounded">
+        <h4 className="text-sm text-gray-500 dark:text-gray-300">
+          Average Evaluation Criteria Feedback
         </h4>
         <ul className="space-y-2">
           {avgEvaluationCriteria.map((criteria, index) => (
             <li key={criteria.id}>
-              <strong>{criteria.name}</strong>: {criteria.avg_score.toFixed(2)}{' '}
-              / 10
-              <strong> Feedback: {randomFeedbacks[index]} </strong>
+              <strong>{criteria.name} Feedback:</strong>
+              <p> {randomFeedbacks[index]} </p>
             </li>
           ))}
         </ul>
-      </div>
+      </Card>
     </div>
   );
 };

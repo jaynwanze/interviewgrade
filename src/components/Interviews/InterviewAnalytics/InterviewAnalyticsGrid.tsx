@@ -16,7 +16,7 @@ export const InterviewAnalyticsGrid = ({
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 mb-6" >
             {analyticsData.map((data) => (
                 <InterviewAnalyticsCard key={data.id} data={data} />
             ))}

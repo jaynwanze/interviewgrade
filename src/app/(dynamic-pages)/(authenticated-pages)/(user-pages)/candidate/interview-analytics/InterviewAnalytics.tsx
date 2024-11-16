@@ -1,10 +1,10 @@
 'use client';
 
 import { InterviewAnalyticsGrid } from '@/components/Interviews/InterviewAnalytics/InterviewAnalyticsGrid';
-import { InterviewFilters } from '@/components/Interviews/InterviewAnalytics/InterviewFilters';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { InterviewAnalytics } from '@/types';
 import { useState } from 'react';
+import { InterviewGraphs } from './_graphs/InterviewGraphs';
 
 const mockAnalyticsData: InterviewAnalytics[] = [
   {
@@ -99,18 +99,16 @@ export default function InterviewAnaltyicsPage() {
       <h1 className="text-4xl font-bold mb-8 text-center">
         Interview Analytics Dashboard
       </h1>
-      <InterviewFilters
-        filters={filters}
-        onFilterChange={(newFilters) =>
-          setFilters((prev) => ({ ...prev, ...newFilters }))
-        }
-      />
+
       {loading ? (
         <LoadingSpinner />
       ) : error ? (
         <p className="text-center">{error}</p>
       ) : (
-        <InterviewAnalyticsGrid analyticsData={mockAnalyticsData} />
+        <div>
+          <InterviewAnalyticsGrid analyticsData={mockAnalyticsData} />
+          <InterviewGraphs />
+        </div>
       )}
     </div>
   );

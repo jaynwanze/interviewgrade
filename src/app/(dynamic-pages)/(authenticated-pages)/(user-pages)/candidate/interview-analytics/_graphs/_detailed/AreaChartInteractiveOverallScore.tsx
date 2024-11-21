@@ -26,12 +26,7 @@ import { getCompletedInterviews } from '@/data/user/interviews';
 import { Interview } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import * as React from 'react';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis
-} from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 const chartConfig = {
   interview_grades: {
@@ -182,6 +177,14 @@ export function AreaChartInteractiveOverallScore() {
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tickCount={5}
+                tickFormatter={(value) => value}
+                width={40}
+                domain={[0, 100]}
+              />
               <XAxis
                 dataKey="date"
                 tickLine={false}

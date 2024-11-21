@@ -1,8 +1,10 @@
 'use client';
-import { Card } from '@/components/ui/card';
 import { InterviewAnalytics } from '@/types';
 import { motion } from 'framer-motion';
 import { AreaChartInteractiveOverallScore } from './AreaChartInteractiveOverallScore';
+import { BarChartInteractiveEvaluationScores } from './BarCharInteractiveEvaluationScores';
+import { BarChartStackedLegendEvaluationScores } from './BarChartStackedLegendEvaluationScores';
+import { LineChartIntereactiveEvaluationScores } from './LineChartInteractiveEvaluationScores';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,9 +44,14 @@ export function InterviewGraphsDetailed({
         <AreaChartInteractiveOverallScore />
       </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <Card>compare avg evaluation scores over time</Card>
+      <motion.div
+        variants={itemVariants}
+      >
+        <BarChartInteractiveEvaluationScores />
       </motion.div>
+
+  
+
     </motion.div>
   );
 }

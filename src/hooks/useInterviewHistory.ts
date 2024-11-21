@@ -28,9 +28,9 @@ export const useInterviewHistory = ({
       setFilteredInterviews(data);
       setCounts({
         all: data.length,
-        completed: data.filter((i) => i.status === 'not_started').length,
+        completed: data.filter((i) => i.status === 'completed').length,
         notCompleted: data.filter((i) => i.status === 'in_progress').length,
-        notStarted: data.filter((i) => i.status === 'completed').length,
+        notStarted: data.filter((i) => i.status === 'not_started').length,
       });
     } catch (error) {
       console.error('Error fetching interview history:', error);
@@ -54,7 +54,7 @@ export const useInterviewHistory = ({
         break;
       case 'Completed':
         setFilteredInterviews(
-          interviews.filter((i) => i.status === 'not_started'),
+          interviews.filter((i) => i.status === 'completed'),
         );
         break;
       case 'Not Completed':
@@ -64,7 +64,7 @@ export const useInterviewHistory = ({
         break;
       case 'Not Started':
         setFilteredInterviews(
-          interviews.filter((i) => i.status === 'completed'),
+          interviews.filter((i) => i.status === 'not_started'),
         );
         break;
       default:

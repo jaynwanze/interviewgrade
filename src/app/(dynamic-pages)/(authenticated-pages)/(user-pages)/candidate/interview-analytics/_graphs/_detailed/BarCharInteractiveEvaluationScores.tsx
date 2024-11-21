@@ -153,11 +153,10 @@ export function BarChartInteractiveEvaluationScores({
   const [activeChart, setActiveChart] = useState<keyof typeof chartConfig>(
     Object.keys(chartConfig)[0],
   );
-  //setActiveChart(Object.keys(chartConfig)[0]);
 
   const rawChartData: InterviewChartData[] = mockInterviewEvaluations.map(
     (evaluation) => {
-      const date = new Date(evaluation.created_at).toISOString().split('T')[0]; // Ensure date is in a valid format
+      const date = new Date(evaluation.created_at).toISOString().split('T')[0];
       const scores = evaluation.evaluation_scores.map((score) => ({
         name: normalizeKey(score.name),
         score: score.score,

@@ -3,7 +3,7 @@
 import { HighlightedItem } from '@/components/HighlightedItem';
 import { SummaryList } from '@/components/SummaryList';
 
-export const InterviewSummaries = ({
+export const InterviewCurrentAverageSummaries = ({
   strengths,
   areasForImprovement,
   recommendations,

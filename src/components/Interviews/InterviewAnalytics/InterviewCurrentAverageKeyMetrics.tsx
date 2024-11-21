@@ -11,7 +11,7 @@ const getRandomItem = (arr: string[]): string => {
   return arr[randomIndex];
 };
 
-export const InterviewKeyMetrics = ({
+export const InterviewCurrentAverageKeyMetrics = ({
   totalInterviews,
   avgOverallScore,
   avgEvaluationCriteria,
@@ -81,7 +81,7 @@ export const InterviewKeyMetrics = ({
       {/* Average Evaluation Criteria Scores */}
       <Card className="p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
-        Evaluation Criteria Feedback Summaries
+          Evaluation Criteria Feedback Summaries
         </h4>
         <ul className="space-y-2">
           {avgEvaluationCriteria.map((criteria, index) => (

@@ -1,6 +1,6 @@
 'use client';
 import { InterviewAnalytics } from '@/types';
-import { InterviewAnalyticsCard } from './InterviewAnalyticsCard';
+import { InterviewCurrentAverageCard } from './InterviewCurrentAverageCard';
 
 export const InterviewAnalyticsGrid = ({
     analyticsData,
@@ -10,7 +10,7 @@ export const InterviewAnalyticsGrid = ({
     if (!analyticsData || analyticsData.length === 0) {
         return (
             <p className="text-center">
-                No analytics data available for the selected filters.
+                No interview current averages and summaries data available at this current time.
             </p>
         );
     }
@@ -18,7 +18,7 @@ export const InterviewAnalyticsGrid = ({
     return (
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
             {analyticsData.map((data) => (
-                <InterviewAnalyticsCard key={data.id} data={data} />
+                <InterviewCurrentAverageCard key={data.id} data={data} />
             ))}
         </div>
     );

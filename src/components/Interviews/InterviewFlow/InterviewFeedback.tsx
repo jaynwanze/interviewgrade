@@ -33,7 +33,7 @@ export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
           {/* Overall Score */}
           <div className="text-center">
             <section className="mb-6">
-              <h2 className="text-xl font-semibold">Overall Score</h2>
+              <h2 className="text-xl font-semibold">Overall Grade</h2>
               <p className="text-3xl font-bold text-blue-600">
                 {feedback.overall_score}/100
               </p>
@@ -76,8 +76,8 @@ export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
           {feedback.question_answer_feedback &&
             feedback.question_answer_feedback.length > 0 && (
               <section className="mb-6">
-                <h3 className="text-lg font-semibold">
-                  Question Answer Feedback
+                <h3 className="text-lg font-semibold text-center mb-2">
+                  Answer Feedback
                 </h3>
                 <div className="space-y-4">
                   {feedback.question_answer_feedback.map(
@@ -93,7 +93,7 @@ export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
                           <strong>Answer:</strong> {qa.answer}
                         </p>
                         <p className="mb-2">
-                          <strong>Score:</strong> {qa.score}/
+                          <strong>Mark:</strong> {qa.score}/
                           {100 / feedback.question_answer_feedback.length}
                         </p>
                         <p>

@@ -38,12 +38,13 @@ export const createInterview = async (
       template_id: interviewTemplate.id,
       candidate_id: candidateProfileId,
       title: interviewTemplate.title,
+      description: interviewTemplate.description,
       role: interviewTemplate.role,
       difficulty: interviewTemplate.difficulty,
       question_count: interviewTemplate.question_count,
       duration: interviewTemplate.duration,
       evaluation_criterias: templateEvaluationCriterias,
-      start_time: moment().toISOString(), // Ensure the time is in ISO format
+      start_time: moment().toISOString(),
       status: 'not_started',
       current_question_index: 0,
       is_general: interviewTemplate.is_general,
@@ -640,6 +641,25 @@ export const getInterviewEvaluations = async (
     .from('interview_evaluations')
     .select('*')
     .eq('candidate_id', interviewId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export const getLatestInterviewCompleted = async (
+  candidateId: string,
+): Promise<Table<'interviews'> | null> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interviews')
+    .select('*')
+    .eq('candidate_id', candidateId)
+    .eq('status', 'completed')
+    .order('end_time', { ascending: false })
+    .single();
 
   if (error) {
     throw error;

@@ -41,14 +41,8 @@ export function InterviewGraphsOverview({
       initial="hidden"
       animate="visible"
     >
-      {/*<motion.div variants={itemVariants}>
-        <BarChartInteractive /> 
-      </motion.div>*/}
-      <motion.div variants={itemVariants}>
-        <Card>
-          !-- Remove this Separator --! Latest Interview Analytics -- Card
-        </Card>
-      </motion.div>
+  
+      
       <motion.div variants={itemVariants}>
         <AreaChartInteractiveLarge />
       </motion.div>
@@ -56,15 +50,6 @@ export function InterviewGraphsOverview({
         className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-flow-row auto-rows-max gap-6"
         variants={containerVariants}
       >
-        <motion.div variants={itemVariants}>
-          <BarChartActive />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <RadialChartGrid />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <RadarChartGridCircleFilled />
-        </motion.div>
       </motion.div>
     </motion.div>
   );

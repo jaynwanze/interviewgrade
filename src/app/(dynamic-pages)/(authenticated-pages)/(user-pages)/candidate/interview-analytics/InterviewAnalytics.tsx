@@ -9,6 +9,7 @@ import { InterviewAnalytics } from '@/types';
 import { useState } from 'react';
 import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
 import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOverview';
+import { InterviewLatestCard } from '@/components/Interviews/InterviewAnalytics/InterviewLatestCard';
 
 const mockAnalyticsData: InterviewAnalytics[] = [
   {
@@ -96,7 +97,7 @@ export default function InterviewAnalyticsPage() {
           </TabsList>
           {/* Dashboard Overview Tab */}
           <TabsContent value="overview">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-5">
               {/* Total Interviews Card */}
               <Card>
                 <CardHeader>
@@ -145,7 +146,7 @@ export default function InterviewAnalyticsPage() {
                 </CardContent>
               </Card>
             </div>
-            <Separator className="my-8" />
+            <InterviewLatestCard />
             <InterviewGraphsOverview analyticsData={analyticsData} />
           </TabsContent>
 

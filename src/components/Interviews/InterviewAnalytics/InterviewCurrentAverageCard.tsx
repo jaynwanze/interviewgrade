@@ -3,10 +3,10 @@
 import { Card } from '@/components/ui/card';
 import { InterviewAnalytics } from '@/types';
 import { InterviewInfo } from './InterviewInfo';
-import { InterviewKeyMetrics } from './InterviewKeyMetrics';
-import { InterviewSummaries } from './InterviewSummaries';
+import { InterviewCurrentAverageKeyMetrics } from './InterviewCurrentAverageKeyMetrics';
+import { InterviewCurrentAverageSummaries } from './InterviewCurrentAverageSummaries';
 
-export const InterviewAnalyticsCard = ({
+export const InterviewCurrentAverageCard = ({
     data,
 }: {
     data: InterviewAnalytics;
@@ -25,16 +25,15 @@ export const InterviewAnalyticsCard = ({
                             ? data.interview_description
                             : 'No description available.'
                     }
-                    periodStart={data.period_start}
-                    periodEnd={data.period_end}
+
                 />
             </div>
-            <InterviewKeyMetrics
+            <InterviewCurrentAverageKeyMetrics
                 totalInterviews={data.total_interviews}
                 avgOverallScore={data.avg_overall_score}
                 avgEvaluationCriteria={data.avg_evaluation_criteria_scores}
             />
-            <InterviewSummaries
+            <InterviewCurrentAverageSummaries
                 strengths={data.strengths_summary}
                 areasForImprovement={data.areas_for_improvement_summary}
                 recommendations={data.recommendations_summary}

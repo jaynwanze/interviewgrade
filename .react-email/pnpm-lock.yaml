@@ -160,7 +160,7 @@ importers:
         version: 1.0.12(next@14.3.0-canary.34(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       autoprefixer:
         specifier: ^10.4.13
-        version: 10.4.20(postcss@8.4.26)
+        version: 10.4.20(postcss@8.4.31)
       axios:
         specifier: ^1.2.1
         version: 1.7.6
@@ -352,8 +352,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(eslint@8.45.0)
       postcss:
-        specifier: 8.4.26
-        version: 8.4.26
+        specifier: 8.4.31
+        version: 8.4.31
       prettier:
         specifier: 3.0.0
         version: 3.0.0
@@ -7072,14 +7072,14 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  autoprefixer@10.4.20(postcss@8.4.26):
+  autoprefixer@10.4.20(postcss@8.4.31):
     dependencies:
       browserslist: 4.23.3
       caniuse-lite: 1.0.30001655
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.1
-      postcss: 8.4.26
+      postcss: 8.4.31
       postcss-value-parser: 4.2.0
 
   available-typed-arrays@1.0.7:

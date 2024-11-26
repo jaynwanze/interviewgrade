@@ -22,12 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getCompletedInterviews } from '@/data/user/interviews';
 import { Interview } from '@/types';
-import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import * as React from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
-
 
 const chartConfig = {
   interviews: {
@@ -39,19 +36,26 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function AreaChartInteractiveLarge() {
+export function AreaChartInteractiveLarge({
+  interviewsCompleted,
+}: {
+  interviewsCompleted: Interview[];
+}) {
   const [timeRange, setTimeRange] = React.useState('90d');
-  const [interviewsCompleted, setInterviewsCompleted] = React.useState<
-    Interview[]
-  >([]);
 
-  const chartData = interviewsCompleted.map((interview) => {
+  if (!interviewsCompleted || interviewsCompleted.length === 0) {
+    return (
+      <p className="text-center">
+        No interview data available for the selected time range.
+      </p>
+    );
+  }
+  const chartData = interviewsCompleted.map((interview: Interview) => {
     return {
       date: interview.end_time,
       interview: interviewsCompleted.length,
     };
-  }
-  );
+  });
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
@@ -65,20 +69,6 @@ export function AreaChartInteractiveLarge() {
     now.setDate(now.getDate() - daysToSubtract);
     return date >= now;
   });
-
-  const fetchInterviews = async () => {
-    try {
-      const user = await serverGetLoggedInUser();
-      const data = await getCompletedInterviews(user.id);
-      setInterviewsCompleted(data);
-    } catch (error) {
-      console.error('Failed to fetch interviews:', error);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchInterviews();
-  }, []);
 
   let timeRangeString: string;
   if (timeRange === '90d') {

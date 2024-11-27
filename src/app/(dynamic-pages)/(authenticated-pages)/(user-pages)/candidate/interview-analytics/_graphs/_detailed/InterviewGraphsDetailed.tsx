@@ -3,8 +3,6 @@ import { InterviewAnalytics } from '@/types';
 import { motion } from 'framer-motion';
 import { AreaChartInteractiveOverallScore } from './AreaChartInteractiveOverallScore';
 import { BarChartInteractiveEvaluationScores } from './BarCharInteractiveEvaluationScores';
-import { BarChartStackedLegendEvaluationScores } from './BarChartStackedLegendEvaluationScores';
-import { LineChartIntereactiveEvaluationScores } from './LineChartInteractiveEvaluationScores';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,7 +29,7 @@ const itemVariants = {
 export function InterviewGraphsDetailed({
   analyticsData,
 }: {
-  analyticsData: InterviewAnalytics[];
+  analyticsData: InterviewAnalytics;
 }) {
   return (
     <motion.div
@@ -41,17 +39,16 @@ export function InterviewGraphsDetailed({
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <AreaChartInteractiveOverallScore />
+        <AreaChartInteractiveOverallScore
+          templateId={analyticsData.template_id}
+        />
       </motion.div>
 
-      <motion.div
-        variants={itemVariants}
-      >
-        <BarChartInteractiveEvaluationScores />
+      <motion.div variants={itemVariants}>
+        <BarChartInteractiveEvaluationScores
+          templateId={analyticsData.template_id}
+        />
       </motion.div>
-
-  
-
     </motion.div>
   );
 }

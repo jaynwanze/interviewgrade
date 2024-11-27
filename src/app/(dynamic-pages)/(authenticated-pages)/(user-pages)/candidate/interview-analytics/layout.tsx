@@ -4,7 +4,6 @@ import { ReactNode } from 'react';
 
 export default function Layout({
   children,
-  navbar,
 }: {
   children: ReactNode;
   navbar: ReactNode;

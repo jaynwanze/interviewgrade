@@ -2,9 +2,9 @@
 
 import { Card } from '@/components/ui/card';
 import { InterviewAnalytics } from '@/types';
-import { InterviewInfo } from './InterviewInfo';
 import { InterviewCurrentAverageKeyMetrics } from './InterviewCurrentAverageKeyMetrics';
 import { InterviewCurrentAverageSummaries } from './InterviewCurrentAverageSummaries';
+import { InterviewInfo } from './InterviewInfo';
 
 export const InterviewCurrentAverageCard = ({
     data,
@@ -25,7 +25,6 @@ export const InterviewCurrentAverageCard = ({
                             ? data.interview_description
                             : 'No description available.'
                     }
-
                 />
             </div>
             <InterviewCurrentAverageKeyMetrics

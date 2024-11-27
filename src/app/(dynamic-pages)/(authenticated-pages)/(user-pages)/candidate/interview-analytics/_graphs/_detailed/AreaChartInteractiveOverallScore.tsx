@@ -22,11 +22,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getCompletedInterviews } from '@/data/user/interviews';
-import { Interview } from '@/types';
+import {
+  getCompletedInterviewsByTemplate,
+  getInterviewEvaluations,
+} from '@/data/user/interviews';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+
+export type rawDataTypeChart = { date: string; interview_grade: number }[];
 
 const chartConfig = {
   interview_grades: {
@@ -38,18 +42,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const rawChartData = [
-  { date: '2024-09-01', interview_grade: 50 },
-  { date: '2024-09-01', interview_grade: 70 },
-  { date: '2024-09-02', interview_grade: 50 },
-  { date: '2024-09-03', interview_grade: 100 },
-  { date: '2024-09-03', interview_grade: 75 },
-  { date: '2024-09-04', interview_grade: 80 },
-  // Add more raw data here
-];
-
 // Helper function to group by date and calculate the average grade
-function aggregateDataByDate(data: typeof rawChartData) {
+function aggregateDataByDate(data: rawDataTypeChart) {
   const aggregated: Record<
     string,
     { date: string; interview_grade: number; count: number }
@@ -66,18 +60,52 @@ function aggregateDataByDate(data: typeof rawChartData) {
 
   return Object.values(aggregated).map(({ date, interview_grade, count }) => ({
     date,
-    interview_grade: interview_grade / count, // Calculate average
+    interview_grade: interview_grade / count,
   }));
 }
 
-export function AreaChartInteractiveOverallScore() {
-  const [timeRange, setTimeRange] = React.useState('90d');
-  const [interviewsCompleted, setInterviewsCompleted] = React.useState<
-    Interview[]
-  >([]);
-  const [chartData, setChartData] = React.useState(
-    aggregateDataByDate(rawChartData),
-  );
+export function AreaChartInteractiveOverallScore({
+  templateId,
+}: {
+  templateId: string;
+}) {
+  const [timeRange, setTimeRange] = useState('90d');
+  let rawChartData: { date: string; interview_grade: number }[] = [];
+
+  const fetchInterviews = async () => {
+    try {
+      const user = await serverGetLoggedInUser();
+      const completedInterviews = await getCompletedInterviewsByTemplate(
+        user.id,
+        templateId,
+      );
+      if (!completedInterviews) {
+        return;
+      }
+      const completedInterviewsIds = completedInterviews.map(
+        (interview) => interview.id,
+      );
+      const data = await getInterviewEvaluations(completedInterviewsIds);
+      if (!data) {
+        return;
+      }
+      
+      rawChartData = data.map((interviewEval) => {
+        return {
+          date: interviewEval.created_at.split('T')[0],
+          interview_grade: interviewEval.overall_score,
+        };
+      });
+    } catch (error) {
+      console.error('Failed to fetch interviews:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchInterviews();
+  }, [templateId]);
+
+  const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
@@ -91,20 +119,6 @@ export function AreaChartInteractiveOverallScore() {
     now.setDate(now.getDate() - daysToSubtract);
     return date >= now;
   });
-
-  const fetchInterviews = async () => {
-    try {
-      const user = await serverGetLoggedInUser();
-      const data = await getCompletedInterviews(user.id);
-      setInterviewsCompleted(data);
-    } catch (error) {
-      console.error('Failed to fetch interviews:', error);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchInterviews();
-  }, []);
 
   let timeRangeString: string;
   if (timeRange === '90d') {

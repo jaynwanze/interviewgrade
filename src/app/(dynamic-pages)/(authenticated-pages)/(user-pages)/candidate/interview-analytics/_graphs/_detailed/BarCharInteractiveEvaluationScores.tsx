@@ -1,7 +1,7 @@
 'use client';
 
 import { InterviewEvaluation } from '@/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
@@ -26,6 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  getCompletedInterviewsByTemplate,
+  getInterviewEvaluations,
+} from '@/data/user/interviews';
+import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 export type InterviewChartData = {
   date: string;
@@ -35,40 +40,6 @@ export type InterviewChartData = {
   }[];
 };
 
-const mockInterviewEvaluations = [
-  {
-    created_at: '2024-09-01T12:00:00Z',
-    evaluation_scores: [
-      { name: 'Technical Knowledge', score: 8 },
-      { name: 'Problem Solving', score: 7 },
-      { name: 'Communication', score: 9 },
-    ],
-  },
-  {
-    created_at: '2024-09-02T12:00:00Z',
-    evaluation_scores: [
-      { name: 'Technical Knowledge', score: 7 },
-      { name: 'Problem Solving', score: 8 },
-      { name: 'Communication', score: 8 },
-    ],
-  },
-  {
-    created_at: '2024-09-03T12:00:00Z',
-    evaluation_scores: [
-      { name: 'Technical Knowledge', score: 9 },
-      { name: 'Problem Solving', score: 6 },
-      { name: 'Communication', score: 7 },
-    ],
-  },
-  {
-    created_at: '2024-09-04T12:00:00Z',
-    evaluation_scores: [
-      { name: 'Technical Knowledge', score: 8 },
-      { name: 'Problem Solving', score: 9 },
-      { name: 'Communication', score: 8 },
-    ],
-  },
-];
 
 export type ChartConfigType = {
   [key: string]: {
@@ -112,19 +83,32 @@ function aggregateDataByDate(data: InterviewChartData[]) {
 }
 
 export function BarChartInteractiveEvaluationScores({
-  interviewId,
+  templateId,
 }: {
-  interviewId: string;
+  templateId: string;
 }) {
   const [timeRange, setTimeRange] = useState('90d');
-  const [InterviewEvaluations, setInterviewEvalutations] = useState<
+  const [interviewEvaluations, setInterviewEvalutations] = useState<
     InterviewEvaluation[]
   >([]);
 
-  /*
   const fetchInterviewEvaluations = async () => {
     try {
-      const data = await getInterviewEvaluations(interviewId);
+      const user = await serverGetLoggedInUser();
+      const completedInterviews = await getCompletedInterviewsByTemplate(
+        user.id,
+        templateId,
+      );
+      if (!completedInterviews) {
+        return;
+      }
+      const completedInterviewsIds = completedInterviews.map(
+        (interview) => interview.id,
+      );
+      const data = await getInterviewEvaluations(completedInterviewsIds);
+      if (!data) {
+        return;
+      }
       setInterviewEvalutations(data);
     } catch (error) {
       console.error('Failed to fetch interviews:', error);
@@ -133,10 +117,10 @@ export function BarChartInteractiveEvaluationScores({
 
   useEffect(() => {
     fetchInterviewEvaluations();
-  }, [interviewId]); */
+  }, [templateId]);
 
   const normalizeKey = (key: string) => key.toLowerCase().replace(/\s+/g, '_');
-  const chartConfig: ChartConfigType = mockInterviewEvaluations.reduce(
+  const chartConfig: ChartConfigType = interviewEvaluations.reduce(
     (acc, evaluation) => {
       evaluation.evaluation_scores.forEach((score, index) => {
         const normalizedKey = normalizeKey(score.name);
@@ -154,7 +138,7 @@ export function BarChartInteractiveEvaluationScores({
     Object.keys(chartConfig)[0],
   );
 
-  const rawChartData: InterviewChartData[] = mockInterviewEvaluations.map(
+  const rawChartData: InterviewChartData[] = interviewEvaluations.map(
     (evaluation) => {
       const date = new Date(evaluation.created_at).toISOString().split('T')[0];
       const scores = evaluation.evaluation_scores.map((score) => ({

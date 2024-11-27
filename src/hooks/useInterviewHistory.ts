@@ -1,13 +1,10 @@
 'use client';
 import { getInterviewHistory } from '@/data/user/interviews';
 import { Interview } from '@/types';
+import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { useEffect, useState } from 'react';
 
-export const useInterviewHistory = ({
-  candidateId,
-}: {
-  candidateId: string;
-}) => {
+export const useInterviewHistory = () => {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [filteredInterviews, setFilteredInterviews] = useState<Interview[]>([]);
   const [activeTab, setActiveTab] = useState<
@@ -23,7 +20,9 @@ export const useInterviewHistory = ({
   const [error, setError] = useState<string | null>(null);
   const fetchInterviewHistory = async () => {
     try {
-      const data = await getInterviewHistory(candidateId);
+      const user = await serverGetLoggedInUser();
+      const userId = user.id;
+      const data = await getInterviewHistory(userId);
       setInterviews(data);
       setFilteredInterviews(data);
       setCounts({
@@ -42,7 +41,7 @@ export const useInterviewHistory = ({
 
   useEffect(() => {
     fetchInterviewHistory();
-  }, [candidateId]);
+  }, []);
 
   const handleTabChange = (
     tab: 'All' | 'Completed' | 'Not Completed' | 'Not Started',

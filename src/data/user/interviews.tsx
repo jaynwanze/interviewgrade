@@ -16,7 +16,7 @@ import type {
   InterviewUpdate,
   QuestionAnswerFeedback,
   SAPayload,
-  Table
+  Table,
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
@@ -263,6 +263,7 @@ export const getInterviewAnswers = async (
 
 export const insertInterviewEvaluation = async (
   interviewId: string,
+  templateId: string,
   interviewEvaluation: FeedbackData,
 ): Promise<Table<'interview_evaluations'>> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -270,6 +271,7 @@ export const insertInterviewEvaluation = async (
     .from('interview_evaluations')
     .insert({
       interview_id: interviewId,
+      template_id: templateId,
       overall_score: interviewEvaluation.overall_score,
       evaluation_scores: interviewEvaluation.evaluation_scores,
       strengths: interviewEvaluation.strengths,
@@ -551,15 +553,29 @@ export const removeInterviewAnalytics = async (
 };
 
 export const getInterviewAnalytics = async (
+  candidateId: string,
   templateId: string,
-): Promise<Table<'interview_analytics'>[]> => {
+): Promise<Table<'interview_analytics'> | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interview_analytics')
     .select('*')
-    .eq('template_id', templateId);
+    .eq('candidate_id', candidateId)
+    .eq('template_id', templateId)
+    .single();
 
   if (error) {
+    if (error.code === 'PGRST116') {
+      // Log invalid query or missing data errors
+      console.warn(
+        'No matching analytics data found for candidate:',
+        candidateId,
+        'and template:',
+        templateId,
+      );
+      return null; // Gracefully handle missing data
+    }
+    // Re-throw critical errors
     throw error;
   }
 
@@ -616,7 +632,7 @@ export const getInterviewEvaluation = async (
   return data;
 };
 
-export const getCompletedInterviews = async (
+export const getTotalCompletedInterviews = async (
   candidateId: string,
 ): Promise<Table<'interviews'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -631,23 +647,43 @@ export const getCompletedInterviews = async (
   }
 
   return data;
-}
+};
 
-export const getInterviewEvaluations = async (
-  interviewId: string,
-): Promise<Table<'interview_evaluations'>[]> => {
+export const getCompletedInterviewsByTemplate = async (
+  candidateId: string,
+  templateId: string,
+): Promise<Table<'interviews'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
-    .from('interview_evaluations')
+    .from('interviews')
     .select('*')
-    .eq('candidate_id', interviewId);
+    .eq('candidate_id', candidateId)
+    .eq('status', 'completed')
+    .eq('template_id', templateId);
 
   if (error) {
     throw error;
   }
 
   return data;
-}
+};
+
+export const getInterviewEvaluations = async (
+  completedInterviewsIds: string[],
+): Promise<Table<'interview_evaluations'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('interview_evaluations')
+    .select('*')
+    .in('interview_id', completedInterviewsIds);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
 
 export const getLatestInterviewCompleted = async (
   candidateId: string,
@@ -666,4 +702,4 @@ export const getLatestInterviewCompleted = async (
   }
 
   return data;
-}
+};

@@ -4,11 +4,7 @@ import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/I
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useInterviewHistory } from '@/hooks/useInterviewHistory';
 
-export default function InterviewHistoryPage({
-  candidateId,
-}: {
-  candidateId: string;
-}) {
+export default function InterviewHistoryPage() {
   const {
     interviews,
     filteredInterviews,
@@ -17,7 +13,7 @@ export default function InterviewHistoryPage({
     loading,
     error,
     handleTabChange,
-  } = useInterviewHistory({ candidateId });
+  } = useInterviewHistory();
 
   if (loading) {
     return <LoadingSpinner />;

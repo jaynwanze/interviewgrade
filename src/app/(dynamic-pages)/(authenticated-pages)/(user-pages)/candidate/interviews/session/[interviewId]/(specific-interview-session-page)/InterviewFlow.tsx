@@ -128,10 +128,8 @@ export default function InterviewFlow({
       return;
     }
 
-    const interviewAnswersDetails: InterviewAnswerDetail[] = 
-    questions.map(
-      (question, index) => (
-        {
+    const interviewAnswersDetails: InterviewAnswerDetail[] = questions.map(
+      (question, index) => ({
         question: question.text,
         answer: answers.current[index],
         evaluation_criteria_name: question.evaluation_criteria.name,
@@ -157,8 +155,6 @@ export default function InterviewFlow({
     } catch (error) {
       // Handle error better
       console.error('Error fetching feedback:', error.message || error);
-      
-  
     } finally {
       setIsFetchingFeedback(false);
     }

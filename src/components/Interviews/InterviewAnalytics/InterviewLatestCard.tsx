@@ -6,7 +6,7 @@ import { InterviewInfo } from './InterviewInfo';
 export const InterviewLatestCard = ({
   latestInterview,
 }: {
-  latestInterview: Interview;
+  latestInterview?: Interview | null;
 }) => {
   if (!latestInterview) {
     return (

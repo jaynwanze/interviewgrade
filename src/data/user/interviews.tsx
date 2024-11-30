@@ -263,7 +263,6 @@ export const getInterviewAnswers = async (
 
 export const insertInterviewEvaluation = async (
   interviewId: string,
-  templateId: string,
   interviewEvaluation: FeedbackData,
 ): Promise<Table<'interview_evaluations'>> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -271,7 +270,6 @@ export const insertInterviewEvaluation = async (
     .from('interview_evaluations')
     .insert({
       interview_id: interviewId,
-      template_id: templateId,
       overall_score: interviewEvaluation.overall_score,
       evaluation_scores: interviewEvaluation.evaluation_scores,
       strengths: interviewEvaluation.strengths,

@@ -30,13 +30,23 @@ const constructPrompt = (
   evaluationCriteria: EvaluationCriteriaType[],
   interviewAnswersDetails: InterviewAnswerDetail[],
 ): string => {
-  // Format the evaluation criteria
+  // Format the evaluation criteria with rubrics in a table
   const formattedCriteria = evaluationCriteria
-    .map(
-      (criterion, index) =>
-        `${index + 1}. **${criterion.name}**: ${criterion.description}`,
-    )
-    .join('\n');
+    .map((criterion, index) => {
+      const formattedRubrics = criterion.rubrics
+        .sort((a, b) => a.order - b.order)
+        .map(
+          (rubric) =>
+            `| ${rubric.percentage_range} | ${rubric.description} |`,
+        )
+        .join('\n');
+      
+      return `${index + 1}. **${criterion.name}**: ${criterion.description}\n   
+| Percentage Range | Description |
+|------------------|-------------|
+${formattedRubrics}`;
+    })
+    .join('\n\n');
 
   // Format the candidate's responses
   const formattedResponses = interviewAnswersDetails

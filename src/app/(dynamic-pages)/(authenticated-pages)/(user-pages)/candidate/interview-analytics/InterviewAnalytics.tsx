@@ -79,7 +79,9 @@ export default function InterviewAnalyticsPage() {
       </Card>
 
       {loading ? (
-        <LoadingSpinner />
+        <div className="flex flex-col items-center">
+          <LoadingSpinner />
+        </div>
       ) : error ? (
         <p className="text-center text-red-500">{error}</p>
       ) : (

@@ -43,22 +43,26 @@ export function InterviewTemplates({
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6 text-center">Select Interview</h1>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex justify-center mb-4">
         <Input
           placeholder="Search position or company"
-          className="flex-grow mr-4"
+          className="max-w-screen-2xl"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
       {isLoading ? (
-        <LoadingSpinner />
+        <div className="flex justify-center min-h-screen">
+          <LoadingSpinner />
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {interviewTemplates.map((interview) => (
-            <InterviewCardTemplate key={interview.id} {...interview} />
-          ))}
+        <div className="flex justify-center min-h-screen">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {interviewTemplates.map((interview) => (
+              <InterviewCardTemplate key={interview.id} {...interview} />
+            ))}
+          </div>
         </div>
       )}
     </div>

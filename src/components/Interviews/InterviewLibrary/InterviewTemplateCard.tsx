@@ -21,7 +21,7 @@ export const InterviewCardTemplate = (interviewTemplate: InterviewTemplate) => {
     <>
       <Card
         key={interviewTemplate.id}
-        className="border rounded-lg p-4 shadow-sm text-center "
+        className="border rounded-lg p-4 shadow-sm text-center max-w-96"
       >
         <CardTitle className="text-xl font-semibold">
           {interviewTemplate.title}

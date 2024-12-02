@@ -29,11 +29,9 @@ export default function InterviewDetailsDialog({
         // Create an interview session
         const interview = await createInterview(interviewTemplate);
         router.push(`/candidate/interviews/session/${interview.id}`);
-      }
-      catch (error) {
+      } catch (error) {
         console.error('Error creating interview:', error);
       }
-
     },
     {
       loadingMessage: 'Creating interview...',
@@ -46,39 +44,45 @@ export default function InterviewDetailsDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>How it Works</DialogTitle>
+          <div className="justify-items-center text-center">
+            <DialogTitle className="text-2xl">How it Works</DialogTitle>
+          </div>
         </DialogHeader>
         <DialogDescription>
-          <div className="flex justify-center text-align">
-            <div>
-              <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+          <div className="justify-items-center text-center mb-2">
+            <div className="mb-1">
+              <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                 Questions
               </span>
-              <p>Current interview questions on the container to the left.</p>
             </div>
-            <div>
-              <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+            <p className="text-base">
+              Current interview questions on the container to the left.
+            </p>
+          </div>
+          <div className="justify-items-center text-center mb-2">
+            <div className="mb-1">
+              <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                 Get Ready
               </span>
-              <p>
-                You will get 5 seconds before recording, once you receive the
-                question.
-              </p>
             </div>
-            <div>
-              <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+            <p className="text-base">
+              You will get 5 seconds before recording, once you receive the
+              question.
+            </p>
+          </div>
+          <div className="justify-items-center text-center mb-1">
+            <div className="mb-1">
+              <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                 Feedback
               </span>
-              <p>
-                You will receive feedback on your questions after you’ve
-                completed all the questions.
-              </p>
             </div>
+            <p className="text-base">
+              You will receive feedback on your questions after you’ve completed
+              all the questions.
+            </p>
           </div>
         </DialogDescription>
-        <Button className="mt-4" onClick={() => handleClick()}>
-          Start Interview
-        </Button>
+        <Button onClick={() => handleClick()}>Start Interview</Button>
       </DialogContent>
     </Dialog>
   );

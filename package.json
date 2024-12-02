@@ -7,6 +7,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@ahanapediatrics/react-volume-meter": "^5.10.1",
     "@calcom/embed-react": "^1.5.1",
     "@ffmpeg/ffmpeg": "^0.12.10",
     "@ffmpeg/util": "^0.12.1",
@@ -118,6 +119,7 @@
     "url-join": "^5.0.0",
     "uuid": "^9.0.1",
     "vaul": "^0.9.9",
+    "web-audio-peak-meter": "^3.1.0",
     "zod": "^3.23.8"
   },
   "scripts": {

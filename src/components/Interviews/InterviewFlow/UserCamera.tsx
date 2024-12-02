@@ -5,10 +5,9 @@ import { Button } from '@/components/ui/button';
 import { transcribeInterviewAudio } from '@/utils/openai/transcribeInterviewAudio';
 import { MediaRecorderHandler } from '@/utils/webspeech/mediaRecorder';
 import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { CandlestickMeter } from './CandleStickMeter'; // Adjust the path as needed
-
-// Define TypeScript interfaces for props if needed
+import { CandlestickMeter } from './CandleStickMeter';
 interface UserCameraProps {
   answerCallback: (answer: string) => void;
   isCameraOn: boolean;
@@ -26,6 +25,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
   const timerRef = useRef<number | null>(null); // Ref for timer
+  const durationRef = useRef<number | null>(null); // Ref for duration
+  const [durationTime, setDurationTime] = useState<number>(0); // Ref for duration
   const whisperFinalTranscript = useRef<string>(''); // Ref for final transcript
   const [isLoadingFFmpeg, setIsLoadingFFmpeg] = useState(false); // Loading state for FFmpeg
 
@@ -37,8 +38,17 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const { startRecognition, stopRecognition, finalTranscript } =
     useSpeechRecognition();
 
+  const pathname = usePathname();
+  const previousPathname = useRef<string | null>(pathname);
+
   useEffect(() => {
     let stream: MediaStream;
+
+    if (durationRef.current == null) {
+      durationRef.current = window.setInterval(() => {
+        setDurationTime((prev) => prev + 1);
+      }, 1000);
+    }
 
     const startCamera = async () => {
       try {
@@ -72,16 +82,27 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     }
 
     return () => {
-      if (stream) {
+      if (stream || pathname !== previousPathname.current) {
         const tracks = stream.getTracks();
         tracks.forEach((track) => track.stop());
+        videoRef.current ? (videoRef.current.srcObject = null) : null;
+        audioContextRef.current?.close();
+        audioContextRef.current = null;
       }
       mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg); // Ensure the recorder stops
 
       // Clean up AudioContext
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (audioContextRef.current || pathname !== previousPathname.current) {
+        audioContextRef.current?.close();
         audioContextRef.current = null;
+      }
+
+      // Clear the duration interval
+      if (durationRef.current || pathname !== previousPathname.current) {
+        if (durationRef.current !== null) {
+          clearInterval(durationRef.current);
+        }
+        durationRef.current = null;
       }
     };
   }, [isCameraOn]);
@@ -110,6 +131,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   };
 
   const handleEndRecord = useCallback(async () => {
+    if (!isRecording) return; // Prevent multiple calls
+
     setIsRecording(false);
     clearInterval(timerRef.current!); // Clear timer when recording ends
     stopRecognition(); // Stop speech recognition
@@ -123,11 +146,11 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         formData.append('file', convertedAudioBlob, 'audio.webm'); // Add the audio file
         formData.append('model', 'whisper-1'); // Specify the model here
         whisperFinalTranscript.current =
-          await transcribeInterviewAudio(formData); // Save the final transcript
+          await transcribeInterviewAudio(formData);
       }
     }
 
-    const webSpeechTranscript = finalTranscript.trim(); // Get the final transcript
+    const webSpeechTranscript = finalTranscript.trim();
     whisperFinalTranscript.current
       ? handleAnswer(whisperFinalTranscript.current)
       : handleAnswer(webSpeechTranscript);
@@ -140,32 +163,30 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       <video
         ref={videoRef}
         muted
-        className="w-full h-auto border-4 border-gray-300 rounded"
+        className="w-full h-auto border-4 border-gray-300 rounded mb-5"
       ></video>
-
       {/* Candlestick Sound Meter */}
-      {audioStreamRef.current && audioContextRef.current && (
-        <div className="mt-4 flex items-end justify-center">
-          <CandlestickMeter
-            audioContext={audioContextRef.current}
-            stream={audioStreamRef.current}
-            width={30} // Adjust width as needed
-            height={100} // Adjust height as needed
-          />
-        </div>
-      )}
 
-      <div className="mt-4">
+      <div className="flex justify-center items-center space-x-5">
         <Button className="mr-4" onClick={handleRecord} disabled={isRecording}>
           Start Recording
         </Button>
         <Button onClick={handleEndRecord} disabled={!isRecording}>
           End Recording
         </Button>
+        {audioStreamRef.current && audioContextRef.current && (
+          <CandlestickMeter
+            audioContext={audioContextRef.current}
+            stream={audioStreamRef.current}
+            width={30}
+            height={100}
+          />
+        )}
       </div>
       {isRecording && (
         <p className="mt-2">Recording for {recordingTime} seconds...</p>
       )}
+      <p className="mt-2"> duration: {durationTime} seconds</p>
     </div>
   );
 };

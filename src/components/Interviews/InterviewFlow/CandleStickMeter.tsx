@@ -1,4 +1,3 @@
-// CandlestickMeter.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -52,7 +51,12 @@ export const CandlestickMeter: React.FC<CandlestickMeterProps> = ({
       animationRef.current = requestAnimationFrame(updateMeter);
     };
 
-    updateMeter(); // Start the loop
+    // Add a small delay before starting the meter update loop
+    const startMeter = () => {
+      setTimeout(updateMeter, 100);
+    };
+
+    startMeter(); // Start the loop
 
     return () => {
       if (animationRef.current) {
@@ -78,15 +82,16 @@ export const CandlestickMeter: React.FC<CandlestickMeterProps> = ({
       style={{
         width: `${width}px`,
         height: `${height}px`,
-        border: '1px solid #ccc',
+        border: '2px solid #ccc',
         borderRadius: '5px',
         backgroundColor: '#f0f0f0',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
       }}
       aria-label="Audio Level Meter"
       role="meter"
-      aria-valuenow={Math.round(level * 100)}
+      aria-valuenow={Math.round(level * 3 * 100)}
       aria-valuemin={0}
       aria-valuemax={100}
     >
@@ -98,7 +103,7 @@ export const CandlestickMeter: React.FC<CandlestickMeterProps> = ({
           width: '100%',
           height: `${level * 3 * 100}%`,
           backgroundColor: getColor(level),
-          transition: 'height 0.05s ease-out, background-color 0.05s ease-out',
+          transition: 'height 0.1s ease-out, background-color 0.1s ease-out',
         }}
       ></div>
     </div>

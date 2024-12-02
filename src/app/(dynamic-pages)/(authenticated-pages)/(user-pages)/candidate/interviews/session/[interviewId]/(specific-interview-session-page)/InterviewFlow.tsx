@@ -4,7 +4,6 @@ import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuest
 import { InterviewFeedback } from '@/components/Interviews/InterviewFlow/InterviewFeedback';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { T } from '@/components/ui/Typography';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   getInterview,
@@ -18,10 +17,8 @@ import {
   Interview,
   InterviewAnswerDetail,
   InterviewQuestion,
-  InterviewAnswer,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
-import { get } from 'http';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function InterviewFlow({
@@ -181,7 +178,10 @@ export default function InterviewFlow({
     return <div className="text-center p-4">{completionMessage}</div>;
   }
 
-  if (!interview && isLoading) {
+  if (
+    (!interview && isLoading) ||
+    (!isInterviewComplete && !questions[currentQuestionIndex])
+  ) {
     return (
       <div className="interview-flow-container flex justify-center items-center min-h-screen">
         <LoadingSpinner />
@@ -195,55 +195,48 @@ export default function InterviewFlow({
         </h1>
       </div>
     );
+  } else if (isInterviewComplete) {
+    return (
+      <div className="flex flex-col items-center">
+        {interviewFeedback && interview ? (
+          <InterviewFeedback
+            interviewTitle={interview.title ?? ''}
+            feedback={interviewFeedback}
+          />
+        ) : (
+          <p>Loading feedback...</p>
+        )}
+      </div>
+    );
   }
 
   return (
     <div className="interview-flow-container flex justify-center items-center min-h-screen">
-      {!isInterviewComplete ? (
-        <div className="flex w-full max-w-4xl">
-          {questions[currentQuestionIndex] ? (
-            <>
-              <div className="left-side w-1/2 p-4">
-                <AIQuestionSpeaker
-                  question={questions[currentQuestionIndex]}
-                  currentIndex={currentQuestionIndex}
-                  questionsLength={questions.length}
-                />
-              </div>
-              <div className="right-side w-1/2 p-4">
-                <Card className="max-w-md text-center">
-                  <CardHeader>
-                    <CardTitle>Candidate</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <UserCamera
-                      answerCallback={handleAnswer}
-                      isCameraOn={true}
-                      onRecordEnd={handleNextQuestion}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </>
-          ) : (
-            <div className="interview-flow-container flex justify-center items-center min-h-screen">
-              <LoadingSpinner />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center">
-          <T.Subtle>Interview Completed!</T.Subtle>
-          {interviewFeedback && interview ? (
-            <InterviewFeedback
-              interviewTitle={interview.title ?? ''}
-              feedback={interviewFeedback}
+      <div className="flex w-full max-w-4xl">
+        <>
+          <div className="left-side w-1/2 p-4">
+            <AIQuestionSpeaker
+              question={questions[currentQuestionIndex]}
+              currentIndex={currentQuestionIndex}
+              questionsLength={questions.length}
             />
-          ) : (
-            <p>Loading feedback...</p>
-          )}
-        </div>
-      )}
+          </div>
+          <div className="right-side w-1/2 p-4">
+            <Card className="max-w-md text-center">
+              <CardHeader>
+                <CardTitle>Candidate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UserCamera
+                  answerCallback={handleAnswer}
+                  isCameraOn={true}
+                  onRecordEnd={handleNextQuestion}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      </div>
     </div>
   );
 }

@@ -40,10 +40,6 @@ export function InterviewGraphsOverview({
       <motion.div variants={itemVariants}>
         <AreaChartInteractiveLarge interviewsCompleted={interviewsCompleted} />
       </motion.div>
-      <motion.div
-        className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-flow-row auto-rows-max gap-6"
-        variants={containerVariants}
-      ></motion.div>
     </motion.div>
   );
 }

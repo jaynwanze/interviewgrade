@@ -1,9 +1,13 @@
 'use server';
 
-import { insertInterviewEvaluation } from '@/data/user/interviews';
+import {
+  insertInterviewEvaluation,
+  updateInterviewAnalytics,
+} from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
   FeedbackData,
+  Interview,
   InterviewAnswerDetail,
 } from '@/types';
 import OpenAI from 'openai';
@@ -30,32 +34,35 @@ const constructPrompt = (
   evaluationCriteria: EvaluationCriteriaType[],
   interviewAnswersDetails: InterviewAnswerDetail[],
 ): string => {
-  // Format the evaluation criteria with rubrics in a table
+  // Helper function to format rubrics
+  const formatRubrics = (
+    rubrics: { order: number; percentage_range: string; description: string }[],
+  ) =>
+    rubrics
+      .sort((a, b) => a.order - b.order)
+      .map((rubric) => `| ${rubric.percentage_range} | ${rubric.description} |`)
+      .join('\n');
+
+  // Format the evaluation criteria
   const formattedCriteria = evaluationCriteria
-    .map((criterion, index) => {
-      const formattedRubrics = criterion.rubrics
-        .sort((a, b) => a.order - b.order)
-        .map(
-          (rubric) =>
-            `| ${rubric.percentage_range} | ${rubric.description} |`,
-        )
-        .join('\n');
-      
-      return `${index + 1}. **${criterion.name}**: ${criterion.description}\n   
+    .map(
+      (criterion, index) =>
+        `${index + 1}. **${criterion.name}**: ${criterion.description}\n   
 | Percentage Range | Description |
 |------------------|-------------|
-${formattedRubrics}`;
-    })
+${formatRubrics(criterion.rubrics)}`,
+    )
     .join('\n\n');
 
   // Format the candidate's responses
   const formattedResponses = interviewAnswersDetails
-    .map((detail) => {
-      return `**Question**: ${detail.question}\n**Answer**: "${detail.answer}"\n**Evaluation Criteria**: ${detail.evaluation_criteria_name}`;
-    })
+    .map(
+      (detail) =>
+        `**Question**: ${detail.question}\n**Answer**: "${detail.answer}"\n**Evaluation Criteria**: ${detail.evaluation_criteria_name}`,
+    )
     .join('\n\n');
 
-  // Construct the evaluation scores and feedback templates without type annotations
+  // Construct the evaluation scores and feedback templates
   const evaluationScoresTemplate = evaluationCriteria
     .map(
       (criterion) => `{
@@ -78,43 +85,41 @@ ${formattedRubrics}`;
     )
     .join(',\n    ');
 
-  // Determine the max score per question to align with overall score
-  const numberOfQuestions = interviewAnswersDetails.length;
+  // Determine maximum score per question
+  const numberOfQuestions = interviewAnswersDetails.length || 1; // Avoid division by zero
   const maxTotalScore = 100;
   const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
 
   // Construct the prompt
-  const prompt = `### Interview Context
-You are an AI evaluation assistant for an interview simulation platform. The following interview was conducted for a **${interviewTitle}**.
+  return `### Interview Context
+As an interviewer for an innovative online interview platform, your task is to evaluate candidates based on their responses for a **${interviewTitle}**.
 
 ### Evaluation Criteria
-Please evaluate the candidate based on the following criteria:
+Evaluate the candidate based on the following criteria, using the rubric provided:
 
 ${formattedCriteria}
 
 ### Candidate's Responses
 ${formattedResponses}
 
-### Instructions
-Provide a detailed evaluation of the candidate's performance based on the above criteria. Your response should include:
-
-- **Overall Score**: An overall grade on a scale of 1 to 100 (1 = Poor, 100 = Excellent).
-- **Evaluation Scores**: Individual scores for each evaluation criterion (on a scale of 1 to 10).
-- **Strengths**: Specific areas where the candidate excelled.
-- **Areas for Improvement**: Specific areas where the candidate could improve.
-- **Recommendations**: Any suggestions or next steps for the candidate.
+### General Instructions
+Your evaluation should include:
+- **Overall Score**: An overall grade on a scale of 1 to 100.
+- **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10.
+- **Strengths and Areas for Improvement**: Specific feedback highlighting areas where the candidate excelled or could improve.
+- **Recommendations**: Suggestions for how the candidate could improve.
 - **Question Answer Feedback**: Grades which add up to the overall score and specific feedback for each question and answer pair.
 
-**Guidelines:**
-
-1. **Link Feedback to Specific Answers**: Reference specific answers related to each criterion. For example, when evaluating a specific criteria, mention how the candidate's answer to the linked question demonstrates their skills in that area.
-
+### Guidelines
+1. **Link Feedback to Specific Answers**: Reference specific answers related to each criterion. For example, when evaluating a specific criterion, mention how the candidate's answer to the linked question demonstrates their skills in that area.
 2. **Balanced Feedback**: Address both strengths and areas for improvement for each criterion, especially if the candidate performed variably across different questions.
-
 3. **Avoid Generalizations**: Provide concrete examples from the candidate's answers to support your evaluations.
+4. **Scoring Constraints**:
+   - The **sum of all question scores** in "question_answer_feedback" **must equal** the "overall_score".
+   - Each question's **maximum score is ${maxScorePerQuestion}**.
 
-**Output Format**:
-Provide your evaluation in the following JSON format without any additional text. Ensure that the sum of all question scores in "question_answer_feedback" equals the "overall_score". Each question's maximum score is ${maxScorePerQuestion}.
+### Output Format
+Provide your evaluation in the following JSON format:
 
 \`\`\`json
 {
@@ -131,10 +136,9 @@ Provide your evaluation in the following JSON format without any additional text
 }
 \`\`\`
 
-**Note**: Ensure the JSON is properly formatted for parsing. The sum of all question scores in "question_answer_feedback" should equal the "overall_score". Each question's maximum score is ${maxScorePerQuestion}.
+**Notes**:
+- Ensure the JSON is properly formatted for parsing.
 `;
-
-  return prompt;
 };
 
 /**
@@ -149,9 +153,9 @@ const callOpenAIWithRetries = async (
     try {
       const completion = await openai.chat.completions.create({
         //model: 'gpt-4', // cost .09 per completion
-        model: 'gpt-3.5-turbo', //use for now
+        model: 'gpt-4', //use for now
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1500,
+        max_tokens: 3000,
         temperature: 0.5,
       });
 
@@ -197,17 +201,15 @@ const callOpenAI = async (prompt: string): Promise<string> => {
         error.response.status,
         error.response.data,
       );
-      throw new Error(
-        `OpenAI API Error: ${error.response.status} - ${JSON.stringify(error.response.data)}`,
-      );
+      return 'error';
     } else if (error.request) {
       // Request was made but no response received
       console.error('OpenAI API No Response:', error.request);
-      throw new Error('OpenAI API did not respond.');
+      return 'error';
     } else {
       // Other errors
       console.error('OpenAI API Error:', error.message);
-      throw new Error(`OpenAI API Error: ${error.message}`);
+      return 'error';
     }
   }
 };
@@ -215,7 +217,10 @@ const callOpenAI = async (prompt: string): Promise<string> => {
 /**
  * Parses the AI's JSON response safely using Zod for validation
  */
-const parseAIResponse = (aiResponse: string): FeedbackData => {
+const parseAIResponse = (
+  aiResponse: string,
+  maxScorePerQuestion,
+): FeedbackData => {
   try {
     // Attempt to parse JSON directly
     const jsonStart = aiResponse.indexOf('{');
@@ -241,6 +246,15 @@ const parseAIResponse = (aiResponse: string): FeedbackData => {
       );
     }
 
+    // Ensure no question exceeds the maximum score
+    for (const qa of feedbackData.question_answer_feedback) {
+      if (qa.score > maxScorePerQuestion) {
+        throw new Error(
+          `Question "${qa.question}" has a score of ${qa.score}, which exceeds the maximum allowed score of ${maxScorePerQuestion}.`,
+        );
+      }
+    }
+
     return feedbackData;
   } catch (error) {
     console.error('Error parsing AI response:', error.message);
@@ -252,17 +266,16 @@ const parseAIResponse = (aiResponse: string): FeedbackData => {
  * Main function to get interview feedback from OpenAI
  */
 export const getInterviewFeedback = async (
-  interviewId: string,
-  interviewTitle: string,
+  interview: Interview,
   evaluationCriteria: EvaluationCriteriaType[],
   interviewAnswersDetails: InterviewAnswerDetail[],
-): Promise<FeedbackData> => {
+): Promise<FeedbackData | null> => {
   // Input Validation
-  if (!interviewId.trim()) {
+  if (!interview.id.trim()) {
     throw new Error('Interview ID cannot be empty.');
   }
 
-  if (!interviewTitle.trim()) {
+  if (!interview.title.trim()) {
     throw new Error('Interview Title cannot be empty.');
   }
 
@@ -285,18 +298,29 @@ export const getInterviewFeedback = async (
 
   // Construct the prompt
   const prompt = constructPrompt(
-    interviewTitle,
+    interview.title,
     evaluationCriteria,
     interviewAnswersDetails,
   );
 
+  // Determine maximum score per question
+  const numberOfQuestions = interviewAnswersDetails.length || 1; // Avoid division by zero
+  const maxTotalScore = 100;
+  const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
+
   // Call OpenAI API
   const aiResponse = await callOpenAI(prompt);
-  const feedbackData = parseAIResponse(aiResponse);
-  await insertInterviewEvaluation(interviewId, feedbackData);
-
-  // Optionally: Insert feedback and scores into the answers table if applicable
-
+  if (aiResponse === 'error') {
+    return null;
+  }
+  const feedbackData = parseAIResponse(aiResponse, maxScorePerQuestion);
+  const interviewEvaluation = await insertInterviewEvaluation(
+    interview.id,
+    feedbackData,
+  );
+  if (interviewEvaluation) {
+    await updateInterviewAnalytics(interview, interviewEvaluation);
+  }
   console.log('Feedback Data:', feedbackData);
 
   return feedbackData;

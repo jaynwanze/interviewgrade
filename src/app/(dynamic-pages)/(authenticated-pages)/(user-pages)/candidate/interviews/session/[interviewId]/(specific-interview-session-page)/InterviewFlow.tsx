@@ -117,6 +117,7 @@ export default function InterviewFlow({
   }, [questions.length]);
 
   const handleInterviewComplete = async () => {
+    setIsInterviewComplete(true);
     setIsFetchingFeedback(true);
     // Ensure synchronization between questions and answers
     if (questions.length !== answers.current.length) {
@@ -139,15 +140,13 @@ export default function InterviewFlow({
         throw new Error('Interview ID or Title is missing.');
       }
 
-      const feedback: FeedbackData = await getInterviewFeedback(
-        interview.id,
-        interview.title,
+      const feedback: FeedbackData | null = await getInterviewFeedback(
+        interview,
         evaluationCriteria,
         interviewAnswersDetails,
       );
 
       setInterviewFeedback(feedback);
-      setIsInterviewComplete(true);
       setIsCameraOn(false);
     } catch (error) {
       // Handle error better
@@ -174,6 +173,7 @@ export default function InterviewFlow({
       setCurrentQuestionIndex(nextQuestionIndex);
     }
   };
+
   if (completionMessage) {
     return <div className="text-center p-4">{completionMessage}</div>;
   }
@@ -196,7 +196,12 @@ export default function InterviewFlow({
       </div>
     );
   } else if (isInterviewComplete) {
-    return (
+    return isFetchingFeedback ? (
+      <div className="interview-flow-container flex justify-center items-center min-h-screen">
+        <p>Fetching feedback...</p>
+        <LoadingSpinner />
+      </div>
+    ) : (
       <div className="flex flex-col items-center">
         {interviewFeedback && interview ? (
           <InterviewFeedback
@@ -204,7 +209,10 @@ export default function InterviewFlow({
             feedback={interviewFeedback}
           />
         ) : (
-          <p>Loading feedback...</p>
+          <p>
+            Failed to fetch feedback. Go to interview history to try and view
+            the feedback!
+          </p>
         )}
       </div>
     );

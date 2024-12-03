@@ -39,10 +39,7 @@ export default function InterviewAnalyticsPage() {
             <CardTitle>Average Overall Score</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-center">
-              {/* Replace with real calculation */}
-              N/A
-            </p>
+            <p className="text-4xl font-bold text-center">N/A</p>
             <p>Average score for completed interviews.</p>
           </CardContent>
         </Card>

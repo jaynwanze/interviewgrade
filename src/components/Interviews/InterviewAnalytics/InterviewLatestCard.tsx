@@ -12,7 +12,7 @@ export const InterviewLatestCard = ({
     return (
       <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
         <p className="text-center">
-          No latest interview latestInterview available at this time.
+          No latest interview data available at this time.
         </p>
       </Card>
     );

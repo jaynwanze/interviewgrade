@@ -1,6 +1,10 @@
 'use server';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { EvaluationCriteriaType, Table } from '@/types';
+import type {
+  EvaluationCriteriaType,
+  EvaluationRubricType,
+  Table,
+} from '@/types';
 
 export const getInterviewsTemplatesByCategory = async (
   category: string,
@@ -26,13 +30,14 @@ export const getTemplateEvaluationCriteriasJsonFormat = async (
     .from('template_evaluation_criteria')
     .select(
       `
-      evaluation_criteria (
-        id,
-        name,
-        description,
-        is_system_defined,
-        created_at
-      )
+    evaluation_criteria (
+      id,
+      name,
+      description,
+      is_system_defined,
+      created_at
+    ),
+    rubrics
     `,
     )
     .eq('template_id', templateId);
@@ -45,12 +50,23 @@ export const getTemplateEvaluationCriteriasJsonFormat = async (
     return [];
   }
 
+  // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
   return data
     .filter(
-      (item): item is { evaluation_criteria: EvaluationCriteriaType } =>
-        item.evaluation_criteria !== null,
+      (
+        item,
+      ): item is {
+        evaluation_criteria: EvaluationCriteriaType;
+        rubrics: EvaluationRubricType[];
+      } => item.evaluation_criteria !== null,
     )
-    .map((item) => item.evaluation_criteria);
+    .map((item) => {
+      const { evaluation_criteria, rubrics } = item;
+      return {
+        ...evaluation_criteria,
+        rubrics: Array.isArray(rubrics) ? rubrics : [], // Ensure rubrics is an array
+      };
+    });
 };
 
 export const getTemplateQuestions = async (

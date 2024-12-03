@@ -45,9 +45,11 @@ export function AreaChartInteractiveLarge({
 
   if (!interviewsCompleted || interviewsCompleted.length === 0) {
     return (
-      <p className="text-center">
-        No interview data available for the selected time range.
-      </p>
+      <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
+        <p className="text-center">
+          No interviews completed data available at this time.
+        </p>
+      </Card>
     );
   }
   const chartData = interviewsCompleted.map((interview: Interview) => {

@@ -16,7 +16,9 @@ export default function InterviewHistoryPage() {
   } = useInterviewHistory();
 
   if (loading) {
-    return <LoadingSpinner />;
+    <div className="flex flex-col items-center">
+      return <LoadingSpinner />;
+    </div>;
   }
 
   if (error) {

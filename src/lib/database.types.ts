@@ -1,4 +1,4 @@
-import { AvgEvaluationScores, EvaluationCriteriaType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { AvgEvaluationScores, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
   | number
@@ -308,9 +308,8 @@ export type Database = {
           template_id: string
           interview_title: string
           interview_description: string
-          period_start: string
-          period_end: string
           total_interviews: number
+          question_count: number
           avg_overall_score: number
           avg_evaluation_criteria_scores: AvgEvaluationScores[]
           strengths_summary: string[]
@@ -324,9 +323,8 @@ export type Database = {
           candidate_id: string
           interview_title: string
           interview_description: string
-          period_start: string
-          period_end: string
           total_interviews: number
+          question_count: number
           avg_overall_score: number
           avg_evaluation_criteria_scores: AvgEvaluationScores[]
           strengths_summary: string[]
@@ -340,9 +338,8 @@ export type Database = {
           candidate_id?: string
           interview_title?: string
           interview_description?: string
-          period_start?: string
-          period_end?: string
-          total_interviews: number
+          total_interviews?: number
+          question_count?: number
           avg_overall_Score?: number
           avg_evaluation_criteria_scores?: AvgEvaluationScores[]
           strengths_summary?: string[]
@@ -395,14 +392,17 @@ export type Database = {
         Row: {
           template_id: string
           evaluation_criteria_id: string
+          rubrics: EvaluationRubricType[]
         }
         Insert: {
           template_id: string
           evaluation_criteria_id: string
+          rubrics: EvaluationRubricType[]
         }
         Update: {
           template_id?: string
           evaluation_criteria_id?: string
+          rubrics?: EvaluationRubricType[]
         }
         Relationships: [
           {

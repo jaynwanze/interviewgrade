@@ -14,7 +14,6 @@ import type {
   InterviewEvaluation,
   InterviewTemplate,
   InterviewUpdate,
-  QuestionAnswerFeedback,
   SAPayload,
   Table,
 } from '@/types';
@@ -264,7 +263,7 @@ export const getInterviewAnswers = async (
 export const insertInterviewEvaluation = async (
   interviewId: string,
   interviewEvaluation: FeedbackData,
-): Promise<Table<'interview_evaluations'>> => {
+): Promise<Table<'interview_evaluations'> | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interview_evaluations')
@@ -277,7 +276,7 @@ export const insertInterviewEvaluation = async (
       recommendations: interviewEvaluation.recommendations,
       question_answer_feedback: interviewEvaluation.question_answer_feedback,
     })
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -289,31 +288,24 @@ export const insertInterviewEvaluation = async (
 export const updateInterviewAnalytics = async (
   interview: Interview,
   interviewEvaluation: InterviewEvaluation,
-): Promise<Table<'interview_analytics'>> => {
+): Promise<Table<'interview_analytics'> | null> => {
   const supabase = createSupabaseUserServerComponentClient();
-  // Determine the current period (e.g., calendar month)
-  const interviewDate = moment(); // Assuming the interview is completed now; adjust if you have a specific date
-  const periodStart = interviewDate
-    .clone()
-    .startOf('month')
-    .format('YYYY-MM-DD');
-  const periodEnd = interviewDate.clone().endOf('month').format('YYYY-MM-DD');
-
   // Fetch existing periodic analytics record
   const { data: existingAnalytics, error: fetchError } = await supabase
     .from('interview_analytics')
     .select('*')
     .eq('template_id', interview.template_id)
-    .eq('period_start', periodStart)
-    .eq('period_end', periodEnd)
-    .single();
+    .maybeSingle();
 
-  if (fetchError && fetchError.code !== 'PGRST116') {
+  if (fetchError) {
     // PGRST116: No rows found
-    console.error(
-      'Error fetching existing periodic analytics:',
-      fetchError.message,
-    );
+    if (fetchError.code !== 'PGRST116') {
+      console.error(
+        'Error fetching existing periodic analytics:',
+        fetchError.message,
+      );
+      return null;
+    }
     throw fetchError;
   }
 
@@ -335,9 +327,8 @@ export const updateInterviewAnalytics = async (
           candidate_id: interview.candidate_id,
           interview_title: interview.title,
           interview_description: interview.description,
-          period_start: periodStart,
-          period_end: periodEnd,
           total_interviews: 1,
+          question_count: interview.question_count,
           avg_overall_score: interviewEvaluation.overall_score,
           avg_evaluation_criteria_scores: avgEvaluationCriteriaScores(),
           strengths_summary: [interviewEvaluation.strengths],
@@ -436,24 +427,15 @@ export const updateInterviewAnalytics = async (
 export const removeInterviewAnalytics = async (
   interview_template_id: string,
   deletedInterviewEvaluation: InterviewEvaluation,
-): Promise<string> => {
+): Promise<string | null> => {
   const supabase = createSupabaseUserServerComponentClient();
-  // Determine the period of the interview
-  const interviewDate = moment(deletedInterviewEvaluation.created_at);
-  const periodStart = interviewDate
-    .clone()
-    .startOf('month')
-    .format('YYYY-MM-DD');
-  const periodEnd = interviewDate.clone().endOf('month').format('YYYY-MM-DD');
 
   // Fetch existing periodic analytics record
   const { data: existingAnalytics, error: fetchError } = await supabase
     .from('interview_analytics')
     .select('*')
     .eq('template_id', interview_template_id)
-    .eq('period_start', periodStart)
-    .eq('period_end', periodEnd)
-    .single();
+    .maybeSingle();
 
   if (fetchError) {
     console.error(
@@ -465,7 +447,7 @@ export const removeInterviewAnalytics = async (
 
   if (!existingAnalytics) {
     // No analytics record exists; nothing to do
-    return 'No analytics record found';
+    return null;
   }
 
   const newTotal = existingAnalytics.total_interviews - 1;
@@ -482,7 +464,7 @@ export const removeInterviewAnalytics = async (
       throw deleteError;
     }
 
-    return 'Analytics record deleted';
+    return null;
   }
 
   const newAvgOverall =
@@ -560,20 +542,11 @@ export const getInterviewAnalytics = async (
     .select('*')
     .eq('candidate_id', candidateId)
     .eq('template_id', templateId)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      // Log invalid query or missing data errors
-      console.warn(
-        'No matching analytics data found for candidate:',
-        candidateId,
-        'and template:',
-        templateId,
-      );
-      return null; // Gracefully handle missing data
-    }
-    // Re-throw critical errors
+    // Log invalid query or missing data errors
+    console.warn('Error fetching interview analytics:', error.message);
     throw error;
   }
 
@@ -582,12 +555,19 @@ export const getInterviewAnalytics = async (
 
 export const getInterviewHistory = async (
   candidateId: string,
-): Promise<Table<'interviews'>[]> => {
+): Promise<Table<'interviews'>[] | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interviews')
     .select('*')
     .eq('candidate_id', candidateId);
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
 
   if (error) {
     throw error;
@@ -604,7 +584,7 @@ export const getInterviewById = async (
     .from('interviews')
     .select('*')
     .eq('id', interviewId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -621,7 +601,7 @@ export const getInterviewEvaluation = async (
     .from('interview_evaluations')
     .select('*')
     .eq('interview_id', interviewId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -632,7 +612,7 @@ export const getInterviewEvaluation = async (
 
 export const getTotalCompletedInterviews = async (
   candidateId: string,
-): Promise<Table<'interviews'>[]> => {
+): Promise<Table<'interviews'>[] | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interviews')
@@ -641,16 +621,24 @@ export const getTotalCompletedInterviews = async (
     .eq('status', 'completed');
 
   if (error) {
+    // PGRST116: No rows found
+    if (error.code !== 'PGRST116') {
+      console.error(
+        'Could not find total completed interviews for candidate ID:' +
+        candidateId,
+        error.message,
+      );
+      return null;
+    }
     throw error;
   }
-
   return data;
 };
 
 export const getCompletedInterviewsByTemplate = async (
   candidateId: string,
   templateId: string,
-): Promise<Table<'interviews'>[]> => {
+): Promise<Table<'interviews'>[] | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interviews')
@@ -660,6 +648,17 @@ export const getCompletedInterviewsByTemplate = async (
     .eq('template_id', templateId);
 
   if (error) {
+    // PGRST116: No rows found
+    if (error.code !== 'PGRST116') {
+      console.error(
+        'Could not find completed interviews for template ID' +
+        templateId +
+        ' + candidateId' +
+        candidateId,
+        error.message,
+      );
+      return null;
+    }
     throw error;
   }
 
@@ -693,7 +692,7 @@ export const getLatestInterviewCompleted = async (
     .eq('candidate_id', candidateId)
     .eq('status', 'completed')
     .order('end_time', { ascending: false })
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw error;

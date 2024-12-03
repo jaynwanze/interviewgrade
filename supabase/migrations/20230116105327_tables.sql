@@ -156,9 +156,9 @@ CREATE TABLE public.evaluation_criteria (
 
 CREATE TABLE public.template_evaluation_criteria (
     "template_id" "uuid" NOT NULL,
-    "evaluation_criteria_id" "uuid" NOT NULL
+    "evaluation_criteria_id" "uuid" NOT NULL,
+    "rubrics" jsonb
 );
-
 --
 -- Name: questions; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -192,7 +192,7 @@ ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
 CREATE TABLE "public"."interview_answers" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_question_id" "uuid" NOT NULL,
-  "text" text,
+  "text" text
 );
 --
 -- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres

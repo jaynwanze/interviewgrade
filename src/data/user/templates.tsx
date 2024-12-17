@@ -86,17 +86,45 @@ export const getTemplateEvaluationCriteriasJsonFormat = async (
 
 export const getTemplateQuestions = async (
   templateId: string,
+  questionCount: number,
 ): Promise<Table<'questions'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   const { data, error } = await supabase
     .from('questions')
     .select('*')
-    .eq('template_id', templateId);
+    .eq('template_id', templateId)
+    .limit(questionCount);
 
   if (error) {
     throw error;
   }
+
+  return data;
+};
+
+export const getPracticeTemplateQuestions = async (
+  templateId: string,
+  questionCount: number,
+): Promise<Table<'questions'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data: allQuestions, error: allQuestionsError } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('template_id', templateId);
+
+  if (allQuestionsError) {
+    throw allQuestionsError;
+  }
+
+  if (!allQuestions) {
+    return [];
+  }
+  // Shuffle the questions array
+  const shuffledQuestions = allQuestions.sort(() => 0.5 - Math.random());
+  // Select the first `questionCount` questions
+  const data = shuffledQuestions.slice(0, questionCount);
 
   return data;
 };

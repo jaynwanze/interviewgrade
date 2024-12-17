@@ -1,5 +1,6 @@
 'use server';
 import {
+  getPracticeTemplateQuestions,
   getTemplateEvaluationCriteriasJsonFormat,
   getTemplateQuestions,
 } from '@/data/user/templates';
@@ -12,16 +13,19 @@ import type {
   Interview,
   InterviewComplete,
   InterviewEvaluation,
+  InterviewModeType,
   InterviewTemplate,
   InterviewUpdate,
   SAPayload,
   Table,
 } from '@/types';
+import { INTERVIEW_INTERVIEW_MODE } from '@/utils/constants';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
 export const createInterview = async (
   interviewTemplate: InterviewTemplate,
+  interviewMode: InterviewModeType,
 ): Promise<Table<'interviews'>> => {
   const supabase = createSupabaseUserServerComponentClient();
   const user = await serverGetLoggedInUser();
@@ -38,7 +42,9 @@ export const createInterview = async (
       candidate_id: candidateProfileId,
       title: interviewTemplate.title,
       description: interviewTemplate.description,
+      mode: interviewMode,
       role: interviewTemplate.role,
+      skill: interviewTemplate.skill,
       difficulty: interviewTemplate.difficulty,
       question_count: interviewTemplate.question_count,
       duration: interviewTemplate.duration,
@@ -58,7 +64,7 @@ export const createInterview = async (
     throw new Error('Failed to insert interview data');
   }
 
-  await createInterviewQuestions(data[0].id, interviewTemplate);
+  await createInterviewQuestions(data[0].id, interviewTemplate, interviewMode);
 
   return data[0];
 };
@@ -66,11 +72,21 @@ export const createInterview = async (
 export const createInterviewQuestions = async (
   interviewId: string,
   interviewTemplate: InterviewTemplate,
+  interviewMode: InterviewModeType,
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   // Fetch template questions
-  const templateQuestions = await getTemplateQuestions(interviewTemplate.id);
+  const templateQuestions =
+    interviewMode === INTERVIEW_INTERVIEW_MODE
+      ? await getTemplateQuestions(
+        interviewTemplate.id,
+        interviewTemplate.question_count,
+      )
+      : await getPracticeTemplateQuestions(
+        interviewTemplate.id,
+        interviewTemplate.question_count,
+      );
   if (!templateQuestions || templateQuestions.length === 0) {
     throw new Error('Failed to fetch template questions or no questions found');
   }
@@ -172,6 +188,22 @@ export const getInterviewQuestions = async (
   return data;
 };
 
+export const getInterviewAnswers = async (
+  interviewQuestionIds: string[],
+): Promise<Table<'interview_answers'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_answers')
+    .select('*')
+    .in('interview_question_id', interviewQuestionIds);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
 export const getInterview = async (
   interviewId: string,
 ): Promise<Table<'interviews'> | null> => {
@@ -242,22 +274,6 @@ export const updateInterviewAnswer = async (
     data: lastInsertData,
   };
 };
-
-export const getInterviewAnswers = async (
-  interviewId: string,
-): Promise<Table<'interview_answers'>[]> => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('interview_answers')
-    .select('*')
-    .eq('interview_id', interviewId);
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-};
 */
 
 export const insertInterviewEvaluation = async (
@@ -269,20 +285,20 @@ export const insertInterviewEvaluation = async (
     .from('interview_evaluations')
     .insert({
       interview_id: interviewId,
-      overall_score: interviewEvaluation.overall_score,
+      overall_grade: interviewEvaluation.overall_grade,
       evaluation_scores: interviewEvaluation.evaluation_scores,
       strengths: interviewEvaluation.strengths,
       areas_for_improvement: interviewEvaluation.areas_for_improvement,
       recommendations: interviewEvaluation.recommendations,
       question_answer_feedback: interviewEvaluation.question_answer_feedback,
     })
-    .single();
+    .select();
 
   if (error) {
     throw error;
   }
 
-  return data;
+  return data[0];
 };
 
 export const updateInterviewAnalytics = async (
@@ -321,43 +337,43 @@ export const updateInterviewAnalytics = async (
 
     // Create a new interview analytics record
     const { data: updatedInterviewAnalytics, error: insertError } =
-      await supabase.from('interview_analytics').insert([
-        {
-          template_id: interview.template_id,
-          candidate_id: interview.candidate_id,
-          interview_title: interview.title,
-          interview_description: interview.description,
-          total_interviews: 1,
-          question_count: interview.question_count,
-          avg_overall_score: interviewEvaluation.overall_score,
-          avg_evaluation_criteria_scores: avgEvaluationCriteriaScores(),
-          strengths_summary: [interviewEvaluation.strengths],
-          areas_for_improvement_summary: [
-            interviewEvaluation.areas_for_improvement,
-          ],
-          recommendations_summary: [interviewEvaluation.recommendations],
-        },
-      ]);
+      await supabase
+        .from('interview_analytics')
+        .insert([
+          {
+            template_id: interview.template_id,
+            candidate_id: interview.candidate_id,
+            interview_title: interview.title,
+            interview_description: interview.description,
+            total_interviews: 1,
+            question_count: interview.question_count,
+            avg_overall_grade: interviewEvaluation.overall_grade,
+            avg_evaluation_criteria_scores: avgEvaluationCriteriaScores(),
+            strengths_summary: [interviewEvaluation.strengths],
+            areas_for_improvement_summary: [
+              interviewEvaluation.areas_for_improvement,
+            ],
+            recommendations_summary: [interviewEvaluation.recommendations],
+          },
+        ])
+        .select();
 
     if (insertError) {
-      console.error(
-        'Error inserting new periodic analytics:',
-        insertError.message,
-      );
+      console.error('Error inserting new analytics:', insertError.message);
       throw insertError;
     }
 
     if (!updatedInterviewAnalytics) {
       throw new Error('Failed to update interview analytics');
     }
-    return updatedInterviewAnalytics;
+    return updatedInterviewAnalytics[0];
   } else {
     // Update the existing periodic analytics record
     const newTotal = existingAnalytics.total_interviews + 1;
     const newAvgOverall =
-      (existingAnalytics.avg_overall_score *
+      (existingAnalytics.avg_overall_grade *
         existingAnalytics.total_interviews +
-        interviewEvaluation.overall_score) /
+        interviewEvaluation.overall_grade) /
       newTotal;
 
     // Recalculate average evaluation criteria
@@ -403,7 +419,7 @@ export const updateInterviewAnalytics = async (
         .from('interview_analytics')
         .update({
           total_interviews: newTotal,
-          avg_overall_score: newAvgOverall,
+          avg_overall_grade: newAvgOverall,
           avg_evaluation_criteria: updatedEvalCriteria,
           strengths_summary: updatedStrengths,
           areas_for_improvement_summary: updatedAreas,
@@ -468,8 +484,8 @@ export const removeInterviewAnalytics = async (
   }
 
   const newAvgOverall =
-    (existingAnalytics.avg_overall_score * existingAnalytics.total_interviews -
-      deletedInterviewEvaluation.overall_score) /
+    (existingAnalytics.avg_overall_grade * existingAnalytics.total_interviews -
+      deletedInterviewEvaluation.overall_grade) /
     newTotal;
 
   // Recalculate average evaluation criteria
@@ -507,7 +523,7 @@ export const removeInterviewAnalytics = async (
     .from('interview_analytics')
     .update({
       total_interviews: newTotal,
-      avg_overall_score: newAvgOverall,
+      avg_overall_grade: newAvgOverall,
       avg_evaluation_criteria: updatedEvalCriteria,
       strengths_summary:
         updatedStrengths.length > 0
@@ -562,12 +578,12 @@ export const getInterviewHistory = async (
     .select('*')
     .eq('candidate_id', candidateId);
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw error;
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
     }
+    throw error;
+  }
 
   if (error) {
     throw error;

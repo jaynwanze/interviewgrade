@@ -37,7 +37,7 @@ export interface SupabaseFileUploadOptions {
 export type QuestionAnswerFeedback = {
   question: string;
   answer: string;
-  score: number;
+  mark: number;
   feedback: string;
 };
 
@@ -103,9 +103,10 @@ export type InterviewMode = {
   name: Database['public']['Enums']['interview_mode'];
 };
 
+export type InterviewModeType = Database['public']['Enums']['interview_mode'];
 export type InterviewEvaluation = Table<'interview_evaluations'>;
 export type FeedbackData = {
-  overall_score: number;
+  overall_grade: number;
   evaluation_scores: EvaluationScores[];
   strengths: string;
   areas_for_improvement: string;

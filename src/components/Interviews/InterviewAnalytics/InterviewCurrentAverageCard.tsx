@@ -29,7 +29,7 @@ export const InterviewCurrentAverageCard = ({
             </div>
             <InterviewCurrentAverageKeyMetrics
                 totalInterviews={data.total_interviews}
-                avgOverallScore={data.avg_overall_score}
+                avgOverallScore={data.avg_overall_grade}
                 avgEvaluationCriteria={data.avg_evaluation_criteria_scores}
             />
             <InterviewCurrentAverageSummaries

@@ -10,12 +10,12 @@ export const EvaluationScoreSchema = z.object({
 export const QuestionAnswerFeedbackSchema = z.object({
   question: z.string(),
   answer: z.string(),
-  score: z.number().min(1).max(100),
+  mark: z.number().min(1).max(100),
   feedback: z.string(),
 });
 
 export const FeedbackDataSchema = z.object({
-  overall_score: z.number().min(1).max(100),
+  overall_grade: z.number().min(1).max(100),
   evaluation_scores: z.array(EvaluationScoreSchema),
   strengths: z.string(),
   areas_for_improvement: z.string(),

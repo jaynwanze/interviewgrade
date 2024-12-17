@@ -191,6 +191,7 @@ export type Database = {
           candidate_id: string
           title: string
           role: string
+          skill: string
           description: string
           mode: Database["public"]["Enums"]["interview_mode"]
           difficulty: Database["public"]["Enums"]["template_difficulty"]
@@ -209,7 +210,8 @@ export type Database = {
           template_id: string
           candidate_id: string
           title: string
-          role: string
+          role?: string
+          skill?: string
           description?: string
           mode: Database["public"]["Enums"]["interview_mode"]
           difficulty: Database["public"]["Enums"]["template_difficulty"]
@@ -229,6 +231,7 @@ export type Database = {
           candidate_id?: string
           title?: string
           role?: string
+          skill?: string
           description?: string
           mode?: Database["public"]["Enums"]["interview_mode"]
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
@@ -265,7 +268,7 @@ export type Database = {
         Row: {
           id: string
           interview_id: string
-          overall_score: number
+          overall_grade: number
           evaluation_scores: EvaluationScores[]
           strengths: string
           areas_for_improvement: string
@@ -276,7 +279,7 @@ export type Database = {
 
         Insert: {
           interview_id: string
-          overall_score: number
+          overall_grade: number
           evaluation_scores: EvaluationScores[]
           strengths: string
           areas_for_improvement: string
@@ -286,7 +289,7 @@ export type Database = {
         }
         Update: {
           interview_id?: string
-          overall_score?: number
+          overall_grade?: number
           evaluation_scores?: EvaluationScores[]
           strengths?: string
           areas_for_improvement?: string
@@ -313,7 +316,7 @@ export type Database = {
           interview_description: string
           total_interviews: number
           question_count: number
-          avg_overall_score: number
+          avg_overall_grade: number
           avg_evaluation_criteria_scores: AvgEvaluationScores[]
           strengths_summary: string[]
           areas_for_improvement_summary: string[]
@@ -328,7 +331,7 @@ export type Database = {
           interview_description: string
           total_interviews: number
           question_count: number
-          avg_overall_score: number
+          avg_overall_grade: number
           avg_evaluation_criteria_scores: AvgEvaluationScores[]
           strengths_summary: string[]
           areas_for_improvement_summary: string[]
@@ -343,7 +346,7 @@ export type Database = {
           interview_description?: string
           total_interviews?: number
           question_count?: number
-          avg_overall_Score?: number
+          avg_overall_grade?: number
           avg_evaluation_criteria_scores?: AvgEvaluationScores[]
           strengths_summary?: string[]
           areas_for_improvement_summary?: string[]

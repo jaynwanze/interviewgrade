@@ -61,6 +61,7 @@ CREATE TABLE "public"."interviews" (
   "candidate_id" "uuid" NOT NULL,
   "title" character varying,
   "role" character varying,
+  "skill" text,
   "description" text,
   "mode" "public"."interview_mode",
   "difficulty" "public"."template_difficulty",
@@ -85,7 +86,7 @@ ALTER TABLE "public"."interviews" OWNER TO "postgres";
 CREATE TABLE "public"."interview_evaluations" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_id" "uuid" NOT NULL,
-  "overall_score" decimal(5,2),
+  "overall_grade" decimal(5,2),
   "evaluation_scores" jsonb,
   "strengths" text,
   "areas_for_improvement" text,
@@ -107,7 +108,7 @@ CREATE TABLE "public"."interview_analytics" (
   "period_start" date NOT NULL,
   "period_end" date NOT NULL,
   "total_interviews" INTEGER NOT NULL DEFAULT 0,
-  "avg_overall_score" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  "avg_overall_grade" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
   "avg_evaluation_criteria_scores" jsonb NOT NULL DEFAULT '{}',
   "strengths_summary" text[] NOT NULL DEFAULT '{}',
   "areas_for_improvement_summary" text[] NOT NULL DEFAULT '{}',
@@ -528,8 +529,8 @@ ALTER TABLE ONLY "public"."interview_analytics"
 ADD CONSTRAINT "interview_analytics_period_start_end_check" CHECK ("period_start" <= "period_end");
 
 --
--- Name: interview_analytics interview_analytics_avg_overall_score_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interview_analytics interview_analytics_avg_overall_grade_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_avg_overall_score_check" CHECK ("avg_overall_score" >= 0 AND "avg_overall_score" <= 100);
+ADD CONSTRAINT "interview_analytics_avg_overall_grade_check" CHECK ("avg_overall_grade" >= 0 AND "avg_overall_grade" <= 100);

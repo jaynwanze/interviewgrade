@@ -10,24 +10,29 @@ import {
 } from '@/components/ui/dialog';
 import { createInterview } from '@/data/user/interviews';
 import { useToastMutation } from '@/hooks/useToastMutation';
-import { InterviewTemplate } from '@/types';
+import { InterviewModeType, InterviewTemplate } from '@/types';
 import { useRouter } from 'next/navigation';
 
 export default function InterviewDetailsDialog({
   isOpen,
   onClose,
   interviewTemplate,
+  interviewMode,
 }: {
   isOpen: boolean;
   onClose: () => void;
   interviewTemplate: InterviewTemplate;
+  interviewMode: InterviewModeType;
 }) {
   const router = useRouter();
   const { mutate: handleClick } = useToastMutation(
     async () => {
       try {
         // Create an interview session
-        const interview = await createInterview(interviewTemplate);
+        const interview = await createInterview(
+          interviewTemplate,
+          interviewMode,
+        );
         router.push(`/candidate/interviews/session/${interview.id}`);
       } catch (error) {
         console.error('Error creating interview:', error);

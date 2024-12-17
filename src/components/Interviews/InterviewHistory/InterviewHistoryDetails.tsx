@@ -2,16 +2,21 @@
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  getInterviewAnswers,
   getInterviewById,
   getInterviewEvaluation,
+  getInterviewQuestions,
 } from '@/data/user/interviews';
 import {
   EvaluationScores,
+  FeedbackData,
   Interview,
+  InterviewAnswerDetail,
   InterviewEvaluation,
-  QuestionAnswerFeedback
+  QuestionAnswerFeedback,
 } from '@/types';
-import { useEffect, useState } from 'react';
+import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { useEffect, useRef, useState } from 'react';
 
 export const InterviewHistoryDetails = ({
   interviewId,
@@ -24,17 +29,65 @@ export const InterviewHistoryDetails = ({
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
+  const hasFetched = useRef(false); // Add this line
+
+
+  const retryFeedbackFetch = async (interview) => {
+    setIsFetchingFeedback(true);
+    // Ensure synchronization between questions and answers
+    const questions = await getInterviewQuestions(interviewId);
+    const answers = await getInterviewAnswers(
+      questions.map((question) => question.id),
+    );
+
+    if (questions.length !== answers.length) {
+      console.error('Mismatch between questions and answers.');
+      setIsFetchingFeedback(false);
+      return;
+    }
+
+    const interviewAnswersDetails: InterviewAnswerDetail[] = questions.map(
+      (question, index) => ({
+        question: question.text,
+        answer: answers[index].text,
+        evaluation_criteria_name: question.evaluation_criteria.name,
+      }),
+    );
+
+    try {
+      const feedback: FeedbackData | null = await getInterviewFeedback(
+        interview,
+        interview.evaluation_criterias,
+        interviewAnswersDetails,
+      );
+      if (feedback) {
+        const interviewEvaluation = await getInterviewEvaluation(interviewId);
+        setEvaluation(interviewEvaluation);
+      }
+    } catch (error) {
+      console.error('Error fetching interview feedback:', error);
+      setIsFetchingFeedback(false);
+    }
+    finally {
+      setIsFetchingFeedback(false);
+    }
+  };
 
   const fetchInterviewDetails = async () => {
+    if (hasFetched.current) return; // Prevent duplicate calls
+    hasFetched.current = true; // Set the flag
+
     setLoading(true);
     setError(null);
     try {
       const interview = await getInterviewById(interviewId);
       const interviewEvaluation = await getInterviewEvaluation(interviewId);
-
       setInterview(interview);
       if (interviewEvaluation) {
         setEvaluation(interviewEvaluation);
+      } else {
+        retryFeedbackFetch(interview);
       }
     } catch (error) {
       console.error('Error fetching interview details:', error);
@@ -51,6 +104,10 @@ export const InterviewHistoryDetails = ({
   }, [interviewId]);
 
   if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isFetchingFeedback) {
     return <LoadingSpinner />;
   }
 
@@ -94,7 +151,7 @@ export const InterviewHistoryDetails = ({
         </p>
       </div>
 
-      {status === 'completed' && evaluation && (
+      {(status === 'completed' && evaluation && (
         <div className="w-full max-w-4xl mx-auto p-4">
           <Card className="shadow-lg">
             <CardHeader>
@@ -108,7 +165,7 @@ export const InterviewHistoryDetails = ({
                 <section className="mb-6">
                   <h2 className="text-xl font-semibold">Overall Grade</h2>
                   <p className="text-3xl font-bold text-blue-600">
-                    {evaluation.overall_score}/100
+                    {evaluation.overall_grade}/100
                   </p>
                 </section>
 
@@ -156,7 +213,7 @@ export const InterviewHistoryDetails = ({
                 evaluation.question_answer_feedback.length > 0 && (
                   <section className="mb-6">
                     <h3 className="text-lg font-semibold text-center mb-2">
-                     Answer Feedback
+                      Answer Feedback
                     </h3>
                     <div className="space-y-4">
                       {evaluation.question_answer_feedback.map(
@@ -172,9 +229,9 @@ export const InterviewHistoryDetails = ({
                               <strong>Answer:</strong> {qa.answer}
                             </p>
                             <p className="mb-2">
-                              <strong>Mark:</strong> {qa.score}/
-                              {100 / evaluation.question_answer_feedback.length}
-                            </p>
+                              <strong>Mark:</strong> {qa.mark}/
+                              {(100 / (evaluation.question_answer_feedback.length)).toFixed(2)}
+                              </p>
                             <p>
                               <strong>Feedback:</strong> {qa.feedback}
                             </p>
@@ -187,7 +244,18 @@ export const InterviewHistoryDetails = ({
             </CardContent>
           </Card>
         </div>
-      )}
+      )) || (
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-center">
+                Interview Feedback
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-1">No feedback available yet.</div>
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 };

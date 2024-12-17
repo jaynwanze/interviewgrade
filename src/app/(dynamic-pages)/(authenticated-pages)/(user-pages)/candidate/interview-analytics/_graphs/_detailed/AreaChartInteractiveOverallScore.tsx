@@ -93,7 +93,7 @@ export function AreaChartInteractiveOverallScore({
       rawChartData = data.map((interviewEval) => {
         return {
           date: interviewEval.created_at.split('T')[0],
-          interview_grade: interviewEval.overall_score,
+          interview_grade: interviewEval.overall_grade,
         };
       });
     } catch (error) {

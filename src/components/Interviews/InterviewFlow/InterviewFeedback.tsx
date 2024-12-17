@@ -35,7 +35,7 @@ export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
             <section className="mb-6">
               <h2 className="text-xl font-semibold">Overall Grade</h2>
               <p className="text-3xl font-bold text-blue-600">
-                {feedback.overall_score}/100
+                {feedback.overall_grade}/100
               </p>
             </section>
 
@@ -93,9 +93,9 @@ export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
                           <strong>Answer:</strong> {qa.answer}
                         </p>
                         <p className="mb-2">
-                          <strong>Mark:</strong> {qa.score}/
-                          {100 / feedback.question_answer_feedback.length}
-                        </p>
+                          <strong>Mark:</strong> {qa.mark}/
+                          {(100 / (feedback.question_answer_feedback.length)).toFixed(2)}
+                          </p>
                         <p>
                           <strong>Feedback:</strong> {qa.feedback}
                         </p>

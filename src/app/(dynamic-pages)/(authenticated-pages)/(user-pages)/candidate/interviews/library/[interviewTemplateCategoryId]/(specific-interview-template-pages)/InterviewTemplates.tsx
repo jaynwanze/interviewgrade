@@ -3,11 +3,8 @@
 import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Input } from '@/components/ui/input';
-import {
-  getInterviewsTemplatesBySkill
-} from '@/data/user/templates';
-import { InterviewTemplate } from '@/types';
-import { InterviewTemplateCategories } from '@/types/interviewTemplateCategories';
+import { getInterviewsTemplatesBySkill } from '@/data/user/templates';
+import { InterviewModeType, InterviewTemplate } from '@/types';
 import { useEffect, useState } from 'react';
 
 export function InterviewTemplates({
@@ -20,10 +17,10 @@ export function InterviewTemplates({
   >([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const categoryName: string =
-    InterviewTemplateCategories.find(
-      (category) => category.id === interviewTemplateCategoryId,
-    )?.name || '';
+  // const categoryName: string =
+  //   InterviewTemplateCategories.find(
+  //     (category) => category.id === interviewTemplateCategoryId,
+  //   )?.name || '';
 
   const fetchInterviews = async () => {
     setIsLoading(true);
@@ -63,7 +60,11 @@ export function InterviewTemplates({
         <div className="flex justify-center min-h-screen">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {interviewTemplates.map((interview) => (
-              <InterviewCardTemplate key={interview.id} {...interview} />
+              <InterviewCardTemplate
+                key={interview.id}
+                interviewTemplate={interview}
+                interviewMode={interviewTemplateCategoryId as InterviewModeType}
+              />
             ))}
           </div>
         </div>

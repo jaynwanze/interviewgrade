@@ -11,7 +11,6 @@ import {
   InterviewAnswerDetail,
 } from '@/types';
 import OpenAI from 'openai';
-import { FeedbackDataSchema } from '../zod-schemas/openAiFeedback';
 
 // Initialize OpenAI Client
 const openAiKey = process.env.OPENAI_SECRET_KEY;
@@ -79,15 +78,16 @@ ${formatRubrics(criterion.rubrics)}`,
       (detail) => `{
   "question": "${detail.question}",
   "answer": "${detail.answer}",
-  "score": 0,
+  "mark": 0,
   "feedback": ""
 }`,
     )
     .join(',\n    ');
 
   // Determine maximum score per question
-  const numberOfQuestions = interviewAnswersDetails.length || 1; // Avoid division by zero
+  const numberOfQuestions = interviewAnswersDetails.length || 1;
   const maxTotalScore = 100;
+  // round to two decimal places
   const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
 
   // Construct the prompt
@@ -108,22 +108,21 @@ Your evaluation should include:
 - **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10.
 - **Strengths and Areas for Improvement**: Specific feedback highlighting areas where the candidate excelled or could improve.
 - **Recommendations**: Suggestions for how the candidate could improve.
-- **Question Answer Feedback**: Grades which add up to the overall score and specific feedback for each question and answer pair.
+- **Question Answer Feedback**: The grade and specific feedback based on corresponding evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
+- **mark**: Within "question_answer_feedback" for each mark for each answer should be marked out of ${maxScorePerQuestion} and ensure that the sum of all marks add up to "overall_grade".
 
 ### Guidelines
 1. **Link Feedback to Specific Answers**: Reference specific answers related to each criterion. For example, when evaluating a specific criterion, mention how the candidate's answer to the linked question demonstrates their skills in that area.
 2. **Balanced Feedback**: Address both strengths and areas for improvement for each criterion, especially if the candidate performed variably across different questions.
 3. **Avoid Generalizations**: Provide concrete examples from the candidate's answers to support your evaluations.
-4. **Scoring Constraints**:
-   - The **sum of all question scores** in "question_answer_feedback" **must equal** the "overall_score".
-   - Each question's **maximum score is ${maxScorePerQuestion}**.
+4. **Constructive Criticism**: Offer actionable feedback that the candidate can use to improve their performance.
 
 ### Output Format
-Provide your evaluation in the following JSON format:
+Provide your evaluation in the following JSON format without any additional text.
 
 \`\`\`json
 {
-  "overall_score": 0,
+  "overall_grade": 0,
   "evaluation_scores": [
     ${evaluationScoresTemplate}
   ],
@@ -136,9 +135,13 @@ Provide your evaluation in the following JSON format:
 }
 \`\`\`
 
-**Notes**:
-- Ensure the JSON is properly formatted for parsing.
-`;
+**Note**: 
+-Ensure the JSON is properly formatted for parsing.
+-If the candidate's response is not provided, assume a score of 0 for that question.
+-If the candidate's response is not relevant to the evaluation criteria, provide feedback accordingly.
+-If the candidate's response is lacking or terrible, score it really low or zero marks if necessary and provide constructive feedback.
+-If the candidate's response is partially relevant, provide partial credit based on the relevance.
+-If the candidate's response is exemplary, provide full credit, fulls marks where due and highlight the strengths.`;
 };
 
 /**
@@ -152,8 +155,7 @@ const callOpenAIWithRetries = async (
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const completion = await openai.chat.completions.create({
-        //model: 'gpt-4', // cost .09 per completion
-        model: 'gpt-4', //use for now
+        model: 'gpt-4-turbo', // Use 'gpt-4' if preferred
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 3000,
         temperature: 0.5,
@@ -163,7 +165,7 @@ const callOpenAIWithRetries = async (
       if (!aiMessage) {
         throw new Error('No content returned from OpenAI.');
       }
-
+      console.log('OpenAI Response:', aiMessage); // Log the raw AI response
       return aiMessage;
     } catch (error) {
       if (attempt === retries) {
@@ -217,43 +219,32 @@ const callOpenAI = async (prompt: string): Promise<string> => {
 /**
  * Parses the AI's JSON response safely using Zod for validation
  */
-const parseAIResponse = (
-  aiResponse: string,
-  maxScorePerQuestion,
-): FeedbackData => {
+const parseAIResponse = (aiResponse: string): FeedbackData => {
   try {
-    // Attempt to parse JSON directly
-    const jsonStart = aiResponse.indexOf('{');
-    const jsonEnd = aiResponse.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) {
-      throw new Error('JSON object not found in the AI response.');
-    }
+    let jsonString = '';
 
-    const jsonString = aiResponse.substring(jsonStart, jsonEnd + 1);
-
-    const parsed = JSON.parse(jsonString);
-    const feedbackData = FeedbackDataSchema.parse(parsed); // Validates the structure
-
-    // Calculate the sum of question scores
-    const questionScoresSum = feedbackData.question_answer_feedback.reduce(
-      (sum, qa) => sum + qa.score,
-      0,
-    );
-
-    if (questionScoresSum !== feedbackData.overall_score) {
-      throw new Error(
-        `Sum of question scores (${questionScoresSum}) does not equal the overall score (${feedbackData.overall_score}).`,
-      );
-    }
-
-    // Ensure no question exceeds the maximum score
-    for (const qa of feedbackData.question_answer_feedback) {
-      if (qa.score > maxScorePerQuestion) {
-        throw new Error(
-          `Question "${qa.question}" has a score of ${qa.score}, which exceeds the maximum allowed score of ${maxScorePerQuestion}.`,
-        );
+    // Attempt to extract JSON from code blocks first
+    const jsonRegex = /```json([\s\S]*?)```/i;
+    const match = aiResponse.match(jsonRegex);
+    if (match && match[1]) {
+      jsonString = match[1].trim();
+    } else {
+      // If no code block is found, attempt to extract JSON from the entire response
+      // Remove any leading/trailing text that is not part of JSON
+      const firstBraceIndex = aiResponse.indexOf('{');
+      const lastBraceIndex = aiResponse.lastIndexOf('}');
+      if (firstBraceIndex !== -1 && lastBraceIndex !== -1) {
+        jsonString = aiResponse
+          .substring(firstBraceIndex, lastBraceIndex + 1)
+          .trim();
+      } else {
+        throw new Error('No JSON object found in the AI response.');
       }
     }
+
+    // Parse the JSON string into a FeedbackData object
+    const feedbackData = JSON.parse(jsonString);
+    // Optional: Validate the structure of feedbackData here
 
     return feedbackData;
   } catch (error) {
@@ -303,17 +294,18 @@ export const getInterviewFeedback = async (
     interviewAnswersDetails,
   );
 
-  // Determine maximum score per question
-  const numberOfQuestions = interviewAnswersDetails.length || 1; // Avoid division by zero
-  const maxTotalScore = 100;
-  const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
+  console.log('Prompt:', prompt);
+  // // Determine maximum score per question
+  // const numberOfQuestions = interviewAnswersDetails.length || 1; // Avoid division by zero
+  // const maxTotalScore = 100;
+  // const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
 
   // Call OpenAI API
   const aiResponse = await callOpenAI(prompt);
   if (aiResponse === 'error') {
     return null;
   }
-  const feedbackData = parseAIResponse(aiResponse, maxScorePerQuestion);
+  const feedbackData = parseAIResponse(aiResponse);
   const interviewEvaluation = await insertInterviewEvaluation(
     interview.id,
     feedbackData,

@@ -276,7 +276,7 @@ export const insertInterviewEvaluation = async (
       recommendations: interviewEvaluation.recommendations,
       question_answer_feedback: interviewEvaluation.question_answer_feedback,
     })
-    .maybeSingle();
+    .single();
 
   if (error) {
     throw error;
@@ -435,7 +435,7 @@ export const removeInterviewAnalytics = async (
     .from('interview_analytics')
     .select('*')
     .eq('template_id', interview_template_id)
-    .maybeSingle();
+    .single();
 
   if (fetchError) {
     console.error(

@@ -21,6 +21,21 @@ export const getInterviewsTemplatesByCategory = async (
   return data;
 };
 
+export const getInterviewsTemplatesBySkill = async (): Promise<
+  Table<'templates'>[]
+> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .neq('skill', null)
+    .order('title', { ascending: true });
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
 export const getTemplateEvaluationCriteriasJsonFormat = async (
   templateId: string,
 ): Promise<EvaluationCriteriaType[]> => {

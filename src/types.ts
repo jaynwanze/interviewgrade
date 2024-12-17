@@ -68,8 +68,21 @@ export type InterviewAnswerDetail = {
 };
 
 export type InterviewAnswer = Table<'interview_answers'>;
+export type EvaluationRubricType = {
+  grade: string;
+  percentage_range: string;
+  description: string;
+  order: number;
+};
 
-export type EvaluationCriteriaType = Table<'evaluation_criteria'>;
+export type EvaluationCriteriaType = {
+  id: string;
+  name: string;
+  description: string;
+  rubrics: EvaluationRubricType[];
+  is_system_defined: boolean;
+  created_at: string;
+};
 export type InterviewTemplate = Table<'templates'>;
 export type Questions = Table<'questions'>;
 export type Interview = Table<'interviews'>;
@@ -85,6 +98,10 @@ export type AvgEvaluationScores = {
   feedback_summary: string[];
 };
 export type InterviewTemplateFilter = 'Category' | 'Company' | 'General';
+
+export type InterviewMode = {
+  name: Database['public']['Enums']['interview_mode'];
+};
 
 export type InterviewEvaluation = Table<'interview_evaluations'>;
 export type FeedbackData = {

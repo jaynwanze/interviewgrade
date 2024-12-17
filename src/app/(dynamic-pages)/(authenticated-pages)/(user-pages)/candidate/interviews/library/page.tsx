@@ -1,11 +1,9 @@
 'use client;';
 
-import { InterviewTemplates } from './[interviewTemplateCategoryId]/(specific-interview-template-pages)/InterviewTemplates';
+import { InterviewMode } from './InterviewMode';
 
 export default async function InterviewsCategoriesPage() {
   //return <InterviewsCategories />;
   //return general-skills-based for now
-  return (
-    <InterviewTemplates interviewTemplateCategoryId="general-skills-based" />
-  );
+  return <InterviewMode />;
 }

@@ -62,6 +62,7 @@ CREATE TABLE "public"."interviews" (
   "title" character varying,
   "role" character varying,
   "description" text,
+  "mode" "public"."interview_mode",
   "difficulty" "public"."template_difficulty",
   "question_count" integer,
   "duration" integer,
@@ -125,6 +126,7 @@ CREATE TABLE "public"."templates" (
   "category" "public"."template_category",
   "title" character varying,
   "role" character varying,
+  "skill" text,
   "description" text,
   "duration" character varying,
   "difficulty" "public"."template_difficulty",
@@ -510,6 +512,13 @@ ADD CONSTRAINT "job_application_tracker_status_check" CHECK ("status" = ANY (ARR
 
 ALTER TABLE ONLY "public"."products"
 ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::product_status, 'inactive'::product_status]));
+
+--
+-- Name: template template_mode_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview"
+ADD CONSTRAINT "interview_mode_check" CHECK ("mode" = ANY (ARRAY['practice'::template_mode, 'interview'::template_mode]));
 
 --
 -- Name: interview_analytics interview_analytics_period_start_end_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres

@@ -3,7 +3,9 @@
 import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Input } from '@/components/ui/input';
-import { getInterviewsTemplatesByCategory } from '@/data/user/templates';
+import {
+  getInterviewsTemplatesBySkill
+} from '@/data/user/templates';
 import { InterviewTemplate } from '@/types';
 import { InterviewTemplateCategories } from '@/types/interviewTemplateCategories';
 import { useEffect, useState } from 'react';
@@ -27,7 +29,8 @@ export function InterviewTemplates({
     setIsLoading(true);
     try {
       const interviewTemplates: InterviewTemplate[] =
-        await getInterviewsTemplatesByCategory(categoryName);
+        //await getInterviewsTemplatesByCategory(categoryName);
+        await getInterviewsTemplatesBySkill();
       setInterviewTemplates(interviewTemplates);
     } catch (error) {
       console.error('Error fetching interview templates:', error);

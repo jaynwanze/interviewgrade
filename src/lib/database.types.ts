@@ -192,6 +192,7 @@ export type Database = {
           title: string
           role: string
           description: string
+          mode: Database["public"]["Enums"]["interview_mode"]
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number
           duration: number
@@ -210,6 +211,7 @@ export type Database = {
           title: string
           role: string
           description?: string
+          mode: Database["public"]["Enums"]["interview_mode"]
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number
           duration: number
@@ -228,6 +230,7 @@ export type Database = {
           title?: string
           role?: string
           description?: string
+          mode?: Database["public"]["Enums"]["interview_mode"]
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
           question_count?: number
           duration?: number
@@ -429,6 +432,7 @@ export type Database = {
           category: Database["public"]["Enums"]["template_category"]
           title: string
           role: string
+          skill: string
           description: string
           duration: number
           difficulty: Database["public"]["Enums"]["template_difficulty"]
@@ -445,6 +449,7 @@ export type Database = {
           category: Database["public"]["Enums"]["template_category"]
           title: string
           role: string
+          skill: string
           description: string
           duration: number
           difficulty: Database["public"]["Enums"]["template_difficulty"]
@@ -461,6 +466,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["template_category"]
           title?: string
           role?: string
+          skill?: string
           description?: string
           duration?: number
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
@@ -615,6 +621,7 @@ export type Database = {
       template_category: "General Skills-Based" | "General Job-Based" | "Accounting" | "Finance" | "Admin" | "Customer Service" | "IT" | "HR" | "Legal" | "Education" | "Training" | "Real Estate" | "Engineering" | "Construction" | "Healthcare" | "Pharma" | "Hospitality" | "Travel" | "Law Enforcement" | "Security" | "Logistics" | "Real Estate" | "Marketing" | "PR" | "Media" | "Sales" | "Retail" | "Other"
       question_type: "General" | "Behavioral" | "Role-Specific" | "Operational"
       job_application_tracker_status: "not_started" | "applied" | "in_progress" | "rejected" | "offered" | "hired"
+      interview_mode: "practice" | "interview"
     }
     CompositeTypes: {
       [_ in never]: never

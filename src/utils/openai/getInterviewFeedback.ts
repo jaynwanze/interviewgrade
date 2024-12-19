@@ -11,6 +11,31 @@ import {
   InterviewAnswerDetail,
 } from '@/types';
 import OpenAI from 'openai';
+import { z } from 'zod';
+
+
+const feedback = z.object({
+  overall_grade: z.number(),
+  evaluation_scores: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      score: z.number(),
+      feedback: z.string(),
+    }),
+  ),
+  strengths: z.string(),
+  areas_for_improvement: z.string(),
+  recommendations: z.string(),
+  question_answer_feedback: z.array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+      mark: z.number(),
+      feedback: z.string(),
+    }),
+  ),
+});
 
 // Initialize OpenAI Client
 const openAiKey = process.env.OPENAI_SECRET_KEY;

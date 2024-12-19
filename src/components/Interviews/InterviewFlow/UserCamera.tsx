@@ -11,7 +11,7 @@ import { CandlestickMeter } from './CandleStickMeter';
 interface UserCameraProps {
   answerCallback: (answer: string) => void;
   isCameraOn: boolean;
-  onRecordEnd: () => void;
+  onRecordEnd: null | (() => void);
 }
 
 // UserCamera component to handle video and audio recording and display a sound meter
@@ -122,7 +122,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       mediaRecorderHandlerRef.current = mediaHandler;
       mediaHandler.start(audioStreamRef.current);
       timerRef.current = window.setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
+        setRecordingTime((prev) => {
+          if (prev + 1 >= 120) {
+            handleEndRecord();
+          }
+          return prev + 1;
+        });
       }, 1000);
       console.log('Recording started');
     } else {
@@ -143,8 +148,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
 
       if (convertedAudioBlob) {
         const formData = new FormData();
-        formData.append('file', convertedAudioBlob, 'audio.webm'); // Add the audio file
-        formData.append('model', 'whisper-1'); // Specify the model here
+        formData.append('file', convertedAudioBlob, 'audio.mp3');
+        formData.append('model', 'whisper-1');
         whisperFinalTranscript.current =
           await transcribeInterviewAudio(formData);
       }
@@ -155,7 +160,9 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       ? handleAnswer(whisperFinalTranscript.current)
       : handleAnswer(webSpeechTranscript);
 
-    onRecordEnd(); // Notify the parent component that recording has ended
+    if (onRecordEnd) {
+      onRecordEnd(); // Notify the parent component that recording has ended
+    }
   }, [stopRecognition, finalTranscript, answerCallback, onRecordEnd]);
 
   return (

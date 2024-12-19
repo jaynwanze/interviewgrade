@@ -4,6 +4,7 @@ import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuest
 import { InterviewFeedback } from '@/components/Interviews/InterviewFlow/InterviewFeedback';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   getInterview,
@@ -18,8 +19,15 @@ import {
   InterviewAnswerDetail,
   InterviewQuestion,
 } from '@/types';
+import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+export type specificFeedbackType = {
+  summary: string;
+  advice_for_next_question: string;
+};
 
 export default function InterviewFlow({
   interviewId,
@@ -44,6 +52,10 @@ export default function InterviewFlow({
   const [completionMessage, setCompletionMessage] = useState<string | null>(
     null,
   );
+  const [isFetchingSpecificFeedback, setIsFetchingSpecificFeedback] =
+    useState(false);
+  const [specificFeedback, setSpecificFeedback] =
+    useState<specificFeedbackType | null>();
 
   const fetchInterview = async () => {
     setIsLoading(true);
@@ -96,25 +108,65 @@ export default function InterviewFlow({
   }, [isQuestionsComplete, answersLength, questions.length]);
 
   const handleAnswer = useCallback(
-    (answer: string) => {
-      answers.current.push(answer);
-      setAnswersLength(answers.current.length);
-      insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
-      updateInterviewState(currentQuestionIndex + 1);
+    async (answer: string) => {
+      try {
+        // Validate the answer before proceeding
+        if (!answer.trim()) {
+          console.warn('Received an empty answer.');
+          //TODO: Show an error message to the user
+          // Retry the answer and start recording again
+          return;
+        }
+        // Push the answer to the answers array
+        answers.current.push(answer);
+        setAnswersLength(answers.current.length);
+        await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+        if (interview?.mode === INTERVIEW_PRACTICE_MODE) {
+          await fetchSpecificFeedback(answer);
+        } else {
+          // For non-practice mode, proceed to the next question
+          await updateInterviewState(currentQuestionIndex + 1);
+        }
+      } catch (error) {
+        console.error('Error in handleAnswer:', error.message || error);
+        // Optionally, set an error state here to inform the user
+      }
     },
-    [questions, currentQuestionIndex],
+    [questions, currentQuestionIndex, interview],
   );
 
-  const handleNextQuestion = useCallback(() => {
-    setCurrentQuestionIndex((prevIndex) => {
-      if (prevIndex < questions.length - 1) {
-        return prevIndex + 1;
+  const fetchSpecificFeedback = async (answer: string) => {
+    setIsFetchingSpecificFeedback(true);
+    try {
+      const nextQuestionIndex = currentQuestionIndex + 1;
+      const nextQuestion = questions[nextQuestionIndex] || null;
+
+      const specificFeedbackData = await getQuestionFeedback(
+        questions[currentQuestionIndex],
+        answer,
+        nextQuestion,
+      );
+
+      if (specificFeedbackData) {
+        setSpecificFeedback(specificFeedbackData);
       } else {
-        setIsQuestionsComplete(true);
-        return prevIndex;
+        setSpecificFeedback(null);
       }
-    });
-  }, [questions.length]);
+    } catch (error) {
+      console.error(
+        'Error fetching specific feedback:',
+        error.message || error,
+      );
+      setSpecificFeedback(null);
+    } finally {
+      setIsFetchingSpecificFeedback(false);
+    }
+  };
+
+  useEffect(() => {
+    // Reset specific feedback whenever the current question index changes
+    setSpecificFeedback(null);
+  }, [currentQuestionIndex]);
 
   const handleInterviewComplete = async () => {
     setIsInterviewComplete(true);
@@ -169,10 +221,31 @@ export default function InterviewFlow({
         }),
       };
 
-      await updateInterview(updateData);
-      setCurrentQuestionIndex(nextQuestionIndex);
+      try {
+        await updateInterview(updateData);
+        setCurrentQuestionIndex(nextQuestionIndex);
+      } catch (error) {
+        console.error(
+          'Error updating interview state:',
+          error.message || error,
+        );
+      }
     }
   };
+
+  const handleNextQuestion = useCallback(async () => {
+    try {
+      if (currentQuestionIndex + 1 >= questions.length) {
+        setIsQuestionsComplete(true);
+        return;
+      }
+      await updateInterviewState(currentQuestionIndex + 1);
+      console.log('Transitioned to next question.');
+    } catch (error) {
+      console.error('Error in handleNextQuestion:', error.message || error);
+      // Optionally, set an error state here to inform the user
+    }
+  }, [currentQuestionIndex, updateInterviewState]);
 
   if (completionMessage) {
     return <div className="text-center p-4">{completionMessage}</div>;
@@ -219,32 +292,73 @@ export default function InterviewFlow({
   }
 
   return (
-    <div className="interview-flow-container flex justify-center items-center min-h-screen">
+    <div className="interview-flow-container flex flex-col items-center min-h-screen">
+      {/* Main Cards: AIQuestionSpeaker and UserCamera */}
       <div className="flex w-full max-w-4xl">
-        <>
-          <div className="left-side w-1/2 p-4">
-            <AIQuestionSpeaker
-              question={questions[currentQuestionIndex]}
-              currentIndex={currentQuestionIndex}
-              questionsLength={questions.length}
-            />
-          </div>
-          <div className="right-side w-1/2 p-4">
-            <Card className="max-w-md text-center">
-              <CardHeader>
-                <CardTitle>Candidate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <UserCamera
-                  answerCallback={handleAnswer}
-                  isCameraOn={true}
-                  onRecordEnd={handleNextQuestion}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </>
+        <div className="left-side w-1/2 p-4">
+          <AIQuestionSpeaker
+            question={questions[currentQuestionIndex]}
+            currentIndex={currentQuestionIndex}
+            questionsLength={questions.length}
+          />
+        </div>
+        <div className="right-side w-1/2 p-4">
+          <Card className="max-w-md mx-auto text-center">
+            <CardHeader>
+              <CardTitle>Candidate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UserCamera
+                answerCallback={handleAnswer}
+                isCameraOn={true}
+                onRecordEnd={
+                  interview?.mode === INTERVIEW_PRACTICE_MODE
+                    ? null
+                    : handleNextQuestion
+                }
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      {/* Feedback Card: Appears beneath the main cards in practice mode */}
+      {interview && interview.mode === INTERVIEW_PRACTICE_MODE && (
+        <div className="w-full max-w-4xl p-4">
+          <Card className="mx-auto text-center">
+            <CardHeader>
+              <CardTitle>Feedback</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isFetchingSpecificFeedback ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <p>Fetching feedback...</p>
+                  <LoadingSpinner />
+                </div>
+              ) : specificFeedback ? (
+                <>
+                  <div className="text-left space-y-2">
+                    <p>
+                      <strong>Summary:</strong> {specificFeedback.summary}
+                    </p>
+                    <p>
+                      <strong>Advice for Next Question:</strong>{' '}
+                      {specificFeedback.advice_for_next_question}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Button onClick={handleNextQuestion} className="mt-4">
+                      Next Question
+                    </Button>{' '}
+                  </div>
+                </>
+              ) : (
+                'After the question is answered, feedback will be loaded.'
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

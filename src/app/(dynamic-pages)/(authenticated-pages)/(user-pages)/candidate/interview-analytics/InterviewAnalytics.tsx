@@ -11,11 +11,11 @@ import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOver
 
 export default function InterviewAnalyticsPage() {
   const {
-    loading,
+    loadingOverview,
+    loadingDetailed,
     error,
     overview,
     detailed,
-    noDetailedData,
     fetchDetailedData,
   } = useAnalyticsData({});
 
@@ -52,7 +52,7 @@ export default function InterviewAnalyticsPage() {
   );
 
   const renderDetailed = () => {
-    if (!detailed || noDetailedData) {
+    if (!detailed) {
       return (
         <p className="text-center text-gray-500">
           No detailed analytics available.
@@ -75,7 +75,7 @@ export default function InterviewAnalyticsPage() {
         </CardHeader>
       </Card>
 
-      {loading ? (
+      {loadingOverview || loadingDetailed ? (
         <div className="flex flex-col items-center">
           <LoadingSpinner />
         </div>

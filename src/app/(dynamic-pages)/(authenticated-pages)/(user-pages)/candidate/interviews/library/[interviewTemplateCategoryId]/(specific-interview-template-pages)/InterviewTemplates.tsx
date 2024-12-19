@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Input } from '@/components/ui/input';
 import { getInterviewsTemplatesBySkill } from '@/data/user/templates';
 import { InterviewModeType, InterviewTemplate } from '@/types';
+import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { useEffect, useState } from 'react';
 
 export function InterviewTemplates({
@@ -17,17 +18,25 @@ export function InterviewTemplates({
   >([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  // const categoryName: string =
-  //   InterviewTemplateCategories.find(
-  //     (category) => category.id === interviewTemplateCategoryId,
-  //   )?.name || '';
+  const displayString =
+    interviewTemplateCategoryId === INTERVIEW_PRACTICE_MODE
+      ? 'Practice Mode'
+      : 'Interview Mode';
 
   const fetchInterviews = async () => {
     setIsLoading(true);
     try {
-      const interviewTemplates: InterviewTemplate[] =
-        //await getInterviewsTemplatesByCategory(categoryName);
-        await getInterviewsTemplatesBySkill();
+      let interviewTemplates: InterviewTemplate[] = [];
+
+      if (interviewTemplateCategoryId === INTERVIEW_PRACTICE_MODE) {
+        interviewTemplates = await getInterviewsTemplatesBySkill();
+      } else {
+        // Fetch templates based on category ID
+        // Example: await getInterviewsTemplatesByCategory(interviewTemplateCategoryId);
+        // For now, setting to empty array
+        interviewTemplates = [];
+      }
+
       setInterviewTemplates(interviewTemplates);
     } catch (error) {
       console.error('Error fetching interview templates:', error);
@@ -40,8 +49,24 @@ export function InterviewTemplates({
     fetchInterviews();
   }, [interviewTemplateCategoryId]);
 
+  // Filter templates based on search query
+  const filteredTemplates = interviewTemplates.filter((template) =>
+    template.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center min-h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        {displayString}
+      </h1>
       <h1 className="text-3xl font-bold mb-6 text-center">Select Interview</h1>
       <div className="flex justify-center mb-4">
         <Input
@@ -51,15 +76,10 @@ export function InterviewTemplates({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-
-      {isLoading ? (
-        <div className="flex justify-center min-h-screen">
-          <LoadingSpinner />
-        </div>
-      ) : (
-        <div className="flex justify-center min-h-screen">
+      <div className="flex justify-center min-h-screen">
+        {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {interviewTemplates.map((interview) => (
+            {filteredTemplates.map((interview) => (
               <InterviewCardTemplate
                 key={interview.id}
                 interviewTemplate={interview}
@@ -67,8 +87,12 @@ export function InterviewTemplates({
               />
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <h1 className="text-lg font-bold text-center">
+            No interviews Found.
+          </h1>
+        )}
+      </div>
     </div>
   );
 }

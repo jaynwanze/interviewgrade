@@ -292,13 +292,13 @@ export const insertInterviewEvaluation = async (
       recommendations: interviewEvaluation.recommendations,
       question_answer_feedback: interviewEvaluation.question_answer_feedback,
     })
-    .select();
+    .single();
 
   if (error) {
     throw error;
   }
 
-  return data[0];
+  return data;
 };
 
 export const updateInterviewAnalytics = async (
@@ -307,23 +307,22 @@ export const updateInterviewAnalytics = async (
 ): Promise<Table<'interview_analytics'> | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   // Fetch existing periodic analytics record
-  const { data: existingAnalytics, error: fetchError } = await supabase
+  const { data: data, error: fetchError } = await supabase
     .from('interview_analytics')
     .select('*')
     .eq('template_id', interview.template_id)
-    .maybeSingle();
+    .select();
 
   if (fetchError) {
     // PGRST116: No rows found
     if (fetchError.code !== 'PGRST116') {
-      console.error(
-        'Error fetching existing periodic analytics:',
-        fetchError.message,
-      );
+      console.error('Error fetching existing analytics:', fetchError.message);
       return null;
     }
     throw fetchError;
   }
+
+  const existingAnalytics = data[0];
 
   if (!existingAnalytics) {
     const avgEvaluationCriteriaScores = () => {
@@ -364,7 +363,7 @@ export const updateInterviewAnalytics = async (
     }
 
     if (!updatedInterviewAnalytics) {
-      throw new Error('Failed to update interview analytics');
+      throw new Error('Failed to create interview analytics');
     }
     return updatedInterviewAnalytics[0];
   } else {
@@ -420,7 +419,7 @@ export const updateInterviewAnalytics = async (
         .update({
           total_interviews: newTotal,
           avg_overall_grade: newAvgOverall,
-          avg_evaluation_criteria: updatedEvalCriteria,
+          avg_evaluation_criteria_scores: updatedEvalCriteria,
           strengths_summary: updatedStrengths,
           areas_for_improvement_summary: updatedAreas,
           recommendations_summary: updatedRecommendations,
@@ -558,7 +557,7 @@ export const getInterviewAnalytics = async (
     .select('*')
     .eq('candidate_id', candidateId)
     .eq('template_id', templateId)
-    .maybeSingle();
+    .select();
 
   if (error) {
     // Log invalid query or missing data errors
@@ -566,7 +565,7 @@ export const getInterviewAnalytics = async (
     throw error;
   }
 
-  return data;
+  return data[0];
 };
 
 export const getInterviewHistory = async (
@@ -625,7 +624,6 @@ export const getInterviewEvaluation = async (
 
   return data;
 };
-
 export const getTotalCompletedInterviews = async (
   candidateId: string,
 ): Promise<Table<'interviews'>[] | null> => {
@@ -637,17 +635,16 @@ export const getTotalCompletedInterviews = async (
     .eq('status', 'completed');
 
   if (error) {
-    // PGRST116: No rows found
-    if (error.code !== 'PGRST116') {
-      console.error(
-        'Could not find total completed interviews for candidate ID:' +
-        candidateId,
-        error.message,
-      );
-      return null;
-    }
-    throw error;
+    console.error(
+      'Error fetching total completed interviews for candidate ID:',
+      candidateId,
+      'Error:',
+      error.message,
+    );
+    return null; // Return null to indicate failure
   }
+
+  // Return the data, which could be an empty array if no interviews are found
   return data;
 };
 
@@ -664,20 +661,18 @@ export const getCompletedInterviewsByTemplate = async (
     .eq('template_id', templateId);
 
   if (error) {
-    // PGRST116: No rows found
-    if (error.code !== 'PGRST116') {
-      console.error(
-        'Could not find completed interviews for template ID' +
-        templateId +
-        ' + candidateId' +
-        candidateId,
-        error.message,
-      );
-      return null;
-    }
-    throw error;
+    console.error(
+      'Error fetching completed interviews for template ID:',
+      templateId,
+      'and candidate ID:',
+      candidateId,
+      'Error:',
+      error.message,
+    );
+    return null; // Return null to indicate failure
   }
 
+  // Return the data, which could be an empty array if no interviews are found
   return data;
 };
 
@@ -707,11 +702,21 @@ export const getLatestInterviewCompleted = async (
     .select('*')
     .eq('candidate_id', candidateId)
     .eq('status', 'completed')
-    .order('end_time', { ascending: false })
-    .maybeSingle();
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
 
   if (error) {
-    throw error;
+    if (error.code === 'PGRST116') {
+      // No rows found
+      return null;
+    }
+    console.error(
+      `Error fetching latest completed interview for candidate ID: ${candidateId}`,
+      'Error Details:',
+      error,
+    );
+    return null;
   }
 
   return data;

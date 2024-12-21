@@ -1,7 +1,7 @@
 'use client';
 import { Interview } from '@/types';
 import { motion } from 'framer-motion';
-import { AreaChartInteractiveLarge } from './AreaChartInteractiveInterviewTotal';
+import { AreaChartInteractiveInterviewTotal } from './AreaChartInteractiveInterviewTotal';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -38,7 +38,9 @@ export function InterviewGraphsOverview({
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <AreaChartInteractiveLarge interviewsCompleted={interviewsCompleted} />
+        <AreaChartInteractiveInterviewTotal
+          interviewsCompleted={interviewsCompleted}
+        />
       </motion.div>
     </motion.div>
   );

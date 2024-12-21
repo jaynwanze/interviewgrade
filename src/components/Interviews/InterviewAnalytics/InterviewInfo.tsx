@@ -30,7 +30,7 @@ export const InterviewInfo = ({
         </>
       )}
       <a href="#" className="text-blue-500 dark:text-blue-400 hover:underline">
-        View interview history
+        View session history
       </a>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 import { InterviewAnalytics } from '@/types';
 import { motion } from 'framer-motion';
-import { AreaChartInteractiveOverallScore } from './AreaChartInteractiveOverallScore';
+import { AreaChartInteractiveOverallGrades } from './AreaChartInteractiveOverallGrades';
 import { BarChartInteractiveEvaluationScores } from './BarCharInteractiveEvaluationScores';
 
 const containerVariants = {
@@ -39,11 +39,10 @@ export function InterviewGraphsDetailed({
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <AreaChartInteractiveOverallScore
+        <AreaChartInteractiveOverallGrades
           templateId={analyticsData.template_id}
         />
       </motion.div>
-
       <motion.div variants={itemVariants}>
         <BarChartInteractiveEvaluationScores
           templateId={analyticsData.template_id}

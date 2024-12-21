@@ -64,7 +64,7 @@ function aggregateDataByDate(data: rawDataTypeChart) {
   }));
 }
 
-export function AreaChartInteractiveOverallScore({
+export function AreaChartInteractiveOverallGrades({
   templateId,
 }: {
   templateId: string;
@@ -91,7 +91,6 @@ export function AreaChartInteractiveOverallScore({
       if (!data) {
         return;
       }
-      
       rawChartData = data.map((interviewEval) => {
         return {
           date: interviewEval.created_at.split('T')[0],

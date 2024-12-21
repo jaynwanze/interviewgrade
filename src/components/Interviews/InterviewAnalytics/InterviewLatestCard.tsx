@@ -1,6 +1,7 @@
 'use client';
-import { Card } from '@/components/ui/card';
+import { Card, CardTitle } from '@/components/ui/card';
 import { Interview } from '@/types';
+import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { InterviewInfo } from './InterviewInfo';
 
 export const InterviewLatestCard = ({
@@ -19,8 +20,14 @@ export const InterviewLatestCard = ({
   }
 
   return (
-    <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
-      <div className="text-center">
+    <div className="text-center">
+      <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
+        <CardTitle className="text-3xl">
+          Latest{' '}
+          {latestInterview.mode === INTERVIEW_PRACTICE_MODE
+            ? 'Practice Session'
+            : 'Mock Interview'}{' '}
+        </CardTitle>
         <InterviewInfo
           title={
             latestInterview.title
@@ -35,7 +42,7 @@ export const InterviewLatestCard = ({
           startDate={latestInterview.start_time}
           endDate={latestInterview.end_time}
         />
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };

@@ -1,7 +1,6 @@
 'use client';
 
-import { InterviewEvaluation } from '@/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
@@ -12,7 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -30,6 +28,7 @@ import {
   getCompletedInterviewsByTemplate,
   getInterviewEvaluations,
 } from '@/data/user/interviews';
+import { InterviewEvaluation } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 export type InterviewChartData = {
@@ -39,7 +38,6 @@ export type InterviewChartData = {
     score: number;
   }[];
 };
-
 
 export type ChartConfigType = {
   [key: string]: {
@@ -88,30 +86,57 @@ export function BarChartInteractiveEvaluationScores({
   templateId: string;
 }) {
   const [timeRange, setTimeRange] = useState('90d');
+
+  const [activeChart, setActiveChart] = useState<keyof typeof chartConfig>('');
   const [interviewEvaluations, setInterviewEvalutations] = useState<
     InterviewEvaluation[]
   >([]);
+  let rawChartData: InterviewChartData[] = [];
+  const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
 
   const fetchInterviewEvaluations = async () => {
     try {
       const user = await serverGetLoggedInUser();
+      if (!user || !user.id) {
+        throw new Error('User not authenticated or ID not found.');
+      }
+
       const completedInterviews = await getCompletedInterviewsByTemplate(
         user.id,
         templateId,
       );
-      if (!completedInterviews) {
+
+      if (!completedInterviews || completedInterviews.length === 0) {
         return;
       }
+
       const completedInterviewsIds = completedInterviews.map(
         (interview) => interview.id,
       );
+
       const data = await getInterviewEvaluations(completedInterviewsIds);
-      if (!data) {
+
+      if (!data || data.length === 0) {
         return;
       }
       setInterviewEvalutations(data);
+      //set rawChartData to the data
+      rawChartData = data.map((evaluation) => {
+        const date = new Date(evaluation.created_at)
+          .toISOString()
+          .split('T')[0];
+        const scores = evaluation.evaluation_scores.map((score) => ({
+          name: normalizeKey(score.name),
+          score: score.score,
+        }));
+        return { date, evaluation_scores: scores };
+      });
+      setChartData(aggregateDataByDate(rawChartData));
+      chartConfig;
+      setActiveChart(Object.keys(chartConfig)[0]);
     } catch (error) {
       console.error('Failed to fetch interviews:', error);
+      setInterviewEvalutations([]);
     }
   };
 
@@ -120,36 +145,30 @@ export function BarChartInteractiveEvaluationScores({
   }, [templateId]);
 
   const normalizeKey = (key: string) => key.toLowerCase().replace(/\s+/g, '_');
-  const chartConfig: ChartConfigType = interviewEvaluations.reduce(
-    (acc, evaluation) => {
+  const chartConfig: ChartConfigType = useMemo(() => {
+    return interviewEvaluations.reduce((acc, evaluation) => {
       evaluation.evaluation_scores.forEach((score, index) => {
         const normalizedKey = normalizeKey(score.name);
-        acc[normalizedKey] = {
-          label: score.name,
-          color: `hsl(var(--chart-${index + 1})) `,
-        };
+        if (!acc[normalizedKey]) {
+          // Prevent overwriting existing config
+          acc[normalizedKey] = {
+            label: score.name,
+            color: `hsl(var(--chart-${index + 1}))`,
+          };
+        }
       });
       return acc;
-    },
-    {} as ChartConfigType,
-  ) satisfies ChartConfig;
+    }, {} as ChartConfigType);
+  }, [interviewEvaluations]);
 
-  const [activeChart, setActiveChart] = useState<keyof typeof chartConfig>(
-    Object.keys(chartConfig)[0],
-  );
-
-  const rawChartData: InterviewChartData[] = interviewEvaluations.map(
-    (evaluation) => {
-      const date = new Date(evaluation.created_at).toISOString().split('T')[0];
-      const scores = evaluation.evaluation_scores.map((score) => ({
-        name: normalizeKey(score.name),
-        score: score.score,
-      }));
-      return { date, evaluation_scores: scores };
-    },
-  );
-
-  const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
+  useEffect(() => {
+    const keys = Object.keys(chartConfig);
+    if (keys.length > 0) {
+      setActiveChart(keys[0]);
+    } else {
+      setActiveChart('');
+    }
+  }, [chartConfig]);
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
@@ -173,7 +192,7 @@ export function BarChartInteractiveEvaluationScores({
     timeRangeString = '7 days';
   }
   const evaluationCriteriaString: string =
-    chartConfig[activeChart].label.toLowerCase();
+    chartConfig[activeChart]?.label?.toLowerCase();
 
   return (
     <Card>
@@ -216,7 +235,7 @@ export function BarChartInteractiveEvaluationScores({
                 className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chart)}
               >
-                <span className=" text-centertext-xs font-bold text-muted-foreground">
+                <span className="text-center text-xs font-bold text-muted-foreground">
                   {chartConfig[chart].label}
                 </span>
               </button>

@@ -64,11 +64,9 @@ export function InterviewTemplates({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        {displayString}
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">{displayString}</h1>
       <h1 className="text-3xl font-bold mb-6 text-center">Select Interview</h1>
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center mb-6">
         <Input
           placeholder="Search position or company"
           className="max-w-screen-2xl"
@@ -76,7 +74,7 @@ export function InterviewTemplates({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      <div className="flex justify-center min-h-screen">
+      <div className="flex justify-center">
         {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTemplates.map((interview) => (
@@ -88,9 +86,13 @@ export function InterviewTemplates({
             ))}
           </div>
         ) : (
-          <h1 className="text-lg font-bold text-center">
-            No interviews Found.
-          </h1>
+          <div className="w-full max-w-96 border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-200">
+            <h3 className="text-xl font-semibold">No interviews found</h3>
+            <p className="text-gray-600">
+              <div>No interviews found for this search.</div>
+              <div className="text-gray-600">Please check back later.</div>
+            </p>
+          </div>
         )}
       </div>
     </div>

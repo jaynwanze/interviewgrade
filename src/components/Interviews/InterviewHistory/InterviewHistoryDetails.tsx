@@ -32,7 +32,6 @@ export const InterviewHistoryDetails = ({
   const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
   const hasFetched = useRef(false); // Add this line
 
-
   const retryFeedbackFetch = async (interview) => {
     setIsFetchingFeedback(true);
     // Ensure synchronization between questions and answers
@@ -68,8 +67,7 @@ export const InterviewHistoryDetails = ({
     } catch (error) {
       console.error('Error fetching interview feedback:', error);
       setIsFetchingFeedback(false);
-    }
-    finally {
+    } finally {
       setIsFetchingFeedback(false);
     }
   };
@@ -104,11 +102,20 @@ export const InterviewHistoryDetails = ({
   }, [interviewId]);
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (isFetchingFeedback) {
-    return <LoadingSpinner />;
+    return (
+      <div className="text-center p-4">
+        <span>Fetching interview feedback...</span>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -137,7 +144,7 @@ export const InterviewHistoryDetails = ({
     : 'N/A';
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="p-4 max-w-3xl mx-auto text-center">
       <h1 className="text-2xl font-bold mb-4">{title}</h1>
       <div className="mb-4">
         <p>
@@ -155,13 +162,13 @@ export const InterviewHistoryDetails = ({
         <div className="w-full max-w-4xl mx-auto p-4">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center">
+              <CardTitle className="text-2xl font-bold">
                 Interview Feedback: {interview.title}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {/* Overall Score */}
-              <div className="text-center">
+              <div>
                 <section className="mb-6">
                   <h2 className="text-xl font-semibold">Overall Grade</h2>
                   <p className="text-3xl font-bold text-blue-600">
@@ -212,7 +219,7 @@ export const InterviewHistoryDetails = ({
               {evaluation.question_answer_feedback &&
                 evaluation.question_answer_feedback.length > 0 && (
                   <section className="mb-6">
-                    <h3 className="text-lg font-semibold text-center mb-2">
+                    <h3 className="text-lg font-semibold mb-2">
                       Answer Feedback
                     </h3>
                     <div className="space-y-4">
@@ -230,8 +237,10 @@ export const InterviewHistoryDetails = ({
                             </p>
                             <p className="mb-2">
                               <strong>Mark:</strong> {qa.mark}/
-                              {(100 / (evaluation.question_answer_feedback.length)).toFixed(2)}
-                              </p>
+                              {(
+                                100 / evaluation.question_answer_feedback.length
+                              ).toFixed(2)}
+                            </p>
                             <p>
                               <strong>Feedback:</strong> {qa.feedback}
                             </p>
@@ -247,7 +256,7 @@ export const InterviewHistoryDetails = ({
       )) || (
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center">
+              <CardTitle className="text-2xl font-bold">
                 Interview Feedback
               </CardTitle>
             </CardHeader>

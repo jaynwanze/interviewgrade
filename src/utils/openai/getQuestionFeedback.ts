@@ -2,12 +2,13 @@
 
 'use server';
 
+import { specificFeedbackType } from '@/app/(dynamic-pages)/(authenticated-pages)/(user-pages)/candidate/interviews/session/[interviewId]/(specific-interview-session-page)/InterviewFlow';
 import { InterviewQuestion } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
 const specificFeedback = z.object({
-  summary: z.string(),
+  evaluation: z.string(),
   advice_for_next_question: z.string(),
 });
 
@@ -28,13 +29,15 @@ const openai = new OpenAI({
  * Constructs the prompt for OpenAI based on the current question and answer
  */
 const constructQuestionFeedbackPrompt = (
+  skill: string,
   currentQuestion: InterviewQuestion,
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
 ): string => {
   return `### Interview Practice Feedback
 
-You are an AI assistant providing feedback for a practice interview.
+As an interviewer for an innovative online interview platform, your task is to evaluate candidates based on their responses practicing **${skill}** questions.
+
 
 ### Current Question
 **Question**: ${currentQuestion.text}
@@ -45,7 +48,7 @@ You are an AI assistant providing feedback for a practice interview.
 ${nextQuestion ? `**Question**: ${nextQuestion.text}` : '**Question**: N/A'}
 
 ### Instructions
-Provide a concise summary of the candidate's answer to the current question and offer advice for how to answer the next question effectively.
+Provide a concise evalaution of the candidate's answer to the current question and based off the evaluation, offer advice for how to answer the next question effectively.
 
 \`\`\`json
 {
@@ -183,10 +186,11 @@ const parseAIResponse = (
  * Main function to get question-specific feedback from OpenAI
  */
 export const getQuestionFeedback = async (
+  skill: string,
   currentQuestion: InterviewQuestion,
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
-): Promise<{ summary: string; advice_for_next_question: string } | null> => {
+): Promise<specificFeedbackType | null> => {
   // Input Validation
   if (!currentQuestion.text.trim()) {
     throw new Error('Current question text cannot be empty.');
@@ -196,12 +200,9 @@ export const getQuestionFeedback = async (
     throw new Error('Current answer cannot be empty.');
   }
 
-  if (nextQuestion && !nextQuestion.text.trim()) {
-    throw new Error('Next question text cannot be empty.');
-  }
-
   // Construct the prompt
   const prompt = constructQuestionFeedbackPrompt(
+    skill,
     currentQuestion,
     currentAnswer,
     nextQuestion,

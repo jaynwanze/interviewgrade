@@ -71,6 +71,8 @@ export function AreaChartInteractiveOverallScore({
 }) {
   const [timeRange, setTimeRange] = useState('90d');
   let rawChartData: { date: string; interview_grade: number }[] = [];
+  const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
+
 
   const fetchInterviews = async () => {
     try {
@@ -96,6 +98,10 @@ export function AreaChartInteractiveOverallScore({
           interview_grade: interviewEval.overall_grade,
         };
       });
+      if (rawChartData.length === 0) {
+        return;
+      }
+      setChartData(aggregateDataByDate(rawChartData));
     } catch (error) {
       console.error('Failed to fetch interviews:', error);
     }
@@ -104,8 +110,6 @@ export function AreaChartInteractiveOverallScore({
   useEffect(() => {
     fetchInterviews();
   }, [templateId]);
-
-  const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);

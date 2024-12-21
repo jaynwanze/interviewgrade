@@ -4,19 +4,27 @@ import { Interview } from '@/types';
 import { InterviewHistoryItem } from './InterviewHistoryItem';
 
 export const InterviewHistoryList = ({
-    interviews,
+  interviews,
 }: {
-    interviews: Interview[];
+  interviews: Interview[];
 }) => {
-    if (interviews.length === 0) {
-        return <div>No interviews found in this category.</div>;
-    }
-
-    return (
-        <div className="space-y-4">
-            {interviews.map((interview) => (
-                <InterviewHistoryItem key={interview.id} interview={interview} />
-            ))}
-        </div>
-    );
+  return (
+    <div className="flex justify-center items-center">
+      <div className="w-full max-w-screen-md space-y-4">
+      {interviews.length > 0 ? (
+          interviews.map((interview) => (
+            <InterviewHistoryItem key={interview.id} interview={interview} />
+          ))
+        ) : (
+          <div className="w-full max-w-screen-md  border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-200">
+            <h3 className="text-xl font-semibold">No interviews found</h3>
+            <p className="text-gray-600">
+              <div>No interviews found for this filter.</div>
+              <div className="text-gray-600">Please check back later.</div>
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };

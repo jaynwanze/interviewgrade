@@ -121,11 +121,9 @@ export default function InterviewFlow({
         answers.current.push(answer);
         setAnswersLength(answers.current.length);
         await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+        await updateInterviewState(currentQuestionIndex + 1);
         if (interview?.mode === INTERVIEW_PRACTICE_MODE) {
           await fetchSpecificFeedback(answer);
-        } else {
-          // For non-practice mode, proceed to the next question
-          await updateInterviewState(currentQuestionIndex + 1);
         }
       } catch (error) {
         console.error('Error in handleAnswer:', error.message || error);
@@ -142,6 +140,7 @@ export default function InterviewFlow({
       const nextQuestion = questions[nextQuestionIndex] || null;
 
       const specificFeedbackData = await getQuestionFeedback(
+        interview?.skill ?? '',
         questions[currentQuestionIndex],
         answer,
         nextQuestion,
@@ -223,7 +222,6 @@ export default function InterviewFlow({
 
       try {
         await updateInterview(updateData);
-        setCurrentQuestionIndex(nextQuestionIndex);
       } catch (error) {
         console.error(
           'Error updating interview state:',
@@ -233,19 +231,16 @@ export default function InterviewFlow({
     }
   };
 
-  const handleNextQuestion = useCallback(async () => {
-    try {
-      if (currentQuestionIndex + 1 >= questions.length) {
+  const handleNextQuestion = useCallback(() => {
+    setCurrentQuestionIndex((prevIndex) => {
+      if (prevIndex < questions.length - 1) {
+        return prevIndex + 1;
+      } else {
         setIsQuestionsComplete(true);
-        return;
+        return prevIndex;
       }
-      await updateInterviewState(currentQuestionIndex + 1);
-      console.log('Transitioned to next question.');
-    } catch (error) {
-      console.error('Error in handleNextQuestion:', error.message || error);
-      // Optionally, set an error state here to inform the user
-    }
-  }, [currentQuestionIndex, updateInterviewState]);
+    });
+  }, [questions.length]);
 
   if (completionMessage) {
     return <div className="text-center p-4">{completionMessage}</div>;
@@ -316,6 +311,7 @@ export default function InterviewFlow({
                     ? null
                     : handleNextQuestion
                 }
+                setIsFetchingFeedback={setIsFetchingFeedback}
               />
             </CardContent>
           </Card>

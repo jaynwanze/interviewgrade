@@ -1,14 +1,19 @@
 'use client';
 
 import { InterviewModeCard } from '@/components/Interviews/InterviewLibrary/InterviewModeCard';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { INTERVIEW_MODES } from '@/utils/constants';
 
 export function InterviewMode() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Select Interview Mode
-      </h1>
+      <Card className="mb-6 text-center">
+        <CardHeader>
+          <CardTitle>
+            <h1 className="text-3xl text-center">Select Interview Mode</h1>
+          </CardTitle>
+        </CardHeader>
+      </Card>
       <div className="flex justify-center mb-4"></div>
 
       <div className="flex justify-center h-60">

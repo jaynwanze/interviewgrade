@@ -3,14 +3,10 @@ import {
   getLatestInterviewCompleted,
   getTotalCompletedInterviews,
 } from '@/data/user/interviews';
-import { Interview, InterviewAnalytics } from '@/types';
+import { Interview } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { useEffect, useState } from 'react';
-export const useAnalyticsData = ({
-  currentTemplateId,
-}: {
-  currentTemplateId?: string;
-}) => {
+export const useAnalyticsData = () => {
   const [loadingOverview, setLoadingOverview] = useState(true);
   const [loadingDetailed, setLoadingDetailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +18,6 @@ export const useAnalyticsData = ({
     completedInterviews: [],
     latestInterview: null,
   });
-  const [detailed, setDetailed] = useState<InterviewAnalytics | null>(null);
-  const [noDetailedData, setNoDetailedData] = useState(false);
 
   // Fetch Overview Data
   const fetchOverviewData = async () => {
@@ -54,25 +48,32 @@ export const useAnalyticsData = ({
   };
 
   // Fetch Detailed Data
-  const fetchDetailedData = async () => {
-    const templateId =
-      currentTemplateId || overview.latestInterview?.template_id;
-
+  const fetchDetailedData = async (currentTemplateId: string) => {
+    const templateId = currentTemplateId;
     if (!templateId || !userId) {
-      setNoDetailedData(true);
-      return;
+      setError('Template ID or User ID not found.');
+      console.error('Template ID or User ID not found.');
+      setLoadingDetailed(false);
+      return null;
     }
 
     try {
       setLoadingDetailed(true);
       setError(null);
       const analytics = await getInterviewAnalytics(userId, templateId);
-      setDetailed(analytics);
+      if (!analytics) {
+        setError('Failed to fetch detailed analytics data.');
+        console.error('Failed to fetch detailed analytics data.');
+        setLoadingDetailed(false);
+        return null;
+      }
       setLoadingDetailed(false);
+      return analytics;
     } catch (err) {
       setLoadingDetailed(false);
       setError('Failed to fetch detailed analytics data.');
       console.error('Error fetching detailed analytics:', err);
+      return null;
     }
   };
 
@@ -80,18 +81,11 @@ export const useAnalyticsData = ({
     fetchOverviewData();
   }, []);
 
-  useEffect(() => {
-    if (userId) {
-      fetchDetailedData();
-    }
-  }, [currentTemplateId, userId, overview.latestInterview]);
-
   return {
     loadingOverview,
     loadingDetailed,
     error,
     overview,
-    detailed,
     fetchOverviewData,
     fetchDetailedData,
   };

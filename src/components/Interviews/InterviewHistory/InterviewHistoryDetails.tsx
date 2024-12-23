@@ -145,17 +145,19 @@ export const InterviewHistoryDetails = ({
 
   return (
     <div className="p-4 max-w-3xl mx-auto text-center">
-      <h1 className="text-2xl font-bold mb-4">{title}</h1>
-      <div className="mb-4">
-        <p>
-          <strong>Status:</strong> {formattedStatus}
-        </p>
-        <p>
-          <strong>Started At:</strong> {formattedStartedAt}
-        </p>
-        <p>
-          <strong>Completed At:</strong> {formattedCompletedAt}
-        </p>
+      <div className="w-full max-w-4xl mx-auto p-">
+        <Card className="shadow-lg p-4">
+          <h1 className="text-2xl font-bold mb-4">{title}</h1>
+          <p>
+            <strong>Status:</strong> {formattedStatus}
+          </p>
+          <p>
+            <strong>Started At:</strong> {formattedStartedAt}
+          </p>
+          <p>
+            <strong>Completed At:</strong> {formattedCompletedAt}
+          </p>
+        </Card>
       </div>
 
       {(status === 'completed' && evaluation && (

@@ -28,13 +28,13 @@ import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 const chartConfig: ChartConfig = {
-  interview: {
-    label: 'Interview Sessions',
-    color: `hsl(var(--chart-1))`,
-  },
   practice: {
     label: 'Practice Sessions',
     color: `hsl(var(--chart-2))`,
+  },
+  interview: {
+    label: 'Interview Sessions',
+    color: `hsl(var(--chart-1))`,
   },
 } satisfies ChartConfig;
 

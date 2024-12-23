@@ -3,6 +3,7 @@
 import { InterviewHistoryFilter } from '@/components/Interviews/InterviewHistory/InterviewHistoryFilter';
 import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/InterviewHistoryList';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useInterviewHistory } from '@/hooks/useInterviewHistory';
@@ -58,7 +59,16 @@ export default function InterviewHistoryPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Interview History</h1>
+      <Card className="mb-6 text-center">
+        <CardHeader>
+          <CardTitle>
+            {' '}
+            <h1 className="text-3xl text-center">
+              Interview History
+            </h1>
+          </CardTitle>
+        </CardHeader>
+      </Card>
       <div className="flex justify-center items-center space-x-2 mb-4">
         <Switch
           id="history-mode"

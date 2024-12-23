@@ -56,6 +56,23 @@ export default function InterviewFlow({
     useState(false);
   const [specificFeedback, setSpecificFeedback] =
     useState<specificFeedbackType | null>();
+  const timerRef = useRef<number | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+
+  const startTimer = () => {
+    if (timerRef.current == null) {
+      timerRef.current = window.setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   const fetchInterview = async () => {
     setIsLoading(true);
@@ -90,6 +107,8 @@ export default function InterviewFlow({
         setAnswersLength(answers.current.length);
       }
       setEvaluationCriteria(interview.evaluation_criterias ?? []);
+      setIsCameraOn(true);
+      startTimer();
     } catch (error) {
       console.error('Error fetching interview:', error);
     } finally {
@@ -170,6 +189,8 @@ export default function InterviewFlow({
   const handleInterviewComplete = async () => {
     setIsInterviewComplete(true);
     setIsFetchingFeedback(true);
+    setIsCameraOn(false);
+    stopTimer();
     // Ensure synchronization between questions and answers
     if (questions.length !== answers.current.length) {
       console.error('Mismatch between number of questions and answers.');
@@ -198,7 +219,6 @@ export default function InterviewFlow({
       );
 
       setInterviewFeedback(feedback);
-      setIsCameraOn(false);
     } catch (error) {
       // Handle error better
       console.error('Error fetching feedback:', error.message || error);
@@ -289,6 +309,15 @@ export default function InterviewFlow({
   return (
     <div className="interview-flow-container flex flex-col items-center min-h-screen">
       {/* Main Cards: AIQuestionSpeaker and UserCamera */}
+      <div className="flex items-center justify-center space-x-2">
+        <Card className=" p-4 text-center">
+          <h1 className="2xl font-bold">Timer</h1>
+          <p>
+            {Math.floor(recordingTime / 60)}:
+            {('0' + (recordingTime % 60)).slice(-2)}
+          </p>
+        </Card>
+      </div>
       <div className="flex w-full max-w-4xl">
         <div className="left-side w-1/2 p-4">
           <AIQuestionSpeaker

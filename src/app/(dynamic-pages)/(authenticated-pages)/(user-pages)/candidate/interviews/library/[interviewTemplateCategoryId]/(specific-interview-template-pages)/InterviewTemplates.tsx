@@ -2,6 +2,7 @@
 
 import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { getInterviewsTemplatesBySkill } from '@/data/user/templates';
 import { InterviewModeType, InterviewTemplate } from '@/types';
@@ -20,8 +21,8 @@ export function InterviewTemplates({
   const [isLoading, setIsLoading] = useState(false);
   const displayString =
     interviewTemplateCategoryId === INTERVIEW_PRACTICE_MODE
-      ? 'Practice Mode'
-      : 'Interview Mode';
+      ? 'Practice Mode : Select Practice Session'
+      : 'Interview Mode : Select Mock Interview';
 
   const fetchInterviews = async () => {
     setIsLoading(true);
@@ -64,8 +65,16 @@ export function InterviewTemplates({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-center">{displayString}</h1>
-      <h1 className="text-3xl font-bold mb-6 text-center">Select Interview</h1>
+      <Card className="mb-6 text-center">
+        <CardHeader>
+          <CardTitle>
+            {' '}
+            <h1 className="text-3xl text-center">
+              {displayString}
+            </h1>
+          </CardTitle>
+        </CardHeader>
+      </Card>
       <div className="flex justify-center mb-6">
         <Input
           placeholder="Search position or company"

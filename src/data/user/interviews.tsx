@@ -224,6 +224,7 @@ export const getInterview = async (
 export const insertInterviewAnswer = async (
   interviewQuestionId: string,
   answer: string,
+  feedback: string,
 ): Promise<Table<'interview_answers'>> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
@@ -231,13 +232,13 @@ export const insertInterviewAnswer = async (
     .insert({
       interview_question_id: interviewQuestionId,
       text: answer,
+      feedback: feedback,
     })
     .single();
 
   if (error) {
     throw error;
   }
-
   return data;
 };
 /*

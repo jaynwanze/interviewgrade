@@ -13,7 +13,6 @@ import {
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-
 const feedback = z.object({
   overall_grade: z.number(),
   evaluation_scores: z.array(
@@ -104,7 +103,7 @@ ${formatRubrics(criterion.rubrics)}`,
   "question": "${detail.question}",
   "answer": "${detail.answer}",
   "mark": 0,
-  "feedback": ""
+  "feedback": "${detail.feedback}"	
 }`,
     )
     .join(',\n    ');
@@ -133,8 +132,8 @@ Your evaluation should include:
 - **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10.
 - **Strengths and Areas for Improvement**: Specific feedback highlighting areas where the candidate excelled or could improve.
 - **Recommendations**: Suggestions for how the candidate could improve.
-- **Question Answer Feedback**: The grade and specific feedback based on corresponding evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
-- **mark**: Within "question_answer_feedback" for each mark for each answer should be marked out of ${maxScorePerQuestion} and ensure that the sum of all marks add up to "overall_grade".
+- **Question Answer Feedback**: The grade based on specific corresponding feedback (Note: In case, a feedback field is empty, populate field it corresponding feedback) and evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
+- **Mark**: Within "question_answer_feedback" for each mark for each answer should be marked out of ${maxScorePerQuestion} and ensure that the sum of all marks add up to "overall_grade".
 
 ### Guidelines
 1. **Link Feedback to Specific Answers**: Reference specific answers related to each criterion. For example, when evaluating a specific criterion, mention how the candidate's answer to the linked question demonstrates their skills in that area.

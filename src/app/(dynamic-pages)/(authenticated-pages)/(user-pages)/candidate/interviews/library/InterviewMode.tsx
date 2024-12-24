@@ -9,8 +9,8 @@ export function InterviewMode() {
     <div>
       <Card className="mb-6 text-center">
         <CardHeader>
-          <CardTitle>
-            <h1 className="text-3xl text-center">Select Interview Mode</h1>
+          <CardTitle className="text-3xl text-center">
+            Select Interview Mode
           </CardTitle>
         </CardHeader>
       </Card>

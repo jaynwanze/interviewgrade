@@ -64,6 +64,7 @@ export type UpdateInterviewAnswer = Pick<
 export type InterviewAnswerDetail = {
   question: string;
   answer: string;
+  feedback: string;
   evaluation_criteria_name: string;
 };
 

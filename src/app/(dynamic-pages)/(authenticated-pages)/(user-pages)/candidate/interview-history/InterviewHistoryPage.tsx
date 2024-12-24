@@ -61,11 +61,8 @@ export default function InterviewHistoryPage() {
     <div className="p-4">
       <Card className="mb-6 text-center">
         <CardHeader>
-          <CardTitle>
-            {' '}
-            <h1 className="text-3xl text-center">
-              Interview History
-            </h1>
+        <CardTitle className="text-3xl text-center">
+        Interview History
           </CardTitle>
         </CardHeader>
       </Card>

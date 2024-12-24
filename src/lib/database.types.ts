@@ -570,19 +570,16 @@ export type Database = {
           id: string
           interview_question_id: string
           text: string
-          score: number
           feedback: string
         }
         Insert: {
           interview_question_id: string
           text: string
-          score?: number
           feedback?: string
         }
         Update: {
           interview_question_id?: string
           text?: string
-          score?: number
           feedback?: string
         }
         Relationships: [

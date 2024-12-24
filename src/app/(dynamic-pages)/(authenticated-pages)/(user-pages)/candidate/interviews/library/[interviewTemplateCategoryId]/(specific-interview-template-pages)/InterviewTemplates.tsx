@@ -67,11 +67,8 @@ export function InterviewTemplates({
     <div>
       <Card className="mb-6 text-center">
         <CardHeader>
-          <CardTitle>
-            {' '}
-            <h1 className="text-3xl text-center">
-              {displayString}
-            </h1>
+          <CardTitle className="text-3xl text-center">
+            {displayString}
           </CardTitle>
         </CardHeader>
       </Card>
@@ -97,10 +94,8 @@ export function InterviewTemplates({
         ) : (
           <div className="w-full max-w-96 border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-200">
             <h3 className="text-xl font-semibold">No interviews found</h3>
-            <p className="text-gray-600">
-              <div>No interviews found for this search.</div>
-              <div className="text-gray-600">Please check back later.</div>
-            </p>
+            <div>No interviews found for this search.</div>
+            <div className="text-gray-600">Please check back later.</div>
           </div>
         )}
       </div>

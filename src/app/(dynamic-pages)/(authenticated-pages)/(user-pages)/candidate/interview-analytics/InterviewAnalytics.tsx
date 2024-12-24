@@ -323,10 +323,8 @@ export default function InterviewAnalyticsPage() {
     <div className="container mx-auto p-6">
       <Card className="mb-6 text-center">
         <CardHeader>
-          <CardTitle>
-            <h1 className="text-3xl text-center">
-              Interview Analytics Dashboard
-            </h1>
+          <CardTitle className="text-3xl text-center">
+            Interview Analytics Dashboard
           </CardTitle>
         </CardHeader>
       </Card>

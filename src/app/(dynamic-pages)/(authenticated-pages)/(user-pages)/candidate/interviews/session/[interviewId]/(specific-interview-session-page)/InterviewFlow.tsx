@@ -58,6 +58,9 @@ export default function InterviewFlow({
     useState<specificFeedbackType | null>();
   const timerRef = useRef<number | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [questionFeedback, setQuestionFeedback] = useState<{
+    [key: number]: specificFeedbackType | null;
+  }>({});
 
   const startTimer = () => {
     if (timerRef.current == null) {
@@ -139,7 +142,12 @@ export default function InterviewFlow({
         // Push the answer to the answers array
         answers.current.push(answer);
         setAnswersLength(answers.current.length);
-        await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+
+        await insertInterviewAnswer(
+          questions[currentQuestionIndex].id,
+          answer,
+          questionFeedback[currentQuestionIndex]?.summary ?? '',
+        );
         await updateInterviewState(currentQuestionIndex + 1);
         if (interview?.mode === INTERVIEW_PRACTICE_MODE) {
           await fetchSpecificFeedback(answer);
@@ -149,7 +157,7 @@ export default function InterviewFlow({
         // Optionally, set an error state here to inform the user
       }
     },
-    [questions, currentQuestionIndex, interview],
+    [questions, questionFeedback, currentQuestionIndex, interview],
   );
 
   const fetchSpecificFeedback = async (answer: string) => {
@@ -166,16 +174,25 @@ export default function InterviewFlow({
       );
 
       if (specificFeedbackData) {
-        setSpecificFeedback(specificFeedbackData);
+        setQuestionFeedback((prev) => ({
+          ...prev,
+          [currentQuestionIndex]: specificFeedbackData,
+        }));
       } else {
-        setSpecificFeedback(null);
+        setQuestionFeedback((prev) => ({
+          ...prev,
+          [currentQuestionIndex]: null,
+        }));
       }
     } catch (error) {
       console.error(
         'Error fetching specific feedback:',
         error.message || error,
       );
-      setSpecificFeedback(null);
+      setQuestionFeedback((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: null,
+      }));
     } finally {
       setIsFetchingSpecificFeedback(false);
     }
@@ -202,6 +219,7 @@ export default function InterviewFlow({
       (question, index) => ({
         question: question.text,
         answer: answers.current[index],
+        feedback: questionFeedback[index]?.summary ?? '',
         evaluation_criteria_name: question.evaluation_criteria.name,
       }),
     );
@@ -360,15 +378,19 @@ export default function InterviewFlow({
                   <p>Fetching feedback...</p>
                   <LoadingSpinner />
                 </div>
-              ) : specificFeedback ? (
+              ) : questionFeedback[currentQuestionIndex] ? (
                 <>
                   <div className="text-left space-y-2">
                     <p>
-                      <strong>Summary:</strong> {specificFeedback.summary}
+                      <strong>Summary:</strong>{' '}
+                      {questionFeedback[currentQuestionIndex]?.summary}
                     </p>
                     <p>
                       <strong>Advice for Next Question:</strong>{' '}
-                      {specificFeedback.advice_for_next_question}
+                      {
+                        questionFeedback[currentQuestionIndex]
+                          ?.advice_for_next_question
+                      }
                     </p>
                   </div>
                   <div className="flex items-center justify-center space-x-2">

@@ -194,7 +194,8 @@ ALTER TABLE "public"."interview_questions" OWNER TO "postgres";
 CREATE TABLE "public"."interview_answers" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_question_id" "uuid" NOT NULL,
-  "text" text
+  "text" text,
+  "feedback" text
 );
 --
 -- Name: job_application_tracker; Type: TABLE; Schema: public; Owner: postgres

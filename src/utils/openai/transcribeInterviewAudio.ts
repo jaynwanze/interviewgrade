@@ -1,31 +1,42 @@
 'use server';
 
-import axios from 'axios';
+import OpenAI from 'openai';
 
-// Ensure that the environment variable is loaded
 const openAiKey = process.env.OPENAI_SECRET_KEY;
 
 if (!openAiKey) {
-  throw new Error('OPENAI_SECRET_KEY is not defined');
+  throw new Error(
+    'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
+  );
 }
 
-// Function to transcribe audio using OpenAI Whisper API
-export const transcribeInterviewAudio = async (formData: FormData) => {
-  
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/audio/transcriptions',
+const openai = new OpenAI({
+  apiKey: openAiKey,
+});
+// Function to transcribe audio using the server-side API route
+export const transcribeInterviewAudio = async (
+  formData: FormData,
+): Promise<string> => {
+  const file = formData.get('file') as File;
 
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${openAiKey}`, // Use Bearer token for authorization
-        },
-      },
-    );
-    return response.data.text; // Return the transcription for further processing
+  if (!file) {
+    throw new Error('File is missing in the form data.');
+  }
+
+  try {
+    const transcription = await openai.audio.transcriptions.create({
+      file: file,
+      model: 'whisper-1',
+      response_format: 'text',
+    });
+    return transcription; // Return the transcription
   } catch (error) {
-    console.error('Error transcribing audio:', error);
+    console.error(
+      'Error transcribing audio:',
+      error.response?.data || error.message,
+    );
+    throw new Error(
+      error.response?.data?.error?.message || 'Transcription failed',
+    );
   }
 };

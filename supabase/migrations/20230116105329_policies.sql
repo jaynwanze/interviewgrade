@@ -287,8 +287,8 @@ INSERT TO "authenticated" WITH CHECK (
     EXISTS (
         SELECT 1 FROM "public"."templates"
         WHERE "templates"."id" = "template_evaluation_criteria"."template_id"
-          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE 
-          AND ("templates"."role" != null AND"templates"."skill" = null) || ("templates"."role" = null AND "templates"."skill" != null))
+          AND ("templates"."user_id" = "auth"."uid"() AND "templates"."is_system_defined" = FALSE
+          AND (("templates"."role" IS NOT NULL AND "templates"."skill" IS NULL) OR ("templates"."role" IS NULL AND "templates"."skill" IS NOT NULL)))
     )
 );
 --

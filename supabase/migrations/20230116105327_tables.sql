@@ -96,28 +96,6 @@ CREATE TABLE "public"."interview_evaluations" (
 );
 ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";
 --
--- Name: interview_analytics; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE "public"."interview_analytics" (
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "candidate_id" "uuid" NOT NULL,
-  "template_id" "uuid" NOT NULL,
-  "interview_title" character varying,
-  "interview_description" text,
-  "total_interviews" INTEGER NOT NULL DEFAULT 0,
-  "question_count" INTEGER NOT NULL DEFAULT 0,
-  "avg_overall_grade" DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-  "avg_evaluation_criteria_scores" jsonb NOT NULL DEFAULT '{}',
-  "strengths_summary" text[] NOT NULL DEFAULT '{}',
-  "areas_for_improvement_summary" text[] NOT NULL DEFAULT '{}',
-  "recommendations_summary" text[] NOT NULL DEFAULT '{}',
-  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  "updated_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-ALTER TABLE "public"."interview_analytics" OWNER TO "postgres";
---
 -- Name: templates; Type: TABLE; Schema: public; Owner: postgres
 --
 CREATE TABLE "public"."templates" (
@@ -257,13 +235,8 @@ ADD CONSTRAINT "interviews_pkey" PRIMARY KEY ("id");
 ALTER TABLE ONLY "public"."interview_evaluations"
 ADD CONSTRAINT "interview_evaluations_pkey" PRIMARY KEY ("id");
 --
--- Name: interview_analytics interview_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_pkey" PRIMARY KEY ("id");
---
 -- Name: templates templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
 
 
 ALTER TABLE ONLY "public"."templates"
@@ -342,18 +315,6 @@ ADD CONSTRAINT "interviews_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFER
 
 ALTER TABLE ONLY "public"."interview_evaluations"
 ADD CONSTRAINT "interview_evaluations_interview_id_fkey" FOREIGN KEY ("interview_id") REFERENCES "interviews"("id") ON DELETE CASCADE;
---
--- Name: interview_analytics interview_analytics_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "templates"("id");
---
--- Name: interview_analytics interview_analytics_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidates"("id") ON DELETE CASCADE;
 --
 -- Name: templates templates_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -520,17 +481,3 @@ ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::pr
 
 ALTER TABLE ONLY "public"."interview"
 ADD CONSTRAINT "interview_mode_check" CHECK ("mode" = ANY (ARRAY['practice'::template_mode, 'interview'::template_mode]));
-
---
--- Name: interview_analytics interview_analytics_period_start_end_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_period_start_end_check" CHECK ("period_start" <= "period_end");
-
---
--- Name: interview_analytics interview_analytics_avg_overall_grade_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_avg_overall_grade_check" CHECK ("avg_overall_grade" >= 0 AND "avg_overall_grade" <= 100);

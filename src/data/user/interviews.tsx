@@ -7,17 +7,15 @@ import {
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
-  AvgEvaluationScores,
-  EvaluationScores,
   FeedbackData,
-  Interview,
   InterviewComplete,
-  InterviewEvaluation,
   InterviewModeType,
   InterviewTemplate,
   InterviewUpdate,
   SAPayload,
   Table,
+  AvgEvaluationScores,
+  InterviewAnalytics
 } from '@/types';
 import { INTERVIEW_INTERVIEW_MODE } from '@/utils/constants';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
@@ -301,272 +299,110 @@ export const insertInterviewEvaluation = async (
 
   return data;
 };
-
-export const updateInterviewAnalytics = async (
-  interview: Interview,
-  interviewEvaluation: InterviewEvaluation,
-): Promise<Table<'interview_analytics'> | null> => {
-  const supabase = createSupabaseUserServerComponentClient();
-  // Fetch existing periodic analytics record
-  const { data: data, error: fetchError } = await supabase
-    .from('interview_analytics')
-    .select('*')
-    .eq('template_id', interview.template_id)
-    .select();
-
-  if (fetchError) {
-    // PGRST116: No rows found
-    if (fetchError.code !== 'PGRST116') {
-      console.error('Error fetching existing analytics:', fetchError.message);
-      return null;
-    }
-    throw fetchError;
-  }
-
-  const existingAnalytics = data[0];
-
-  if (!existingAnalytics) {
-    const avgEvaluationCriteriaScores = () => {
-      return interviewEvaluation.evaluation_scores.map((score) => ({
-        id: score.id,
-        name: score.name,
-        avg_score: score.score,
-        feedback_summary: [score.feedback],
-      }));
-    };
-
-    // Create a new interview analytics record
-    const { data: updatedInterviewAnalytics, error: insertError } =
-      await supabase
-        .from('interview_analytics')
-        .insert([
-          {
-            template_id: interview.template_id,
-            candidate_id: interview.candidate_id,
-            interview_title: interview.title,
-            interview_description: interview.description,
-            total_interviews: 1,
-            question_count: interview.question_count,
-            avg_overall_grade: interviewEvaluation.overall_grade,
-            avg_evaluation_criteria_scores: avgEvaluationCriteriaScores(),
-            strengths_summary: [interviewEvaluation.strengths],
-            areas_for_improvement_summary: [
-              interviewEvaluation.areas_for_improvement,
-            ],
-            recommendations_summary: [interviewEvaluation.recommendations],
-          },
-        ])
-        .select();
-
-    if (insertError) {
-      console.error('Error inserting new analytics:', insertError.message);
-      throw insertError;
-    }
-
-    if (!updatedInterviewAnalytics) {
-      throw new Error('Failed to create interview analytics');
-    }
-    return updatedInterviewAnalytics[0];
-  } else {
-    // Update the existing periodic analytics record
-    const newTotal = existingAnalytics.total_interviews + 1;
-    const newAvgOverall =
-      (existingAnalytics.avg_overall_grade *
-        existingAnalytics.total_interviews +
-        interviewEvaluation.overall_grade) /
-      newTotal;
-
-    // Recalculate average evaluation criteria
-    const updatedEvalCriteria: AvgEvaluationScores[] = [
-      ...existingAnalytics.avg_evaluation_criteria_scores,
-    ];
-    for (const score of interviewEvaluation.evaluation_scores) {
-      const existingScore = updatedEvalCriteria.find(
-        (item) => item.id === score.id,
-      );
-      if (existingScore) {
-        existingScore.avg_score =
-          (existingScore.avg_score * existingAnalytics.total_interviews +
-            score.score) /
-          newTotal;
-        existingScore.feedback_summary.push(score.feedback);
-      } else {
-        updatedEvalCriteria.push({
-          id: score.id,
-          name: score.name,
-          avg_score: score.score,
-          feedback_summary: [score.feedback],
-        });
-      }
-    }
-
-    // Append to summaries arrays
-    const updatedStrengths = [
-      ...existingAnalytics.strengths_summary,
-      interviewEvaluation.strengths,
-    ];
-    const updatedAreas = [
-      ...existingAnalytics.areas_for_improvement_summary,
-      interviewEvaluation.areas_for_improvement,
-    ];
-    const updatedRecommendations = [
-      ...existingAnalytics.recommendations_summary,
-      interviewEvaluation.recommendations,
-    ];
-
-    const { data: updatedInterviewAnalytics, error: updateError } =
-      await supabase
-        .from('interview_analytics')
-        .update({
-          total_interviews: newTotal,
-          avg_overall_grade: newAvgOverall,
-          avg_evaluation_criteria_scores: updatedEvalCriteria,
-          strengths_summary: updatedStrengths,
-          areas_for_improvement_summary: updatedAreas,
-          recommendations_summary: updatedRecommendations,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existingAnalytics.id);
-
-    if (updateError) {
-      console.error('Error updating periodic analytics:', updateError.message);
-      throw updateError;
-    }
-
-    if (!updatedInterviewAnalytics) {
-      throw new Error('Failed to update interview analytics');
-    }
-    return updatedInterviewAnalytics;
-  }
-};
-
-export const removeInterviewAnalytics = async (
-  interview_template_id: string,
-  deletedInterviewEvaluation: InterviewEvaluation,
-): Promise<string | null> => {
-  const supabase = createSupabaseUserServerComponentClient();
-
-  // Fetch existing periodic analytics record
-  const { data: existingAnalytics, error: fetchError } = await supabase
-    .from('interview_analytics')
-    .select('*')
-    .eq('template_id', interview_template_id)
-    .single();
-
-  if (fetchError) {
-    console.error(
-      'Error fetching existing periodic analytics:',
-      fetchError.message,
-    );
-    throw fetchError;
-  }
-
-  if (!existingAnalytics) {
-    // No analytics record exists; nothing to do
-    return null;
-  }
-
-  const newTotal = existingAnalytics.total_interviews - 1;
-
-  if (newTotal <= 0) {
-    // Optionally delete the analytics record if no interviews remain in the period
-    const { error: deleteError } = await supabase
-      .from('interview_analytics')
-      .delete()
-      .eq('id', existingAnalytics.id);
-
-    if (deleteError) {
-      console.error('Error deleting periodic analytics:', deleteError.message);
-      throw deleteError;
-    }
-
-    return null;
-  }
-
-  const newAvgOverall =
-    (existingAnalytics.avg_overall_grade * existingAnalytics.total_interviews -
-      deletedInterviewEvaluation.overall_grade) /
-    newTotal;
-
-  // Recalculate average evaluation criteria
-  const updatedEvalCriteria: AvgEvaluationScores[] =
-    existingAnalytics.avg_evaluation_criteria_scores.map(
-      (score: AvgEvaluationScores) => {
-        const deletedScore = deletedInterviewEvaluation.evaluation_scores.find(
-          (s: EvaluationScores) => s.id === score.id,
-        );
-        if (deletedScore) {
-          score.avg_score =
-            (score.avg_score * existingAnalytics.total_interviews -
-              deletedScore.score) /
-            newTotal;
-          score.feedback_summary = score.feedback_summary.filter(
-            (f: string) => f !== deletedScore.feedback,
-          );
-        }
-        return score;
-      },
-    );
-  // Remove the deleted interview's summaries from the arrays
-  const updatedStrengths = existingAnalytics.strengths_summary.filter(
-    (s: string) => s !== deletedInterviewEvaluation.strengths,
-  );
-  const updatedAreas = existingAnalytics.areas_for_improvement_summary.filter(
-    (a: string) => a !== deletedInterviewEvaluation.areas_for_improvement,
-  );
-  const updatedRecommendations =
-    existingAnalytics.recommendations_summary.filter(
-      (r: string) => r !== deletedInterviewEvaluation.recommendations,
-    );
-
-  const { error: updateError } = await supabase
-    .from('interview_analytics')
-    .update({
-      total_interviews: newTotal,
-      avg_overall_grade: newAvgOverall,
-      avg_evaluation_criteria: updatedEvalCriteria,
-      strengths_summary:
-        updatedStrengths.length > 0
-          ? updatedStrengths
-          : ['No strengths available.'],
-      areas_for_improvement_summary:
-        updatedAreas.length > 0
-          ? updatedAreas
-          : ['No areas for improvement available.'],
-      recommendations_summary:
-        updatedRecommendations.length > 0
-          ? updatedRecommendations
-          : ['No recommendations available.'],
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', existingAnalytics.id);
-
-  if (updateError) {
-    console.error('Error updating periodic analytics:', updateError.message);
-    throw updateError;
-  }
-  return 'Analytics record updated';
-};
-
 export const getInterviewAnalytics = async (
   candidateId: string,
   templateId: string,
-): Promise<Table<'interview_analytics'> | null> => {
+): Promise<InterviewAnalytics | null> => {
   const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('interview_analytics')
+
+  // Fetch completed interviews for the candidate and template
+  const { data: interviews, error: interviewError } = await supabase
+    .from('interviews')
     .select('*')
     .eq('candidate_id', candidateId)
     .eq('template_id', templateId)
-    .select();
+    .eq('status', 'completed'); // Assuming you only want completed interviews
 
-  if (error) {
-    // Log invalid query or missing data errors
-    console.warn('Error fetching interview analytics:', error.message);
-    throw error;
+  if (interviewError) {
+    console.warn('Error fetching interviews:', interviewError.message);
+    throw interviewError;
   }
 
-  return data[0];
+  if (!interviews || interviews.length === 0) {
+    return null; // No interviews found
+  }
+
+  // Fetch evaluations for the fetched interviews
+  const interviewIds = interviews.map((interview) => interview.id);
+  const { data: evaluations, error: evalError } = await supabase
+    .from('interview_evaluations')
+    .select('*')
+    .in('interview_id', interviewIds);
+
+  if (evalError) {
+    console.warn('Error fetching interview evaluations:', evalError.message);
+    throw evalError;
+  }
+
+  // Aggregate data
+  const totalInterviews = interviews.length;
+  const totalQuestions = interviews.reduce(
+    (acc, interview) => acc + interview.question_count,
+    0,
+  );
+  const avgOverallGrade =
+    evaluations.reduce((acc, evalItem) => acc + evalItem.overall_grade, 0) /
+    evaluations.length;
+
+  // Aggregate Evaluation Criteria Scores
+  const criteriaMap: Record<
+    string,
+    { name: string; total: number; count: number; feedbacks: string[] }
+  > = {};
+
+  evaluations.forEach((evalItem) => {
+    evalItem.evaluation_scores.forEach((score) => {
+      if (!criteriaMap[score.id]) {
+        criteriaMap[score.id] = {
+          name: score.name,
+          total: score.score,
+          count: 1,
+          feedbacks: [score.feedback],
+        };
+      } else {
+        criteriaMap[score.id].total += score.score;
+        criteriaMap[score.id].count += 1;
+        criteriaMap[score.id].feedbacks.push(score.feedback);
+      }
+    });
+  });
+
+  const avgEvaluationCriteriaScores: AvgEvaluationScores[] = Object.values(
+    criteriaMap,
+  ).map((criteria) => ({
+    id: '', // If you have an ID for criteria, include it here
+    name: criteria.name,
+    avg_score: criteria.total / criteria.count,
+    feedback_summary: criteria.feedbacks,
+  }));
+
+  // Aggregate Strengths, Areas for Improvement, and Recommendations
+  const strengthsSummary: string[] = evaluations.map(
+    (evalItem) => evalItem.strengths,
+  );
+  const areasForImprovementSummary: string[] = evaluations.map(
+    (evalItem) => evalItem.areas_for_improvement,
+  );
+  const recommendationsSummary: string[] = evaluations.map(
+    (evalItem) => evalItem.recommendations,
+  );
+
+  // Assuming all interviews have the same title and description
+  const { title: interviewTitle, description: interviewDescription } =
+    interviews[0];
+
+  return {
+    template_id: templateId,
+    interview_title: interviewTitle,
+    interview_description: interviewDescription,
+    total_interviews: totalInterviews,
+    question_count: totalQuestions,
+    avg_overall_grade: avgOverallGrade,
+    avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
+    strengths_summary: strengthsSummary,
+    areas_for_improvement_summary: areasForImprovementSummary,
+    recommendations_summary: recommendationsSummary,
+  };
 };
 
 export const getInterviewHistory = async (

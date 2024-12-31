@@ -124,6 +124,12 @@ export default function InterviewFlow({
   }, []);
 
   useEffect(() => {
+    return () => {
+      setIsCameraOn(false);
+    };
+  }, []);
+
+  useEffect(() => {
     if (isQuestionsComplete && answersLength === questions.length) {
       handleInterviewComplete();
     }
@@ -358,7 +364,7 @@ export default function InterviewFlow({
                     ? null
                     : handleNextQuestion
                 }
-                setIsFetchingFeedback={setIsFetchingFeedback}
+                isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
               />
             </CardContent>
           </Card>

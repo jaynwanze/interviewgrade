@@ -13,15 +13,55 @@ interface UserCameraProps {
   answerCallback: (answer: string) => void;
   isCameraOn: boolean;
   onRecordEnd: null | (() => void);
-  setIsFetchingFeedback: (isFetching: boolean) => void;
+  isFetchingSpecificFeedback: (isFetching: boolean) => void;
 }
+
+// Helper function to get the preferred video device ID
+const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
+  try {
+    // Request permission to access video to get device labels
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(
+      (device) => device.kind === 'videoinput',
+    );
+
+    // Define exclusion keywords for unwanted devices
+    const exclusionKeywords = [
+      'android',
+      'phone',
+      'external',
+      'virtual',
+      'usb',
+      'wireless',
+    ];
+
+    // Attempt to find a preferred device
+    const preferredDevice = videoDevices.find((device) => {
+      const label = device.label.toLowerCase();
+      // Exclude devices that match any of the exclusion keywords
+      return !exclusionKeywords.some((keyword) => label.includes(keyword));
+    });
+
+    // Stop all tracks to release the temporary stream
+    stream.getTracks().forEach((track) => track.stop());
+
+    return preferredDevice ? preferredDevice.deviceId : undefined;
+  } catch (error) {
+    console.error('Error selecting preferred video device:', error);
+    return undefined;
+  }
+};
 
 // UserCamera component to handle video and audio recording and display a sound meter
 export const UserCamera: React.FC<UserCameraProps> = ({
   answerCallback,
   isCameraOn,
   onRecordEnd,
-  setIsFetchingFeedback,
+  isFetchingSpecificFeedback,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -43,59 +83,57 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const previousPathname = useRef<string | null>(pathname);
 
   useEffect(() => {
-    let stream: MediaStream;
     const startCamera = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+        const deviceId = await getPreferredVideoDeviceId();
+        const constraints: MediaStreamConstraints = {
+          video: deviceId
+            ? { deviceId: { exact: deviceId } }
+            : { facingMode: 'user' }, // Fallback to 'user' if no deviceId
           audio: true,
-        });
-
-        // Save the audio stream to ref for CandlestickMeter
-        audioStreamRef.current = stream;
-
+        };
+        // Get webcam and microphone stream
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        audioStreamRef.current = mediaStream;
+  
         // Initialize AudioContext
         audioContextRef.current = new (window.AudioContext ||
-          (
-            window as typeof window & {
-              webkitAudioContext: typeof AudioContext;
-            }
-          ).webkitAudioContext)();
-
+          (window as any).webkitAudioContext)();
+  
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = mediaStream;
           await videoRef.current.play();
         }
       } catch (err) {
         console.error('Error accessing webcam and microphone:', err);
       }
     };
-
+  
     if (isCameraOn) {
       startCamera();
     }
-
+  
     return () => {
-      if (stream || pathname !== previousPathname.current) {
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => track.stop());
+      // Stop MediaRecorder if it's active
+      mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg);
+  
+      // Stop all media tracks
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop());
         if (videoRef.current) {
           videoRef.current.srcObject = null;
         }
-        if (audioContextRef.current) {
-          audioContextRef.current.close();
-          audioContextRef.current = null;
-        }
+        audioStreamRef.current = null;
       }
-      mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg); // Ensure the recorder stops
-
-      // Clean up AudioContext
-      if (audioContextRef.current || pathname !== previousPathname.current) {
-        audioContextRef.current?.close();
+  
+      // Close AudioContext unconditionally
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
         audioContextRef.current = null;
       }
     };
   }, [isCameraOn, pathname]);
+  
 
   const handleAnswer = (answer: string) => {
     answerCallback(answer);
@@ -126,11 +164,11 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   };
 
   const handleEndRecord = useCallback(async () => {
-    if (!isRecording) return; // Prevent multiple calls
+    if (!isRecording) return;
     setIsRecording(false);
-    clearInterval(timerRef.current!); // Clear timer when recording ends
-    stopRecognition(); // Stop speech recognition
-    setIsFetchingFeedback(true);
+    clearInterval(timerRef.current!);
+    stopRecognition();
+    isFetchingSpecificFeedback(true);
 
     if (mediaRecorderHandlerRef.current) {
       const convertedAudioBlob =
@@ -153,7 +191,14 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     if (onRecordEnd) {
       onRecordEnd(); // Notify the parent component that recording has ended
     }
-  }, [isRecording, stopRecognition, finalTranscript, answerCallback, onRecordEnd, setIsFetchingFeedback]);
+  }, [
+    isRecording,
+    stopRecognition,
+    finalTranscript,
+    answerCallback,
+    onRecordEnd,
+    isFetchingSpecificFeedback,
+  ]);
 
   return (
     <div className="user-camera">
@@ -161,6 +206,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         ref={videoRef}
         muted
         className="w-full h-auto border-4 border-gray-300 rounded mb-5"
+        playsInline
       ></video>
       <div className="flex justify-center items-center space-x-5 mb-10">
         <Button className="mr-4" onClick={handleRecord} disabled={isRecording}>

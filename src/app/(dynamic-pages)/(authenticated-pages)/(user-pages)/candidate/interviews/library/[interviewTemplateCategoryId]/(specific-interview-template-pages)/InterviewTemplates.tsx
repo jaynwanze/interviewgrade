@@ -55,7 +55,7 @@ export function InterviewTemplates({
     template.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  if (isLoading) {
+  if (isLoading || interviewTemplates.length === 0) {
     return (
       <div className="flex justify-center min-h-screen">
         <LoadingSpinner />

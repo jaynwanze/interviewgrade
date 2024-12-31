@@ -2,7 +2,6 @@
 
 import {
   insertInterviewEvaluation,
-  updateInterviewAnalytics,
 } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
@@ -334,9 +333,6 @@ export const getInterviewFeedback = async (
     interview.id,
     feedbackData,
   );
-  if (interviewEvaluation) {
-    await updateInterviewAnalytics(interview, interviewEvaluation);
-  }
   console.log('Feedback Data:', feedbackData);
 
   return feedbackData;

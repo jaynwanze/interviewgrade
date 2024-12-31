@@ -91,7 +91,18 @@ export type InterviewQuestion = Table<'interview_questions'>;
 export type InterviewTemplateCategory = {
   category: Database['public']['Enums']['template_category'];
 };
-export type InterviewAnalytics = Table<'interview_analytics'>;
+export type InterviewAnalytics = {
+  template_id: string;
+  interview_title: string;
+  interview_description: string;
+  total_interviews: number;
+  question_count: number;
+  avg_overall_grade: number;
+  avg_evaluation_criteria_scores: AvgEvaluationScores[];
+  strengths_summary: string[];
+  areas_for_improvement_summary: string[];
+  recommendations_summary: string[];
+};
 export type AvgEvaluationScores = {
   id: string;
   name: string;

@@ -108,10 +108,12 @@ CREATE TYPE "public"."product_status" AS ENUM (
 ALTER TYPE "public"."product_status" OWNER TO "postgres";
 
 --
--- Name: template_mode; Type: TYPE; Schema: public; Owner: postgres
+-- Name: interview_mode; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE "public"."interview_mode" AS ENUM (
   'practice',
-  'interview',
+  'interview'
 );
+
+ALTER TYPE "public"."interview_mode" OWNER TO "postgres";

@@ -42,8 +42,6 @@ CREATE INDEX idx_template_evaluation_criteria_evaluation_criteria_id ON "public"
 CREATE INDEX idx_interview_analytics_id ON "public"."interview_analytics" ("id");
 CREATE INDEX idx_interview_analytics_template_id ON "public"."interview_analytics" ("template_id");
 CREATE INDEX idx_interview_analytics_candidate_id ON "public"."interview_analytics" ("candidate_id");
-CREATE INDEX idx_interview_analytics_period_start ON "public"."interview_analytics"("period_start");
-CREATE INDEX idx_interview_analytics_end ON "public"."interview_analytics"("period_end");
 
 -- Indexes for interview_questions
 CREATE INDEX idx_interview_questions_id ON "public"."interview_questions" ("id");

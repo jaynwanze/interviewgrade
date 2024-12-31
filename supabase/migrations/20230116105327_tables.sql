@@ -515,18 +515,11 @@ ALTER TABLE ONLY "public"."products"
 ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::product_status, 'inactive'::product_status]));
 
 --
--- Name: template template_mode_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interview interview_mode_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."interview"
-ADD CONSTRAINT "interview_mode_check" CHECK ("mode" = ANY (ARRAY['practice'::template_mode, 'interview'::template_mode]));
-
---
--- Name: interview_analytics interview_analytics_period_start_end_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."interview_analytics"
-ADD CONSTRAINT "interview_analytics_period_start_end_check" CHECK ("period_start" <= "period_end");
+ALTER TABLE ONLY "public"."interviews"
+ADD CONSTRAINT "interview_mode_check" CHECK ("mode" = ANY (ARRAY['practice'::interview_mode, 'interview'::interview_mode]));
 
 --
 -- Name: interview_analytics interview_analytics_avg_overall_grade_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres

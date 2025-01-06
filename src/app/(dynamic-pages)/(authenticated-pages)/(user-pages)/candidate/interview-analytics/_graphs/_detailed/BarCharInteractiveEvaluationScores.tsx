@@ -248,7 +248,8 @@ export function BarChartInteractiveEvaluationScores({
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          {filteredData.length === 0 ? (
+          {filteredData.length === 0 ||
+            filteredData.filter((data) => data[activeChart] > 0).length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               No data available for the selected time range.
             </div>

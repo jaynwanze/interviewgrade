@@ -44,6 +44,10 @@ export default function InterviewDetailsDialog({
       errorMessage: 'Failed to prepare interview',
     },
   );
+  const feedbackStringPrefix =
+    interviewMode === 'practice'
+      ? 'You will receive live feedback after each question and then an'
+      : 'You will recieve an';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -61,7 +65,8 @@ export default function InterviewDetailsDialog({
               </span>
             </div>
             <p className="text-base">
-              Current interview questions on the container to the left.
+              Current {interviewMode === 'practice' ? 'practice' : 'interview'}{' '}
+              questions on the container to the left.
             </p>
           </div>
           <div className="justify-items-center text-center mb-2">
@@ -82,8 +87,9 @@ export default function InterviewDetailsDialog({
               </span>
             </div>
             <p className="text-base">
-              You will receive feedback on your questions after you’ve completed
-              all the questions.
+              {feedbackStringPrefix}{` `}
+              overall report on your session after you’ve completed all the
+              questions.
             </p>
           </div>
         </DialogDescription>

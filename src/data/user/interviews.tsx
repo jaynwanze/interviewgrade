@@ -412,7 +412,8 @@ export const getInterviewHistory = async (
   const { data, error } = await supabase
     .from('interviews')
     .select('*')
-    .eq('candidate_id', candidateId);
+    .eq('candidate_id', candidateId)
+    .order('created_at', { ascending: false });
 
   if (error) {
     if (error.code === 'PGRST116') {

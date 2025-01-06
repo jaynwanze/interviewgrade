@@ -17,7 +17,16 @@ export class MediaRecorderHandler {
   ) {
     setLoadingFFmpeg(true); // Set loading state
     if (!this.ffmpeg.loaded) {
-      await this.ffmpeg.load(); // Load FFmpeg if not already loaded
+      try {
+        await this.ffmpeg.load(); // Load FFmpeg if not already loaded
+      } catch (error) {
+        console.error(
+          'Error loading FFmpeg now using backup transcript:',
+          error,
+        );
+        setLoadingFFmpeg(false); // Reset loading state
+        return null;
+      }
     }
     try {
       // Write the audio blob to the virtual file system

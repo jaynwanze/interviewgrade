@@ -1,11 +1,11 @@
 'use client';
 
 import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
-import { InterviewFeedback } from '@/components/Interviews/InterviewFlow/InterviewFeedback';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import {
   getInterview,
   getInterviewQuestions,
@@ -61,6 +61,7 @@ export default function InterviewFlow({
   const [questionFeedback, setQuestionFeedback] = useState<{
     [key: number]: specificFeedbackType | null;
   }>({});
+  const { addNotification } = useNotifications();
 
   const startTimer = () => {
     if (timerRef.current == null) {
@@ -68,6 +69,14 @@ export default function InterviewFlow({
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     }
+    // // end interview if time runs out
+    //might to set rest of answers to empty string
+    setTimeout(
+      () => {
+        handleInterviewComplete();
+      },
+      interview?.duration ? interview.duration * 60 * 1000 : 0,
+    );
   };
 
   const stopTimer = () => {
@@ -243,6 +252,14 @@ export default function InterviewFlow({
       );
 
       setInterviewFeedback(feedback);
+      if (feedback) {
+        // Add notification
+        addNotification({
+          title: 'Feedback Ready',
+          message: 'Your interview feedback is ready. Click to view.',
+          link: `/candidate/interview-history/${interview.id}`,
+        });
+      }
     } catch (error) {
       // Handle error better
       console.error('Error fetching feedback:', error.message || error);
@@ -307,25 +324,20 @@ export default function InterviewFlow({
         </h1>
       </div>
     );
-  } else if (isInterviewComplete) {
-    return isFetchingFeedback ? (
-      <div className="interview-flow-container flex justify-center items-center min-h-screen">
-        <p>Fetching feedback...</p>
-        <LoadingSpinner />
-      </div>
-    ) : (
-      <div className="flex flex-col items-center">
-        {interviewFeedback && interview ? (
-          <InterviewFeedback
-            interviewTitle={interview.title ?? ''}
-            feedback={interviewFeedback}
-          />
-        ) : (
-          <p>
-            Failed to fetch feedback. Go to interview history to try and view
-            the feedback!
-          </p>
-        )}
+  } else if (isInterviewComplete && isFetchingFeedback) {
+    return (
+      <div className="interview-flow-container flex flex-col items-center min-h-screen">
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="flex flex-col items-center">
+            <p className="text-center text-lg">
+              Your interview is complete. Thank you for participating!
+            </p>
+            <p className="text-center text-lg">
+              Feedback is being processed. You will receive a notification when
+              it's ready.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -358,13 +370,14 @@ export default function InterviewFlow({
             <CardContent>
               <UserCamera
                 answerCallback={handleAnswer}
-                isCameraOn={true}
+                isCameraOn={isCameraOn}
                 onRecordEnd={
                   interview?.mode === INTERVIEW_PRACTICE_MODE
                     ? null
                     : handleNextQuestion
                 }
                 isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
+                interviewMode={interview?.mode ?? null}
               />
             </CardContent>
           </Card>
@@ -401,7 +414,9 @@ export default function InterviewFlow({
                   </div>
                   <div className="flex items-center justify-center space-x-2">
                     <Button onClick={handleNextQuestion} className="mt-4">
-                      Next Question
+                      {currentQuestionIndex === questions.length - 1
+                        ? 'Finish Interview'
+                        : 'Next Question'}
                     </Button>{' '}
                   </div>
                 </>

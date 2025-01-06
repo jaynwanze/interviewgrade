@@ -3,6 +3,7 @@ import { getUserProfile } from '@/data/user/user';
 import { getUserAvatarUrl } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { UserNavDropDownMenu } from './UserNavDropDownMenu';
+import Notifications from '@/components/Notifcations';
 
 export async function UserNav() {
   const user = await serverGetLoggedInUser();
@@ -16,7 +17,7 @@ export async function UserNav() {
   return (
     <>
       <ThemeToggle />
-
+      <Notifications />
       <UserNavDropDownMenu
         avatarUrl={getUserAvatarUrl({
           email,

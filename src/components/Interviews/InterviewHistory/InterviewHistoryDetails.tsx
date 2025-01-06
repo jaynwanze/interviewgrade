@@ -8,7 +8,6 @@ import {
   getInterviewQuestions,
 } from '@/data/user/interviews';
 import {
-  EvaluationScores,
   FeedbackData,
   Interview,
   InterviewAnswerDetail,
@@ -31,6 +30,7 @@ export const InterviewHistoryDetails = ({
   const [error, setError] = useState<string | null>(null);
   const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
   const hasFetched = useRef(false); // Add this line
+  
 
   const retryFeedbackFetch = async (interview) => {
     setIsFetchingFeedback(true);
@@ -171,52 +171,63 @@ export const InterviewHistoryDetails = ({
             </CardHeader>
             <CardContent>
               {/* Overall Score */}
-              <div>
-                <section className="mb-6">
-                  <h2 className="text-xl font-semibold">Overall Grade</h2>
-                  <p className="text-3xl font-bold text-blue-600">
-                    {evaluation.overall_grade}/100
-                  </p>
-                </section>
+              <section className="mb-6">
+                <h2 className="text-xl font-semibold">Overall Grade</h2>
+                <p className="text-3xl font-bold text-blue-600">
+                  {evaluation.overall_grade}/100
+                </p>
+              </section>
 
-                {/* Strengths */}
-                <section className="mb-6">
-                  <h3 className="text-lg font-semibold">Strengths</h3>
-                  <p>{evaluation.strengths}</p>
-                </section>
+              {/* Strengths */}
+              <section className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">Strengths</h2>
+                <p>{evaluation.strengths}</p>
+              </section>
 
-                {/* Areas for Improvement */}
-                <section className="mb-6">
-                  <h3 className="text-lg font-semibold">
-                    Areas for Improvement
-                  </h3>
-                  <p>{evaluation.areas_for_improvement}</p>
-                </section>
+              {/* Areas for Improvement */}
+              <section className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">
+                  Areas for Improvement
+                </h2>
+                <p>{evaluation.areas_for_improvement}</p>
+              </section>
 
-                {/* Recommendations */}
-                <section className="mb-6">
-                  <h3 className="text-lg font-semibold">Recommendations</h3>
-                  <p>{evaluation.recommendations}</p>
-                </section>
+              {/* Recommendations */}
+              <section className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
+                <p>{evaluation.recommendations}</p>
+              </section>
 
-                {/* Evaluation Scores */}
-                <section className="mb-6">
-                  <h3 className="text-lg font-semibold">Evaluation Scores</h3>
-                  <ul className="list-disc list-inside">
-                    {evaluation.evaluation_scores.map(
-                      (score: EvaluationScores) => (
-                        <li key={score.id} className="mb-2">
-                          <strong>{score.name}</strong>: {score.score}/10
-                          <br />
-                          <span className="italic">
-                            Feedback: {score.feedback}
-                          </span>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                </section>
-              </div>
+              {/* Evaluation Scores */}
+              <section className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">
+                  Evaluation Scores
+                </h2>
+                <table className="min-w-full border">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-800 font-bold">
+                      <th className="px-4 py-2 border">Criterion</th>
+                      <th className="px-4 py-2 border">Score</th>
+                      <th className="px-4 py-2 border">Feedback</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {evaluation.evaluation_scores.map((score) => (
+                      <tr key={score.id}>
+                        <td className="px-4 py-2 border bold font-semibold">
+                          {score.name}
+                        </td>
+                        <td className="px-4 py-2 border font-semibold">
+                          {score.score}/10
+                        </td>
+                        <td className="px-4 py-2 border italic">
+                          {score.feedback}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
 
               {/* Question Answer Feedback */}
               {evaluation.question_answer_feedback &&

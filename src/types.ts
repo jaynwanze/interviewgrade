@@ -56,11 +56,7 @@ export type InterviewComplete = Pick<
   Table<'interviews'>,
   'id' | 'end_time' | 'status' | 'current_question_index'
 >;
-
-export type UpdateInterviewAnswer = Pick<
-  Table<'interview_answers'>,
-  'score' | 'feedback'
->;
+export type Token = Table<'tokens'>;
 export type InterviewAnswerDetail = {
   question: string;
   answer: string;

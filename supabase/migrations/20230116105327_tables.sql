@@ -29,12 +29,11 @@ ALTER TABLE "public"."candidates" OWNER TO "postgres";
 CREATE TABLE "public"."products" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "product_type" "public"."product_type",
-  "title" character varying,
+  "title" character varying NOT NULL,
   "description" text,
-  "price" integer,
+  "price" numeric(10,2) NOT NULL,
   "status" "public"."product_status" DEFAULT 'active'::product_status NOT NULL,
-  "tokens_bundle" bigint,
-  "subscription_duration" character varying
+  "amount" number NOT NULL,
 );
 ALTER TABLE "public"."products" OWNER TO "postgres";
 
@@ -44,9 +43,9 @@ ALTER TABLE "public"."products" OWNER TO "postgres";
 
 CREATE TABLE "public"."tokens" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "tokens_available" bigint DEFAULT 5,
-  "total_tokens_used" bigint,
-  "total_tokens_purchased" bigint,
+  "tokens_available" number DEFAULT 5,
+  "total_tokens_used" number DEFAULT 0,
+  "total_tokens_purchased" number DEFAULT 0,
   "last_purchase_date" timestamp with time zone
 );
 ALTER TABLE "public"."tokens" OWNER TO "postgres";

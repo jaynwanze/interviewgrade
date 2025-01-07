@@ -6,8 +6,12 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 export const useInterviewHistory = () => {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [filteredInterviews, setFilteredInterviews] = useState<Interview[]>([]);
-  const [activeTab, setActiveTab] = useState<'All' | 'Completed' | 'Not Completed' | 'Not Started'>('All');
-  const [activeSwitch, setActiveSwitch] = useState<'Practice Mode' | 'Interview Mode'>('Practice Mode');
+  const [activeTab, setActiveTab] = useState<
+    'All' | 'Completed' | 'Not Completed' | 'Not Started'
+  >('All');
+  const [activeSwitch, setActiveSwitch] = useState<
+    'Practice Mode' | 'Interview Mode'
+  >('Practice Mode');
   const [counts, setCounts] = useState({
     all: 0,
     completed: 0,
@@ -52,7 +56,9 @@ export const useInterviewHistory = () => {
     setActiveTab(tab);
   };
 
-  const handleSwitchChange = (switchMode: 'Practice Mode' | 'Interview Mode') => {
+  const handleSwitchChange = (
+    switchMode: 'Practice Mode' | 'Interview Mode',
+  ) => {
     setActiveSwitch(switchMode);
   };
 

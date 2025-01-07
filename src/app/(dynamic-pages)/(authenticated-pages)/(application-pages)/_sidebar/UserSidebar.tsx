@@ -1,14 +1,18 @@
+import { SubscriptionCardSmall } from '@/components/SubscriptionCardSmall';
+import { T } from '@/components/ui/Typography';
 import { cn } from '@/utils/cn';
 import {
+  BarChart3Icon,
   LucideHistory,
   NotepadText,
   Settings,
   Shield,
   TableProperties,
-  BarChart3Icon,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
+import { ProFeatureGateDialog } from '@/components/ProFeatureGateDialog';
 
 export async function UserSidebar() {
   return (
@@ -48,6 +52,7 @@ export async function UserSidebar() {
           icon={<Shield className="h-5 w-5" />}
         />
       </div>
+      <ProFeatureGateDialog organizationId={'product'} label={'Tokens purchase'} icon={undefined} />
     </div>
   );
 }

@@ -279,3 +279,83 @@ export const getCandidateUserProfile = async (
   }
   return data;
 };
+
+//Get avaialble products for the user
+export const getAvaliableUserProducts = async (): Promise<
+  Table<'products'>[]
+> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('product_type', 'token')
+    .order('tokens_bundle', { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const purchaseProduct = async (
+  candidateId: string,
+  productId: string,
+): Promise<SAPayload<boolean>> => {
+  const supabase = createSupabaseUserServerActionClient();
+  if (!candidateId) {
+    return { status: 'error', message: 'User ID not found' };
+  }
+
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', productId)
+    .single();
+
+  if (productError || !product) {
+    console.error('Error fetching product:', productError);
+    return {
+      status: 'error',
+      message: 'Product not found ' + productError.message,
+    };
+  }
+
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('tokens')
+    .select('*')
+    .eq('candidate_id', candidateId)
+    .single();
+
+  if (tokenError || !tokenData) {
+    console.error('Error fetching tokens:', tokenError);
+    return {
+      status: 'error',
+      message: 'Tokens not found ' + tokenError.message,
+    };
+  }
+
+  const updatedTokensAvailable = tokenData.tokens_available + product.amount;
+  const updatedTotalTokensPurchased =
+    (tokenData.total_tokens_purchased || 0) + product.amount;
+  const currentDate = new Date().toISOString();
+
+  // Update tokens
+  const { error: updateError } = await supabase
+    .from('tokens')
+    .update({
+      tokens_available: updatedTokensAvailable,
+      total_tokens_purchased: updatedTotalTokensPurchased,
+      last_purchase_date: currentDate,
+    })
+    .eq('candidate_id', candidateId);
+
+  if (updateError) {
+    return { status: 'error', message: updateError.message };
+  }
+
+  return {
+    status: 'success',
+    data: true,
+  };
+};

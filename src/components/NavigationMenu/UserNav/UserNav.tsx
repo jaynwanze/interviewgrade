@@ -4,6 +4,7 @@ import { getUserAvatarUrl } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { UserNavDropDownMenu } from './UserNavDropDownMenu';
 import Notifications from '@/components/Notifcations';
+import { Tokens } from '@/components/Tokens';
 
 export async function UserNav() {
   const user = await serverGetLoggedInUser();
@@ -17,6 +18,7 @@ export async function UserNav() {
   return (
     <>
       <ThemeToggle />
+      <Tokens />
       <Notifications />
       <UserNavDropDownMenu
         avatarUrl={getUserAvatarUrl({

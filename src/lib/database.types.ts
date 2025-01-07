@@ -124,55 +124,55 @@ export type Database = {
         Row: {
           id: string
           product_type: Database["public"]["Enums"]["product_type"]
-          title: string | null
-          description: string | null
-          price: number | null
+          title: string
+          description: string
+          price: number 
           status: Database["public"]["Enums"]["product_status"]
-          tokens: number | null
-          subscription_duration: string | null
+          amount: number 
+          //subscription_duration: string | null
         }
         Insert: {
           id: string
           product_type: Database["public"]["Enums"]["product_type"]
-          title?: string | null
-          description?: string | null
-          price?: number | null
+          title: string
+          description: string
+          price: number
           status: Database["public"]["Enums"]["product_status"]
-          tokens?: number | null
-          subscription_duration?: string | null
+          amount: number
+          //subscription_duration?: string | null
         }
         Update: {
           id?: string
           product_type?: Database["public"]["Enums"]["product_type"]
-          title?: string | null
-          description?: string | null
-          price?: number | null
+          title?: string
+          description?: string
+          price?: number
           status?: Database["public"]["Enums"]["product_status"]
-          tokens?: number | null
-          subscription_duration?: string | null
+          amount?: number
+          //subscription_duration?: string | null
         }
       }
       tokens: {
         Row: {
           id: string
-          tokens_available: string
-          total_tokens_used: string | null
-          total_tokens_purchased: string | null
-          last_token_purchase_date: string | null
+          tokens_available: number
+          total_tokens_used: number 
+          total_tokens_purchased: number
+          last_token_purchase_date?: number
         }
         Insert: {
           id: string
-          tokens_available: string
-          total_tokens_used?: string | null
-          total_tokens_purchased?: string | null
-          last_token_purchase_date?: string | null
+          tokens_available: number
+          total_tokens_used: number
+          total_tokens_purchased: number
+          last_token_purchase_date?: number
         }
         Update: {
           id?: string
-          tokens_available?: string
-          total_tokens_used?: string | null
-          total_tokens_purchased?: string | null
-          last_token_purchase_date?: string | null
+          tokens_available?: number
+          total_tokens_used?: number
+          total_tokens_purchased?: number
+          last_token_purchase_date?: number
         }
         Relationships: [
           {

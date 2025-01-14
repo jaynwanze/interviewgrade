@@ -2,16 +2,24 @@
 import { PRODUCT_NAME } from '@/constants';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { SAPayload, SupabaseFileUploadOptions, Table } from '@/types';
+import type {
+  NormalizedSubscription,
+  Product,
+  SAPayload,
+  SupabaseFileUploadOptions,
+  Table,
+} from '@/types';
 import { UserType } from '@/types/userTypes';
 import { sendEmail } from '@/utils/api-routes/utils';
 import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { stripe } from '@/utils/stripe';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { renderAsync } from '@react-email/render';
 import slugify from 'slugify';
 import urlJoin from 'url-join';
 import ConfirmAccountDeletionEmail from '../../../emails/account-deletion-request';
+import { createOrRetrieveCandidateCustomer } from '../admin/stripe';
 import { refreshSessionAction } from './session';
 
 export async function getIsAppAdmin(): Promise<boolean> {
@@ -279,3 +287,299 @@ export const getCandidateUserProfile = async (
   }
   return data;
 };
+
+//Get avaialble products for the user
+export const getAvaliableUserProducts = async (): Promise<
+  Table<'products'>[]
+> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('product_type', 'token')
+    .order('tokens_bundle', { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const purchaseProduct = async (
+  candidateId: string,
+  productId: string,
+): Promise<SAPayload<boolean>> => {
+  const supabase = createSupabaseUserServerActionClient();
+  if (!candidateId) {
+    return { status: 'error', message: 'User ID not found' };
+  }
+
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', productId)
+    .single();
+
+  if (productError || !product) {
+    console.error('Error fetching product:', productError);
+    return {
+      status: 'error',
+      message: 'Product not found ' + productError.message,
+    };
+  }
+
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('tokens')
+    .select('*')
+    .eq('candidate_id', candidateId)
+    .single();
+
+  if (tokenError || !tokenData) {
+    console.error('Error fetching tokens:', tokenError);
+    return {
+      status: 'error',
+      message: 'Tokens not found ' + tokenError.message,
+    };
+  }
+
+  const updatedTokensAvailable = tokenData.tokens_available + product.amount;
+  const updatedTotalTokensPurchased =
+    (tokenData.total_tokens_purchased || 0) + product.amount;
+  const currentDate = new Date().toISOString();
+
+  // Update tokens
+  const { error: updateError } = await supabase
+    .from('tokens')
+    .update({
+      tokens_available: updatedTokensAvailable,
+      total_tokens_purchased: updatedTotalTokensPurchased,
+      last_purchase_date: currentDate,
+    })
+    .eq('candidate_id', candidateId);
+
+  if (updateError) {
+    return { status: 'error', message: updateError.message };
+  }
+
+  return {
+    status: 'success',
+    data: true,
+  };
+};
+
+export const getCurrentCandidateSubscription = async (
+  candidateId: string,
+): Promise<NormalizedSubscription> => {
+  const candidate = getCandidateUserProfile(candidateId);
+  const candidateSubscriptionId = candidate.subscription_id;
+
+  if (!candidateSubscriptionId) {
+    return {
+      type: 'no-subscription',
+    };
+  }
+
+  const { data: subscriptionData, error } =
+    await createSupabaseUserServerActionClient()
+      .from('subscriptions')
+      .select('*, products(*)')
+      .eq('subscription_id', candidate.subscription_id)
+      .in('status', ['trialing', 'active'])
+      .single();
+
+  if (error) {
+    console.error('Error fetching subscription:', error);
+    throw error;
+  }
+
+  if (!subscriptionData) {
+    return {
+      type: 'no-subscription',
+    };
+  }
+
+  try {
+    const subscription = subscriptionData as Table<'subscriptions'> & {
+      products: Product;
+    };
+
+    const product = subscription.products;
+
+    if (!product) {
+      throw new Error('No product found for the subscription');
+    }
+
+    if (subscription.status === 'trialing') {
+      if (!subscription.trial_start || !subscription.trial_end) {
+        throw new Error('No trial start or end found');
+      }
+      return {
+        type: 'trialing',
+        trialStart: subscription.trial_start,
+        trialEnd: subscription.trial_end,
+        product: product,
+        subscription,
+      };
+    } else if (subscription.status) {
+      return {
+        type: subscription.status as
+          | 'active'
+          | 'past_due'
+          | 'canceled'
+          | 'paused'
+          | 'incomplete'
+          | 'incomplete_expired'
+          | 'unpaid',
+        product: product,
+        subscription,
+      };
+    } else {
+      return {
+        type: 'no-subscription',
+      };
+    }
+  } catch (err) {
+    console.error('Error processing subscription:', err);
+    return {
+      type: 'no-subscription',
+    };
+  }
+};
+
+export async function createCustomerCandidatePortalLinkAction(
+  candidateId: string,
+) {
+  const candidate = await getCandidateUserProfile(candidateId);
+  if (!candidate) throw Error('Could not get candidate profile');
+  if (!candidate.stripe_customer_id) {
+    throw Error('No stripe customer id found');
+  }
+  const { url } = await stripe.billingPortal.sessions.create({
+    customer: candidate.stripe_customer_id,
+    return_url: toSiteURL(`/candidate`),
+  });
+
+  return url;
+}
+
+export const getActiveProducts = async (): Promise<Product[]> => {
+  const { data, error } = await createSupabaseUserServerComponentClient()
+    .from('products')
+    .select('*')
+    .eq('status', 'active');
+
+  if (error) {
+    console.error('Error fetching active products:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
+export async function createCandidateCheckoutSessionAction({
+  product,
+  isTrial = false,
+  isTokenBundlePurchase = false,
+}: {
+  product: Product;
+  isTrial?: boolean;
+  isTokenBundlePurchase?: boolean;
+}) {
+  const TRIAL_DAYS = 14;
+  const user = await serverGetLoggedInUser();
+  if (!user) throw Error('Could not get user');
+  const candidate = await getCandidateUserProfile(user.id);
+  if (user.id !== candidate.id)
+    throw Error('Logged in user is not the candidate');
+  if (!user.email) throw Error('User email not found');
+
+  const customer = await createOrRetrieveCandidateCustomer({
+    candidate_id: candidate.id,
+    email: user.email || '',
+  });
+  if (!customer) throw Error('Could not get customer');
+  if (isTokenBundlePurchase) {
+    const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      billing_address_collection: 'required',
+      customer,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: product.currency,
+            product_data: {
+              name: product.title,
+              description: product.description,
+            },
+            unit_amount: product.price_unit_amount,
+          },
+        },
+      ],
+      mode: 'payment',
+      allow_promotion_codes: true,
+      payment_intent_data: {
+        setup_future_usage: 'off_session',
+        metadata: {},
+      },
+      success_url: toSiteURL(`/candidate/purchase-tokens`),
+      cancel_url: toSiteURL(`/candidate/purchase-tokens`),
+    });
+
+    return stripeSession.id;
+  } else if (isTrial) {
+    const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      billing_address_collection: 'required',
+      customer,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      allow_promotion_codes: true,
+      subscription_data: {
+        trial_period_days: TRIAL_DAYS,
+        trial_settings: {
+          end_behavior: {
+            missing_payment_method: 'cancel',
+          },
+        },
+        metadata: {},
+      },
+      success_url: toSiteURL(
+        `/organization/${organizationId}/settings/billing`,
+      ),
+      cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+    });
+
+    return stripeSession.id;
+  } else {
+    const stripeSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      billing_address_collection: 'required',
+      customer,
+      line_items: [
+        {
+          //price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      allow_promotion_codes: true,
+      subscription_data: {
+        trial_from_plan: true,
+        metadata: {},
+      },
+      success_url: toSiteURL(
+        `/candidate/purchase-tokens/success?client=${customer}`,
+      ),
+      cancel_url: toSiteURL(`/candidate/purchase-tokens`),
+    });
+
+    return stripeSession.id;
+  }
+}

@@ -14,6 +14,7 @@ interface UserCameraProps {
   isCameraOn: boolean;
   onRecordEnd: null | (() => void);
   isFetchingSpecificFeedback: (isFetching: boolean) => void;
+  interviewMode: string | null;
 }
 
 // Helper function to get the preferred video device ID
@@ -62,8 +63,10 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   isCameraOn,
   onRecordEnd,
   isFetchingSpecificFeedback,
+  interviewMode,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
+  const [isGettingFeedback, setIsGettingFeedback] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
@@ -93,13 +96,14 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           audio: true,
         };
         // Get webcam and microphone stream
-        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const mediaStream =
+          await navigator.mediaDevices.getUserMedia(constraints);
         audioStreamRef.current = mediaStream;
-  
+
         // Initialize AudioContext
         audioContextRef.current = new (window.AudioContext ||
-          (window as any).webkitAudioContext)();
-  
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext)();
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
           await videoRef.current.play();
@@ -108,15 +112,15 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         console.error('Error accessing webcam and microphone:', err);
       }
     };
-  
+
     if (isCameraOn) {
       startCamera();
     }
-  
+
     return () => {
       // Stop MediaRecorder if it's active
       mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg);
-  
+
       // Stop all media tracks
       if (audioStreamRef.current) {
         audioStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -125,7 +129,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         }
         audioStreamRef.current = null;
       }
-  
+
       // Close AudioContext unconditionally
       if (audioContextRef.current) {
         audioContextRef.current.close();
@@ -133,7 +137,6 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       }
     };
   }, [isCameraOn, pathname]);
-  
 
   const handleAnswer = (answer: string) => {
     answerCallback(answer);
@@ -209,14 +212,25 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         playsInline
       ></video>
       <div className="flex justify-center items-center space-x-5 mb-10">
-        <Button className="mr-4" onClick={handleRecord} disabled={isRecording}>
+        <Button
+          className="mr-4"
+          onClick={handleRecord}
+          disabled={
+            isRecording
+          }
+        >
           Start Recording
         </Button>
-        <Button onClick={handleEndRecord} disabled={!isRecording}>
+        <Button
+          onClick={handleEndRecord}
+          disabled={
+            !isRecording
+          }
+        >
           End Recording
         </Button>
       </div>
-      {audioStreamRef.current && audioContextRef.current && (
+      {isRecording && audioStreamRef.current && audioContextRef.current && (
         <div className="mt-5">
           <Meter
             audioContext={audioContextRef.current}

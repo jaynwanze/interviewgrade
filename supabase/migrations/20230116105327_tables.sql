@@ -7,7 +7,6 @@ CREATE TABLE "public"."user_profiles" (
   "full_name" character varying,
   "avatar_url" character varying,
   "user_type" "public"."user_types" DEFAULT 'candidate'::user_types NOT NULL,
-  "stripe_customer_id" character varying,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
@@ -19,7 +18,9 @@ ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 CREATE TABLE "public"."candidates" (
   "id" "uuid" NOT NULL,
   "token_id" "uuid" NOT NULL
-);
+  "subscription_id" "uuid",
+  "stripe_customer_id" character varying,
+  );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";
 
 --
@@ -29,24 +30,51 @@ ALTER TABLE "public"."candidates" OWNER TO "postgres";
 CREATE TABLE "public"."products" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "product_type" "public"."product_type",
-  "title" character varying,
+  "title" character varying NOT NULL,
   "description" text,
-  "price" integer,
+  "price" numeric(10,2) NOT NULL,
+  "quantity" bigint,
   "status" "public"."product_status" DEFAULT 'active'::product_status NOT NULL,
-  "tokens_bundle" bigint,
-  "subscription_duration" character varying
-);
+  "price_unit_amount" bigint,
+  "currency" character varying,
+  "pricing_type" "public"."pricing_type",
+  "pricing_plan_interval" "public"."pricing_plan_interval_type",
+  "pricing_interval_count" bigint,
+  "trial_period_days" bigint,
+  "metadata" "jsonb"
+  );
 ALTER TABLE "public"."products" OWNER TO "postgres";
 
+--
+-- Name: subscriptions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE "public"."subscriptions" (
+  "id" character varying NOT NULL,
+  "product_id" "uuid" NOT NULL,
+  "status" "public"."subscription_status",
+  "quantity" bigint,
+  "cancel_at_period_end" boolean,
+  "created" timestamp WITH time zone NOT NULL,
+  "current_period_start" timestamp WITH time zone NOT NULL,
+  "current_period_end" timestamp WITH time zone NOT NULL,
+  "metadata" "json",
+  "ended_at" timestamp WITH time zone,
+  "cancel_at" timestamp WITH time zone,
+  "canceled_at" timestamp WITH time zone,
+  "trial_start" timestamp WITH time zone,
+  "trial_end" timestamp WITH time zone,
+);
+ALTER TABLE "public"."subscriptions" OWNER TO "postgres";
 --
 -- Name: tokens; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE "public"."tokens" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "tokens_available" bigint DEFAULT 5,
-  "total_tokens_used" bigint,
-  "total_tokens_purchased" bigint,
+  "tokens_available" number DEFAULT 5,
+  "total_tokens_used" number DEFAULT 0,
+  "total_tokens_purchased" number DEFAULT 0,
   "last_purchase_date" timestamp with time zone
 );
 ALTER TABLE "public"."tokens" OWNER TO "postgres";
@@ -223,6 +251,12 @@ ADD CONSTRAINT "product_pkey" PRIMARY KEY ("id");
 ALTER TABLE ONLY "public"."tokens"
 ADD CONSTRAINT "tokens_pkey" PRIMARY KEY ("id");
 --
+-- Name: subscriptions subscriptions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."subscriptions"
+ADD CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id");
+--
 -- Name: interviews interviews_pkey; Type: CONSTRAINT; Schema: public; Owner: supabase_admin
 --
 
@@ -296,6 +330,12 @@ ADD CONSTRAINT "candidate_id_fkey" FOREIGN KEY ("id") REFERENCES "user_profiles"
 
 ALTER TABLE ONLY "public"."candidates"
 ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
+--
+-- Name: candidate candidate_subscription_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres 
+--
+
+ALTER TABLE ONLY "public"."candidates"
+ADD CONSTRAINT "candidate_subscription_id_fkey" FOREIGN KEY ("subscription_id") REFERENCES "subscriptions"("id") ON DELETE CASCADE;
 
 --
 -- Name: interviews interviews_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -402,7 +442,7 @@ ADD CONSTRAINT "user_profiles_user_type_check" CHECK ("user_type" = ANY (ARRAY['
 --
 
 ALTER TABLE ONLY "public"."products"
-ADD CONSTRAINT "products_product_type_check" CHECK ("product_type" = ANY (ARRAY['token'::product_type, 'subscription'::product_type]));
+ADD CONSTRAINT "products_product_type_check" CHECK ("product_type" = ANY (ARRAY['token_bundle'::product_type]));
 --
 -- Name: interviews interviews_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -481,3 +521,79 @@ ADD CONSTRAINT "products_status_check" CHECK ("status" = ANY (ARRAY['active'::pr
 
 ALTER TABLE ONLY "public"."interviews"
 ADD CONSTRAINT "interview_mode_check" CHECK ("mode" = ANY (ARRAY['practice'::interview_mode, 'interview'::interview_mode]));
+
+--
+-- Name: subscriptions subscriptions_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."subscriptions"
+ADD CONSTRAINT "subscriptions_status_check" CHECK ("status" = ANY (ARRAY['active'::subscription_status, 'inactive'::subscription_status, 'canceled'::subscription_status]));
+
+--
+-- Name: products pricing_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "pricing_type_check" CHECK ("pricing_type" = ANY (ARRAY['one_time'::pricing_type, 'recurring'::pricing_type]));
+--
+-- Name: products pricing_plan_interval_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "pricing_plan_interval_check" CHECK ("pricing_plan_interval" = ANY (ARRAY['day'::pricing_plan_interval_type, 'week'::pricing_plan_interval_type, 'month'::pricing_plan_interval_type, 'year'::pricing_plan_interval_type]));
+
+--
+--
+-- Name: tokens tokens_tokens_available_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."tokens"
+ADD CONSTRAINT "tokens_tokens_available_check" CHECK ("tokens_available" >= 0);
+
+--
+-- Name: tokens tokens_total_tokens_used_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."tokens"
+ADD CONSTRAINT "tokens_total_tokens_used_check" CHECK ("total_tokens_used" >= 0);
+
+--
+-- Name: tokens tokens_total_tokens_purchased_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."tokens"
+ADD CONSTRAINT "tokens_total_tokens_purchased_check" CHECK ("total_tokens_purchased" >= 0);
+
+--
+-- Name products products_price_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_price_check" CHECK ("price" >= 0);
+
+--
+-- Name: products products_unit_amount_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_unit_amount_check" CHECK ("unit_amount" >= 0);
+--
+-- Name: products products_pricing_interval_count_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_pricing_interval_count_check" CHECK ("pricing_interval_count" >= 0);
+
+--
+-- Name: products products_trial_period_days_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."products"
+ADD CONSTRAINT "products_trial_period_days_check" CHECK ("trial_period_days" >= 0);
+
+--
+-- Name: subscriptions subscriptions_quantity_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."subscriptions"
+ADD CONSTRAINT "subscriptions_quantity_check" CHECK ("quantity" >= 0);

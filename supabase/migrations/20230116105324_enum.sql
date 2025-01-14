@@ -2,7 +2,7 @@
 -- Name: product_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."product_type" AS ENUM ('token', 'subscription');
+CREATE TYPE "public"."product_type" AS ENUM ('token_bundle');
 ALTER TYPE "public"."product_type" OWNER TO "postgres";
 
 --
@@ -117,3 +117,32 @@ CREATE TYPE "public"."interview_mode" AS ENUM (
 );
 
 ALTER TYPE "public"."interview_mode" OWNER TO "postgres";
+
+--
+-- Name: pricing_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."pricing_type" AS ENUM ('one_time', 'recurring');
+ALTER TYPE "public"."pricing_type" OWNER TO "postgres";
+--
+-- Name: pricing_plan_interval_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."pricing_plan_interval" AS ENUM ('day', 'week', 'month', 'year');
+ALTER TYPE "public"."pricing_plan_interval_type" OWNER TO "postgres";
+--
+-- Name: subscription_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."subscription_status" AS ENUM (
+  'trialing',
+  'active',
+  'canceled',
+  'incomplete',
+  'incomplete_expired',
+  'past_due',
+  'unpaid',
+  'paused'
+);
+
+ALTER TYPE "public"."subscription_status" OWNER TO "postgres

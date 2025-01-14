@@ -1,4 +1,5 @@
 'use client';
+import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import React, { Suspense } from 'react';
@@ -26,21 +27,23 @@ export function AppProviders({
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <ReactNoSSR>
-            <SonnerToaster theme={'light'} />
-            <HotToaster />
-          </ReactNoSSR>
-          <Suspense>
-            <ProgressBar
-              height="4px"
-              color="#0047ab"
-              options={{ showSpinner: false }}
-              shallowRouting
-            />
-          </Suspense>
-        </QueryClientProvider>
+        <NotificationsProvider>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <ReactNoSSR>
+              <SonnerToaster theme={'light'} />
+              <HotToaster />
+            </ReactNoSSR>
+            <Suspense>
+              <ProgressBar
+                height="4px"
+                color="#0047ab"
+                options={{ showSpinner: false }}
+                shallowRouting
+              />
+            </Suspense>
+          </QueryClientProvider>
+        </NotificationsProvider>
       </ThemeProvider>
     </>
   );

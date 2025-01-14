@@ -1,22 +1,30 @@
+import { SubscriptionCardSmall } from '@/components/SubscriptionCardSmall';
+import { T } from '@/components/ui/Typography';
 import { cn } from '@/utils/cn';
 import {
+  BarChart3Icon,
   LucideHistory,
   NotepadText,
   Settings,
   Shield,
   TableProperties,
-  BarChart3Icon,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
 
 export async function UserSidebar() {
   return (
-    <div className={cn('flex flex-col  h-full', 'lg:px-3 lg:py-4 lg:pt-2.5 ')}>
-      <div className="flex justify-between items-center">
-        <SidebarLogoAndToggle />
-      </div>
-      <div className="">
+    <div
+      className={cn(
+        'flex flex-col justify-between h-full',
+        'lg:px-3 lg:py-4 lg:pt-2.5 ',
+      )}
+    >
+      <div>
+        <div className="flex justify-between items-center">
+          <SidebarLogoAndToggle />
+        </div>
         <SidebarLink
           label="Mock Interviews"
           href={`/candidate/interviews`}
@@ -47,6 +55,14 @@ export async function UserSidebar() {
           href="/candidate/settings/security"
           icon={<Shield className="h-5 w-5" />}
         />
+      </div>
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-normal text-muted-foreground">
+          Subscription Details
+        </p>
+        <Suspense fallback={<T.P>Loading Subscription Details details...</T.P>}>
+          <SubscriptionCardSmall organizationId={'organizationId'} />
+        </Suspense>{' '}
       </div>
     </div>
   );

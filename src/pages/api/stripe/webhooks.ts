@@ -1,10 +1,6 @@
 import { errors } from '@/utils/errors';
 import { stripe } from '@/utils/stripe';
-import {
-  manageSubscriptionStatusChange,
-  upsertPriceRecord,
-  upsertProductRecord,
-} from '@/utils/supabase-admin';
+import { manageSubscriptionStatusChange, upsertProductRecord } from '@/utils/supabase-admin';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Readable } from 'node:stream';
 import Stripe from 'stripe';
@@ -16,6 +12,7 @@ export const config = {
   },
 };
 
+// Utility to convert Readable stream to Buffer
 async function buffer(readable: Readable) {
   const chunks: Array<Buffer> = [];
   for await (const chunk of readable) {
@@ -24,33 +21,36 @@ async function buffer(readable: Readable) {
   return Buffer.concat(chunks);
 }
 
+// Define relevant Stripe events
 const relevantEvents = new Set([
   'product.created',
   'product.updated',
-  'price.created',
-  'price.updated',
   'checkout.session.completed',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
 ]);
-/**
- *  Webhook handler which receives Stripe events and updates the database.
- *  Events handled are product.created, product.updated, price.created, price.updated,
- *  checkout.session.completed, customer.subscription.created, customer.subscription.updated.
- *
- *  IMPORTANT! Make sure that when your webshite is deployed, the webhook secret is set in the environment variables and
- *  that the webhook is set up in the Stripe dashboard.
- */
 
+/**
+ * Webhook handler which receives Stripe events and updates the database.
+ * Events handled are product.created, product.updated,
+ * checkout.session.completed, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted.
+ *
+ * IMPORTANT! Ensure the webhook secret is set in environment variables
+ * and the webhook is configured in the Stripe dashboard.
+ */
 const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const buf = await buffer(req);
     const sig = req.headers['stripe-signature'];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
     let event: Stripe.Event;
+
     try {
-      if (!sig || !webhookSecret) return;
+      if (!sig || !webhookSecret) {
+        throw new Error('Missing Stripe signature or webhook secret.');
+      }
       event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
     } catch (error: unknown) {
       errors.add(error);
@@ -68,10 +68,7 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           case 'product.updated':
             await upsertProductRecord(event.data.object as Stripe.Product);
             break;
-          case 'price.created':
-          case 'price.updated':
-            await upsertPriceRecord(event.data.object as Stripe.Price);
-            break;
+
           case 'customer.subscription.created':
           case 'customer.subscription.updated':
           case 'customer.subscription.deleted': {
@@ -85,8 +82,7 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
 
           case 'checkout.session.completed': {
-            const checkoutSession = event.data
-              .object as Stripe.Checkout.Session;
+            const checkoutSession = event.data.object as Stripe.Checkout.Session;
             if (checkoutSession.mode === 'subscription') {
               const subscriptionId = checkoutSession.subscription;
               await manageSubscriptionStatusChange(
@@ -97,6 +93,7 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
             }
             break;
           }
+
           default:
             throw new Error('Unhandled relevant event!');
         }

@@ -1,4 +1,4 @@
-import { AvgEvaluationScores, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
   | number
@@ -94,14 +94,21 @@ export type Database = {
         Row: {
           id: string
           token_id: string
+          subscription_id: string
+          stripe_customer_id: string
+
         }
         Insert: {
           id: string
           token_id: string
+          subscription_id: string
+          stripe_customer_id: string
         }
         Update: {
           id?: string
           token_id?: string
+          subscription_id?: string
+          stripe_customer_id?: string
         }
         Relationships: [
           {
@@ -118,6 +125,13 @@ export type Database = {
             referencedRelation: "account_delete_tokens"
             referencedColumns: ["token"]
           },
+          {
+            foreignKeyName: "candidates_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: true
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       products: {
@@ -126,20 +140,32 @@ export type Database = {
           product_type: Database["public"]["Enums"]["product_type"]
           title: string
           description: string
-          price: number 
+          price: number
+          quantity: number
           status: Database["public"]["Enums"]["product_status"]
-          amount: number 
-          //subscription_duration: string | null
+          price_unit_amount: number
+          currency: string
+          pricing_type: Database["public"]["Enums"]["pricing_type"]
+          pricing_plan_interval: Database["public"]["Enums"]["pricing_plan_interval_type"]
+          pricing_plan_interval_count: number
+          trial_period_days: number
+          metadata: string
+
         }
         Insert: {
-          id: string
           product_type: Database["public"]["Enums"]["product_type"]
           title: string
           description: string
           price: number
+          quantity: number
           status: Database["public"]["Enums"]["product_status"]
-          amount: number
-          //subscription_duration?: string | null
+          price_unit_amount: number
+          currency: string
+          pricing_type: Database["public"]["Enums"]["pricing_type"]
+          pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
+          pricing_plan_interval_count?: number
+          trial_period_days?: number
+          metadata: string
         }
         Update: {
           id?: string
@@ -147,16 +173,22 @@ export type Database = {
           title?: string
           description?: string
           price?: number
+          quantity?: number
           status?: Database["public"]["Enums"]["product_status"]
-          amount?: number
-          //subscription_duration?: string | null
+          price_unit_amount?: number
+          currency?: string
+          pricing_type?: Database["public"]["Enums"]["pricing_type"]
+          pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
+          pricing_plan_interval_count?: number
+          trial_period_days?: number
+          metadata?: string
         }
       }
       tokens: {
         Row: {
           id: string
           tokens_available: number
-          total_tokens_used: number 
+          total_tokens_used: number
           total_tokens_purchased: number
           last_token_purchase_date?: number
         }
@@ -180,6 +212,61 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      subscriptions: {
+        Row: {
+          id: string
+          product_id: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          quantity: number
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_start: string
+          current_period_end: string
+          ended_at: string
+          cancel_at: string
+          sidenote: string
+          metadata: string
+          updated_at: string
+        }
+        Insert: {
+          product_id: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          quantity: number
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_start: string
+          current_period_end: string
+          ended_at: string
+          cancel_at: string
+          sidenote: string
+          metadata: string
+          updated_at: string
+        },
+        Update: {
+          product_id?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          quantity?: number
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_start?: string
+          current_period_end?: string
+          ended_at?: string
+          cancel_at?: string
+          sidenote?: string
+          metadata?: string
+          updated_at?: string
+        },
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -557,6 +644,9 @@ export type Database = {
       question_type: "General" | "Behavioral" | "Role-Specific" | "Operational"
       job_application_tracker_status: "not_started" | "applied" | "in_progress" | "rejected" | "offered" | "hired"
       interview_mode: "practice" | "interview"
+      subscription_status: "active" | "paused" | "cancelled" | "trialing" | "past_due" | "unpaid" | "incomplete" | "incomplete_expired"
+      pricing_type: "recurring" | "one-time"
+      pricing_plan_interval_type: "day" | "week" | "month" | "year"
     }
     CompositeTypes: {
       [_ in never]: never

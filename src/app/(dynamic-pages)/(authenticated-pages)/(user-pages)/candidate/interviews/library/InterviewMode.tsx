@@ -14,9 +14,7 @@ export function InterviewMode() {
           </CardTitle>
         </CardHeader>
       </Card>
-      <div className="flex justify-center mb-4"></div>
-
-      <div className="flex justify-center h-60">
+      <div className="mt-4 flex justify-center min-h-60">
         <div className="grid grid-cols-2 gap-6">
           {INTERVIEW_MODES.map((mode) => (
             <InterviewModeCard key={mode} name={mode} />

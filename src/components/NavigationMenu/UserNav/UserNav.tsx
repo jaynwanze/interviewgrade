@@ -18,7 +18,7 @@ export async function UserNav() {
   return (
     <>
       <ThemeToggle />
-      <Tokens />
+      {/* <Tokens /> */}
       <Notifications />
       <UserNavDropDownMenu
         avatarUrl={getUserAvatarUrl({

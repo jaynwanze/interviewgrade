@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './lib/database.types';
+import { S } from 'vitest/dist/reporters-5f784f42';
 
 export type AppSupabaseClient = SupabaseClient<Database>;
 export type Table<T extends keyof Database['public']['Tables']> =
@@ -148,6 +149,11 @@ export type DropzoneFile = File & {
 export type DropzoneFileWithDuration = DropzoneFile & {
   duration: number;
 };
+// src/types/index.ts
+
+export type Product = Table<'products'>;
+
+export type Subscription = Table<'subscriptions'>;
 
 export type NoSubscription = {
   type: 'no-subscription';
@@ -157,58 +163,50 @@ export type TrialSubscription = {
   type: 'trialing';
   trialStart: string;
   trialEnd: string;
-  product: Table<'products'>;
-  price: Table<'subscriptions'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type ActiveSubscription = {
   type: 'active';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type PastDueSubscription = {
   type: 'past_due';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type CanceledSubscription = {
   type: 'canceled';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type PausedSubscription = {
   type: 'paused';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type IncompleteSubscription = {
   type: 'incomplete';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type IncompleteExpiredSubscription = {
   type: 'incomplete_expired';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type UnpaidSubscription = {
   type: 'unpaid';
-  product: Table<'products'>;
-  price: Table<'prices'>;
-  subscription: Table<'subscriptions'>;
+  product: Product;
+  subscription: Subscription;
 };
 
 export type NormalizedSubscription =

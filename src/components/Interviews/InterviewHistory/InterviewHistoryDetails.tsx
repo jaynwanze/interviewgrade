@@ -200,7 +200,11 @@ export const InterviewHistoryDetails = ({
               {/* Strengths */}
               <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-2">Strengths</h2>
-                <p>{evaluation.strengths}</p>
+                <p>
+                  {evaluation.strengths
+                    ? evaluation.strengths
+                    : 'None Provided'}
+                </p>
               </section>
 
               {/* Areas for Improvement */}
@@ -208,13 +212,21 @@ export const InterviewHistoryDetails = ({
                 <h2 className="text-xl font-semibold mb-2">
                   Areas for Improvement
                 </h2>
-                <p>{evaluation.areas_for_improvement}</p>
+                <p>
+                  {evaluation.areas_for_improvement
+                    ? evaluation.areas_for_improvement
+                    : 'None Provided'}
+                </p>
               </section>
 
               {/* Recommendations */}
               <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
-                <p>{evaluation.recommendations}</p>
+                <p>
+                  {evaluation.recommendations
+                    ? evaluation.recommendations
+                    : 'None Provided'}
+                </p>
               </section>
 
               {/* Evaluation Scores */}
@@ -234,7 +246,7 @@ export const InterviewHistoryDetails = ({
                     {evaluation.evaluation_scores.map((score) => (
                       <tr key={score.id}>
                         <td className="px-4 py-2 border bold font-semibold">
-                          {score.name}
+                          {score.name || 'N/A'}
                         </td>
                         <td className="px-4 py-2 border font-semibold">
                           {score.score}/10
@@ -266,7 +278,7 @@ export const InterviewHistoryDetails = ({
                               Question {index + 1}: {qa.question}
                             </h4>
                             <p className="mb-2">
-                              <strong>Answer:</strong> {qa.answer}
+                              <strong>Answer:</strong> {qa.answer || 'N/A'}
                             </p>
                             <p className="mb-2">
                               <strong>Mark:</strong> {qa.mark}/

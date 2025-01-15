@@ -71,7 +71,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
   const timerRef = useRef<number | null>(null); // Ref for timer
-  const whisperFinalTranscript = useRef<string>(''); // Ref for final transcript
+  const whisperFinalTranscript = useRef<string | null>(null); // Ref for final transcript
   const [isLoadingFFmpeg, setIsLoadingFFmpeg] = useState(false); // Loading state for FFmpeg
 
   // Refs for audio stream and context
@@ -140,37 +140,36 @@ export const UserCamera: React.FC<UserCameraProps> = ({
 
   const handleAnswer = (answer: string) => {
     answerCallback(answer);
-    whisperFinalTranscript.current = ''; // Reset the final transcript
+    whisperFinalTranscript.current = null; // Reset the final transcript
   };
 
   const handleRecord = () => {
     setIsRecording(true);
     setRecordingTime(0);
-    startRecognition(); // Start speech recognition
-
     if (audioStreamRef.current) {
       const mediaHandler = new MediaRecorderHandler();
       mediaRecorderHandlerRef.current = mediaHandler;
       mediaHandler.start(audioStreamRef.current);
-      timerRef.current = window.setInterval(() => {
-        setRecordingTime((prev) => {
-          if (prev + 1 >= 120) {
-            handleEndRecord();
-          }
-          return prev + 1;
-        });
-      }, 1000);
-      console.log('Recording started');
+      console.log('Audio Stream/MediaHandler - Recording started');
     } else {
-      console.error('Audio stream is not available.');
+      startRecognition();
+      console.log('Webkit Speech Recognition - Recording started');
+      console.log('Audio stream/MediaHandler not available');
     }
+    timerRef.current = window.setInterval(() => {
+      setRecordingTime((prev) => {
+        if (prev + 1 >= 120) {
+          handleEndRecord();
+        }
+        return prev + 1;
+      });
+    }, 1000);
   };
 
   const handleEndRecord = useCallback(async () => {
     if (!isRecording) return;
     setIsRecording(false);
     clearInterval(timerRef.current!);
-    stopRecognition();
     isFetchingSpecificFeedback(true);
 
     if (mediaRecorderHandlerRef.current) {
@@ -184,6 +183,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         whisperFinalTranscript.current =
           await transcribeInterviewAudio(formData);
       }
+    } else {
+      stopRecognition();
     }
 
     const webSpeechTranscript = finalTranscript.trim();
@@ -212,21 +213,10 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         playsInline
       ></video>
       <div className="flex justify-center items-center space-x-5 mb-10">
-        <Button
-          className="mr-4"
-          onClick={handleRecord}
-          disabled={
-            isRecording
-          }
-        >
+        <Button className="mr-4" onClick={handleRecord} disabled={isRecording}>
           Start Recording
         </Button>
-        <Button
-          onClick={handleEndRecord}
-          disabled={
-            !isRecording
-          }
-        >
+        <Button onClick={handleEndRecord} disabled={!isRecording}>
           End Recording
         </Button>
       </div>

@@ -73,7 +73,7 @@ export default function InterviewFlow({
     //might to set rest of answers to empty string
     setTimeout(
       () => {
-        handleInterviewComplete();
+        //handleInterviewComplete();
       },
       interview?.duration ? interview.duration * 60 * 1000 : 0,
     );

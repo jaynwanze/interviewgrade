@@ -14,6 +14,7 @@ import {
   InterviewEvaluation,
   QuestionAnswerFeedback,
 } from '@/types';
+import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { useEffect, useRef, useState } from 'react';
 
@@ -29,10 +30,10 @@ export const InterviewHistoryDetails = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
-  const hasFetched = useRef(false); // Add this line
-  
+  const [gradeStringColour, setGradeStringColour] = useState<string>('');
+  const hasFetched = useRef(false);
 
-  const retryFeedbackFetch = async (interview) => {
+  const retryFeedbackFetch = async (interview: Interview) => {
     setIsFetchingFeedback(true);
     // Ensure synchronization between questions and answers
     const questions = await getInterviewQuestions(interviewId);
@@ -74,23 +75,26 @@ export const InterviewHistoryDetails = ({
   };
 
   const fetchInterviewDetails = async () => {
-    if (hasFetched.current) return; // Prevent duplicate calls
-    hasFetched.current = true; // Set the flag
-
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     setLoading(true);
     setError(null);
     try {
       const interview = await getInterviewById(interviewId);
-      const interviewEvaluation = await getInterviewEvaluation(interviewId);
+      if (!interview) {
+        setError('Session not found');
+        return;
+      }
       setInterview(interview);
+      const interviewEvaluation = await getInterviewEvaluation(interviewId);
       if (interviewEvaluation) {
         setEvaluation(interviewEvaluation);
       } else {
         retryFeedbackFetch(interview);
       }
     } catch (error) {
-      console.error('Error fetching interview details:', error);
-      setError('Failed to fetch interview details');
+      console.error('Error fetching session details:', error);
+      setError('Failed to fetch session details');
     } finally {
       setLoading(false);
     }
@@ -101,6 +105,19 @@ export const InterviewHistoryDetails = ({
       fetchInterviewDetails();
     }
   }, [interviewId]);
+
+  useEffect(() => {
+    if (evaluation) {
+      const grade = evaluation.overall_grade;
+      if (grade >= 80) {
+        setGradeStringColour('text-green-600');
+      } else if (grade >= 60) {
+        setGradeStringColour('text-yellow-600');
+      } else {
+        setGradeStringColour('text-red-600');
+      }
+    }
+  }, [evaluation]);
 
   if (loading) {
     return (
@@ -124,16 +141,17 @@ export const InterviewHistoryDetails = ({
   }
 
   if (!interview) {
-    return <div className="text-center p-4">No interview data available.</div>;
+    return <div className="text-center p-4">No session is data available.</div>;
   }
 
   if (interview.status === 'not_started') {
-    return (
-      <div className="text-center p-4">Interview has not started yet.</div>
-    );
+    return <div className="text-center p-4">Session has not started yet.</div>;
   }
 
-  const { title, status, start_time, end_time } = interview;
+  const { title, mode, status, start_time, end_time } = interview;
+
+  const interviewModeDisplayString =
+    mode === INTERVIEW_PRACTICE_MODE ? 'Practice Session' : 'Interview Session';
 
   const formattedStatus = status === 'completed' ? 'Completed' : 'In Progress';
 
@@ -148,7 +166,10 @@ export const InterviewHistoryDetails = ({
     <div className="p-4 max-w-3xl mx-auto text-center">
       <div className="w-full max-w-4xl mx-auto p-">
         <Card className="shadow-lg p-4">
-          <h1 className="text-2xl font-bold mb-4">{title}</h1>
+          <h1 className="text-2xl font-bold mb-1">
+            {' '}
+            {interviewModeDisplayString}: {title}
+          </h1>
           <p>
             <strong>Status:</strong> {formattedStatus}
           </p>
@@ -164,16 +185,14 @@ export const InterviewHistoryDetails = ({
       {(status === 'completed' && evaluation && (
         <div className="w-full max-w-4xl mx-auto p-4">
           <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">
-                Interview Feedback: {interview.title}
-              </CardTitle>
+            <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4">
+              Report
             </CardHeader>
             <CardContent>
               {/* Overall Score */}
-              <section className="mb-6">
+              <section className="mb-2">
                 <h2 className="text-xl font-semibold">Overall Grade</h2>
-                <p className="text-3xl font-bold text-blue-600">
+                <p className={`text-3xl font-bold ${gradeStringColour}`}>
                   {evaluation.overall_grade}/100
                 </p>
               </section>

@@ -24,9 +24,9 @@ export default function Notifications() {
           size="sm"
           className="h-5 w-5 px-0 text-muted-foreground focus:ring-0"
         >
-          <BellIcon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 dark:hover:text-foreground" />
+          <BellIcon className="absolute  dark:hover:text-foreground" />
           {notifications.length > 0 && (
-            <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+            <span className="absolute top-0 right-1/3 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
               {notifications.length}
             </span>
           )}

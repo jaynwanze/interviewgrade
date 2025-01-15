@@ -27,7 +27,7 @@ export async function UserSidebar() {
         </div>
         <SidebarLink
           label="Mock Interviews"
-          href={`/candidate/interviews`}
+          href={`/candidate/interviews/library`}
           icon={<NotepadText className="h-5 w-5" />}
         />
         <SidebarLink

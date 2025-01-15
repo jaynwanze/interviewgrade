@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { NormalizedSubscription, Token } from '@/types';
 import { ShoppingCartIcon } from '@heroicons/react/solid';
+import tokenImg from '@public/images/token.jpg';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import {
@@ -54,17 +55,27 @@ export const Tokens: React.FC = () => {
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center">
-                        {/* Token Icon */}
-                        {/* <Image
-                        src="/token-icon.png"
-                        alt="Token Icon"
-                        width={24}
-                        height={24}
-                    /> */}
-                        {/* Available Tokens */}
-                        <span className="ml-2">Tokens: {tokens?.tokens_available}</span>
-                    </Button>
+                    <div
+                        data-testid="user-token"
+                        data-user-id={tokens?.id}
+                        className="flex items-center h-[24px] w-[50px] border rounded-full focus:ring-0"
+                    >
+                        <span className="ml-2 flex items-center cursor-pointer">
+                            5{tokens?.tokens_available}
+                            <Image
+                                src={tokenImg}
+                                alt="Token Icon"
+                                width={20}
+                                height={20}
+                                quality={100}
+                                sizes="100vw"
+                                className="ml-2"
+                                style={{
+                                    borderRadius: '50%',
+                                }}
+                            />
+                        </span>
+                    </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-80">
                     <DropdownMenuLabel className="font-semibold">

@@ -93,7 +93,7 @@ export function UserNavDropDownMenu({
         <div
           data-testid="user-nav-avatar"
           data-user-id={userId}
-          className="h-[24px] w-[24px] border rounded-full"
+          className="h-[24px] w-[24px] border rounded-full focus:ring-0"
         >
           <Image
             src={avatarUrl}

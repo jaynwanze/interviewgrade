@@ -56,14 +56,14 @@ export async function UserSidebar() {
           icon={<Shield className="h-5 w-5" />}
         />
       </div>
-      <div className="flex flex-col gap-1">
+      {/* <div className="flex flex-col gap-1">
         <p className="text-sm font-normal text-muted-foreground">
           Subscription Details
         </p>
         <Suspense fallback={<T.P>Loading Subscription Details details...</T.P>}>
           <SubscriptionCardSmall organizationId={'organizationId'} />
         </Suspense>{' '}
-      </div>
+      </div> */}
     </div>
   );
 }

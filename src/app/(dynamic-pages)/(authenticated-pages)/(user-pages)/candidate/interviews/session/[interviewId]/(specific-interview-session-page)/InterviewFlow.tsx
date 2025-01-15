@@ -404,13 +404,15 @@ export default function InterviewFlow({
                       <strong>Summary:</strong>{' '}
                       {questionFeedback[currentQuestionIndex]?.summary}
                     </p>
-                    <p>
-                      <strong>Advice for Next Question:</strong>{' '}
-                      {
-                        questionFeedback[currentQuestionIndex]
-                          ?.advice_for_next_question
-                      }
-                    </p>
+              {currentQuestionIndex < questions.length - 1 && (
+                <p>
+                  <strong>Advice for Next Question:</strong>{' '}
+                  {
+                    questionFeedback[currentQuestionIndex]
+                      ?.advice_for_next_question
+                  }
+                </p>
+              )}
                   </div>
                   <div className="flex items-center justify-center space-x-2">
                     <Button onClick={handleNextQuestion} className="mt-4">

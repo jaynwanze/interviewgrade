@@ -22,11 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  getCompletedInterviewsByTemplate,
-  getInterviewEvaluations,
-} from '@/data/user/interviews';
-import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { InterviewEvaluation } from '@/types';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
@@ -38,7 +34,7 @@ const chartConfig = {
   },
   interview_grade: {
     label: 'Interview Grade',
-    color: 'hsl(var(--chart-2))',
+    color: 'hsl(var(--chart-5))',
   },
 } satisfies ChartConfig;
 
@@ -65,33 +61,21 @@ function aggregateDataByDate(data: rawDataTypeChart) {
 }
 
 export function AreaChartInteractiveOverallGrades({
-  templateId,
+  completedInterviewEvaluations,
 }: {
-  templateId: string;
+  completedInterviewEvaluations: InterviewEvaluation[];
 }) {
   const [timeRange, setTimeRange] = useState('90d');
   let rawChartData: { date: string; interview_grade: number }[] = [];
   const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
-
+  const [interviewEvaluations, setInterviewEvalutations] = useState<
+    InterviewEvaluation[]
+  >([]);
 
   const fetchInterviews = async () => {
     try {
-      const user = await serverGetLoggedInUser();
-      const completedInterviews = await getCompletedInterviewsByTemplate(
-        user.id,
-        templateId,
-      );
-      if (!completedInterviews) {
-        return;
-      }
-      const completedInterviewsIds = completedInterviews.map(
-        (interview) => interview.id,
-      );
-      const data = await getInterviewEvaluations(completedInterviewsIds);
-      if (!data) {
-        return;
-      }
-      rawChartData = data.map((interviewEval) => {
+   
+      rawChartData = completedInterviewEvaluations.map((interviewEval) => {
         return {
           date: interviewEval.created_at.split('T')[0],
           interview_grade: interviewEval.overall_grade,
@@ -108,7 +92,7 @@ export function AreaChartInteractiveOverallGrades({
 
   useEffect(() => {
     fetchInterviews();
-  }, [templateId]);
+  }, [completedInterviewEvaluations]);
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);

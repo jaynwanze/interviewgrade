@@ -370,7 +370,6 @@ export const getInterviewAnalytics = async (
   const avgEvaluationCriteriaScores: AvgEvaluationScores[] = Object.values(
     criteriaMap,
   ).map((criteria) => ({
-    id: '', // If you have an ID for criteria, include it here
     name: criteria.name,
     avg_score: criteria.total / criteria.count,
     feedback_summary: criteria.feedbacks,
@@ -402,12 +401,13 @@ export const getInterviewAnalytics = async (
     strengths_summary: strengthsSummary,
     areas_for_improvement_summary: areasForImprovementSummary,
     recommendations_summary: recommendationsSummary,
+    completed_interview_evaluations: evaluations,
   };
 };
 
 export const getInterviewHistory = async (
   candidateId: string,
-): Promise<Table<'interviews'>[] | null> => {
+): Promise<Table<'interviews'>[] | null> =>{
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interviews')

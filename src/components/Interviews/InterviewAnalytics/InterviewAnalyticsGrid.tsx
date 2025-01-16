@@ -19,7 +19,6 @@ export const InterviewAnalyticsGrid = ({
     return (
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
             <InterviewCurrentAverageCard
-                key={analyticsData.id}
                 data={analyticsData}
             />
         </div>

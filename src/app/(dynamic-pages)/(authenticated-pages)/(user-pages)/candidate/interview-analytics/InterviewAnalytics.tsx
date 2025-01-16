@@ -1,5 +1,7 @@
 'use client';
 
+import { InterviewAverageDetails } from '@/components/Interviews/InterviewAnalytics/InterviewAverageDetails';
+import { InterviewCurrentAverageKeyMetrics } from '@/components/Interviews/InterviewAnalytics/InterviewCurrentAverageKeyMetrics';
 import { InterviewLatestCard } from '@/components/Interviews/InterviewAnalytics/InterviewLatestCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
@@ -291,17 +293,10 @@ export default function InterviewAnalyticsPage() {
         ) : detailed &&
           selectedTemplateId &&
           filteredCompletedInterviews.length > 0 ? (
-          <>
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Current Averages</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>TO DO.</p>
-              </CardContent>
-            </Card>
+          <div>
+            <InterviewAverageDetails analyticsData={detailed} />
             <InterviewGraphsDetailed analyticsData={detailed} />
-          </>
+          </div>
         ) : !detailed && selectedTemplateId && activeSwitch ? (
           <p className="mt-5 text-center text-gray-500">
             No analytics data found for this interview template.

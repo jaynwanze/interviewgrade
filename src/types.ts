@@ -99,9 +99,9 @@ export type InterviewAnalytics = {
   strengths_summary: string[];
   areas_for_improvement_summary: string[];
   recommendations_summary: string[];
+  completed_interview_evaluations: InterviewEvaluation[]
 };
 export type AvgEvaluationScores = {
-  id: string;
   name: string;
   avg_score: number;
   feedback_summary: string[];

@@ -29,6 +29,7 @@ export const InterviewLatestCard = ({
             : 'Mock Interview'}{' '}
         </CardTitle>
         <InterviewInfo
+          interviewId = {latestInterview.id}
           title={
             latestInterview.title
               ? latestInterview.title

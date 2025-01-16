@@ -1,6 +1,6 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
+import { Card, CardTitle } from '@/components/ui/card';
 import { AvgEvaluationScores } from '@/types';
 import { useEffect, useState } from 'react';
 import { RadialChart } from './RadialChart';
@@ -41,8 +41,8 @@ export const InterviewCurrentAverageKeyMetrics = ({
     return () => intervals.forEach(clearInterval);
   }, [avgEvaluationCriteria]);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
-      {/* Total Interviews , Avg overeall score and avg score per mark */}
+    <div className="grid grid-cols-1 gap-6 text-center mb-5">
+      {/* Total Interviews , Avg overeall score and avg score per mark
       <Card className=" p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
           Total Interviews
@@ -60,14 +60,14 @@ export const InterviewCurrentAverageKeyMetrics = ({
         <p className="text-2xl font-bold ">
           avg grade/ question.length / 100/ question.length
         </p>
-      </Card>
+      </Card> */}
 
       {/* Average Evaluation Criteria Scores */}
       <Card className=" p-4 rounded">
-        <h4 className="text-sm text-gray-500 dark:text-gray-300">
-          Average Evaluation Criteria Scores (Out of 10)
-        </h4>
-        <div className="grid grid-cols-2 gap-1 text-ellipsis text-wrap">
+        <CardTitle className='mb-5'>
+          Current Average Evaluation Criteria Scores (Out of 10)
+        </CardTitle>
+        <div className="grid grid-cols-3 gap-1 text-ellipsis text-wrap">
           {avgEvaluationCriteria.map((criteria, index) => (
             <div key={index}>
               <div className="mb">
@@ -79,7 +79,7 @@ export const InterviewCurrentAverageKeyMetrics = ({
       </Card>
 
       {/* Average Evaluation Criteria Scores */}
-      <Card className="p-4 rounded">
+      {/* <Card className="p-4 rounded">
         <h4 className="text-sm text-gray-500 dark:text-gray-300">
           Evaluation Criteria Feedback Summaries
         </h4>
@@ -91,7 +91,7 @@ export const InterviewCurrentAverageKeyMetrics = ({
             </li>
           ))}
         </ul>
-      </Card>
+      </Card> */}
     </div>
   );
 };

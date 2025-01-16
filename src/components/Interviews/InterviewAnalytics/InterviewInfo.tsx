@@ -1,11 +1,14 @@
 'use client';
 
+
 export const InterviewInfo = ({
+  interviewId,
   title,
   description,
   startDate,
   endDate,
 }: {
+  interviewId?: string;
   title: string;
   description: string;
   startDate?: string;
@@ -22,16 +25,23 @@ export const InterviewInfo = ({
       {startDate && endDate && (
         <>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Start Time/Date:{new Date(startDate).toLocaleTimeString()} - {new Date(startDate).toLocaleDateString()}
+            Start Time/Date:{new Date(startDate).toLocaleTimeString()} -{' '}
+            {new Date(startDate).toLocaleDateString()}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            End Time/Date: {new Date(endDate).toLocaleTimeString()} - {new Date(endDate).toLocaleDateString() }
+            End Time/Date: {new Date(endDate).toLocaleTimeString()} -{' '}
+            {new Date(endDate).toLocaleDateString()}
           </p>
         </>
       )}
-      <a href="#" className="text-blue-500 dark:text-blue-400 hover:underline">
-        View session history
-      </a>
+      {interviewId && (
+        <a
+          href={`/candidate/interview-history/${interviewId}`}
+          className="text-blue-500 dark:text-blue-400 hover:underline"
+        >
+          View session history
+        </a>
+      )}
     </div>
   );
 };

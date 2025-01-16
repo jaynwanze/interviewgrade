@@ -40,12 +40,16 @@ export function InterviewGraphsDetailed({
     >
       <motion.div variants={itemVariants}>
         <AreaChartInteractiveOverallGrades
-          templateId={analyticsData.template_id}
+          completedInterviewEvaluations={
+            analyticsData.completed_interview_evaluations
+          }
         />
       </motion.div>
       <motion.div variants={itemVariants}>
         <BarChartInteractiveEvaluationScores
-          templateId={analyticsData.template_id}
+          completedInterviewEvaluations={
+            analyticsData.completed_interview_evaluations
+          }
         />
       </motion.div>
     </motion.div>

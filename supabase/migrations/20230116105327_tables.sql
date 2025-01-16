@@ -153,7 +153,8 @@ ALTER TABLE "public"."templates" OWNER TO "postgres";
 CREATE TABLE public.evaluation_criteria (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "user_id" "uuid",
-  "name" character varying,          
+  "name" character varying,
+  "rubrics" jsonb,
   "description" text,
   "is_system_defined" boolean DEFAULT false,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
@@ -165,7 +166,6 @@ CREATE TABLE public.evaluation_criteria (
 CREATE TABLE public.template_evaluation_criteria (
     "template_id" "uuid" NOT NULL,
     "evaluation_criteria_id" "uuid" NOT NULL,
-    "rubrics" jsonb
 );
 --
 -- Name: questions; Type: TABLE; Schema: public; Owner: postgres

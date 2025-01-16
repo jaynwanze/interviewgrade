@@ -1,10 +1,6 @@
 'use server';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type {
-  EvaluationCriteriaType,
-  EvaluationRubricType,
-  Table,
-} from '@/types';
+import type { EvaluationCriteriaType, Table } from '@/types';
 
 export const getInterviewsTemplatesByCategory = async (
   category: string,
@@ -49,10 +45,10 @@ export const getTemplateEvaluationCriteriasJsonFormat = async (
       id,
       name,
       description,
+      rubrics,
       is_system_defined,
       created_at
-    ),
-    rubrics
+    )
     `,
     )
     .eq('template_id', templateId);
@@ -67,21 +63,18 @@ export const getTemplateEvaluationCriteriasJsonFormat = async (
 
   // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
   return data
-    .filter(
-      (
-        item,
-      ): item is {
-        evaluation_criteria: EvaluationCriteriaType;
-        rubrics: EvaluationRubricType[];
-      } => item.evaluation_criteria !== null,
-    )
-    .map((item) => {
-      const { evaluation_criteria, rubrics } = item;
-      return {
-        ...evaluation_criteria,
-        rubrics: Array.isArray(rubrics) ? rubrics : [], // Ensure rubrics is an array
-      };
-    });
+    .filter((item) => item.evaluation_criteria !== null)
+    .map((item) => ({
+      id: item.evaluation_criteria?.id ?? '',
+      name: item.evaluation_criteria?.name ?? '',
+      description: item.evaluation_criteria?.description ?? '',
+      rubrics:
+        typeof item.evaluation_criteria?.rubrics === 'string'
+          ? JSON.parse(item.evaluation_criteria.rubrics)
+          : (item.evaluation_criteria?.rubrics ?? []),
+      is_system_defined: item.evaluation_criteria?.is_system_defined ?? false,
+      created_at: item.evaluation_criteria?.created_at ?? '',
+    }));
 };
 
 export const getTemplateQuestions = async (

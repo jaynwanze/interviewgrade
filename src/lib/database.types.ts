@@ -399,18 +399,21 @@ export type Database = {
           id: string
           name: string
           description: string
+          rubrics: EvaluationRubricType[]
           is_system_defined: boolean
           created_at: string
         }
         Insert: {
           name: string
           description: string
+          rubrics: EvaluationRubricType[]
           is_system_defined: boolean
           created_at: string
         }
         Update: {
           name?: string
           description?: string
+          rubrics?: EvaluationRubricType[]
           is_system_defined?: boolean
           created_at?: string
         }
@@ -420,17 +423,14 @@ export type Database = {
         Row: {
           template_id: string
           evaluation_criteria_id: string
-          rubrics: EvaluationRubricType[]
         }
         Insert: {
           template_id: string
           evaluation_criteria_id: string
-          rubrics: EvaluationRubricType[]
         }
         Update: {
           template_id?: string
           evaluation_criteria_id?: string
-          rubrics?: EvaluationRubricType[]
         }
         Relationships: [
           {

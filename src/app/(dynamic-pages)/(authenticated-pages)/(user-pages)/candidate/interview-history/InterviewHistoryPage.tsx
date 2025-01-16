@@ -61,8 +61,8 @@ export default function InterviewHistoryPage() {
     <div className="p-4">
       <Card className="mb-6 text-center">
         <CardHeader>
-        <CardTitle className="text-3xl text-center">
-        Interview History
+          <CardTitle className="text-3xl text-center">
+            Interview History
           </CardTitle>
         </CardHeader>
       </Card>
@@ -89,7 +89,10 @@ export default function InterviewHistoryPage() {
         counts={memoizedValues.counts}
         onTabChange={memoizedValues.handleTabChange}
       />
-      <InterviewHistoryList interviews={memoizedValues.filteredInterviews} />
+      <InterviewHistoryList
+        interviews={memoizedValues.filteredInterviews}
+        interviewModeToggle={memoizedValues.activeSwitch}
+      />
     </div>
   );
 }

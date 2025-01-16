@@ -9,8 +9,12 @@ export const InterviewHistoryItem = ({
   interview: Interview;
 }) => {
   const router = useRouter();
-  const handleClick = () => {
+  const handleViewDetailsClick = () => {
     router.push(`/candidate/interview-history/${interview.id}`);
+  };
+
+  const handleFinishSessionClick = () => {
+    router.push(`/candidate/interviews/session/${interview.id}`);
   };
 
   const displayStatus: string =
@@ -37,9 +41,21 @@ export const InterviewHistoryItem = ({
           ? new Date(interview.end_time).toLocaleString()
           : 'N/A'}
       </p>
-      <Button className="mt-2 inline-block" onClick={() => handleClick()}>
-        View Details
-      </Button>
+      {interview.status === 'completed' ? (
+        <Button
+          className="mt-2 inline-block"
+          onClick={() => handleViewDetailsClick()}
+        >
+          View Details
+        </Button>
+      ) : (
+        <Button
+          className="mt-2 inline-block"
+          onClick={() => handleFinishSessionClick()}
+        >
+          Finish Session
+        </Button>
+      )}
     </div>
   );
 };

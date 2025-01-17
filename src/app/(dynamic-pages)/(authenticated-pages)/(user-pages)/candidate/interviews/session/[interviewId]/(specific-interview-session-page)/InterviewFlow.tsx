@@ -157,8 +157,6 @@ export default function InterviewFlow({
         await insertInterviewAnswer(
           questions[currentQuestionIndex].id,
           answer,
-          questionFeedback[currentQuestionIndex]?.mark ?? 0,
-          questionFeedback[currentQuestionIndex]?.summary ?? '',
         );
         await updateInterviewState(currentQuestionIndex + 1);
         if (interview?.mode === INTERVIEW_PRACTICE_MODE) {

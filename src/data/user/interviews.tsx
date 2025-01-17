@@ -217,8 +217,8 @@ export const getInterview = async (
 export const insertInterviewAnswer = async (
   interviewQuestionId: string,
   answer: string,
-  mark: number,
-  feedback: string,
+  mark?: number,
+  feedback?: string,
 ): Promise<Table<'interview_answers'>> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase

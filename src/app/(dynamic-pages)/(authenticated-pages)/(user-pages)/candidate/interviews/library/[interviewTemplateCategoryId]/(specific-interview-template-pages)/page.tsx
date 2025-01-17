@@ -17,7 +17,7 @@ export default function InterviewsPage({
 
   return (
     <InterviewTemplates
-      interviewTemplateCategoryId={interviewTemplateCategoryId}
+    interviewMode={interviewTemplateCategoryId}
     />
   );
 }

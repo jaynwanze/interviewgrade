@@ -2,12 +2,12 @@
 
 'use server';
 
-import { specificFeedbackType } from '@/app/(dynamic-pages)/(authenticated-pages)/(user-pages)/candidate/interviews/session/[interviewId]/(specific-interview-session-page)/InterviewFlow';
-import { InterviewQuestion } from '@/types';
+import { InterviewQuestion, specificFeedbackType } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
 const specificFeedback = z.object({
+  score: z.number(),
   evaluation: z.string(),
   advice_for_next_question: z.string(),
 });
@@ -33,11 +33,36 @@ const constructQuestionFeedbackPrompt = (
   currentQuestion: InterviewQuestion,
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
+  interview_question_count: number,
 ): string => {
+  // Helper function to format rubrics
+  const formatRubrics = (
+    rubrics: { order: number; percentage_range: string; description: string }[],
+  ) =>
+    rubrics
+      .sort((a, b) => a.order - b.order)
+      .map((rubric) => `| ${rubric.percentage_range} | ${rubric.description} |`)
+      .join('\n');
+
+  // Format the evaluation criteria
+  const formattedCriteria = `**${currentQuestion.evaluation_criteria.name}**: ${currentQuestion.evaluation_criteria.description}\n   
+| Percentage Range | Description |
+|------------------|-------------|
+${formatRubrics(currentQuestion.evaluation_criteria.rubrics)}`;
+
+  const numberOfQuestions = interview_question_count || 1;
+  const maxTotalScore = 100;
+  // round to two decimal places
+  const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
+
   return `### Interview Practice Feedback
 
 As an interviewer for an innovative online interview platform, your task is to evaluate candidates based on their responses practicing **${skill}** questions.
 
+### Evaluation Criteria
+Evaluate the candidate based on the following criteria, using the rubric provided:
+
+${formattedCriteria}
 
 ### Current Question
 **Question**: ${currentQuestion.text}
@@ -48,10 +73,14 @@ As an interviewer for an innovative online interview platform, your task is to e
 ${nextQuestion ? `**Question**: ${nextQuestion.text}` : '**Question**: N/A'}
 
 ### Instructions
-Provide a concise evalaution of the candidate's answer to the current question and based off the evaluation, offer advice for how to answer the next question effectively.
+Your evaluation should include:
+- **Mark**: A numerical score for the current answer should be marked out of ${maxScorePerQuestion}.
+- **Summary**: Concise evalaution of the candidate's answer to the current question and based off the evaluation.
+- **Advice for Next Question**: Offer advice for how to answer the next question effectively.
 
 \`\`\`json
 {
+  "mark": "Your mark here.",
   "summary": "Your summary here.",
   "advice_for_next_question": "Your advice here."
 }
@@ -136,9 +165,7 @@ const callOpenAI = async (prompt: string): Promise<string> => {
 /**
  * Parses the AI's JSON response safely
  */
-const parseAIResponse = (
-  aiResponse: string,
-): { summary: string; advice_for_next_question: string } => {
+const parseAIResponse = (aiResponse: string): specificFeedbackType => {
   try {
     let jsonString = '';
 
@@ -165,10 +192,12 @@ const parseAIResponse = (
 
     // Validate the structure
     if (
+      typeof parsedData.score === 'number' &&
       typeof parsedData.summary === 'string' &&
       typeof parsedData.advice_for_next_question === 'string'
     ) {
       return {
+        mark: parsedData.mark,
         summary: parsedData.summary,
         advice_for_next_question: parsedData.advice_for_next_question,
       };
@@ -190,6 +219,7 @@ export const getQuestionFeedback = async (
   currentQuestion: InterviewQuestion,
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
+  interview_question_count: number,
 ): Promise<specificFeedbackType | null> => {
   // Input Validation
   if (!currentQuestion.text.trim()) {
@@ -206,6 +236,7 @@ export const getQuestionFeedback = async (
     currentQuestion,
     currentAnswer,
     nextQuestion,
+    interview_question_count,
   );
 
   // Call OpenAI API

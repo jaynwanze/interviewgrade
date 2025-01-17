@@ -1,23 +1,21 @@
 'use server';
 import {
-  getPracticeTemplateQuestions,
   getTemplateEvaluationCriteriasJsonFormat,
-  getTemplateQuestions,
+  getTemplateQuestionByEvaluationCriteria,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
+  AvgEvaluationScores,
   FeedbackData,
+  InterviewAnalytics,
   InterviewComplete,
   InterviewModeType,
   InterviewTemplate,
   InterviewUpdate,
   SAPayload,
   Table,
-  AvgEvaluationScores,
-  InterviewAnalytics
 } from '@/types';
-import { INTERVIEW_INTERVIEW_MODE } from '@/utils/constants';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
@@ -74,52 +72,49 @@ export const createInterviewQuestions = async (
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
-  // Fetch template questions
-  const templateQuestions =
-    interviewMode === INTERVIEW_INTERVIEW_MODE
-      ? await getTemplateQuestions(
-        interviewTemplate.id,
-        interviewTemplate.question_count,
-      )
-      : await getPracticeTemplateQuestions(
-        interviewTemplate.id,
-        interviewTemplate.question_count,
-      );
-  if (!templateQuestions || templateQuestions.length === 0) {
-    throw new Error('Failed to fetch template questions or no questions found');
-  }
-
   const templateEvaluationCriterias =
     await getTemplateEvaluationCriteriasJsonFormat(interviewTemplate.id);
 
   let lastInsertData: Table<'interview_questions'> | null = null;
 
-  for (const question of templateQuestions) {
-    // Find the corresponding evaluation criteria
-    const evaluationCriteria = templateEvaluationCriterias.find(
-      (criteria) => criteria.id === question.evaluation_criteria_id,
+  for (const criteria of templateEvaluationCriterias) {
+    const tempQuestions = await getTemplateQuestionByEvaluationCriteria(
+      interviewTemplate.id,
+      criteria.id,
+      interviewTemplate.question_count,
     );
-    if (!evaluationCriteria) {
+
+    if (!tempQuestions || tempQuestions.length === 0) {
       throw new Error(
-        `Evaluation criteria not found for question: ${question.text}`,
+        'Failed to fetch template questions or no questions found',
       );
     }
+
+    //randmly insert questions
+    const randomQuestion =
+      tempQuestions[Math.floor(Math.random() * tempQuestions.length)];
+
+    if (!randomQuestion) {
+      throw new Error('Failed to fetch random question');
+    }
+
     const { data, error } = await supabase
       .from('interview_questions')
-      .insert([
-        {
-          interview_id: interviewId,
-          type: question.type,
-          text: question.text,
-          evaluation_criteria: evaluationCriteria,
-          sample_answer: question.sample_answer,
-        },
-      ])
+      .insert({
+        interview_id: interviewId,
+        type: randomQuestion.type,
+        text: randomQuestion.text,
+        evaluation_criteria: criteria,
+        sample_answer: randomQuestion.sample_answer,
+      })
       .select('*');
 
     if (error) {
-      console.error('Error inserting interview question:', error);
-      throw new Error(`Error inserting interview question: ${error.message}`);
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('Failed to insert interview question data');
     }
 
     lastInsertData = data ? data[0] : null;
@@ -222,6 +217,7 @@ export const getInterview = async (
 export const insertInterviewAnswer = async (
   interviewQuestionId: string,
   answer: string,
+  mark: number,
   feedback: string,
 ): Promise<Table<'interview_answers'>> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -230,6 +226,7 @@ export const insertInterviewAnswer = async (
     .insert({
       interview_question_id: interviewQuestionId,
       text: answer,
+      mark: mark,
       feedback: feedback,
     })
     .single();
@@ -407,7 +404,7 @@ export const getInterviewAnalytics = async (
 
 export const getInterviewHistory = async (
   candidateId: string,
-): Promise<Table<'interviews'>[] | null> =>{
+): Promise<Table<'interviews'>[] | null> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('interviews')

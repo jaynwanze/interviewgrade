@@ -4,15 +4,15 @@ import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { getInterviewsTemplatesBySkill } from '@/data/user/templates';
+import { getInterviewsTemplatesByCategoryAndMode } from '@/data/user/templates';
 import { InterviewModeType, InterviewTemplate } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { useEffect, useState } from 'react';
 
 export function InterviewTemplates({
-  interviewTemplateCategoryId,
+  interviewMode,
 }: {
-  interviewTemplateCategoryId: string;
+  interviewMode: string;
 }) {
   const [interviewTemplates, setInterviewTemplates] = useState<
     InterviewTemplate[]
@@ -20,7 +20,7 @@ export function InterviewTemplates({
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const displayString =
-    interviewTemplateCategoryId === INTERVIEW_PRACTICE_MODE
+  interviewMode === INTERVIEW_PRACTICE_MODE
       ? 'Practice Mode : Select Practice Session'
       : 'Interview Mode : Select Mock Interview';
 
@@ -29,8 +29,8 @@ export function InterviewTemplates({
     try {
       let interviewTemplates: InterviewTemplate[] = [];
 
-      if (interviewTemplateCategoryId === INTERVIEW_PRACTICE_MODE) {
-        interviewTemplates = await getInterviewsTemplatesBySkill();
+      if (interviewMode === INTERVIEW_PRACTICE_MODE) {
+        interviewTemplates = await getInterviewsTemplatesByCategoryAndMode(INTERVIEW_PRACTICE_MODE, 'Soft Skills');
       } else {
         // Fetch templates based on category ID
         // Example: await getInterviewsTemplatesByCategory(interviewTemplateCategoryId);
@@ -48,7 +48,7 @@ export function InterviewTemplates({
 
   useEffect(() => {
     fetchInterviews();
-  }, [interviewTemplateCategoryId]);
+  }, [interviewMode]);
 
   // Filter templates based on search query
   const filteredTemplates = interviewTemplates.filter((template) =>
@@ -87,7 +87,7 @@ export function InterviewTemplates({
               <InterviewCardTemplate
                 key={interview.id}
                 interviewTemplate={interview}
-                interviewMode={interviewTemplateCategoryId as InterviewModeType}
+                interviewMode={interviewMode as InterviewModeType}
               />
             ))}
           </div>

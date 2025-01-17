@@ -18,16 +18,12 @@ import {
   Interview,
   InterviewAnswerDetail,
   InterviewQuestion,
+  specificFeedbackType,
 } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-export type specificFeedbackType = {
-  summary: string;
-  advice_for_next_question: string;
-};
 
 export default function InterviewFlow({
   interviewId,
@@ -161,6 +157,7 @@ export default function InterviewFlow({
         await insertInterviewAnswer(
           questions[currentQuestionIndex].id,
           answer,
+          questionFeedback[currentQuestionIndex]?.mark ?? 0,
           questionFeedback[currentQuestionIndex]?.summary ?? '',
         );
         await updateInterviewState(currentQuestionIndex + 1);
@@ -186,8 +183,8 @@ export default function InterviewFlow({
         questions[currentQuestionIndex],
         answer,
         nextQuestion,
+        interview?.question_count ?? 0,
       );
-
       if (specificFeedbackData) {
         setQuestionFeedback((prev) => ({
           ...prev,
@@ -234,6 +231,7 @@ export default function InterviewFlow({
       (question, index) => ({
         question: question.text,
         answer: answers.current[index],
+        mark: questionFeedback[index]?.mark ?? 0,
         feedback: questionFeedback[index]?.summary ?? '',
         evaluation_criteria_name: question.evaluation_criteria.name,
       }),
@@ -404,15 +402,15 @@ export default function InterviewFlow({
                       <strong>Summary:</strong>{' '}
                       {questionFeedback[currentQuestionIndex]?.summary}
                     </p>
-              {currentQuestionIndex < questions.length - 1 && (
-                <p>
-                  <strong>Advice for Next Question:</strong>{' '}
-                  {
-                    questionFeedback[currentQuestionIndex]
-                      ?.advice_for_next_question
-                  }
-                </p>
-              )}
+                    {currentQuestionIndex < questions.length - 1 && (
+                      <p>
+                        <strong>Advice for Next Question:</strong>{' '}
+                        {
+                          questionFeedback[currentQuestionIndex]
+                            ?.advice_for_next_question
+                        }
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center justify-center space-x-2">
                     <Button onClick={handleNextQuestion} className="mt-4">

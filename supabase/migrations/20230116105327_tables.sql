@@ -201,6 +201,7 @@ CREATE TABLE "public"."interview_answers" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "interview_question_id" "uuid" NOT NULL,
   "text" text,
+  "mark" decimal(5,2),
   "feedback" text
 );
 --
@@ -474,7 +475,8 @@ ADD CONSTRAINT "interview_questions_type_check" CHECK ("type" = ANY (ARRAY['Gene
 ALTER TABLE ONLY "public"."templates"
 ADD CONSTRAINT "templates_category_check" CHECK ("category" = ANY (ARRAY[
   'General Skills-Based'::template_category, 
-  'General Job-Based'::template_category, 
+  'General Job-Based'::template_category,
+  'Soft Skills'::template_category,
   'Accounting'::template_category, 
   'Finance'::template_category, 
   'Admin'::template_category, 

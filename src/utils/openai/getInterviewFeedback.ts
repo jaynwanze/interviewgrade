@@ -1,8 +1,6 @@
 'use server';
 
-import {
-  insertInterviewEvaluation,
-} from '@/data/user/interviews';
+import { insertInterviewEvaluation } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
   FeedbackData,
@@ -101,7 +99,7 @@ ${formatRubrics(criterion.rubrics)}`,
       (detail) => `{
   "question": "${detail.question}",
   "answer": "${detail.answer}",
-  "mark": 0,
+  "mark":"${detail.mark}",
   "feedback": "${detail.feedback}"	
 }`,
     )
@@ -131,7 +129,8 @@ Your evaluation should include:
 - **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10.
 - **Strengths and Areas for Improvement**: Specific feedback highlighting areas where the candidate excelled or could improve.
 - **Recommendations**: Suggestions for how the candidate could improve.
-- **Question Answer Feedback**: The grade based on specific corresponding feedback (Note: In case, a feedback field is empty, populate field it corresponding feedback) and evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
+(Note: In case, a mark or feedback field is empty, populate its field accordingly)
+- **Question Answer Feedback**: The grade based on specific corresponding feedback and evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
 - **Mark**: Within "question_answer_feedback" for each mark for each answer should be marked out of ${maxScorePerQuestion} and ensure that the sum of all marks add up to "overall_grade".
 
 ### Guidelines

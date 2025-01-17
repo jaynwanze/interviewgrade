@@ -17,13 +17,17 @@ export const getInterviewsTemplatesByCategory = async (
   return data;
 };
 
-export const getInterviewsTemplatesBySkill = async (): Promise<
+export const getInterviewsTemplatesByCategoryAndMode = async (
+  mode: string,
+  category: string,
+): Promise<
   Table<'templates'>[]
 > => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('templates')
     .select('*')
+    .eq('category', category)
     .neq('skill', null)
     .order('title', { ascending: true });
   if (error) {
@@ -89,6 +93,25 @@ export const getTemplateQuestions = async (
     .eq('template_id', templateId)
     .limit(questionCount);
 
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const getTemplateQuestionByEvaluationCriteria = async (
+  templateId: string,
+  evaluationCriteriaId: string,
+  questionCount: number,
+): Promise<Table<'questions'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('template_id', templateId)
+    .eq('evaluation_criteria_id', evaluationCriteriaId)
   if (error) {
     throw error;
   }

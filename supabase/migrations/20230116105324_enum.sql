@@ -57,6 +57,7 @@ ALTER TYPE "public"."template_difficulty" OWNER TO "postgres";
 CREATE TYPE "public"."template_category" AS ENUM (
   'General Skills-Based',
   'General Job-Based',
+  'Soft Skills',
   'Accounting',
   'Finance',
   'Admin',

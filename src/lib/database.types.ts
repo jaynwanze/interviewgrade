@@ -592,16 +592,19 @@ export type Database = {
           id: string
           interview_question_id: string
           text: string
+          mark : number
           feedback: string
         }
         Insert: {
           interview_question_id: string
           text: string
+          mark? : number
           feedback?: string
         }
         Update: {
           interview_question_id?: string
           text?: string
+          mark? : number
           feedback?: string
         }
         Relationships: [

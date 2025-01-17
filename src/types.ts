@@ -61,6 +61,7 @@ export type Token = Table<'tokens'>;
 export type InterviewAnswerDetail = {
   question: string;
   answer: string;
+  mark: number
   feedback: string;
   evaluation_criteria_name: string;
 };
@@ -71,6 +72,12 @@ export type EvaluationRubricType = {
   percentage_range: string;
   description: string;
   order: number;
+};
+
+export type specificFeedbackType = {
+  mark: number;
+  summary: string;
+  advice_for_next_question: string;
 };
 
 export type EvaluationCriteriaType = {

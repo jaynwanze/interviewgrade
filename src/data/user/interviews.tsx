@@ -75,9 +75,19 @@ export const createInterviewQuestions = async (
   const templateEvaluationCriterias =
     await getTemplateEvaluationCriteriasJsonFormat(interviewTemplate.id);
 
+  if (
+    !templateEvaluationCriterias ||
+    templateEvaluationCriterias.length === 0
+  ) {
+    throw new Error('Failed to fetch template evaluation criterias');
+  }
+
   let lastInsertData: Table<'interview_questions'> | null = null;
 
   for (const criteria of templateEvaluationCriterias) {
+    if (!criteria.rubrics.length || criteria.rubrics.length === 0) {
+      throw new Error('Rubrics not found for evaluation criteria');
+    }
     const tempQuestions = await getTemplateQuestionByEvaluationCriteria(
       interviewTemplate.id,
       criteria.id,

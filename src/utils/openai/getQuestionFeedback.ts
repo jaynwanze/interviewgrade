@@ -7,8 +7,8 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 
 const specificFeedback = z.object({
-  score: z.number(),
-  evaluation: z.string(),
+  mark: z.number(),
+  summary: z.string(),
   advice_for_next_question: z.string(),
 });
 
@@ -74,15 +74,18 @@ ${nextQuestion ? `**Question**: ${nextQuestion.text}` : '**Question**: N/A'}
 
 ### Instructions
 Your evaluation should include:
-- **Mark**: A numerical score for the current answer should be marked out of ${maxScorePerQuestion}.
-- **Summary**: Concise evalaution of the candidate's answer to the current question and based off the evaluation.
+- **Mark**: Assign a numerical score out of ${maxScorePerQuestion} based on the candidate's performance relative to the rubric. Ensure that the mark reflects the degree to which the candidate meets the criteria outlined in the rubric.
+- **Summary**: Short/Concise evalaution of the candidate's answer to the current question and based off the evalution criteria.
 - **Advice for Next Question**: Offer advice for how to answer the next question effectively.
+
+### Output Format
+Provide your evaluation in the following JSON format without any additional text.
 
 \`\`\`json
 {
-  "mark": "Your mark here.",
-  "summary": "Your summary here.",
-  "advice_for_next_question": "Your advice here."
+  "mark": number,",
+  "summary": string,
+  "advice_for_next_question": string"
 }
 \`\`\`
 
@@ -90,7 +93,6 @@ Your evaluation should include:
 - Ensure the JSON is properly formatted for parsing.
 - If there is no next question, set "advice_for_next_question" to "N/A".
 - Provide actionable and constructive advice to help the candidate improve.
-
 `;
 };
 
@@ -105,10 +107,10 @@ const callOpenAIWithRetries = async (
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const completion = await openai.beta.chat.completions.parse({
-        model: 'gpt-3.5-turbo', // Use 'gpt-4' if preferred
+        model: 'gpt-4-turbo', // Use 'gpt-4' if preferred
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1000,
-        temperature: 0.5,
+        max_tokens: 500,
+        temperature: 0.2,
       });
 
       const aiMessage = completion.choices?.[0]?.message?.content;
@@ -190,20 +192,8 @@ const parseAIResponse = (aiResponse: string): specificFeedbackType => {
     // Parse the JSON string
     const parsedData = JSON.parse(jsonString);
 
-    // Validate the structure
-    if (
-      typeof parsedData.score === 'number' &&
-      typeof parsedData.summary === 'string' &&
-      typeof parsedData.advice_for_next_question === 'string'
-    ) {
-      return {
-        mark: parsedData.mark,
-        summary: parsedData.summary,
-        advice_for_next_question: parsedData.advice_for_next_question,
-      };
-    } else {
-      throw new Error('Invalid structure of the parsed JSON.');
-    }
+    const feedback = specificFeedback.parse(parsedData);
+    return feedback;
   } catch (error) {
     console.error('Error parsing AI response:', error.message);
     console.error('Raw AI Response:', aiResponse);

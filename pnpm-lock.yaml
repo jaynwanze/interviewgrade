@@ -278,6 +278,9 @@ importers:
       path-to-regexp:
         specifier: ^6.3.0
         version: 6.3.0
+      rate-limiter-flexible:
+        specifier: ^5.0.5
+        version: 5.0.5
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -380,6 +383,9 @@ importers:
       web-audio-peak-meter:
         specifier: ^3.1.0
         version: 3.1.0
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -6701,6 +6707,9 @@ packages:
   range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
+
+  rate-limiter-flexible@5.0.5:
+    resolution: {integrity: sha512-+/dSQfo+3FYwYygUs/V2BBdwGa9nFtakDwKt4l0bnvNB53TNT++QSFewwHX9qXrZJuMe9j+TUaU21lm5ARgqdQ==}
 
   react-beautiful-dnd@13.1.1:
     resolution: {integrity: sha512-0Lvs4tq2VcrEjEgDXHjT98r+63drkKEgqyxdA7qD3mvKwga6a5SscbdLPO2IExotU1jW8L0Ksdl0Cj2AF67nPQ==}
@@ -15260,6 +15269,8 @@ snapshots:
       performance-now: 2.1.0
 
   range-parser@1.2.1: {}
+
+  rate-limiter-flexible@5.0.5: {}
 
   react-beautiful-dnd@13.1.1(react-dom@18.3.1(react@18.3.1))(react-native@0.75.4(@babel/core@7.25.8)(@babel/preset-env@7.25.8(@babel/core@7.25.8))(@types/react@18.2.23)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3))(react@18.3.1):
     dependencies:

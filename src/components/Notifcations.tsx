@@ -41,33 +41,35 @@ export default function Notifications() {
           {notifications.length === 0 ? (
             <p className="text-sm text-gray-500">No new notifications.</p>
           ) : (
-            notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className="flex items-start justify-between"
-              >
-                <div>
-                  <Link
-                    href={notification.link}
-                    className="text-sm font-medium text-blue-600 hover:underline"
-                  >
-                    {notification.title}
-                  </Link>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {notification.timestamp.toLocaleString()}
-                  </p>
-                </div>
-                <button
-                  onClick={() => removeNotification(notification.id)}
-                  className="text-gray-400 hover:text-gray-600"
+            notifications
+              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+              .map((notification) => (
+                <div
+                  key={notification.id}
+                  className="flex items-start justify-between"
                 >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))
+                  <div>
+                    <Link
+                      href={notification.link}
+                      className="text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      {notification.title}
+                    </Link>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {notification.message}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {notification.timestamp.toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => removeNotification(notification.id)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))
           )}
           {notifications.length > 0 && (
             <Button

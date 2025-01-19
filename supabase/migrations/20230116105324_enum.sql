@@ -129,7 +129,7 @@ ALTER TYPE "public"."pricing_type" OWNER TO "postgres";
 -- Name: pricing_plan_interval_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."pricing_plan_interval" AS ENUM ('day', 'week', 'month', 'year');
+CREATE TYPE "public"."pricing_plan_interval_type" AS ENUM ('day', 'week', 'month', 'year');
 ALTER TYPE "public"."pricing_plan_interval_type" OWNER TO "postgres";
 --
 -- Name: subscription_status; Type: TYPE; Schema: public; Owner: postgres
@@ -146,4 +146,4 @@ CREATE TYPE "public"."subscription_status" AS ENUM (
   'paused'
 );
 
-ALTER TYPE "public"."subscription_status" OWNER TO "postgres
+ALTER TYPE "public"."subscription_status" OWNER TO "postgres";

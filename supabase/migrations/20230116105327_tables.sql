@@ -17,9 +17,9 @@ ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 
 CREATE TABLE "public"."candidates" (
   "id" "uuid" NOT NULL,
-  "token_id" "uuid" NOT NULL
+  "token_id" "uuid" NOT NULL,
   "subscription_id" "uuid",
-  "stripe_customer_id" character varying,
+  "stripe_customer_id" character varying
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";
 
@@ -50,7 +50,7 @@ ALTER TABLE "public"."products" OWNER TO "postgres";
 --
 
 CREATE TABLE "public"."subscriptions" (
-  "id" character varying NOT NULL,
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "product_id" "uuid" NOT NULL,
   "status" "public"."subscription_status",
   "quantity" bigint,
@@ -63,7 +63,7 @@ CREATE TABLE "public"."subscriptions" (
   "cancel_at" timestamp WITH time zone,
   "canceled_at" timestamp WITH time zone,
   "trial_start" timestamp WITH time zone,
-  "trial_end" timestamp WITH time zone,
+  "trial_end" timestamp WITH time zone
 );
 ALTER TABLE "public"."subscriptions" OWNER TO "postgres";
 --
@@ -72,9 +72,9 @@ ALTER TABLE "public"."subscriptions" OWNER TO "postgres";
 
 CREATE TABLE "public"."tokens" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  "tokens_available" number DEFAULT 5,
-  "total_tokens_used" number DEFAULT 0,
-  "total_tokens_purchased" number DEFAULT 0,
+  "tokens_available" bigint DEFAULT 5,
+  "total_tokens_used" bigint DEFAULT 0,
+  "total_tokens_purchased" bigint DEFAULT 0,
   "last_purchase_date" timestamp with time zone
 );
 ALTER TABLE "public"."tokens" OWNER TO "postgres";
@@ -165,7 +165,7 @@ CREATE TABLE public.evaluation_criteria (
 
 CREATE TABLE public.template_evaluation_criteria (
     "template_id" "uuid" NOT NULL,
-    "evaluation_criteria_id" "uuid" NOT NULL,
+    "evaluation_criteria_id" "uuid" NOT NULL
 );
 --
 -- Name: questions; Type: TABLE; Schema: public; Owner: postgres
@@ -227,12 +227,6 @@ ALTER TABLE "public"."job_application_tracker" OWNER TO "postgres";
 
 ALTER TABLE ONLY "public"."user_profiles"
 ADD CONSTRAINT "user_profiles_pkey" PRIMARY KEY ("id");
---
--- Name: user_profiles user_profiles_stripe_customer_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."user_profiles"
-ADD CONSTRAINT "user_profiles_stripe_customer_id_key" UNIQUE ("stripe_customer_id");
 --
 -- Name: candidate candidate_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -529,8 +523,16 @@ ADD CONSTRAINT "interview_mode_check" CHECK ("mode" = ANY (ARRAY['practice'::int
 --
 
 ALTER TABLE ONLY "public"."subscriptions"
-ADD CONSTRAINT "subscriptions_status_check" CHECK ("status" = ANY (ARRAY['active'::subscription_status, 'inactive'::subscription_status, 'canceled'::subscription_status]));
-
+ADD CONSTRAINT "subscriptions_status_check" CHECK ("status" = ANY (ARRAY[
+  'trialing'::subscription_status,
+  'active'::subscription_status,
+  'canceled'::subscription_status,
+  'incomplete'::subscription_status,
+  'incomplete_expired'::subscription_status,
+  'past_due'::subscription_status,
+  'unpaid'::subscription_status,
+  'paused'::subscription_status
+]));
 --
 -- Name: products pricing_type_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -574,11 +576,11 @@ ALTER TABLE ONLY "public"."products"
 ADD CONSTRAINT "products_price_check" CHECK ("price" >= 0);
 
 --
--- Name: products products_unit_amount_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: products products_price_unit_amount_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."products"
-ADD CONSTRAINT "products_unit_amount_check" CHECK ("unit_amount" >= 0);
+ADD CONSTRAINT "products_price_unit_amount_check" CHECK ("price_unit_amount" >= 0);
 --
 -- Name: products products_pricing_interval_count_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --

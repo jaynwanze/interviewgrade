@@ -20,7 +20,6 @@ import {
   specificFeedbackType,
 } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
-import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function InterviewFlow({
@@ -168,42 +167,58 @@ export default function InterviewFlow({
     try {
       const nextQuestionIndex = currentQuestionIndex + 1;
       const nextQuestion = questions[nextQuestionIndex] || null;
-      // let accumulatedFeedback: string | null = null;
 
-      const stream = await getQuestionFeedback(
-        interview?.skill ?? '',
-        questions[currentQuestionIndex],
-        answer,
-        nextQuestion,
-        interview?.question_count ?? 0,
-        // (chunk: string) => {
-        //   accumulatedFeedback = (accumulatedFeedback || '') + chunk;
-        //   setQuestionFeedback((prev) => ({
-        //     ...prev,
-        //     [currentQuestionIndex]: accumulatedFeedback,
-        //   }));
-        // },
-        // (error?: Error) => {
-        //   console.error('Error in feedback chunk:', error);
-        // },
-        // () => {
-        //   // handle feedback completion
-        // },
-      );
+      const response = await fetch('/api/getQuestionFeedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skill: interview?.skill ?? '',
+          currentQuestion: questions[currentQuestionIndex],
+          currentAnswer: answer,
+          nextQuestion,
+          interview_question_count: interview?.question_count ?? 0,
+        }),
+      });
 
-      if (!stream) {
-        console.error('Failed to initiate OpenAI stream.');
+      if (!response.ok || !response.body) {
+        console.error('Failed to get feedback from OpenAI.');
         return;
       }
+      setIsFetchingSpecificFeedback(false);
+      let accumulatedText = ''; // To store the accumulated paragraph
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      const done = false;
+      while (!done) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      for await (const chunk of stream) {
-        process.stdout.write(chunk.choices[0]?.delta?.content || '');
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.trim() === '') continue;
+          if (line.startsWith('data: ')) {
+            const data = line.replace(/^data: /, '').trim();
+            if (data === '[DONE]') break;
+
+            try {
+              const parsed = JSON.parse(data);
+              accumulatedText += parsed; // Append new text to the paragraph
+
+              // Update the state with the growing paragraph
+              setQuestionFeedback((prev) => ({
+                ...prev,
+                [currentQuestionIndex]: accumulatedText,
+              }));
+            } catch (err) {
+              console.error('Error parsing feedback chunk:', err);
+            }
+          }
+        }
       }
     } catch (error) {
-      console.error(
-        'Error fetching specific feedback:',
-        error.message || error,
-      );
+      console.error('Error fetching specific feedback:', error);
       setQuestionFeedback((prev) => ({
         ...prev,
         [currentQuestionIndex]: null,
@@ -383,28 +398,28 @@ export default function InterviewFlow({
         </div>
       </div>
 
-        {/* Feedback Card: Appears beneath the main cards in practice mode */}
-        {interview && interview.mode === INTERVIEW_PRACTICE_MODE && (
-          <div className="w-full max-w-4xl p-4">
-            <Card className="mx-auto text-center">
-              <CardHeader>
-                <CardTitle>Feedback</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isFetchingSpecificFeedback ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <p>Fetching feedback...</p>
-                    <LoadingSpinner />
-                  </div>
-                ) : questionFeedback[currentQuestionIndex] ? (
-                  <>
-                    <div className="text-left space-y-2">
-                      <p>
-                        <strong>Mark:</strong>{' '}
-                        {questionFeedback[currentQuestionIndex]}/
-                        {maxScorePerQuestion}
-                      </p>
-                      {/* <p>
+      {/* Feedback Card: Appears beneath the main cards in practice mode */}
+      {interview && interview.mode === INTERVIEW_PRACTICE_MODE && (
+        <div className="w-full max-w-4xl p-4">
+          <Card className="mx-auto text-center">
+            <CardHeader>
+              <CardTitle>Feedback</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isFetchingSpecificFeedback ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <p>Fetching feedback...</p>
+                  <LoadingSpinner />
+                </div>
+              ) : questionFeedback[currentQuestionIndex] ? (
+                <>
+                  <div className="text-left space-y-2">
+                    <p>
+                      <strong>Mark:</strong>{' '}
+                      {questionFeedback[currentQuestionIndex]}/
+                      {maxScorePerQuestion}
+                    </p>
+                    {/* <p>
                         <strong>Mark:</strong>{' '}
                         {questionFeedback[currentQuestionIndex]?.mark}/
                         {maxScorePerQuestion}
@@ -422,22 +437,22 @@ export default function InterviewFlow({
                           }
                         </p>
                       )} */}
-                    </div>
-                    <div className="flex items-center justify-center space-x-2">
-                      <Button onClick={handleNextQuestion} className="mt-4">
-                        {currentQuestionIndex === questions.length - 1
-                          ? 'Finish Interview'
-                          : 'Next Question'}
-                      </Button>{' '}
-                    </div>
-                  </>
-                ) : (
-                  'After the question is answered, feedback will be loaded.'
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
-    );
-  }
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Button onClick={handleNextQuestion} className="mt-4">
+                      {currentQuestionIndex === questions.length - 1
+                        ? 'Finish Interview'
+                        : 'Next Question'}
+                    </Button>{' '}
+                  </div>
+                </>
+              ) : (
+                'After the question is answered, feedback will be loaded.'
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}

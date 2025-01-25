@@ -116,25 +116,21 @@ Provide your evaluation in the following JSON format without any additional text
  */
 const callOpenAIStream = async (
   prompt: string,
-): Promise<Readable | undefined> => {
-  try {
-    const stream = openai.chat.completions.create({
-      model: 'gpt-4-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 500,
-      temperature: 0.2,
-      store: true,
-      stream: true,
-    });
+): Promise<AsyncIterable<OpenAI.Chat.ChatCompletionChunk>> => {
+  const response = openai.chat.completions.create({
+    model: 'gpt-4-turbo',
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 500,
+    temperature: 0.2,
+    store: true,
+    stream: true,
+  });
 
-    // for await (const chunk of await stream) {
-    //   process.stdout.write(chunk.choices[0]?.delta?.content || '');
-    // }
-    return stream as unknown as Readable;
-    // Assuming OpenAI SDK returns a readable stream
-  } catch (error) {
-    console.error('OpenAI API Error:', error);
-  }
+  // for await (const chunk of await stream) {
+  //   process.stdout.write(chunk.choices[0]?.delta?.content || '');
+  // }
+  return response as unknown as AsyncIterable<OpenAI.Chat.ChatCompletionChunk>; // Return the async iterable response
+  // Assuming OpenAI SDK returns a readable stream
 };
 
 /**
@@ -191,7 +187,7 @@ export const getQuestionFeedback = async (
   // onFeedbackChunk: (chunk: string) => void, // Callback for each chunk
   // onFeedbackComplete: () => void, // Callback when complete
   // onFeedbackError: (error: Error) => void, // Callback on error
-): Promise<Readable | undefined> => {
+): Promise<AsyncIterable<OpenAI.Chat.ChatCompletionChunk>> => {
   // Input Validation
   if (!currentQuestion.text.trim()) {
     throw new Error('Current question text cannot be empty.');
@@ -212,11 +208,6 @@ export const getQuestionFeedback = async (
 
   // Call OpenAI API with streaming
   const stream = await callOpenAIStream(prompt);
-  if (!stream) {
-    console.log('Failed to initiate OpenAI stream.');
-    return;
-  }
-
   return stream;
   // if (!stream) {
   //   console.log('Failed to initiate OpenAI stream.');

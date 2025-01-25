@@ -21,6 +21,7 @@ declare global {
       GOCARDLESS_SECRET_KEY: string;
       RESEND_API_KEY: string;
       OPENAI_SECRET_KEY: string;
+      DEEPSEEK_API_KEY: string;
     }
   }
 }

@@ -25,6 +25,21 @@ const openai = new OpenAI({
   apiKey: openAiKey,
 });
 
+// // deepSeekKey OpenAI Client
+// const deepSeekKey = process.env.DEEPSEEK_API_KEY;
+
+// if (!deepSeekKey) {
+//   throw new Error(
+//     'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
+//   );
+// }
+
+// const openai = new OpenAI({
+//   baseURL: 'https://api.deepseek.com',
+//   apiKey: deepSeekKey,
+// });
+
+
 /**
  * Constructs the prompt for OpenAI based on the current question and answer
  */
@@ -106,8 +121,9 @@ const callOpenAIWithRetries = async (
 ): Promise<string> => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const completion = await openai.beta.chat.completions.parse({
-        model: 'gpt-4-turbo', // Use 'gpt-4' if preferred
+      const completion = await openai.chat.completions.create({
+        // model: 'deepseek-chat',
+        model: 'gpt-4-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 500,
         temperature: 0.2,

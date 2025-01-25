@@ -39,7 +39,7 @@ export const AIQuestionSpeaker = ({
     const utterance = new SpeechSynthesisUtterance(speechText);
     console.log('Speech Text:', speechText); // Debugging line
 
-    utterance.rate = 0.65; // Set rate (0.1 to 10)
+    utterance.rate = 0.75; // Set rate (0.1 to 10)
     utterance.pitch = 1; // Set pitch (0 to 2)
     utterance.volume = 1; // Set volume (0 to 1)
 

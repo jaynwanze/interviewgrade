@@ -1,6 +1,6 @@
 'use client';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 export class MediaRecorderHandler {
   private mediaRecorder: MediaRecorder | null = null;
@@ -8,7 +8,21 @@ export class MediaRecorderHandler {
   private ffmpeg: FFmpeg;
 
   constructor() {
-    this.ffmpeg = new FFmpeg(); // Enable logging for debugging
+    this.ffmpeg = new FFmpeg();
+    this.initializeFFmpeg();
+  }
+
+  private async initializeFFmpeg() {
+    await this.ffmpeg.load({
+      coreURL: await toBlobURL(
+        'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+        'text/javascript',
+      ),
+      wasmURL: await toBlobURL(
+        'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+        'application/wasm',
+      ),
+    });
   }
 
   async convertAudioFormat(
@@ -18,10 +32,10 @@ export class MediaRecorderHandler {
     setLoadingFFmpeg(true); // Set loading state
     if (!this.ffmpeg.loaded) {
       try {
-        await this.ffmpeg.load(); // Load FFmpeg if not already loaded
+        await this.ffmpeg.load({});
       } catch (error) {
         console.error(
-          'Error loading FFmpeg now using backup transcript:',
+          'Error loading FFmpeg now using backup audio converter:',
           error,
         );
         setLoadingFFmpeg(false); // Reset loading state

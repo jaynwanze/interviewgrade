@@ -8,6 +8,7 @@ import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Meter } from './SoundMeter';
+import { set } from 'nprogress';
 
 interface UserCameraProps {
   answerCallback: (answer: string) => void;
@@ -182,6 +183,13 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         formData.append('model', 'whisper-1');
         whisperFinalTranscript.current =
           await transcribeInterviewAudio(formData);
+      }
+      else {
+        // Handle error when audio conversion fails
+        //create a way for them to retry question if it fails
+        console.error('Audio conversion failed - returning error message to display to user');
+        isFetchingSpecificFeedback(false);
+        return;
       }
     } else {
       stopRecognition();

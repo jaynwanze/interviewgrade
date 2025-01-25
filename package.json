@@ -9,6 +9,7 @@
   "dependencies": {
     "@ahanapediatrics/react-volume-meter": "^5.10.1",
     "@calcom/embed-react": "^1.5.1",
+    "@ffmpeg/core": "^0.12.10",
     "@ffmpeg/ffmpeg": "^0.12.10",
     "@ffmpeg/util": "^0.12.1",
     "@headlessui/react": "^1.7.19",
@@ -70,6 +71,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^0.2.1",
+    "coi-serviceworker": "^0.1.7",
     "cookie": "^0.6.0",
     "country-region-data": "^3.0.0",
     "cross-env": "^7.0.3",
@@ -145,6 +147,7 @@
     "tsc": "tsc"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.26.5",
     "@next/eslint-plugin-next": "^13.5.7",
     "@playwright/test": "^1.48.0",
     "@testing-library/react": "^14.3.1",

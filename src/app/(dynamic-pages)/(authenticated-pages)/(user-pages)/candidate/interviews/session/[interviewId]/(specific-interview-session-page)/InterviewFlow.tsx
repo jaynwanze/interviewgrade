@@ -21,7 +21,6 @@ import {
 } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
-import { wss } from '@/utils/server/webSocket';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function InterviewFlow({
@@ -56,58 +55,6 @@ export default function InterviewFlow({
     [key: number]: string | null;
   }>({});
   const { addNotification } = useNotifications();
-  const ws = useRef<WebSocket | null>(null);
-  useEffect(() => {
-    let isMounted = true; // To prevent state updates on unmounted components
-  
-    connectWebSocket()
-      .then((socket) => {
-        if (!isMounted) {
-          socket.close();
-          return;
-        }
-  
-        ws.current = socket;
-  
-        ws.current!.onopen = () => {
-          console.log('Connected to proxy server.');
-          // Optionally send an initial event
-        };
-  
-        ws.current!.onmessage = (event) => {
-          try {
-            const message = JSON.parse(event.data);
-            console.log('Received from OpenAI:', message);
-            // Handle the received message (e.g., update state)
-          } catch (error) {
-            console.error('Error parsing message:', error);
-          }
-        };
-  
-        ws.current!.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          // Optionally notify the user
-        };
-  
-        ws.current!.onclose = () => {
-          console.log('WebSocket connection closed.');
-          // Optionally handle reconnection logic
-        };
-      })
-      .catch((error) => {
-        console.error('Failed to connect to WebSocket proxy:', error);
-        // Optionally notify the user
-      });
-  
-    // Cleanup on unmount
-    return () => {
-      isMounted = false;
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, []);
-
   const startTimer = () => {
     if (timerRef.current == null) {
       timerRef.current = window.setInterval(() => {
@@ -454,6 +401,11 @@ export default function InterviewFlow({
                     <div className="text-left space-y-2">
                       <p>
                         <strong>Mark:</strong>{' '}
+                        {questionFeedback[currentQuestionIndex]}/
+                        {maxScorePerQuestion}
+                      </p>
+                      {/* <p>
+                        <strong>Mark:</strong>{' '}
                         {questionFeedback[currentQuestionIndex]?.mark}/
                         {maxScorePerQuestion}
                       </p>
@@ -469,7 +421,7 @@ export default function InterviewFlow({
                               ?.advice_for_next_question
                           }
                         </p>
-                      )}
+                      )} */}
                     </div>
                     <div className="flex items-center justify-center space-x-2">
                       <Button onClick={handleNextQuestion} className="mt-4">

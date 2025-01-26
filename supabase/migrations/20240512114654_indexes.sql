@@ -12,6 +12,7 @@ CREATE INDEX idx_tokens_id ON "public"."tokens" ("id");
 CREATE INDEX idx_interviews_id ON "public"."interviews" ("id");
 CREATE INDEX idx_interviews_candidate_id ON "public"."interviews" ("candidate_id");
 CREATE INDEX idx_interviews_template_id ON "public"."interviews" ("template_id");
+CREATE INDEX idx_interviews_interview_template_id ON "public"."interviews" ("interview_template_id");
 
 -- Indexes for templates
 CREATE INDEX idx_templates_id ON "public"."templates" ("id");
@@ -20,6 +21,13 @@ CREATE INDEX idx_templates_is_company_specific ON "public"."templates" ("is_comp
 CREATE INDEX idx_templates_is_industry_specific ON "public"."templates" ("is_industry_specific");
 CREATE INDEX idx_templates_is_general ON "public"."templates" ("is_general");
 CREATE INDEX idx_templates_is_system_defined ON "public"."templates" ("is_system_defined");
+
+-- Indexes for interview_template
+CREATE INDEX idx_interview_templates_id ON "public"."interview_templates" ("id");
+
+-- Indexes for interview_template_template
+CREATE INDEX idx_interview_template_interview_template_id ON "public"."interview_template_template" ("interview_template_id");
+CREATE INDEX idx_interview_template_template_template_id ON "public"."interview_template_template" ("template_id");
 
 -- Indexes for questions
 CREATE INDEX idx_questions_id ON "public"."questions" ("id");
@@ -33,6 +41,10 @@ CREATE INDEX idx_interview_evaluations_interview_id ON "public"."interview_evalu
 -- Indexes for evaluation_criteria
 CREATE INDEX idx_evaluation_criteria_id ON "public"."evaluation_criteria" ("id");
 CREATE INDEX idx_evaluation_criteria_is_system_defined ON "public"."evaluation_criteria" ("is_system_defined");
+
+-- Indexes for interview_template_evaluation_criteria
+CREATE INDEX idx_interview_template_evaluation_criteria_interview_template_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_template_id");
+CREATE INDEX idx_interview_template_evaluation_criteria_evaluation_criteria_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_evaluation_criteria_id");
 
 -- Indexes for template_evaluation_criteria
 CREATE INDEX idx_template_evaluation_criteria_template_id ON "public"."template_evaluation_criteria" ("template_id");

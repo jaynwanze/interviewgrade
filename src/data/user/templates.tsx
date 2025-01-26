@@ -20,9 +20,7 @@ export const getInterviewsTemplatesByCategory = async (
 export const getInterviewsTemplatesByCategoryAndMode = async (
   mode: string,
   category: string,
-): Promise<
-  Table<'templates'>[]
-> => {
+): Promise<Table<'templates'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('templates')
@@ -36,7 +34,7 @@ export const getInterviewsTemplatesByCategoryAndMode = async (
   return data;
 };
 
-export const getTemplateEvaluationCriteriasJsonFormat = async (
+export const getPracticeTemplateEvaluationCriteriasJsonFormat = async (
   templateId: string,
 ): Promise<EvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -81,6 +79,51 @@ export const getTemplateEvaluationCriteriasJsonFormat = async (
     }));
 };
 
+export const getInterviewTemplateEvaluationCriteriasJsonFormat = async (
+  interviewTemplateId: string,
+): Promise<EvaluationCriteriaType[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('interview_template_evaluation_criteria')
+    .select(
+      `
+    evaluation_criteria (
+      id,
+      name,
+      description,
+      rubrics,
+      is_system_defined,
+      created_at
+    )
+    `,
+    )
+    .eq('interview_template_id', interviewTemplateId);
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
+  return data
+    .filter((item) => item.evaluation_criteria !== null)
+    .map((item) => ({
+      id: item.evaluation_criteria?.id ?? '',
+      name: item.evaluation_criteria?.name ?? '',
+      description: item.evaluation_criteria?.description ?? '',
+      rubrics:
+        typeof item.evaluation_criteria?.rubrics === 'string'
+          ? JSON.parse(item.evaluation_criteria.rubrics)
+          : (item.evaluation_criteria?.rubrics ?? []),
+      is_system_defined: item.evaluation_criteria?.is_system_defined ?? false,
+      created_at: item.evaluation_criteria?.created_at ?? '',
+    }));
+};
+
 export const getTemplateQuestions = async (
   templateId: string,
   questionCount: number,
@@ -100,7 +143,7 @@ export const getTemplateQuestions = async (
   return data;
 };
 
-export const getTemplateQuestionByEvaluationCriteria = async (
+export const getPracticeTemplateQuestionByEvaluationCriteria = async (
   templateId: string,
   evaluationCriteriaId: string,
   questionCount: number,
@@ -111,7 +154,7 @@ export const getTemplateQuestionByEvaluationCriteria = async (
     .from('questions')
     .select('*')
     .eq('template_id', templateId)
-    .eq('evaluation_criteria_id', evaluationCriteriaId)
+    .eq('evaluation_criteria_id', evaluationCriteriaId);
   if (error) {
     throw error;
   }
@@ -141,6 +184,41 @@ export const getPracticeTemplateQuestions = async (
   const shuffledQuestions = allQuestions.sort(() => 0.5 - Math.random());
   // Select the first `questionCount` questions
   const data = shuffledQuestions.slice(0, questionCount);
+
+  return data;
+};
+
+export const getInterviewTemplatePracticeTemplates = async (
+  interviewTemplateId: string,
+): Promise<Table<'templates'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('templates')
+    .select(
+    `
+      id,
+      user_id,
+      category,
+      title,
+      description,
+      difficulty,
+      question_count,
+      duration,
+      skill,
+      role,
+      company,
+      is_company_specific,
+      is_industry_specific,
+      created_at,
+      is_general,
+      is_system_defined
+    `
+    )
+    .eq('interview_template_id', interviewTemplateId);
+  if (error) {
+    throw error;
+  }
 
   return data;
 };

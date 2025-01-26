@@ -2,7 +2,7 @@
 
 import InterviewDetailsDialog from '@/components/Interviews/InterviewLibrary/InterviewDetailsDialog'; // Corrected import
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
-import { InterviewModeType, InterviewTemplate } from '@/types';
+import { InterviewModeType, PracticeInterviewTemplate } from '@/types';
 import { useState } from 'react';
 import { Button } from '../../ui/button';
 
@@ -10,7 +10,7 @@ export const InterviewCardTemplate = ({
   interviewTemplate,
   interviewMode,
 }: {
-  interviewTemplate: InterviewTemplate;
+  interviewTemplate: PracticeInterviewTemplate;
   interviewMode: InterviewModeType;
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -316,6 +316,55 @@ DELETE TO "authenticated" USING (
     )
 );
 --
+-- Name: interview_template_interview_evaluation_criteria Only users can view system defined and their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_interview_template_interview_evaluation_criteria" ON "public"."interview_template_interview_evaluation_criteria" FOR
+SELECT TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_interview_evaluation_criteria"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() OR "interview_templates"."is_system_defined" = TRUE)
+    )
+);
+
+--
+-- Name: interview_template_interview_evaluation_criteria Only users can insert their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_template_interview_evaluation_criteria_insert" ON "public"."interview_template_interview_evaluation_criteria" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_interview_evaluation_criteria"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: interview_template_interview_evaluation_criteria Only users can update their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_template_interview_evaluation_criteria_update" ON "public"."interview_template_interview_evaluation_criteria" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_interview_evaluation_criteria"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: interview_template_interview_evaluation_criteria Only users can delete their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_template_interview_evaluation_criteria_delete" ON "public"."interview_template_interview_evaluation_criteria" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_interview_evaluation_criteria"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
+    )
+);
+--
 -- Name: templates Only users can view system defined templates their own templates; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
@@ -356,6 +405,97 @@ DELETE
 TO "authenticated"
 USING (
     is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: interview_templates Only users can view system defined and their own interview templates; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_interview_templates" ON "public"."interview_templates" FOR
+SELECT TO "authenticated" USING (
+    is_system_defined = TRUE AND "user_id" IS NULL
+    OR
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: interview_templates Only users can insert their own interview templates; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_templates_insert" ON "public"."interview_templates" FOR
+INSERT
+TO "authenticated"
+WITH CHECK (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: interview_templates Only users can update their own interview templates; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_templates_update" ON "public"."interview_templates" FOR
+UPDATE
+TO "authenticated"
+USING (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+)
+WITH CHECK (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: interview_templates Only users can delete their own interview templates; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_templates_delete" ON "public"."interview_templates" FOR
+DELETE
+TO "authenticated"
+USING (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name: interview_template_template Only users can view system defined and their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_interview_template_template" ON "public"."interview_template_template" FOR
+SELECT TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() OR "interview_templates"."is_system_defined" = TRUE)
+    )
+);
+--
+-- Name: interview_template_template Only users can insert their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_template_template_insert" ON "public"."interview_template_template" FOR
+INSERT TO "authenticated" WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: interview_template_template Only users can update their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_template_template_update" ON "public"."interview_template_template" FOR
+UPDATE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
+    )
+);
+--
+-- Name: interview_template_template Only users can delete their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_template_template_delete" ON "public"."interview_template_template" FOR
+DELETE TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM "public"."interview_templates"
+        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
+          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
+    )
 );
 --
 -- Name: evaluation_criteria Only users can view system defined and their own evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin

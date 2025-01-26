@@ -88,7 +88,8 @@ export type EvaluationCriteriaType = {
   is_system_defined: boolean;
   created_at: string;
 };
-export type InterviewTemplate = Table<'templates'>;
+export type PracticeInterviewTemplate = Table<'templates'>;
+export type InterviewTemplate = Table<'interview_templates'>;
 export type Questions = Table<'questions'>;
 export type Interview = Table<'interviews'>;
 export type InterviewQuestion = Table<'interview_questions'>;

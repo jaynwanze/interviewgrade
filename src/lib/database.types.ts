@@ -274,8 +274,9 @@ export type Database = {
       interviews: {
         Row: {
           id: string
-          template_id: string
           candidate_id: string
+          template_id: string
+          interview_template_id: string
           title: string
           role: string
           skill: string
@@ -294,8 +295,9 @@ export type Database = {
           created_at: string
         }
         Insert: {
-          template_id: string
           candidate_id: string
+          template_id?: string
+          interview_template_id?: string
           title: string
           role?: string
           skill?: string
@@ -314,8 +316,9 @@ export type Database = {
           created_at?: string
         }
         Update: {
-          template_id?: string
           candidate_id?: string
+          template_id?: string
+          interview_template_id?: string
           title?: string
           role?: string
           skill?: string
@@ -335,6 +338,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "interviews_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: true
@@ -342,10 +352,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "interviews_candidate_id_fkey"
-            columns: ["candidate_id"]
+            foreignKeyName: "interviews_interview_template_id_fkey"
+            columns: ["interview_template_id"]
             isOneToOne: true
-            referencedRelation: "candidates"
+            referencedRelation: "interview_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -394,9 +404,12 @@ export type Database = {
           },
         ]
       }
+      
       evaluation_criteria: {
         Row: {
           id: string
+          user_id: string
+          interview_evaluation_criteria_id: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -405,6 +418,8 @@ export type Database = {
         }
         Insert: {
           name: string
+          user_id?: string
+          interview_evaluation_criteria_id?: string
           description: string
           rubrics: EvaluationRubricType[]
           is_system_defined: boolean
@@ -412,11 +427,66 @@ export type Database = {
         }
         Update: {
           name?: string
+          user_id?: string
+          interview_evaluation_criteria_id: string
           description?: string
           rubrics?: EvaluationRubricType[]
           is_system_defined?: boolean
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_criteria_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evaluation_criteria_interview_evaluation_criteria_id_fkey"
+            columns: ["interview_evaluation_criteria_id"]
+            isOneToOne: true
+            referencedRelation: "interview_evaluation_criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      interview_evaluation_criteria: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          description: string
+          rubrics: EvaluationRubricType[]
+          is_system_defined: boolean
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          name: string
+          description: string
+          rubrics: EvaluationRubricType[]
+          is_system_defined: boolean
+          created_at: string
+        }
+        Update: {
+          user_id?: string
+          name?: string
+          description?: string
+          rubrics?: EvaluationRubricType[]
+          is_system_defined?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_evaluation_criteria_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
 
       template_evaluation_criteria: {
@@ -445,6 +515,37 @@ export type Database = {
             columns: ["evaluation_criteria_id"]
             isManyToMany: true
             referencedRelation: "evaluation_criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      interview_template_interview_evaluation_criteria: {
+        Row: {
+          interview_template_id: string
+          interview_evaluation_criteria_id: string
+        }
+        Insert: {
+          interview_template_id: string
+          interview_evaluation_criteria_id: string
+        }
+        Update: {
+          interview_template_id?: string
+          interview_evaluation_criteria_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_template_evaluation_criteria_interview_template_id_fkey"
+            columns: ["interview_template_id"]
+            isManyToMany: true
+            referencedRelation: "interview_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_template_evaluation_interview_criteria_evaluation_criteria_id_fkey"
+            columns: ["interview_evaluation_criteria_id"]
+            isManyToMany: true
+            referencedRelation: "interview_evaluation_criteria"
             referencedColumns: ["id"]
           },
         ]
@@ -509,6 +610,86 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      interview_templates: {
+        Row: {
+          id: string
+          user_id: string
+          category: Database["public"]["Enums"]["template_category"]
+          title: string
+          description: string
+          duration: number
+          difficulty: Database["public"]["Enums"]["template_difficulty"]
+          question_count: number;
+          is_general: boolean
+          is_system_defined: boolean
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          category: Database["public"]["Enums"]["template_category"]
+          title: string
+          description: string
+          duration: number
+          difficulty: Database["public"]["Enums"]["template_difficulty"]
+          question_count: number;
+          is_general: boolean
+          is_system_defined: boolean
+          created_at: string
+        }
+        Update: {
+          user_id?: string
+          category?: Database["public"]["Enums"]["template_category"]
+          title?: string
+          description?: string
+          duration?: number
+          difficulty?: Database["public"]["Enums"]["template_difficulty"]
+          question_count: number;
+          is_general?: boolean
+          is_system_defined?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_templates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      interview_template_template: {
+        Row: {
+          interview_template_id: string
+          template_id: string
+        }
+        Insert: {
+          interview_template_id: string
+          template_id: string
+        }
+        Update: {
+          interview_template_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_template_template_interview_template_id_fkey"
+            columns: ["interview_template_id"]
+            isManyToMany: true
+            referencedRelation: "interview_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_template_template_template_id_fkey"
+            columns: ["template_id"]
+            isManyToMany: true
+            referencedRelation: "templates"
             referencedColumns: ["id"]
           },
         ]
@@ -592,19 +773,19 @@ export type Database = {
           id: string
           interview_question_id: string
           text: string
-          mark : number
+          mark: number
           feedback: string
         }
         Insert: {
           interview_question_id: string
           text: string
-          mark? : number
+          mark?: number
           feedback?: string
         }
         Update: {
           interview_question_id?: string
           text?: string
-          mark? : number
+          mark?: number
           feedback?: string
         }
         Relationships: [

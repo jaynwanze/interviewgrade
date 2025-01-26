@@ -8,9 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { createInterview } from '@/data/user/interviews';
+import { createPracticeSession, createInterviewSession} from '@/data/user/interviews';
 import { useToastMutation } from '@/hooks/useToastMutation';
-import { InterviewModeType, InterviewTemplate } from '@/types';
+import { InterviewModeType, PracticeInterviewTemplate } from '@/types';
 import { useRouter } from 'next/navigation';
 
 export default function InterviewDetailsDialog({
@@ -21,7 +21,7 @@ export default function InterviewDetailsDialog({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  interviewTemplate: InterviewTemplate;
+  interviewTemplate: PracticeInterviewTemplate;
   interviewMode: InterviewModeType;
 }) {
   const router = useRouter();
@@ -29,10 +29,10 @@ export default function InterviewDetailsDialog({
     async () => {
       try {
         // Create an interview session
-        const interview = await createInterview(
-          interviewTemplate,
-          interviewMode,
-        );
+        const interview =
+          interviewMode === 'practice'
+            ? await createPracticeSession(interviewTemplate, interviewMode)
+            : await createInterviewSession(interviewTemplate, interviewMode);
         router.push(`/candidate/interviews/session/${interview.id}`);
       } catch (error) {
         console.error('Error creating interview:', error);
@@ -87,7 +87,8 @@ export default function InterviewDetailsDialog({
               </span>
             </div>
             <p className="text-base">
-              {feedbackStringPrefix}{` `}
+              {feedbackStringPrefix}
+              {` `}
               overall report on your session after you’ve completed all the
               questions.
             </p>

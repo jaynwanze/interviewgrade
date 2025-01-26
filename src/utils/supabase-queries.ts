@@ -34,122 +34,122 @@ export const updateUserName = async (
     .eq('id', user.id);
 };
 
-export const getOrganizationById = async (
-  supabase: AppSupabaseClient,
-  organizationId: string,
-) => {
-  const { data, error } = await supabase
-    .from('organizations')
-    // query team_members and team_invitations in one go
-    .select('*')
-    .eq('id', organizationId)
-    .single();
+// export const getOrganizationById = async (
+//   supabase: AppSupabaseClient,
+//   organizationId: string,
+// ) => {
+//   const { data, error } = await supabase
+//     .from('organizations')
+//     // query team_members and team_invitations in one go
+//     .select('*')
+//     .eq('id', organizationId)
+//     .single();
 
-  if (error) {
-    errors.add(error.message);
-    throw error;
-  }
+//   if (error) {
+//     errors.add(error.message);
+//     throw error;
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
-export const createOrganization = async (
-  supabase: AppSupabaseClient,
-  user: User,
-  name: string,
-) => {
-  const { data, error } = await supabase
-    .from('organizations')
-    .insert({
-      title: name,
-      created_by: user.id,
-    })
-    .select('*')
-    .single();
+// export const createOrganization = async (
+//   supabase: AppSupabaseClient,
+//   user: User,
+//   name: string,
+// ) => {
+//   const { data, error } = await supabase
+//     .from('organizations')
+//     .insert({
+//       title: name,
+//       created_by: user.id,
+//     })
+//     .select('*')
+//     .single();
 
-  if (error) {
-    errors.add(error.message);
-    throw error;
-  }
+//   if (error) {
+//     errors.add(error.message);
+//     throw error;
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
-export const getTeamMembersInOrganization = async (
-  supabase: AppSupabaseClient,
-  organizationId: string,
-) => {
-  const { data, error } = await supabase
-    .from('organization_members')
-    .select('*, user_profiles(*)')
-    .eq('organization_id', organizationId);
+// export const getTeamMembersInOrganization = async (
+//   supabase: AppSupabaseClient,
+//   organizationId: string,
+// ) => {
+//   const { data, error } = await supabase
+//     .from('organization_members')
+//     .select('*, user_profiles(*)')
+//     .eq('organization_id', organizationId);
 
-  if (error) {
-    errors.add(error.message);
-    throw error;
-  }
+//   if (error) {
+//     errors.add(error.message);
+//     throw error;
+//   }
 
-  return data || [];
-};
+//   return data || [];
+// };
 
-export const getPendingTeamInvitationsInOrganization = async (
-  supabase: AppSupabaseClient,
-  organizationId: string,
-) => {
-  const { data, error } = await supabase
-    .from('organization_join_invitations')
-    .select(
-      '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*)',
-    )
-    .eq('organization_id', organizationId)
-    .eq('status', 'active');
+// export const getPendingTeamInvitationsInOrganization = async (
+//   supabase: AppSupabaseClient,
+//   organizationId: string,
+// ) => {
+//   const { data, error } = await supabase
+//     .from('organization_join_invitations')
+//     .select(
+//       '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*)',
+//     )
+//     .eq('organization_id', organizationId)
+//     .eq('status', 'active');
 
-  if (error) {
-    errors.add(error.message);
-    throw error;
-  }
+//   if (error) {
+//     errors.add(error.message);
+//     throw error;
+//   }
 
-  return data || [];
-};
+//   return data || [];
+// };
 
-export const getOrganizationSubscription = async (
-  supabase: AppSupabaseClient,
-  organizationId: string,
-) => {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*, prices(*, products(*))')
-    .eq('organization_id', organizationId)
-    .in('status', ['trialing', 'active'])
-    .single();
+// export const getOrganizationSubscription = async (
+//   supabase: AppSupabaseClient,
+//   organizationId: string,
+// ) => {
+//   const { data, error } = await supabase
+//     .from('subscriptions')
+//     .select('*, prices(*, products(*))')
+//     .eq('organization_id', organizationId)
+//     .in('status', ['trialing', 'active'])
+//     .single();
 
-  if (error) {
-    errors.add(error.message);
-    throw error;
-  }
+//   if (error) {
+//     errors.add(error.message);
+//     throw error;
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
-export const getUserOrganizationRole = async (
-  supabase: AppSupabaseClient,
-  userId: string,
-  organizationId: string,
-) => {
-  const { data, error } = await supabase
-    .from('organization_members')
-    .select('member_id, member_role')
-    .eq('member_id', userId)
-    .eq('organization_id', organizationId)
-    .single();
+// export const getUserOrganizationRole = async (
+//   supabase: AppSupabaseClient,
+//   userId: string,
+//   organizationId: string,
+// ) => {
+//   const { data, error } = await supabase
+//     .from('organization_members')
+//     .select('member_id, member_role')
+//     .eq('member_id', userId)
+//     .eq('organization_id', organizationId)
+//     .single();
 
-  if (error) {
-    errors.add(error.message);
-    throw error;
-  }
+//   if (error) {
+//     errors.add(error.message);
+//     throw error;
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
 /* ==================== */
 /* AUTH */

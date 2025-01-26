@@ -41,10 +41,14 @@ CREATE INDEX idx_interview_evaluations_interview_id ON "public"."interview_evalu
 -- Indexes for evaluation_criteria
 CREATE INDEX idx_evaluation_criteria_id ON "public"."evaluation_criteria" ("id");
 CREATE INDEX idx_evaluation_criteria_is_system_defined ON "public"."evaluation_criteria" ("is_system_defined");
+CREATE INDEX idx_evaluation_criteria_interview_evaluation_criteria_id ON "public"."evaluation_criteria" ("interview_evaluation_criteria_id");
 
--- Indexes for interview_template_evaluation_criteria
-CREATE INDEX idx_interview_template_evaluation_criteria_interview_template_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_template_id");
-CREATE INDEX idx_interview_template_evaluation_criteria_evaluation_criteria_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_evaluation_criteria_id");
+-- Indexes for interview_evaluation_criteria
+CREATE INDEX idx_interview_evaluation_criteria_id ON "public"."interview_evaluation_criteria" ("id");
+
+-- Indexes for interview_template_interview_evaluation_criteria
+CREATE INDEX idx_interview_template_interview_evaluation_criteria_interview_template_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_template_id");
+CREATE INDEX idx_interview_template_interview_evaluation_criteria_interview_evaluation_criteria_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_evaluation_criteria_id");
 
 -- Indexes for template_evaluation_criteria
 CREATE INDEX idx_template_evaluation_criteria_template_id ON "public"."template_evaluation_criteria" ("template_id");

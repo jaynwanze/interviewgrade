@@ -480,6 +480,12 @@ ADD CONSTRAINT "interview_template_template_template_id_fkey" FOREIGN KEY ("temp
 ALTER TABLE ONLY "public"."interview_template_interview_evaluation_criteria"
 ADD CONSTRAINT "interview_template_interview_evaluation_criteria_interview_template_id_fkey" FOREIGN KEY ("interview_template_id") REFERENCES "interview_templates"("id") ON DELETE CASCADE;
 --
+-- Name: interview_template_evaluation_criteria interview_template_evaluation_criteria_interview_evaluation_criteria_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."interview_template_interview_evaluation_criteria"
+ADD CONSTRAINT "interview_template_interview_evaluation_criteria_interview_evaluation_criteria_id_fkey" FOREIGN KEY ("interview_evaluation_criteria_id") REFERENCES "interview_evaluation_criteria"("id") ON DELETE CASCADE;
+--
 -- Name: evaluation_criteria evaluation_criteria_interview_evaluation_criteria_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 

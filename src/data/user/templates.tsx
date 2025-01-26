@@ -34,7 +34,7 @@ export const getInterviewsTemplatesByCategoryAndMode = async (
   return data;
 };
 
-export const getPracticeTemplateEvaluationCriteriasJsonFormat = async (
+export const getPracticeTemplateEvaluationsByTemplate = async (
   templateId: string,
 ): Promise<EvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -45,6 +45,8 @@ export const getPracticeTemplateEvaluationCriteriasJsonFormat = async (
       `
     evaluation_criteria (
       id,
+      user_id,
+      interview_evaluation_criteria_id,
       name,
       description,
       rubrics,
@@ -53,7 +55,8 @@ export const getPracticeTemplateEvaluationCriteriasJsonFormat = async (
     )
     `,
     )
-    .eq('template_id', templateId);
+    .eq('template_id', templateId)
+    .limit(3);
 
   if (error) {
     throw error;
@@ -79,17 +82,18 @@ export const getPracticeTemplateEvaluationCriteriasJsonFormat = async (
     }));
 };
 
-export const getInterviewTemplateEvaluationCriteriasJsonFormat = async (
+export const getInterviewEvaluationCriteriasByTemplate = async (
   interviewTemplateId: string,
 ): Promise<EvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   const { data, error } = await supabase
-    .from('interview_template_evaluation_criteria')
+    .from('interview_template_interview_evaluation_criteria')
     .select(
       `
-    evaluation_criteria (
+    interview_evaluation_criteria (
       id,
+      user_id,
       name,
       description,
       rubrics,
@@ -110,6 +114,53 @@ export const getInterviewTemplateEvaluationCriteriasJsonFormat = async (
 
   // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
   return data
+    .filter((item) => item.interview_evaluation_criteria !== null)
+    .map((item) => ({
+      id: item.interview_evaluation_criteria?.id ?? '',
+      name: item.interview_evaluation_criteria?.name ?? '',
+      description: item.interview_evaluation_criteria?.description ?? '',
+      rubrics:
+        typeof item.interview_evaluation_criteria?.rubrics === 'string'
+          ? JSON.parse(item.interview_evaluation_criteria.rubrics)
+          : (item.interview_evaluation_criteria?.rubrics ?? []),
+      is_system_defined:
+        item.interview_evaluation_criteria?.is_system_defined ?? false,
+      created_at: item.interview_evaluation_criteria?.created_at ?? '',
+    }));
+};
+
+export const getPracticeEvaluationCriteriasByInterviewEvalCriteria = async (
+  interviewEvalCriteriaId: string,
+): Promise<EvaluationCriteriaType[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data, error } = await supabase
+    .from('template_evaluation_criteria')
+    .select(
+      `
+      evaluation_criteria (
+        id,
+        user_id,
+        interview_evaluation_criteria_id,
+        name,
+        description,
+        rubrics,
+        is_system_defined,
+        created_at
+      )
+    `,
+    )
+    .eq('evaluation_criteria_id', interviewEvalCriteriaId);
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  return data
     .filter((item) => item.evaluation_criteria !== null)
     .map((item) => ({
       id: item.evaluation_criteria?.id ?? '',
@@ -124,29 +175,9 @@ export const getInterviewTemplateEvaluationCriteriasJsonFormat = async (
     }));
 };
 
-export const getTemplateQuestions = async (
-  templateId: string,
-  questionCount: number,
-): Promise<Table<'questions'>[]> => {
-  const supabase = createSupabaseUserServerComponentClient();
-
-  const { data, error } = await supabase
-    .from('questions')
-    .select('*')
-    .eq('template_id', templateId)
-    .limit(questionCount);
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-};
-
-export const getPracticeTemplateQuestionByEvaluationCriteria = async (
+export const getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria = async (
   templateId: string,
   evaluationCriteriaId: string,
-  questionCount: number,
 ): Promise<Table<'questions'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
@@ -162,63 +193,42 @@ export const getPracticeTemplateQuestionByEvaluationCriteria = async (
   return data;
 };
 
-export const getPracticeTemplateQuestions = async (
-  templateId: string,
-  questionCount: number,
+export const getPracticeTemplateQuestionByInterviewEvaluationCriteria = async (
+  interviewEvaluationCriteriaId: string,
 ): Promise<Table<'questions'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
-  const { data: allQuestions, error: allQuestionsError } = await supabase
-    .from('questions')
-    .select('*')
-    .eq('template_id', templateId);
-
-  if (allQuestionsError) {
-    throw allQuestionsError;
-  }
-
-  if (!allQuestions) {
-    return [];
-  }
-  // Shuffle the questions array
-  const shuffledQuestions = allQuestions.sort(() => 0.5 - Math.random());
-  // Select the first `questionCount` questions
-  const data = shuffledQuestions.slice(0, questionCount);
-
-  return data;
-};
-
-export const getInterviewTemplatePracticeTemplates = async (
-  interviewTemplateId: string,
-): Promise<Table<'templates'>[]> => {
-  const supabase = createSupabaseUserServerComponentClient();
-
+  // Fetch evaluation criteria along with their associated questions
   const { data, error } = await supabase
-    .from('templates')
+    .from('evaluation_criteria')
     .select(
-    `
-      id,
-      user_id,
-      category,
-      title,
-      description,
-      difficulty,
-      question_count,
-      duration,
-      skill,
-      role,
-      company,
-      is_company_specific,
-      is_industry_specific,
-      created_at,
-      is_general,
-      is_system_defined
-    `
+      `
+      questions (
+        id,
+        template_id,
+        evaluation_criteria_id,
+        type,
+        text,
+        sample_answer
+      )
+    `,
     )
-    .eq('interview_template_id', interviewTemplateId);
+    .eq('interview_evaluation_criteria_id', interviewEvaluationCriteriaId);
+
   if (error) {
+    console.error('Error fetching evaluation criteria and questions:', error);
     throw error;
   }
 
-  return data;
+  if (!data || data.length === 0) {
+    console.warn('No evaluation criteria found for the provided ID.');
+    return [];
+  }
+
+  // Aggregate all questions from the fetched evaluation criterias
+  const allQuestions: Table<'questions'>[] = data.flatMap(
+    (item) => item.questions ?? [],
+  );
+
+  return allQuestions;
 };

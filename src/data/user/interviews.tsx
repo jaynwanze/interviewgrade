@@ -1,24 +1,28 @@
 'use server';
 import {
-  getPracticeTemplateEvaluationCriteriasJsonFormat,
-  getInterviewTemplateEvaluationCriteriasJsonFormat,
-  getPracticeTemplateQuestionByEvaluationCriteria,
-  getInterviewTemplatePracticeTemplates,
+  getInterviewEvaluationCriteriasByTemplate,
+  getPracticeEvaluationCriteriasByInterviewEvalCriteria,
+  getPracticeTemplateEvaluationsByTemplate,
+  getPracticeTemplateQuestionByInterviewEvaluationCriteria,
+  getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
   AvgEvaluationScores,
+  EvaluationCriteriaType,
   FeedbackData,
   InterviewAnalytics,
   InterviewComplete,
   InterviewModeType,
+  InterviewQuestion,
   InterviewTemplate,
   InterviewUpdate,
   PracticeInterviewTemplate,
   SAPayload,
   Table,
 } from '@/types';
+import { getRandomElements } from '@/utils/getRandomElements';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
@@ -30,10 +34,8 @@ export const createPracticeSession = async (
   const user = await serverGetLoggedInUser();
   const candidateProfile = await getCandidateUserProfile(user.id);
   const candidateProfileId = candidateProfile.id;
-  const templateEvaluationCriterias =
-    await getPracticeTemplateEvaluationCriteriasJsonFormat(
-      practiceTemplate.id,
-    );
+  const practiceTemplateEvaluationCriterias =
+    await getPracticeTemplateEvaluationsByTemplate(practiceTemplate.id);
 
   const { data, error } = await supabase
     .from('interviews')
@@ -48,7 +50,7 @@ export const createPracticeSession = async (
       difficulty: practiceTemplate.difficulty,
       question_count: practiceTemplate.question_count,
       duration: practiceTemplate.duration,
-      evaluation_criterias: templateEvaluationCriterias,
+      evaluation_criterias: practiceTemplateEvaluationCriterias,
       start_time: moment().toISOString(),
       status: 'not_started',
       current_question_index: 0,
@@ -64,7 +66,11 @@ export const createPracticeSession = async (
     throw new Error('Failed to insert interview data');
   }
 
-  await createPracticeModeQuestions(data[0].id, practiceTemplate);
+  await createPracticeModeQuestions(
+    data[0].id,
+    practiceTemplate,
+    practiceTemplateEvaluationCriterias,
+  );
   return data[0];
 };
 
@@ -77,9 +83,7 @@ export const createInterviewSession = async (
   const candidateProfile = await getCandidateUserProfile(user.id);
   const candidateProfileId = candidateProfile.id;
   const templateEvaluationCriterias =
-    await getInterviewTemplateEvaluationCriteriasJsonFormat(
-      interviewTemplate.id,
-    );
+    await getInterviewEvaluationCriteriasByTemplate(interviewTemplate.id);
 
   const { data, error } = await supabase
     .from('interviews')
@@ -108,168 +112,200 @@ export const createInterviewSession = async (
     throw new Error('Failed to insert interview data');
   }
 
-  await createInterviewModeQuestions(data[0].id, interviewTemplate);
+  await createInterviewModeQuestions(data[0].id, templateEvaluationCriterias);
   return data[0];
 };
 
 export const createPracticeModeQuestions = async (
   interviewId: string,
-  interviewTemplate: InterviewTemplate,
+  practiceTemplate: PracticeInterviewTemplate,
+  practiceTemplateEvaluationCriterias: EvaluationCriteriaType[],
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
-  const templateEvaluationCriterias =
-    await getPracticeTemplateEvaluationCriteriasJsonFormat(
-      interviewTemplate.id,
-    );
-
   if (
-    !templateEvaluationCriterias ||
-    templateEvaluationCriterias.length === 0
+    !practiceTemplateEvaluationCriterias ||
+    practiceTemplateEvaluationCriterias.length === 0
   ) {
-    throw new Error('Failed to fetch template evaluation criterias');
+    throw new Error('Failed to fetch practice template evaluation criterias');
   }
 
-  let lastInsertData: Table<'interview_questions'> | null = null;
+  const questionsToInsert: Table<'interview_questions'>[] = [];
 
-  for (const criteria of templateEvaluationCriterias) {
-    if (!criteria.rubrics.length || criteria.rubrics.length === 0) {
-      throw new Error('Rubrics not found for evaluation criteria');
+  // Fetch practice evaluation criterias linked to this interview evaluation criteria
+  for (const criteria of practiceTemplateEvaluationCriterias) {
+    if (!criteria.rubrics || criteria.rubrics.length === 0) {
+      console.warn(`Rubrics not found for evaluation criteria ${criteria.id}`);
+      continue;
     }
-    const tempQuestions = await getPracticeTemplateQuestionByEvaluationCriteria(
-      interviewTemplate.id,
-      criteria.id,
-      interviewTemplate.question_count,
-    );
+
+    const tempQuestions =
+      await getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria(
+        practiceTemplate.id,
+        criteria.id,
+      );
 
     if (!tempQuestions || tempQuestions.length === 0) {
-      throw new Error(
-        'Failed to fetch template questions or no questions found',
-      );
+      console.warn(`No questions found for evaluation criteria ${criteria.id}`);
+      continue;
     }
 
-    //randmly insert questions
-    const randomQuestion =
-      tempQuestions[Math.floor(Math.random() * tempQuestions.length)];
+    const selectedQuestions = getRandomElements(tempQuestions, 1);
 
-    if (!randomQuestion) {
-      throw new Error('Failed to fetch random question');
-    }
+    selectedQuestions.forEach((randomQuestion) => {
+      if (!randomQuestion) {
+        console.warn('Random question selection failed.');
+        return;
+      }
 
-    const { data, error } = await supabase
-      .from('interview_questions')
-      .insert({
+      const interviewQuestion: InterviewQuestion = {
+        id: crypto.randomUUID(),
         interview_id: interviewId,
         type: randomQuestion.type,
         text: randomQuestion.text,
         evaluation_criteria: criteria,
         sample_answer: randomQuestion.sample_answer,
-      })
-      .select('*');
+      };
 
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error('Failed to insert interview question data');
-    }
-
-    lastInsertData = data ? data[0] : null;
+      questionsToInsert.push(interviewQuestion);
+    });
   }
 
-  if (!lastInsertData) {
+  if (questionsToInsert.length === 0) {
     return {
       status: 'error',
-      message: 'No interview questions were inserted',
+      message: 'No interview questions were prepared for insertion.',
     };
+  }
+
+  const { data, error } = await supabase
+    .from('interview_questions')
+    .insert(questionsToInsert)
+    .select('*');
+
+  if (error) {
+    throw error;
   }
 
   return {
     status: 'success',
-    data: lastInsertData,
+    data: data[0], // All inserted questions
   };
 };
 export const createInterviewModeQuestions = async (
   interviewId: string,
-  interviewTemplate: InterviewTemplate,
+  interviewTemplateEvaluationCriterias: EvaluationCriteriaType[],
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
-  const templateEvaluationCriterias =
-    await getInterviewTemplateEvaluationCriteriasJsonFormat(
-      interviewTemplate.id,
-    );
-
-  const practiceTemplates = await getInterviewTemplatePracticeTemplates(
-    interviewTemplate.id,
-  );
-
   if (
-    !templateEvaluationCriterias ||
-    templateEvaluationCriterias.length === 0
+    !interviewTemplateEvaluationCriterias ||
+    interviewTemplateEvaluationCriterias.length === 0
   ) {
-    throw new Error('Failed to fetch template evaluation criterias');
+    throw new Error('Failed to fetch interview template evaluation criterias');
   }
 
-  let lastInsertData: Table<'interview_questions'> | null = null;
+  const questionsToInsert: InterviewQuestion[] = [];
 
-  for (const criteria of templateEvaluationCriterias) {
-    if (!criteria.rubrics.length || criteria.rubrics.length === 0) {
-      throw new Error('Rubrics not found for evaluation criteria');
+  for (const interviewTemplateCriteria of interviewTemplateEvaluationCriterias) {
+    if (
+      !interviewTemplateCriteria.rubrics ||
+      interviewTemplateCriteria.rubrics.length === 0
+    ) {
+      console.warn(
+        `Rubrics not found for evaluation criteria ${interviewTemplateCriteria.id}`,
+      );
+      continue;
     }
-    const tempQuestions = await getInterviewTemplateQuestionByEvaluationCriteria(
-      interviewTemplate.id,
-      criteria.id,
-      interviewTemplate.question_count,
+
+    // Fetch practice evaluation criterias linked to this interview evaluation criteria
+    const practiceEvaluationCriterias =
+      await getPracticeEvaluationCriteriasByInterviewEvalCriteria(
+        interviewTemplateCriteria.id,
+      );
+
+    if (
+      !practiceEvaluationCriterias ||
+      practiceEvaluationCriterias.length === 0
+    ) {
+      console.warn(
+        `No practice evaluation criterias linked to interview evaluation criteria ${interviewTemplateCriteria.id}`,
+      );
+      continue;
+    }
+    // Select 4 random practice evaluation criterias
+    const selectedPracticeCriterias = getRandomElements(
+      practiceEvaluationCriterias,
+      4,
     );
 
-    if (!tempQuestions || tempQuestions.length === 0) {
-      throw new Error(
-        'Failed to fetch template questions or no questions found',
-      );
+    for (const practiceCriteria of selectedPracticeCriterias) {
+      if (!practiceCriteria.rubrics || practiceCriteria.rubrics.length === 0) {
+        console.warn(
+          `Rubrics not found for practice evaluation criteria ${practiceCriteria.id}`,
+        );
+        continue;
+      }
+
+      if (!practiceCriteria.interview_evaluation_criteria_id) {
+        console.warn(
+          `Interview evaluation criteria ID not found for practice evaluation criteria ${practiceCriteria.id}`,
+        );
+        continue;
+      }
+      const tempQuestions =
+        await getPracticeTemplateQuestionByInterviewEvaluationCriteria(
+          practiceCriteria.interview_evaluation_criteria_id,
+        );
+
+      if (!tempQuestions || tempQuestions.length === 0) {
+        console.warn(
+          `No questions found for practice evaluation criteria ${practiceCriteria.id}`,
+        );
+        continue;
+      }
+
+      const selectedQuestions = getRandomElements(tempQuestions, 2);
+
+      selectedQuestions.forEach((randomQuestion) => {
+        if (!randomQuestion) {
+          console.warn('Random question selection failed.');
+          return;
+        }
+
+        const interviewQuestion: InterviewQuestion = {
+          id: crypto.randomUUID(),
+          interview_id: interviewId,
+          type: randomQuestion.type,
+          text: randomQuestion.text,
+          evaluation_criteria: interviewTemplateCriteria,
+          sample_answer: randomQuestion.sample_answer,
+        };
+
+        questionsToInsert.push(interviewQuestion);
+      });
     }
-
-    //randmly insert questions
-    const randomQuestion =
-      tempQuestions[Math.floor(Math.random() * tempQuestions.length)];
-
-    if (!randomQuestion) {
-      throw new Error('Failed to fetch random question');
-    }
-
-    const { data, error } = await supabase
-      .from('interview_questions')
-      .insert({
-        interview_id: interviewId,
-        type: randomQuestion.type,
-        text: randomQuestion.text,
-        evaluation_criteria: criteria,
-        sample_answer: randomQuestion.sample_answer,
-      })
-      .select('*');
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
-      throw new Error('Failed to insert interview question data');
-    }
-
-    lastInsertData = data ? data[0] : null;
   }
 
-  if (!lastInsertData) {
+  if (questionsToInsert.length === 0) {
     return {
       status: 'error',
-      message: 'No interview questions were inserted',
+      message: 'No interview questions were prepared for insertion.',
     };
+  }
+
+  const { data, error } = await supabase
+    .from('interview_questions')
+    .insert(questionsToInsert)
+    .select('*');
+
+  if (error) {
+    throw error;
   }
 
   return {
     status: 'success',
-    data: lastInsertData,
+    data: data[0],
   };
 };
 

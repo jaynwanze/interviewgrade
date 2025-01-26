@@ -404,7 +404,7 @@ export type Database = {
           },
         ]
       }
-      
+
       evaluation_criteria: {
         Row: {
           id: string
@@ -463,7 +463,7 @@ export type Database = {
           created_at: string
         }
         Insert: {
-          user_id: string
+          user_id?: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]

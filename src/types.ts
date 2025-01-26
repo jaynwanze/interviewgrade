@@ -82,6 +82,17 @@ export type specificFeedbackType = {
 
 export type EvaluationCriteriaType = {
   id: string;
+  user_id?: string;
+  interview_evaluation_criteria_id?: string;
+  name: string;
+  description: string;
+  rubrics: EvaluationRubricType[];
+  is_system_defined: boolean;
+  created_at: string;
+};
+export type InterviewEvaluationCriteriaType = {
+  id: string;
+  user_id?: string;
   name: string;
   description: string;
   rubrics: EvaluationRubricType[];

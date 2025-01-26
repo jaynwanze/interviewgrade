@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     SpeechRecognition: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     webkitSpeechRecognition: any; // For Safari
   }
 }
 
 export const useSpeechRecognition = () => {
-  const recognition = useRef<SpeechRecognition | null>(null);
+  const recognition = useRef<null | typeof window.SpeechRecognition>(null);
   const [finalTranscript, setFinalTranscript] = useState<string>('');
 
   useEffect(() => {

@@ -24,6 +24,7 @@ export const AIQuestionSpeaker = ({
   questionsLength: number;
 }) => {
   const speechRef = useRef<SpeechSynthesis | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
 

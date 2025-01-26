@@ -25,6 +25,7 @@ interface Column {
   key: string
   label: string
   className?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (value: any, row: any) => React.ReactNode
 }
 
@@ -32,6 +33,7 @@ interface ListTableProps {
   title: string
   description: string
   columns: Column[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[]
   viewAllLink?: string
 }

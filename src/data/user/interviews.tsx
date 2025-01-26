@@ -1,7 +1,9 @@
 'use server';
 import {
-  getTemplateEvaluationCriteriasJsonFormat,
-  getTemplateQuestionByEvaluationCriteria,
+  getPracticeTemplateEvaluationCriteriasJsonFormat,
+  getInterviewTemplateEvaluationCriteriasJsonFormat,
+  getPracticeTemplateQuestionByEvaluationCriteria,
+  getInterviewTemplatePracticeTemplates,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
@@ -13,13 +15,60 @@ import type {
   InterviewModeType,
   InterviewTemplate,
   InterviewUpdate,
+  PracticeInterviewTemplate,
   SAPayload,
   Table,
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
-export const createInterview = async (
+export const createPracticeSession = async (
+  practiceTemplate: PracticeInterviewTemplate,
+  interviewMode: InterviewModeType,
+): Promise<Table<'interviews'>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const user = await serverGetLoggedInUser();
+  const candidateProfile = await getCandidateUserProfile(user.id);
+  const candidateProfileId = candidateProfile.id;
+  const templateEvaluationCriterias =
+    await getPracticeTemplateEvaluationCriteriasJsonFormat(
+      practiceTemplate.id,
+    );
+
+  const { data, error } = await supabase
+    .from('interviews')
+    .insert({
+      candidate_id: candidateProfileId,
+      template_id: practiceTemplate.id,
+      title: practiceTemplate.title,
+      description: practiceTemplate.description,
+      mode: interviewMode,
+      role: practiceTemplate.role,
+      skill: practiceTemplate.skill,
+      difficulty: practiceTemplate.difficulty,
+      question_count: practiceTemplate.question_count,
+      duration: practiceTemplate.duration,
+      evaluation_criterias: templateEvaluationCriterias,
+      start_time: moment().toISOString(),
+      status: 'not_started',
+      current_question_index: 0,
+      is_general: practiceTemplate.is_general,
+      is_system_defined: practiceTemplate.is_system_defined,
+    })
+    .select('*');
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error('Failed to insert interview data');
+  }
+
+  await createPracticeModeQuestions(data[0].id, practiceTemplate);
+  return data[0];
+};
+
+export const createInterviewSession = async (
   interviewTemplate: InterviewTemplate,
   interviewMode: InterviewModeType,
 ): Promise<Table<'interviews'>> => {
@@ -28,19 +77,18 @@ export const createInterview = async (
   const candidateProfile = await getCandidateUserProfile(user.id);
   const candidateProfileId = candidateProfile.id;
   const templateEvaluationCriterias =
-    await getTemplateEvaluationCriteriasJsonFormat(interviewTemplate.id);
+    await getInterviewTemplateEvaluationCriteriasJsonFormat(
+      interviewTemplate.id,
+    );
 
-  //maybe add in description
   const { data, error } = await supabase
     .from('interviews')
     .insert({
-      template_id: interviewTemplate.id,
       candidate_id: candidateProfileId,
+      interview_template_id: interviewTemplate.id,
       title: interviewTemplate.title,
       description: interviewTemplate.description,
       mode: interviewMode,
-      role: interviewTemplate.role,
-      skill: interviewTemplate.skill,
       difficulty: interviewTemplate.difficulty,
       question_count: interviewTemplate.question_count,
       duration: interviewTemplate.duration,
@@ -60,20 +108,20 @@ export const createInterview = async (
     throw new Error('Failed to insert interview data');
   }
 
-  await createInterviewQuestions(data[0].id, interviewTemplate, interviewMode);
-
+  await createInterviewModeQuestions(data[0].id, interviewTemplate);
   return data[0];
 };
 
-export const createInterviewQuestions = async (
+export const createPracticeModeQuestions = async (
   interviewId: string,
   interviewTemplate: InterviewTemplate,
-  interviewMode: InterviewModeType,
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   const templateEvaluationCriterias =
-    await getTemplateEvaluationCriteriasJsonFormat(interviewTemplate.id);
+    await getPracticeTemplateEvaluationCriteriasJsonFormat(
+      interviewTemplate.id,
+    );
 
   if (
     !templateEvaluationCriterias ||
@@ -88,7 +136,89 @@ export const createInterviewQuestions = async (
     if (!criteria.rubrics.length || criteria.rubrics.length === 0) {
       throw new Error('Rubrics not found for evaluation criteria');
     }
-    const tempQuestions = await getTemplateQuestionByEvaluationCriteria(
+    const tempQuestions = await getPracticeTemplateQuestionByEvaluationCriteria(
+      interviewTemplate.id,
+      criteria.id,
+      interviewTemplate.question_count,
+    );
+
+    if (!tempQuestions || tempQuestions.length === 0) {
+      throw new Error(
+        'Failed to fetch template questions or no questions found',
+      );
+    }
+
+    //randmly insert questions
+    const randomQuestion =
+      tempQuestions[Math.floor(Math.random() * tempQuestions.length)];
+
+    if (!randomQuestion) {
+      throw new Error('Failed to fetch random question');
+    }
+
+    const { data, error } = await supabase
+      .from('interview_questions')
+      .insert({
+        interview_id: interviewId,
+        type: randomQuestion.type,
+        text: randomQuestion.text,
+        evaluation_criteria: criteria,
+        sample_answer: randomQuestion.sample_answer,
+      })
+      .select('*');
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('Failed to insert interview question data');
+    }
+
+    lastInsertData = data ? data[0] : null;
+  }
+
+  if (!lastInsertData) {
+    return {
+      status: 'error',
+      message: 'No interview questions were inserted',
+    };
+  }
+
+  return {
+    status: 'success',
+    data: lastInsertData,
+  };
+};
+export const createInterviewModeQuestions = async (
+  interviewId: string,
+  interviewTemplate: InterviewTemplate,
+): Promise<SAPayload<Table<'interview_questions'>>> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const templateEvaluationCriterias =
+    await getInterviewTemplateEvaluationCriteriasJsonFormat(
+      interviewTemplate.id,
+    );
+
+  const practiceTemplates = await getInterviewTemplatePracticeTemplates(
+    interviewTemplate.id,
+  );
+
+  if (
+    !templateEvaluationCriterias ||
+    templateEvaluationCriterias.length === 0
+  ) {
+    throw new Error('Failed to fetch template evaluation criterias');
+  }
+
+  let lastInsertData: Table<'interview_questions'> | null = null;
+
+  for (const criteria of templateEvaluationCriterias) {
+    if (!criteria.rubrics.length || criteria.rubrics.length === 0) {
+      throw new Error('Rubrics not found for evaluation criteria');
+    }
+    const tempQuestions = await getInterviewTemplateQuestionByEvaluationCriteria(
       interviewTemplate.id,
       criteria.id,
       interviewTemplate.question_count,

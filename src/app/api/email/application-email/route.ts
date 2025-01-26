@@ -1,5 +1,5 @@
 import { resend, resendFrom } from '@/utils/resend';
-import ApplicationEmail from 'emails/application-email';
+// import ApplicationEmail from 'emails/application-email';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       from: resendFrom,
       to: [recipientEmail], // Updated to use recipientEmail
       subject: 'Application Link',
-      react: ApplicationEmail({ applicationUrl, applicantName }),
+      // react: ApplicationEmail({ applicationUrl, applicantName }),
       text: `Hello ${applicantName}, please visit ${applicationUrl} to complete your application.`,
     });
 

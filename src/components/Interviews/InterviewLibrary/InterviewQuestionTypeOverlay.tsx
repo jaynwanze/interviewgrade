@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Button } from '../../ui/button';
 
 export const InterviewQuestionTypeOverlay = ({ onSelect }) => {
-  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
-  const handleSelect = (type) => {
+  const handleSelect = (type: string) => {
     setSelectedTypes((prev) => {
       if (prev.includes(type)) {
         return prev.filter((t) => t !== type);

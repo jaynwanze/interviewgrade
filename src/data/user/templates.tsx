@@ -1,6 +1,10 @@
 'use server';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { EvaluationCriteriaType, InterviewEvaluationCriteriaType, Table } from '@/types';
+import type {
+  EvaluationCriteriaType,
+  InterviewEvaluationCriteriaType,
+  Table,
+} from '@/types';
 
 export const getInterviewsTemplatesByCategory = async (
   category: string,
@@ -34,7 +38,7 @@ export const getInterviewsTemplatesByCategoryAndMode = async (
   return data;
 };
 
-export const getPracticeTemplateEvaluationsByTemplate = async (
+export const getPracticeTemplateEvaluationsByTemplateId = async (
   templateId: string,
 ): Promise<EvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -194,9 +198,8 @@ export const getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria = async (
   return data;
 };
 
-export const getPracticeTemplateQuestionByTemplateIdAndInterviewEvalId = async (
+export const getPracticeTemplateQuestionByTemplateId = async (
   practiceTemplateId: string,
-  interviewEvaluationCriteriaId: string,
 ): Promise<Table<'questions'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
@@ -215,8 +218,7 @@ export const getPracticeTemplateQuestionByTemplateIdAndInterviewEvalId = async (
       )
     `,
     )
-    .eq('template_id', practiceTemplateId)
-    .eq('interview_evaluation_criteria_id', interviewEvaluationCriteriaId);
+    .eq('template_id', practiceTemplateId);
 
   if (error) {
     console.error('Error fetching evaluation criteria and questions:', error);

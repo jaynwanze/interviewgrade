@@ -1,9 +1,9 @@
 'use server';
 import {
   getInterviewEvaluationCriteriasByTemplate,
-  getPracticeTemplateEvaluationsByTemplate,
-  getPracticeTemplateQuestionByTemplateIdAndInterviewEvalId,
-  getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria
+  getPracticeTemplateEvaluationsByTemplateId,
+  getPracticeTemplateQuestionByTemplateId,
+  getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
@@ -35,7 +35,7 @@ export const createPracticeSession = async (
   const candidateProfile = await getCandidateUserProfile(user.id);
   const candidateProfileId = candidateProfile.id;
   const practiceTemplateEvaluationCriterias =
-    await getPracticeTemplateEvaluationsByTemplate(practiceTemplate.id);
+    await getPracticeTemplateEvaluationsByTemplateId(practiceTemplate.id);
 
   const { data, error } = await supabase
     .from('interviews')
@@ -226,7 +226,7 @@ export const createInterviewModeQuestions = async (
     }
   }
 
-  //insert into interview_questions interview evaluation criteria with linked practice question details
+  //For each selected evaluation criteria, fetch practice questions linked to this evaluation criteria
   for (const interviewTemplateCriteria of interviewTemplateEvaluationCriterias) {
     if (
       !interviewTemplateCriteria.rubrics ||
@@ -238,7 +238,7 @@ export const createInterviewModeQuestions = async (
       continue;
     }
 
-    //check if interview evaluation criteria has linked practice questions
+    //Check if interview evaluation criteria has linked practice questions
     if (!interviewTemplateCriteria.template_id) {
       console.warn(
         `Template ID not found for interview evaluation criteria ${interviewTemplateCriteria.id}`,
@@ -246,16 +246,15 @@ export const createInterviewModeQuestions = async (
       continue;
     }
 
-    // get practice questions linked to this interview evaluation criteria and pracetice template
-    const questions =
-      await getPracticeTemplateQuestionByTemplateIdAndInterviewEvalId(
-        interviewTemplateCriteria.template_id,
-        interviewTemplateCriteria.id,
-      );
+    //Get practice questions linked to this interview evaluation criteria and pracetice template
+    const questions = await getPracticeTemplateQuestionByTemplateId(
+      interviewTemplateCriteria.template_id,
+    );
 
-    //randomise 2 questions for each evaluation criteria
+    //Randomise 2 questions for each evaluation criteria
     const selectedQuestions = getRandomElements(questions, 2);
 
+    //For each selected question, create an interview question
     selectedQuestions.forEach((randomQuestion) => {
       if (!randomQuestion) {
         console.warn('Random question selection failed.');
@@ -271,6 +270,7 @@ export const createInterviewModeQuestions = async (
         sample_answer: randomQuestion.sample_answer,
       };
 
+      //Add the interview question to the list of questions to insert
       questionsToInsert.push(interviewQuestion);
     });
   }
@@ -282,6 +282,7 @@ export const createInterviewModeQuestions = async (
     };
   }
 
+  //Insert into interview_questions interview evaluation criteria with linked practice question details
   const { data, error } = await supabase
     .from('interview_questions')
     .insert(questionsToInsert)

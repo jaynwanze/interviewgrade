@@ -493,17 +493,14 @@ export type Database = {
         Row: {
           template_id: string
           evaluation_criteria_id: string
-          interview_evaluation_criteria_id: string
         }
         Insert: {
           template_id: string
           evaluation_criteria_id: string
-          interview_evaluation_criteria_id?: string
         }
         Update: {
           template_id?: string
           evaluation_criteria_id?: string
-          interview_evaluation_criteria_id?: string
         }
         Relationships: [
           {
@@ -518,13 +515,6 @@ export type Database = {
             columns: ["evaluation_criteria_id"]
             isManyToMany: true
             referencedRelation: "evaluation_criteria"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "template_evaluation_criteria_interview_evaluation_criteria_id_fkey"
-            columns: ["interview_evaluation_criteria_id"]
-            isOneToOne: true
-            referencedRelation: "interview_evaluation_criteria"
             referencedColumns: ["id"]
           },
         ]

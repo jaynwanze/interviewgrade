@@ -51,6 +51,7 @@ export const InterviewHistoryDetails = ({
       (question, index) => ({
         question: question.text,
         answer: answers[index].text,
+        mark: answers[index].mark,
         feedback: answers[index].feedback,
         evaluation_criteria_name: question.evaluation_criteria.name,
       }),

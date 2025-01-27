@@ -185,7 +185,7 @@ CREATE TABLE public.evaluation_criteria (
 CREATE TABLE public.interview_evaluation_criteria (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "user_id" "uuid",
-  "template_id" "uuid",
+  "template_id" "uuid" NOT NULL,
   "name" character varying,
   "rubrics" jsonb,
   "description" text,

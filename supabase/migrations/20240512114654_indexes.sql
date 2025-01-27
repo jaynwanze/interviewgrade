@@ -47,8 +47,8 @@ CREATE INDEX idx_evaluation_criteria_interview_evaluation_criteria_id ON "public
 CREATE INDEX idx_interview_evaluation_criteria_id ON "public"."interview_evaluation_criteria" ("id");
 
 -- Indexes for interview_template_interview_evaluation_criteria
-CREATE INDEX idx_interview_template_interview_evaluation_criteria_interview_template_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_template_id");
-CREATE INDEX idx_interview_template_interview_evaluation_criteria_interview_evaluation_criteria_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_evaluation_criteria_id");
+CREATE INDEX idx_interview_temp_interview_eval_criteria_template_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_template_id");
+CREATE INDEX idx_interview_temp_interview_eval_criteria_interview_evaluation_criteria_id ON "public"."interview_template_interview_evaluation_criteria" ("interview_evaluation_criteria_id");
 
 -- Indexes for template_evaluation_criteria
 CREATE INDEX idx_template_evaluation_criteria_template_id ON "public"."template_evaluation_criteria" ("template_id");

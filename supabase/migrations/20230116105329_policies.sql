@@ -319,7 +319,7 @@ DELETE TO "authenticated" USING (
 -- Name: interview_template_interview_evaluation_criteria Only users can view system defined and their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "users_can_view_system_defined_and_own_interview_template_interview_evaluation_criteria" ON "public"."interview_template_interview_evaluation_criteria" FOR
+CREATE POLICY "users_can_view_system_defined_and_own_interview_temp_interview_eval_criteria" ON "public"."interview_template_interview_evaluation_criteria" FOR
 SELECT TO "authenticated" USING (
     EXISTS (
         SELECT 1 FROM "public"."interview_templates"
@@ -327,12 +327,11 @@ SELECT TO "authenticated" USING (
           AND ("interview_templates"."user_id" = "auth"."uid"() OR "interview_templates"."is_system_defined" = TRUE)
     )
 );
-
 --
--- Name: interview_template_interview_evaluation_criteria Only users can insert their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: interview_template_interview_evaluation_criteria Only users can insert their own interview template interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "users_can_manage_own_interview_template_interview_evaluation_criteria_insert" ON "public"."interview_template_interview_evaluation_criteria" FOR
+CREATE POLICY "users_can_manage_own_interview_temp_interview_eval_criteria_insert" ON "public"."interview_template_interview_evaluation_criteria" FOR
 INSERT TO "authenticated" WITH CHECK (
     EXISTS (
         SELECT 1 FROM "public"."interview_templates"
@@ -341,10 +340,10 @@ INSERT TO "authenticated" WITH CHECK (
     )
 );
 --
--- Name: interview_template_interview_evaluation_criteria Only users can update their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: interview_template_interview_evaluation_criteria Only users can update their own interview template interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "users_can_manage_own_interview_template_interview_evaluation_criteria_update" ON "public"."interview_template_interview_evaluation_criteria" FOR
+CREATE POLICY "users_can_manage_own_interview_temp_interview_eval_criteria_update" ON "public"."interview_template_interview_evaluation_criteria" FOR
 UPDATE TO "authenticated" USING (
     EXISTS (
         SELECT 1 FROM "public"."interview_templates"
@@ -353,10 +352,10 @@ UPDATE TO "authenticated" USING (
     )
 );
 --
--- Name: interview_template_interview_evaluation_criteria Only users can delete their own interview template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: interview_template_interview_evaluation_criteria Only users can delete their own interview template interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "users_can_manage_own_interview_template_interview_evaluation_criteria_delete" ON "public"."interview_template_interview_evaluation_criteria" FOR
+CREATE POLICY "users_can_manage_own_interview_temp_interview_eval_criteria_delete" ON "public"."interview_template_interview_evaluation_criteria" FOR
 DELETE TO "authenticated" USING (
     EXISTS (
         SELECT 1 FROM "public"."interview_templates"

@@ -180,7 +180,6 @@ CREATE TABLE public.interview_template_template(
 CREATE TABLE public.evaluation_criteria (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "user_id" "uuid",
-  "interview_evaluation_criteria_id" "uuid",
   "name" character varying,
   "rubrics" jsonb,
   "description" text,
@@ -207,6 +206,7 @@ CREATE TABLE public.interview_evaluation_criteria (
 CREATE TABLE public.template_evaluation_criteria (
     "template_id" "uuid" NOT NULL,
     "evaluation_criteria_id" "uuid" NOT NULL
+    "interview_evaluation_criteria_id" "uuid",
 );
 --
 -- Name: interview_template_evaluation_criteria; Type: TABLE; Schema: public; Owner: postgres
@@ -332,11 +332,11 @@ ADD CONSTRAINT "interview_templates_pkey" PRIMARY KEY ("id");
 ALTER TABLE ONLY "public"."interview_template_template"
 ADD CONSTRAINT "interview_template_template_pkey" PRIMARY KEY ("interview_template_id", "template_id");
 --
--- Name: interview_template_evaluation_criteria interview_template_evaluation_criteria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: interview_template_interview_evaluation_criteria interview_template_evaluation_criteria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."interview_template_evaluation_criteria"
-ADD CONSTRAINT "interview_template_evaluation_criteria_pkey" PRIMARY KEY ("interview_template_id", "evaluation_criteria_id");
+ALTER TABLE ONLY "public"."interview_template_interview_evaluation_criteria"
+ADD CONSTRAINT "interview_template_interview_evaluation_criteria_pkey" PRIMARY KEY ("interview_template_id", "interview_evaluation_criteria_id");
 --
 -- Name: evaluation_criteria evaluation_criteria_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -486,11 +486,11 @@ ADD CONSTRAINT "interview_template_interview_evaluation_criteria_interview_templ
 ALTER TABLE ONLY "public"."interview_template_interview_evaluation_criteria"
 ADD CONSTRAINT "interview_template_interview_evaluation_criteria_interview_evaluation_criteria_id_fkey" FOREIGN KEY ("interview_evaluation_criteria_id") REFERENCES "interview_evaluation_criteria"("id") ON DELETE CASCADE;
 --
--- Name: evaluation_criteria evaluation_criteria_interview_evaluation_criteria_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: template_evaluation_criteria template_evaluation_criteria_interview_evaluation_criteria_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "public"."evaluation_criteria"
-ADD CONSTRAINT "evaluation_criteria_interview_evaluation_criteria_id_fkey" FOREIGN KEY ("interview_evaluation_criteria_id") REFERENCES "interview_evaluation_criteria"("id") ON DELETE CASCADE;
+ALTER TABLE ONLY "public"."template_evaluation_criteria"
+ADD CONSTRAINT "template_evaluation_criteria_interview_evaluation_criteria_id_fkey" FOREIGN KEY ("interview_evaluation_criteria_id") REFERENCES "interview_evaluation_criteria"("id") ON DELETE CASCADE;
 --
 -- Name: evaluation_criteria evaluation_criteria_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

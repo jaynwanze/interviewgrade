@@ -148,8 +148,8 @@ export type Database = {
           pricing_type: Database["public"]["Enums"]["pricing_type"]
           pricing_plan_interval: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count: number
-          trial_period_days: number
-          metadata: string
+          trial_period_days: number | null
+          metadata: JSON | null
 
         }
         Insert: {
@@ -165,7 +165,7 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          metadata: string
+          metadata: JSON | null
         }
         Update: {
           id?: string
@@ -181,7 +181,7 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          metadata?: string
+          metadata?: JSON | null
         }
       }
       tokens: {
@@ -230,7 +230,7 @@ export type Database = {
           ended_at: string
           cancel_at: string
           sidenote: string
-          metadata: string
+          metadata: JSON
           updated_at: string
         }
         Insert: {
@@ -244,7 +244,7 @@ export type Database = {
           ended_at: string
           cancel_at: string
           sidenote: string
-          metadata: string
+          metadata: JSON
           updated_at: string
         },
         Update: {
@@ -258,7 +258,7 @@ export type Database = {
           ended_at?: string
           cancel_at?: string
           sidenote?: string
-          metadata?: string
+          metadata?: JSON
           updated_at?: string
         },
         Relationships: [
@@ -820,7 +820,7 @@ export type Database = {
     }
     Enums: {
       user_types: "employer" | "candidate"
-      product_type: "subscription" | "token"
+      product_type: "token_bundle" | "subscription"
       product_status: "active" | "inactive"
       interview_status: "not_started" | "in_progress" | "completed"
       template_difficulty: "Easy" | "Medium" | "Hard"

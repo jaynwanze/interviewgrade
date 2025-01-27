@@ -562,7 +562,7 @@ ADD CONSTRAINT "user_profiles_user_type_check" CHECK ("user_type" = ANY (ARRAY['
 --
 
 ALTER TABLE ONLY "public"."products"
-ADD CONSTRAINT "products_product_type_check" CHECK ("product_type" = ANY (ARRAY['token_bundle'::product_type]));
+ADD CONSTRAINT "products_product_type_check" CHECK ("product_type" = ANY (ARRAY['token_bundle'::product_type , 'subscription'::product_type]));
 --
 -- Name: interviews interviews_status_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --

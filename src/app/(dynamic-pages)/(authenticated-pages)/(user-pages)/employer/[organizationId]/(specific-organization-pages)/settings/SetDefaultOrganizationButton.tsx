@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { setDefaultOrganization } from '@/data/user/organizations';
+// import { setDefaultOrganization } from '@/data/user/organizations';
 import { useToastMutation } from '@/hooks/useToastMutation';
 
 export function SetDefaultOrganizationButton({
@@ -10,7 +10,8 @@ export function SetDefaultOrganizationButton({
 }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await setDefaultOrganization(organizationId);
+      // return await setDefaultOrganization(organizationId);
+      return 'TO:DO';
     },
     {
       loadingMessage: 'Setting as default organization...',

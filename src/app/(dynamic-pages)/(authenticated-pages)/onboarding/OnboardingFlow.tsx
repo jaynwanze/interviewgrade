@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createOrganization } from '@/data/user/organizations';
+// import { createOrganization } from '@/data/user/organizations';
 import {
   acceptTermsOfService,
   updateUserProfileNameAndAvatar,
@@ -275,11 +275,13 @@ type CreateOrganizationSchema = z.infer<typeof createOrganizationSchema>;
 
 export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   const { mutate: createOrg, isLoading: isCreatingOrg } = useSAToastMutation(
-    async (organizationTitle: string) => {
-      const orgId = await createOrganization(organizationTitle, {
-        isOnboardingFlow: true,
-      });
-      return orgId;
+    // async (organizationTitle: string) => {
+    async () => {
+      // const orgId = await createOrganization(organizationTitle, {
+      //   isOnboardingFlow: true,
+      // });
+      const orgId = 'TO:DO';
+      return { status: 'success', data: orgId };
     },
     {
       successMessage: 'Organization created!',
@@ -289,7 +291,8 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   );
 
   const onSubmit = (data: CreateOrganizationSchema) => {
-    createOrg(data.organizationTitle);
+    // createOrg(data.organizationTitle);
+    createOrg();
   };
 
   const { register, formState, handleSubmit } =

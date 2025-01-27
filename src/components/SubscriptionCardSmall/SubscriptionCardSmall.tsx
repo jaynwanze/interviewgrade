@@ -5,57 +5,12 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { getNormalizedOrganizationSubscription } from '@/data/user/organizations';
+// import { getNormalizedOrganizationSubscription } from '@/data/user/organizations';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import { NormalizedSubscription } from '@/types';
 import { formatNormalizedSubscription } from '@/utils/formatNormalizedSubscription';
 import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
-
-const activeSubscription: NormalizedSubscription = {
-  type: 'active',
-  product: {
-    id: 'prod_002',
-    product_type: 'subscription',
-    title: 'Standard Tier',
-    description: 'Access to standard features and more tokens.',
-    price: 9.99,
-    status: 'active',
-    amount: 20,
-  },
-  price: {
-    id: 'price_002',
-    product_id: 'prod_002',
-    active: true,
-    description: 'Standard Tier Subscription',
-    unit_amount: 999,
-    currency: 'usd',
-    type: 'recurring',
-    interval: 'month',
-    interval_count: 1,
-    trial_period_days: 14,
-    metadata: {
-      tier: 'standard',
-    },
-  },
-  subscription: {
-    id: 'sub_001',
-    status: 'active',
-    metadata: '{"user_id":"11111111-1111-1111-1111-111111111111","tier":"standard"}',
-    price_id: 'price_002',
-    quantity: 1,
-    cancel_at_period_end: false,
-    created: '2024-03-01T09:00:00Z',
-    current_period_start: '2024-03-01T09:00:00Z',
-    current_period_end: '2024-04-01T09:00:00Z',
-    ended_at: null,
-    cancel_at: null,
-    canceled_at: null,
-    trial_start: null,
-    trial_end: null,
-  },
-};
-
 
 export async function SubscriptionCardSmall({
   organizationId,
@@ -63,8 +18,10 @@ export async function SubscriptionCardSmall({
   organizationId: string;
 }) {
   const supabaseClient = createSupabaseUserServerComponentClient();
-  const normalizedSubscription = activeSubscription;
-    
+  const normalizedSubscription: NormalizedSubscription = {
+    type: 'no-subscription',
+  }; // Replace with actual data fetching logic
+
   const { title, sidenote, description } = formatNormalizedSubscription(
     normalizedSubscription,
   );

@@ -2,7 +2,7 @@
 
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
-import { getDefaultOrganization } from '@/data/user/organizations';
+// import { getDefaultOrganization } from '@/data/user/organizations';
 import { Check } from 'lucide-react';
 import { SetDefaultOrganizationButton } from './SetDefaultOrganizationButton';
 
@@ -27,7 +27,8 @@ export async function SetDefaultOrganizationPreference({
 }: {
   organizationId: string;
 }) {
-  const defaultOrganizationId = await getDefaultOrganization();
+  // const defaultOrganizationId = await getDefaultOrganization();
+  const defaultOrganizationId = 'TO:DO';
 
   const isDefaultOrganization = defaultOrganizationId === organizationId;
   if (isDefaultOrganization) {

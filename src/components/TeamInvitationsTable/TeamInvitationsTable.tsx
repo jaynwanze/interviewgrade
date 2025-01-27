@@ -32,11 +32,11 @@ export const TeamInvitationsTable = ({
 
                 <TableCell>{invitation.created_at}</TableCell>
                 <TableCell className="uppercase">
-                  <span>
+                  {/* <span>
                     {invitation.status === 'active'
                       ? 'pending'
                       : invitation.status}
-                  </span>
+                  </span> */}
                 </TableCell>
               </TableRow>
             );

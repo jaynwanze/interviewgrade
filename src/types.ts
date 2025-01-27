@@ -83,7 +83,6 @@ export type specificFeedbackType = {
 export type EvaluationCriteriaType = {
   id: string;
   user_id?: string;
-  interview_evaluation_criteria_id?: string;
   name: string;
   description: string;
   rubrics: EvaluationRubricType[];
@@ -93,6 +92,7 @@ export type EvaluationCriteriaType = {
 export type InterviewEvaluationCriteriaType = {
   id: string;
   user_id?: string;
+  template_id?: string;
   name: string;
   description: string;
   rubrics: EvaluationRubricType[];

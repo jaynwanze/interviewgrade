@@ -409,7 +409,6 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          interview_evaluation_criteria_id: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -419,7 +418,6 @@ export type Database = {
         Insert: {
           name: string
           user_id?: string
-          interview_evaluation_criteria_id?: string
           description: string
           rubrics: EvaluationRubricType[]
           is_system_defined: boolean
@@ -428,7 +426,6 @@ export type Database = {
         Update: {
           name?: string
           user_id?: string
-          interview_evaluation_criteria_id: string
           description?: string
           rubrics?: EvaluationRubricType[]
           is_system_defined?: boolean
@@ -442,13 +439,6 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "evaluation_criteria_interview_evaluation_criteria_id_fkey"
-            columns: ["interview_evaluation_criteria_id"]
-            isOneToOne: true
-            referencedRelation: "interview_evaluation_criteria"
-            referencedColumns: ["id"]
-          },
         ]
       }
 
@@ -456,6 +446,7 @@ export type Database = {
         Row: {
           id: string
           user_id: string
+          template_id?: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -464,6 +455,7 @@ export type Database = {
         }
         Insert: {
           user_id?: string
+          template_id?: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -472,6 +464,7 @@ export type Database = {
         }
         Update: {
           user_id?: string
+          template_id?: string
           name?: string
           description?: string
           rubrics?: EvaluationRubricType[]
@@ -486,6 +479,13 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "interview_evaluation_criteria_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: true
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
 
@@ -493,14 +493,17 @@ export type Database = {
         Row: {
           template_id: string
           evaluation_criteria_id: string
+          interview_evaluation_criteria_id: string
         }
         Insert: {
           template_id: string
           evaluation_criteria_id: string
+          interview_evaluation_criteria_id?: string
         }
         Update: {
           template_id?: string
           evaluation_criteria_id?: string
+          interview_evaluation_criteria_id?: string
         }
         Relationships: [
           {
@@ -515,6 +518,13 @@ export type Database = {
             columns: ["evaluation_criteria_id"]
             isManyToMany: true
             referencedRelation: "evaluation_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_evaluation_criteria_interview_evaluation_criteria_id_fkey"
+            columns: ["interview_evaluation_criteria_id"]
+            isOneToOne: true
+            referencedRelation: "interview_evaluation_criteria"
             referencedColumns: ["id"]
           },
         ]
@@ -659,37 +669,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-
-      interview_template_template: {
-        Row: {
-          interview_template_id: string
-          template_id: string
-        }
-        Insert: {
-          interview_template_id: string
-          template_id: string
-        }
-        Update: {
-          interview_template_id?: string
-          template_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "interview_template_template_interview_template_id_fkey"
-            columns: ["interview_template_id"]
-            isManyToMany: true
-            referencedRelation: "interview_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "interview_template_template_template_id_fkey"
-            columns: ["template_id"]
-            isManyToMany: true
-            referencedRelation: "templates"
             referencedColumns: ["id"]
           },
         ]

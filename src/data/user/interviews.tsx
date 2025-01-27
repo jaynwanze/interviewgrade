@@ -1,10 +1,9 @@
 'use server';
 import {
   getInterviewEvaluationCriteriasByTemplate,
-  getPracticeEvaluationCriteriasByInterviewEvalCriteria,
   getPracticeTemplateEvaluationsByTemplate,
-  getPracticeTemplateQuestionByInterviewEvaluationCriteria,
-  getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria,
+  getPracticeTemplateQuestionByTemplateIdAndInterviewEvalId,
+  getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
@@ -14,6 +13,7 @@ import type {
   FeedbackData,
   InterviewAnalytics,
   InterviewComplete,
+  InterviewEvaluationCriteriaType,
   InterviewModeType,
   InterviewQuestion,
   InterviewTemplate,
@@ -194,7 +194,7 @@ export const createPracticeModeQuestions = async (
 };
 export const createInterviewModeQuestions = async (
   interviewId: string,
-  interviewTemplateEvaluationCriterias: EvaluationCriteriaType[],
+  interviewTemplateEvaluationCriterias: InterviewEvaluationCriteriaType[],
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
@@ -207,6 +207,26 @@ export const createInterviewModeQuestions = async (
 
   const questionsToInsert: InterviewQuestion[] = [];
 
+  // Select 4 random practice evaluation criterias
+  const selectedInterviewTemplateEvaluationCriterias = getRandomElements(
+    interviewTemplateEvaluationCriterias,
+    4,
+  );
+
+  // fetch practice eval/questions linked to this interview evaluation criteria
+  for (const selectedInterviewTemplateEvalCriteria of selectedInterviewTemplateEvaluationCriterias) {
+    if (
+      !selectedInterviewTemplateEvalCriteria.rubrics ||
+      selectedInterviewTemplateEvalCriteria.rubrics.length === 0
+    ) {
+      console.warn(
+        `Rubrics not found for evaluation criteria ${selectedInterviewTemplateEvalCriteria.id}`,
+      );
+      continue;
+    }
+  }
+
+  //insert into interview_questions interview evaluation criteria with linked practice question details
   for (const interviewTemplateCriteria of interviewTemplateEvaluationCriterias) {
     if (
       !interviewTemplateCriteria.rubrics ||
@@ -218,73 +238,41 @@ export const createInterviewModeQuestions = async (
       continue;
     }
 
-    // Fetch practice evaluation criterias linked to this interview evaluation criteria
-    const practiceEvaluationCriterias =
-      await getPracticeEvaluationCriteriasByInterviewEvalCriteria(
-        interviewTemplateCriteria.id,
-      );
-
-    if (
-      !practiceEvaluationCriterias ||
-      practiceEvaluationCriterias.length === 0
-    ) {
+    //check if interview evaluation criteria has linked practice questions
+    if (!interviewTemplateCriteria.template_id) {
       console.warn(
-        `No practice evaluation criterias linked to interview evaluation criteria ${interviewTemplateCriteria.id}`,
+        `Template ID not found for interview evaluation criteria ${interviewTemplateCriteria.id}`,
       );
       continue;
     }
-    // Select 4 random practice evaluation criterias
-    const selectedPracticeCriterias = getRandomElements(
-      practiceEvaluationCriterias,
-      4,
-    );
 
-    for (const practiceCriteria of selectedPracticeCriterias) {
-      if (!practiceCriteria.rubrics || practiceCriteria.rubrics.length === 0) {
-        console.warn(
-          `Rubrics not found for practice evaluation criteria ${practiceCriteria.id}`,
-        );
-        continue;
+    // get practice questions linked to this interview evaluation criteria and pracetice template
+    const questions =
+      await getPracticeTemplateQuestionByTemplateIdAndInterviewEvalId(
+        interviewTemplateCriteria.template_id,
+        interviewTemplateCriteria.id,
+      );
+
+    //randomise 2 questions for each evaluation criteria
+    const selectedQuestions = getRandomElements(questions, 2);
+
+    selectedQuestions.forEach((randomQuestion) => {
+      if (!randomQuestion) {
+        console.warn('Random question selection failed.');
+        return;
       }
 
-      if (!practiceCriteria.interview_evaluation_criteria_id) {
-        console.warn(
-          `Interview evaluation criteria ID not found for practice evaluation criteria ${practiceCriteria.id}`,
-        );
-        continue;
-      }
-      const tempQuestions =
-        await getPracticeTemplateQuestionByInterviewEvaluationCriteria(
-          practiceCriteria.interview_evaluation_criteria_id,
-        );
+      const interviewQuestion: InterviewQuestion = {
+        id: crypto.randomUUID(),
+        interview_id: interviewId,
+        type: randomQuestion.type,
+        text: randomQuestion.text,
+        evaluation_criteria: interviewTemplateCriteria,
+        sample_answer: randomQuestion.sample_answer,
+      };
 
-      if (!tempQuestions || tempQuestions.length === 0) {
-        console.warn(
-          `No questions found for practice evaluation criteria ${practiceCriteria.id}`,
-        );
-        continue;
-      }
-
-      const selectedQuestions = getRandomElements(tempQuestions, 2);
-
-      selectedQuestions.forEach((randomQuestion) => {
-        if (!randomQuestion) {
-          console.warn('Random question selection failed.');
-          return;
-        }
-
-        const interviewQuestion: InterviewQuestion = {
-          id: crypto.randomUUID(),
-          interview_id: interviewId,
-          type: randomQuestion.type,
-          text: randomQuestion.text,
-          evaluation_criteria: interviewTemplateCriteria,
-          sample_answer: randomQuestion.sample_answer,
-        };
-
-        questionsToInsert.push(interviewQuestion);
-      });
-    }
+      questionsToInsert.push(interviewQuestion);
+    });
   }
 
   if (questionsToInsert.length === 0) {

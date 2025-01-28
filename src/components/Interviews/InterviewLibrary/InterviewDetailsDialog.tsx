@@ -8,20 +8,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { createPracticeSession, createInterviewSession} from '@/data/user/interviews';
+import {
+  createInterviewSession,
+  createPracticeSession,
+} from '@/data/user/interviews';
 import { useToastMutation } from '@/hooks/useToastMutation';
-import { InterviewModeType, PracticeInterviewTemplate } from '@/types';
+import {
+  InterviewModeType,
+  InterviewTemplate,
+  PracticeTemplate,
+} from '@/types';
 import { useRouter } from 'next/navigation';
 
 export default function InterviewDetailsDialog({
   isOpen,
   onClose,
-  interviewTemplate,
+  selectedTemplate,
   interviewMode,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  interviewTemplate: PracticeInterviewTemplate;
+  selectedTemplate: PracticeTemplate | InterviewTemplate;
   interviewMode: InterviewModeType;
 }) {
   const router = useRouter();
@@ -31,8 +38,14 @@ export default function InterviewDetailsDialog({
         // Create an interview session
         const interview =
           interviewMode === 'practice'
-            ? await createPracticeSession(interviewTemplate, interviewMode)
-            : await createInterviewSession(interviewTemplate, interviewMode);
+            ? await createPracticeSession(
+              selectedTemplate as PracticeTemplate,
+              interviewMode,
+            )
+            : await createInterviewSession(
+              selectedTemplate as InterviewTemplate,
+              interviewMode,
+            );
         router.push(`/candidate/interviews/session/${interview.id}`);
       } catch (error) {
         console.error('Error creating interview:', error);

@@ -12,7 +12,32 @@ import { InterviewQuestion } from '@/types';
 import Lottie from 'lottie-react';
 import talkingInteviewer from 'public/assets/animations/AnimationSpeakingRings.json';
 import { useEffect, useRef, useState } from 'react';
-import { Avatar3D } from '@/components/Avatar/Avatar3D'; 
+
+const colors = [
+  'bg-blue-100',
+  'bg-red-100',
+  'bg-green-100',
+  'bg-yellow-100',
+  'bg-purple-100',
+  'bg-pink-100',
+  'bg-indigo-100',
+];
+
+const darkColors = [
+  'bg-blue-700',
+  'bg-red-700',
+  'bg-green-700',
+  'bg-yellow-700',
+  'bg-purple-700',
+  'bg-pink-700',
+  'bg-indigo-700',
+];
+const getRandomColor = () => {
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+const getRandomDarkColor = () => {
+  return darkColors[Math.floor(Math.random() * darkColors.length)];
+};
 
 export const AIQuestionSpeaker = ({
   question,
@@ -27,6 +52,14 @@ export const AIQuestionSpeaker = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [randomColor, setRandomColor] = useState<string>(getRandomColor());
+  const [randomDarkColor, setRandomDarkColour] =
+    useState<string>(getRandomColor());
+
+  useEffect(() => {
+    setRandomColor(getRandomColor());
+    setRandomDarkColour(getRandomDarkColor());
+  }, [question]);
 
   useEffect(() => {
     const introText: string =
@@ -110,12 +143,17 @@ export const AIQuestionSpeaker = ({
                 <CardTitle>Question {currentIndex + 1}</CardTitle>
               </CardHeader>
               <CardContent>
-                <T.Subtle>{question.text}</T.Subtle>
+                <span
+                  className={`${randomColor} text-gray-800 text-s font-semibold px-2.5 py-0.5 rounded dark:${randomDarkColor} dark:text-gray-300`}
+                >
+                  {question.evaluation_criteria.name}
+                </span>
+                <T.Subtle className="mt-2">{question.text}</T.Subtle>
               </CardContent>
             </Card>
           </div>
         </CardContent>
-        <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+        <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
           Progress
         </span>
         <CardFooter>

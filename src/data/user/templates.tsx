@@ -21,7 +21,7 @@ export const getInterviewsTemplatesByCategory = async (
   return data;
 };
 
-export const getInterviewsTemplatesByCategoryAndMode = async (
+export const getPracticeTemplatesByCategoryAndMode = async (
   mode: string,
   category: string,
 ): Promise<Table<'templates'>[]> => {
@@ -31,6 +31,21 @@ export const getInterviewsTemplatesByCategoryAndMode = async (
     .select('*')
     .eq('category', category)
     .neq('skill', null)
+    .order('title', { ascending: true });
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+export const getInterviewTemplatesByCategory = async (
+  category: string,
+): Promise<Table<'interview_templates'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_templates')
+    .select('*')
+    .eq('category', category)
     .order('title', { ascending: true });
   if (error) {
     throw error;
@@ -112,7 +127,8 @@ export const getInterviewEvaluationCriteriasByTemplate = async (
     throw error;
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
+    console.warn('No interview evaluation criteria found for the provided ID.');
     return [];
   }
 
@@ -205,19 +221,8 @@ export const getPracticeTemplateQuestionByTemplateId = async (
 
   // Fetch evaluation criteria along with their associated questions
   const { data, error } = await supabase
-    .from('template_evaluation_criteria')
-    .select(
-      `
-      questions (
-        id,
-        template_id,
-        evaluation_criteria_id,
-        type,
-        text,
-        sample_answer
-      )
-    `,
-    )
+    .from('questions')
+    .select('*')
     .eq('template_id', practiceTemplateId);
 
   if (error) {
@@ -230,10 +235,5 @@ export const getPracticeTemplateQuestionByTemplateId = async (
     return [];
   }
 
-  // Aggregate all questions from the fetched evaluation criterias
-  const allQuestions: Table<'questions'>[] = data.flatMap(
-    (item) => item.questions ?? [],
-  );
-
-  return allQuestions;
+  return data;
 };

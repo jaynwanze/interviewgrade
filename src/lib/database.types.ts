@@ -445,7 +445,7 @@ export type Database = {
       interview_evaluation_criteria: {
         Row: {
           id: string
-          user_id: string
+          user_id?: string
           template_id?: string
           name: string
           description: string

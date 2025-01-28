@@ -18,7 +18,7 @@ import type {
   InterviewQuestion,
   InterviewTemplate,
   InterviewUpdate,
-  PracticeInterviewTemplate,
+  PracticeTemplate,
   SAPayload,
   Table,
 } from '@/types';
@@ -27,7 +27,7 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
 export const createPracticeSession = async (
-  practiceTemplate: PracticeInterviewTemplate,
+  practiceTemplate: PracticeTemplate,
   interviewMode: InterviewModeType,
 ): Promise<Table<'interviews'>> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -118,7 +118,7 @@ export const createInterviewSession = async (
 
 export const createPracticeModeQuestions = async (
   interviewId: string,
-  practiceTemplate: PracticeInterviewTemplate,
+  practiceTemplate: PracticeTemplate,
   practiceTemplateEvaluationCriterias: EvaluationCriteriaType[],
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();

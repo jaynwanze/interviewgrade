@@ -497,6 +497,46 @@ DELETE TO "authenticated" USING (
     )
 );
 --
+-- Name interview_evaluation_criteria Only users can view system defined and their own interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_view_system_defined_and_own_interview_evaluation_criteria" ON "public"."interview_evaluation_criteria" FOR
+SELECT TO "authenticated" USING (
+    EXISTS (
+          is_system_defined = TRUE AND "user_id" IS NULL
+    OR
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+    
+    )
+);
+--
+-- Name interview_evaluation_criteria Only users can insert their own interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_evaluation_criteria_insert" ON "public"."interview_evaluation_criteria" FOR
+INSERT TO "authenticated" WITH CHECK (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name interview_evaluation_criteria Only users can update their own interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_evaluation_criteria_update" ON "public"."interview_evaluation_criteria" FOR
+UPDATE TO "authenticated" USING (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+)
+WITH CHECK (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
+-- Name interview_evaluation_criteria Only users can delete their own interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "users_can_manage_own_interview_evaluation_criteria_delete" ON "public"."interview_evaluation_criteria" FOR
+DELETE TO "authenticated" USING (
+    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+);
+--
 -- Name: evaluation_criteria Only users can view system defined and their own evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 

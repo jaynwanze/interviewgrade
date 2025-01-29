@@ -246,14 +246,15 @@ export default function InterviewAnalyticsPage() {
                                   ? interview.template_id
                                   : interview.interview_template_id;
                               setSelectedTemplateId(currentTemplateId);
-                              fetchDetailedData(currentTemplateId, activeSwitch).then(
-                                (data) => {
-                                  if (data) {
-                                    setDetailed(data);
-                                  }
-                                  return;
-                                },
-                              );
+                              fetchDetailedData(
+                                currentTemplateId,
+                                activeSwitch,
+                              ).then((data) => {
+                                if (data) {
+                                  setDetailed(data);
+                                }
+                                return;
+                              });
                             } else {
                               setSelectedTemplateId(null);
                               setDetailed(null);

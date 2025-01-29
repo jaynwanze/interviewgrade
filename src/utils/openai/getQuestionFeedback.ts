@@ -95,15 +95,13 @@ Your evaluation should include:
 - **Advice for Next Question**: Offer advice for how to answer the next question effectively.
 
 ### Output Format
-Provide your evaluation in the following JSON format without any additional text.
+Provide your evaluation in the following JSON format only, without any additional text, explanations, Markdown formatting, or code blocks. Ensure that all sentences have proper spacing between words.
 
-\`\`\`json
 {
-  "mark": number,",
+  "mark": number,
   "summary": string,
-  "advice_for_next_question": string"
+  "advice_for_next_question": string
 }
-\`\`\`
 
 **Note:**
 - Ensure the JSON is properly formatted for parsing.
@@ -112,7 +110,7 @@ Provide your evaluation in the following JSON format without any additional text
 `;
 };
 /**
- * Calls the OpenAI API with retry logic and returns a readable stream
+ * Calls the OpenAI API with streaming and returns an async iterable
  */
 const callOpenAIStream = async (
   prompt: string,
@@ -126,53 +124,7 @@ const callOpenAIStream = async (
     stream: true,
   });
 
-  // for await (const chunk of await stream) {
-  //   process.stdout.write(chunk.choices[0]?.delta?.content || '');
-  // }
-  return response as unknown as AsyncIterable<OpenAI.Chat.ChatCompletionChunk>; // Return the async iterable response
-  // Assuming OpenAI SDK returns a readable stream
-};
-
-/**
- * Parses the streamed AI response incrementally
- */
-const parseStreamedResponse = (
-  stream: Readable,
-  // onData: (chunk: string) => void,
-  // onEnd: () => void,
-  // onError: (error: Error) => void,
-) => {
-  let buffer = '';
-
-  stream.on('data', (chunk) => {
-    const chunkStr = chunk.toString('utf-8');
-    buffer += chunkStr;
-
-    // Process each line (OpenAI streams data as lines)
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-
-    lines.forEach((line) => {
-      console.log(line);
-      if (line.trim() === '') return;
-      if (line.startsWith('data: ')) {
-        const data = line.replace(/^data: /, '');
-        if (data === '[DONE]') {
-          stream.destroy();
-          return;
-        }
-        try {
-          const parsed = JSON.parse(data);
-          const content = parsed.choices?.[0]?.delta?.content;
-          if (content) {
-            console.log(content);
-          }
-        } catch (err) {
-          console.error('Error parsing JSON:', err);
-        }
-      }
-    });
-  });
+  return response as unknown as AsyncIterable<OpenAI.Chat.ChatCompletionChunk>;
 };
 
 /**
@@ -184,18 +136,7 @@ export const getQuestionFeedback = async (
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
   interview_question_count: number,
-  // onFeedbackChunk: (chunk: string) => void, // Callback for each chunk
-  // onFeedbackComplete: () => void, // Callback when complete
-  // onFeedbackError: (error: Error) => void, // Callback on error
 ): Promise<AsyncIterable<OpenAI.Chat.ChatCompletionChunk>> => {
-  // Input Validation
-  if (!currentQuestion.text.trim()) {
-    throw new Error('Current question text cannot be empty.');
-  }
-
-  if (!currentAnswer.trim()) {
-    throw new Error('Current answer cannot be empty.');
-  }
 
   // Construct the prompt
   const prompt = constructQuestionFeedbackPrompt(
@@ -209,16 +150,4 @@ export const getQuestionFeedback = async (
   // Call OpenAI API with streaming
   const stream = await callOpenAIStream(prompt);
   return stream;
-  // if (!stream) {
-  //   console.log('Failed to initiate OpenAI stream.');
-  //   return;
-  // }
-
-  // // Parse the streamed response
-  // parseStreamedResponse(
-  //   stream,
-  //   // onFeedbackChunk,
-  //   // onFeedbackComplete,
-  //   // onFeedbackError,
-  // );
 };

@@ -37,7 +37,10 @@ export async function POST(req: NextRequest) {
         for await (const chunk of stream) {
           const data = chunk.choices?.[0]?.delta?.content;
           if (data) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
+            );
+            console.log('data:', data);
           }
         }
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
@@ -48,6 +51,9 @@ export async function POST(req: NextRequest) {
     return new NextResponse(readableStream, { headers });
   } catch (error) {
     console.error('Error fetching feedback:', error.message || error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   }
 }

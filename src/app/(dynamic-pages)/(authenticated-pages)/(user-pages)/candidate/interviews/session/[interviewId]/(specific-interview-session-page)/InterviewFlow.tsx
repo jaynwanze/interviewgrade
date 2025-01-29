@@ -51,6 +51,22 @@ export default function InterviewFlow({
   const timerRef = useRef<number | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [questionFeedback, setQuestionFeedback] = useState<{
+    [key: number]: specificFeedbackType | null;
+  }>({});
+  const [questionFeedbackMarkDisplayText, setQuestionFeedbackMarkDisplayText] =
+    useState<{
+      [key: number]: string | null;
+    }>({});
+  const [
+    questionFeedbackSummaryDisplayText,
+    setQuestionFeedbackSummaryDisplayText,
+  ] = useState<{
+    [key: number]: string | null;
+  }>({});
+  const [
+    questionFeedbackAdviceDisplayText,
+    setQuestionFeedbackAdviceDisplayText,
+  ] = useState<{
     [key: number]: string | null;
   }>({});
   const { addNotification } = useNotifications();
@@ -161,6 +177,7 @@ export default function InterviewFlow({
     },
     [questions, questionFeedback, currentQuestionIndex, interview],
   );
+  // components/Interviews/InterviewFlow.tsx
 
   const fetchSpecificFeedback = async (answer: string) => {
     setIsFetchingSpecificFeedback(true);
@@ -184,45 +201,93 @@ export default function InterviewFlow({
         console.error('Failed to get feedback from OpenAI.');
         return;
       }
-      setIsFetchingSpecificFeedback(false);
-      let accumulatedText = ''; // To store the accumulated paragraph
+
+      let accumulatedText = '';
+      let markDisplayText = '';
+      let summaryDisplayText = '';
+      let adviceDisplayText = '';
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
-      const done = false;
-      while (!done) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      let doneReading = false;
+      let readingMark = false;
+      let readingSummary = false;
+      let readingAdvice = false;
 
+      while (!doneReading) {
+        const { value, done } = await reader.read();
+        if (done) {
+          doneReading = true;
+          break;
+        }
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+        accumulatedText += chunk;
+
+        const lines = accumulatedText.split('\n\n');
+        accumulatedText = lines.pop() || '';
 
         for (const line of lines) {
-          if (line.trim() === '') continue;
           if (line.startsWith('data: ')) {
             const data = line.replace(/^data: /, '').trim();
-            if (data === '[DONE]') break;
-
-            try {
-              const parsed = JSON.parse(data);
-              accumulatedText += parsed; // Append new text to the paragraph
-
-              // Update the state with the growing paragraph
-              setQuestionFeedback((prev) => ({
-                ...prev,
-                [currentQuestionIndex]: accumulatedText,
-              }));
-            } catch (err) {
-              console.error('Error parsing feedback chunk:', err);
+            if (data === '[DONE]') {
+              doneReading = true;
+              break;
             }
+
+            /// check what coming on the frontend and if it matches the data
+            console.log('datafronted:', data);
+            if (data === 'mark') {
+              readingMark = true;
+            }
+            if (data === 'summary') {
+              readingSummary = true;
+            }
+            if (data === 'advice_for_next_question') {
+              readingAdvice = true;
+            }
+
+            if (readingMark) {
+              markDisplayText += data;
+              setQuestionFeedbackMarkDisplayText((prev) => ({
+                ...prev,
+                [currentQuestionIndex]: markDisplayText,
+              }));
+            }
+            if (readingSummary) {
+              summaryDisplayText += data;
+              setQuestionFeedbackSummaryDisplayText((prev) => ({
+                ...prev,
+                [currentQuestionIndex]: summaryDisplayText,
+              }));
+            }
+            if (readingAdvice) {
+              adviceDisplayText += data;
+              setQuestionFeedbackAdviceDisplayText((prev) => ({
+                ...prev,
+                [currentQuestionIndex]: adviceDisplayText,
+              }));
+            }
+            accumulatedText += data;
           }
         }
       }
+      // Now, parse the accumulated JSON
+      try {
+        // const parsedFeedback = JSON.parse(accumulatedText);
+        // setQuestionFeedback(parsedFeedback);
+      } catch (err) {
+        console.error('Error parsing accumulated feedback JSON:', err);
+        setQuestionFeedback((prevFeedback) => ({
+          ...prevFeedback,
+          [currentQuestionIndex]: {
+            mark: 0,
+            summary: 'Error parsing feedback.',
+            advice_for_next_question: 'Please try again later.',
+          },
+        }));
+      }
     } catch (error) {
       console.error('Error fetching specific feedback:', error);
-      setQuestionFeedback((prev) => ({
-        ...prev,
-        [currentQuestionIndex]: null,
-      }));
     } finally {
       setIsFetchingSpecificFeedback(false);
     }
@@ -278,7 +343,6 @@ export default function InterviewFlow({
       // Handle error better
       console.error('Error fetching feedback:', error.message || error);
     }
-    }
   };
 
   const updateInterviewState = async (nextQuestionIndex: number) => {
@@ -293,29 +357,29 @@ export default function InterviewFlow({
           end_time: new Date().toISOString(),
         }),
       };
-  const updateInterviewState = async (nextQuestionIndex: number) => {
-    if (interview) {
-      const newStatus: 'in_progress' | 'completed' =
-        nextQuestionIndex < questions.length ? 'in_progress' : 'completed';
-      const updateData = {
-        id: interview.id,
-        status: newStatus,
-        current_question_index: nextQuestionIndex,
-        ...(newStatus === 'completed' && {
-          end_time: new Date().toISOString(),
-        }),
-      };
+      const updateInterviewState = async (nextQuestionIndex: number) => {
+        if (interview) {
+          const newStatus: 'in_progress' | 'completed' =
+            nextQuestionIndex < questions.length ? 'in_progress' : 'completed';
+          const updateData = {
+            id: interview.id,
+            status: newStatus,
+            current_question_index: nextQuestionIndex,
+            ...(newStatus === 'completed' && {
+              end_time: new Date().toISOString(),
+            }),
+          };
 
-      try {
-        await updateInterview(updateData);
-      } catch (error) {
-        console.error(
-          'Error updating interview state:',
-          error.message || error,
-        );
-      }
-    }
-  };
+          try {
+            await updateInterview(updateData);
+          } catch (error) {
+            console.error(
+              'Error updating interview state:',
+              error.message || error,
+            );
+          }
+        }
+      };
       try {
         await updateInterview(updateData);
       } catch (error) {
@@ -341,23 +405,11 @@ export default function InterviewFlow({
     100 / (interview?.question_count || 1),
   );
   if (completionMessage) {
-    return <div className="text-center p-4">{completionMessage}</div>;
-  }
-  const handleNextQuestion = useCallback(() => {
-    setCurrentQuestionIndex((prevIndex) => {
-      if (prevIndex < questions.length - 1) {
-        return prevIndex + 1;
-      } else {
-        setIsQuestionsComplete(true);
-        return prevIndex;
-      }
-    });
-  }, [questions.length]);
-  const maxScorePerQuestion = Math.floor(
-    100 / (interview?.question_count || 1),
-  );
-  if (completionMessage) {
-    return <div className="text-center p-4">{completionMessage}</div>;
+    return (
+      <div className="interview-flow-container flex justify-center items-center min-h-screen text-center p-4">
+        {completionMessage}
+      </div>
+    );
   }
 
   if (
@@ -429,47 +481,6 @@ export default function InterviewFlow({
     );
   }
 
-  return (
-    <div className="interview-flow-container flex flex-col items-center min-h-screen">
-      {/* Main Cards: AIQuestionSpeaker and UserCamera */}
-      <div className="flex items-center justify-center space-x-2">
-        <Card className=" p-4 text-center">
-          <h1 className="2xl font-bold">Timer</h1>
-          <p>
-            {Math.floor(recordingTime / 60)}:
-            {('0' + (recordingTime % 60)).slice(-2)}
-          </p>
-        </Card>
-      </div>
-      <div className="flex w-full max-w-4xl">
-        <div className="left-side w-1/2 p-4">
-          <AIQuestionSpeaker
-            question={questions[currentQuestionIndex]}
-            currentIndex={currentQuestionIndex}
-            questionsLength={questions.length}
-          />
-        </div>
-        <div className="right-side w-1/2 p-4">
-          <Card className="max-w-md mx-auto text-center">
-            <CardHeader>
-              <CardTitle>Candidate</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UserCamera
-                answerCallback={handleAnswer}
-                isCameraOn={isCameraOn}
-                onRecordEnd={
-                  interview?.mode === INTERVIEW_PRACTICE_MODE
-                    ? null
-                    : handleNextQuestion
-                }
-                isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
-                interviewMode={interview?.mode ?? null}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
   return (
     <div className="interview-flow-container flex flex-col items-center min-h-screen">
       {/* Main Cards: AIQuestionSpeaker and UserCamera */}
@@ -528,29 +539,43 @@ export default function InterviewFlow({
               ) : questionFeedback[currentQuestionIndex] ? (
                 <>
                   <div className="text-left space-y-2">
-                    <p>
+                    {/* <p>
                       <strong>Mark:</strong>{' '}
-                      {questionFeedback[currentQuestionIndex]}/
+                      {questionFeedback[currentQuestionIndex]?.mark}/
                       {maxScorePerQuestion}
                     </p>
-                    {/* <p>
-                        <strong>Mark:</strong>{' '}
-                        {questionFeedback[currentQuestionIndex]?.mark}/
-                        {maxScorePerQuestion}
-                      </p>
+                    <p>
+                      <strong>Summary:</strong>{' '}
+                      {questionFeedback[currentQuestionIndex]?.summary}
+                    </p>
+                    {currentQuestionIndex < questions.length - 1 && (
                       <p>
-                        <strong>Summary:</strong>{' '}
-                        {questionFeedback[currentQuestionIndex]?.summary}
+                        <strong>Advice for Next Question:</strong>{' '}
+                        {
+                          questionFeedback[currentQuestionIndex]
+                            ?.advice_for_next_question
+                        }
                       </p>
-                      {currentQuestionIndex < questions.length - 1 && (
-                        <p>
-                          <strong>Advice for Next Question:</strong>{' '}
-                          {
-                            questionFeedback[currentQuestionIndex]
-                              ?.advice_for_next_question
-                          }
-                        </p>
-                      )} */}
+                    )} */}
+                    <p>
+                      <strong>Mark:</strong>{' '}
+                      {questionFeedbackMarkDisplayText[currentQuestionIndex]}/
+                      {maxScorePerQuestion}
+                    </p>
+                    <p>
+                      <strong>Summary:</strong>{' '}
+                      {questionFeedbackSummaryDisplayText[currentQuestionIndex]}
+                    </p>
+                    {currentQuestionIndex < questions.length - 1 && (
+                      <p>
+                        <strong>Advice for Next Question:</strong>{' '}
+                        {
+                          questionFeedbackAdviceDisplayText[
+                          currentQuestionIndex
+                          ]
+                        }
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center justify-center space-x-2">
                     <Button onClick={handleNextQuestion} className="mt-4">

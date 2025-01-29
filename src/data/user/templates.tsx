@@ -1,6 +1,10 @@
 'use server';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { EvaluationCriteriaType, Table } from '@/types';
+import type {
+  EvaluationCriteriaType,
+  InterviewEvaluationCriteriaType,
+  Table,
+} from '@/types';
 
 export const getInterviewsTemplatesByCategory = async (
   category: string,
@@ -17,7 +21,7 @@ export const getInterviewsTemplatesByCategory = async (
   return data;
 };
 
-export const getInterviewsTemplatesByCategoryAndMode = async (
+export const getPracticeTemplatesByCategoryAndMode = async (
   mode: string,
   category: string,
 ): Promise<Table<'templates'>[]> => {
@@ -34,7 +38,22 @@ export const getInterviewsTemplatesByCategoryAndMode = async (
   return data;
 };
 
-export const getPracticeTemplateEvaluationsByTemplate = async (
+export const getInterviewTemplatesByCategory = async (
+  category: string,
+): Promise<Table<'interview_templates'>[]> => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interview_templates')
+    .select('*')
+    .eq('category', category)
+    .order('title', { ascending: true });
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+export const getPracticeTemplateEvaluationsByTemplateId = async (
   templateId: string,
 ): Promise<EvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -46,7 +65,6 @@ export const getPracticeTemplateEvaluationsByTemplate = async (
     evaluation_criteria (
       id,
       user_id,
-      interview_evaluation_criteria_id,
       name,
       description,
       rubrics,
@@ -84,7 +102,7 @@ export const getPracticeTemplateEvaluationsByTemplate = async (
 
 export const getInterviewEvaluationCriteriasByTemplate = async (
   interviewTemplateId: string,
-): Promise<EvaluationCriteriaType[]> => {
+): Promise<InterviewEvaluationCriteriaType[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   const { data, error } = await supabase
@@ -94,6 +112,7 @@ export const getInterviewEvaluationCriteriasByTemplate = async (
     interview_evaluation_criteria (
       id,
       user_id,
+      template_id,
       name,
       description,
       rubrics,
@@ -108,7 +127,8 @@ export const getInterviewEvaluationCriteriasByTemplate = async (
     throw error;
   }
 
-  if (!data) {
+  if (!data || data.length === 0) {
+    console.warn('No interview evaluation criteria found for the provided ID.');
     return [];
   }
 
@@ -117,6 +137,8 @@ export const getInterviewEvaluationCriteriasByTemplate = async (
     .filter((item) => item.interview_evaluation_criteria !== null)
     .map((item) => ({
       id: item.interview_evaluation_criteria?.id ?? '',
+      user_id: item.interview_evaluation_criteria?.user_id ?? '',
+      template_id: item.interview_evaluation_criteria?.template_id ?? '',
       name: item.interview_evaluation_criteria?.name ?? '',
       description: item.interview_evaluation_criteria?.description ?? '',
       rubrics:
@@ -141,7 +163,6 @@ export const getPracticeEvaluationCriteriasByInterviewEvalCriteria = async (
       evaluation_criteria (
         id,
         user_id,
-        interview_evaluation_criteria_id,
         name,
         description,
         rubrics,
@@ -193,27 +214,16 @@ export const getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria = async (
   return data;
 };
 
-export const getPracticeTemplateQuestionByInterviewEvaluationCriteria = async (
-  interviewEvaluationCriteriaId: string,
+export const getPracticeTemplateQuestionByTemplateId = async (
+  practiceTemplateId: string,
 ): Promise<Table<'questions'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
 
   // Fetch evaluation criteria along with their associated questions
   const { data, error } = await supabase
-    .from('evaluation_criteria')
-    .select(
-      `
-      questions (
-        id,
-        template_id,
-        evaluation_criteria_id,
-        type,
-        text,
-        sample_answer
-      )
-    `,
-    )
-    .eq('interview_evaluation_criteria_id', interviewEvaluationCriteriaId);
+    .from('questions')
+    .select('*')
+    .eq('template_id', practiceTemplateId);
 
   if (error) {
     console.error('Error fetching evaluation criteria and questions:', error);
@@ -225,10 +235,5 @@ export const getPracticeTemplateQuestionByInterviewEvaluationCriteria = async (
     return [];
   }
 
-  // Aggregate all questions from the fetched evaluation criterias
-  const allQuestions: Table<'questions'>[] = data.flatMap(
-    (item) => item.questions ?? [],
-  );
-
-  return allQuestions;
+  return data;
 };

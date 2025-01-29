@@ -4,8 +4,15 @@ import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { getInterviewsTemplatesByCategoryAndMode } from '@/data/user/templates';
-import { InterviewModeType, PracticeInterviewTemplate } from '@/types';
+import {
+  getInterviewTemplatesByCategory,
+  getPracticeTemplatesByCategoryAndMode,
+} from '@/data/user/templates';
+import {
+  InterviewModeType,
+  InterviewTemplate,
+  PracticeTemplate,
+} from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { useEffect, useState } from 'react';
 
@@ -14,11 +21,15 @@ export function InterviewTemplates({
 }: {
   interviewMode: string;
 }) {
-  const [interviewTemplates, setInterviewTemplates] = useState<
-    PracticeInterviewTemplate[]
+  const [practiceTemplates, setPracticeTemplates] = useState<
+    PracticeTemplate[]
   >([]);
+  const [interviewTemplates, setInterviewTemplates] = useState<
+    InterviewTemplate[]
+  >([]);
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const displayString =
     interviewMode === INTERVIEW_PRACTICE_MODE
       ? 'Practice Mode : Select Practice Session'
@@ -27,21 +38,16 @@ export function InterviewTemplates({
   const fetchInterviews = async () => {
     setIsLoading(true);
     try {
-      let interviewTemplates: PracticeInterviewTemplate[] = [];
-
       if (interviewMode === INTERVIEW_PRACTICE_MODE) {
-        interviewTemplates = await getInterviewsTemplatesByCategoryAndMode(
+        const data = await getPracticeTemplatesByCategoryAndMode(
           INTERVIEW_PRACTICE_MODE,
           'Soft Skills',
         );
+        setPracticeTemplates(data);
       } else {
-        // Fetch templates based on category ID
-        // Example: await getInterviewsTemplatesByCategory(interviewTemplateCategoryId);
-        // For now, setting to empty array
-        interviewTemplates = [];
+        const data = await getInterviewTemplatesByCategory('Soft Skills');
+        setInterviewTemplates(data);
       }
-
-      setInterviewTemplates(interviewTemplates);
     } catch (error) {
       console.error('Error fetching interview templates:', error);
     } finally {
@@ -54,11 +60,18 @@ export function InterviewTemplates({
   }, [interviewMode]);
 
   // Filter templates based on search query
-  const filteredTemplates = interviewTemplates.filter((template) =>
-    template.title.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  let filteredTemplates: (PracticeTemplate | InterviewTemplate)[] = [];
+  if (interviewMode === INTERVIEW_PRACTICE_MODE) {
+    filteredTemplates = practiceTemplates.filter((template) =>
+      template.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  } else {
+    filteredTemplates = interviewTemplates.filter((template) =>
+      template.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }
 
-  if (isLoading || interviewTemplates.length === 0) {
+  if (isLoading || !filteredTemplates) {
     return (
       <div className="flex justify-center min-h-screen">
         <LoadingSpinner />
@@ -86,10 +99,10 @@ export function InterviewTemplates({
       <div className="flex justify-center">
         {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTemplates.map((interview) => (
+            {filteredTemplates.map((template) => (
               <InterviewCardTemplate
-                key={interview.id}
-                interviewTemplate={interview}
+                key={template.id}
+                selectedTemplate={template}
                 interviewMode={interviewMode as InterviewModeType}
               />
             ))}

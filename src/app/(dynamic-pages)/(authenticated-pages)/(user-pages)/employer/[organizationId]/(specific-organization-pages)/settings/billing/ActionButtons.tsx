@@ -2,10 +2,10 @@
 
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
-import {
-  createCheckoutSessionAction,
-  createCustomerPortalLinkAction,
-} from '@/data/user/organizations';
+// import {
+//   createCheckoutSessionAction,
+//   createCustomerPortalLinkAction,
+// } from '@/data/user/organizations';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { getStripe } from '@/utils/stripe-client';
 import { ExternalLink } from 'lucide-react';
@@ -19,10 +19,10 @@ export function CreateSubscriptionButton({
 }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCheckoutSessionAction({
-        organizationId: organizationId,
-        priceId: priceId,
-      });
+      // return await createCheckoutSessionAction({
+      //   organizationId: organizationId,
+      //   priceId: priceId,
+      // });
     },
     {
       loadingMessage: 'Please wait...',
@@ -30,7 +30,7 @@ export function CreateSubscriptionButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId });
+        stripe?.redirectToCheckout({ sessionId: 'TO:DO' });
       },
     },
   );
@@ -57,11 +57,11 @@ export function StartFreeTrialButton({
 }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCheckoutSessionAction({
-        organizationId: organizationId,
-        priceId: priceId,
-        isTrial: true,
-      });
+      // return await createCheckoutSessionAction({
+      //   organizationId: organizationId,
+      //   priceId: priceId,
+      //   isTrial: true,
+      // });
     },
     {
       loadingMessage: 'Please wait...',
@@ -69,7 +69,7 @@ export function StartFreeTrialButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId });
+        stripe?.redirectToCheckout({ sessionId: 'TO:DO' });
       },
     },
   );
@@ -94,7 +94,8 @@ export function ManageSubscriptionButton({
 }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCustomerPortalLinkAction(organizationId);
+      // return await createCustomerPortalLinkAction(organizationId);
+      return 'TO:DO';
     },
     {
       loadingMessage: 'Please wait...',

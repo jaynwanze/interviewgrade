@@ -110,216 +110,216 @@ async function getViewInvitationUrl(
   return toSiteURL('/api/invitations/view/' + invitationId);
 }
 
-export async function createInvitationHandler({
-  organizationId,
-  email,
-  role,
-}: {
-  organizationId: string;
-  email: string;
-  role: Enum<'organization_member_role'>;
-}): Promise<SAPayload<Tables<'organization_join_invitations'>>> {
-  'use server';
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const user = await serverGetLoggedInUser();
-  // check if organization exists
-  const organizationResponse = await supabaseClient
-    .from('organizations')
-    .select('*')
-    .eq('id', organizationId)
-    .single();
+// export async function createInvitationHandler({
+//   organizationId,
+//   email,
+//   role,
+// }: {
+//   organizationId: string;
+//   email: string;
+//   role: Enum<'organization_member_role'>;
+// }): Promise<SAPayload<Tables<'organization_join_invitations'>>> {
+//   'use server';
+//   const supabaseClient = createSupabaseUserServerActionClient();
+//   const user = await serverGetLoggedInUser();
+//   // check if organization exists
+//   const organizationResponse = await supabaseClient
+//     .from('organizations')
+//     .select('*')
+//     .eq('id', organizationId)
+//     .single();
 
-  if (organizationResponse.error) {
-    return { status: 'error', message: organizationResponse.error.message };
-  }
+//   if (organizationResponse.error) {
+//     return { status: 'error', message: organizationResponse.error.message };
+//   }
 
-  const inviteeUserDetails = await setupInviteeUserDetails(email);
-  // check if already invited
-  const existingInvitationResponse = await supabaseClient
-    .from('organization_join_invitations')
-    .select('*')
-    .eq('invitee_user_id', inviteeUserDetails.userId)
-    .eq('inviter_user_id', user.id)
-    .eq('status', 'active')
-    .eq('organization_id', organizationId);
+//   const inviteeUserDetails = await setupInviteeUserDetails(email);
+//   // check if already invited
+//   const existingInvitationResponse = await supabaseClient
+//     .from('organization_join_invitations')
+//     .select('*')
+//     .eq('invitee_user_id', inviteeUserDetails.userId)
+//     .eq('inviter_user_id', user.id)
+//     .eq('status', 'active')
+//     .eq('organization_id', organizationId);
 
-  if (existingInvitationResponse.error) {
-    return {
-      status: 'error',
-      message: existingInvitationResponse.error.message,
-    };
-  }
-  if (existingInvitationResponse.data.length > 0) {
-    return { status: 'error', message: 'User already invited' };
-  }
+//   if (existingInvitationResponse.error) {
+//     return {
+//       status: 'error',
+//       message: existingInvitationResponse.error.message,
+//     };
+//   }
+//   if (existingInvitationResponse.data.length > 0) {
+//     return { status: 'error', message: 'User already invited' };
+//   }
 
-  const invitationResponse = await supabaseClient
-    .from('organization_join_invitations')
-    .insert({
-      invitee_user_email: email,
-      invitee_user_id: inviteeUserDetails.userId,
-      inviter_user_id: user.id,
-      status: 'active',
-      organization_id: organizationId,
-      invitee_organization_role: role,
-    })
-    .select('*')
-    .single();
+//   const invitationResponse = await supabaseClient
+//     .from('organization_join_invitations')
+//     .insert({
+//       invitee_user_email: email,
+//       invitee_user_id: inviteeUserDetails.userId,
+//       inviter_user_id: user.id,
+//       status: 'active',
+//       organization_id: organizationId,
+//       invitee_organization_role: role,
+//     })
+//     .select('*')
+//     .single();
 
-  if (invitationResponse.error) {
-    return { status: 'error', message: invitationResponse.error.message };
-  }
+//   if (invitationResponse.error) {
+//     return { status: 'error', message: invitationResponse.error.message };
+//   }
 
-  const viewInvitationUrl = await getViewInvitationUrl(
-    invitationResponse.data.id,
-    inviteeUserDetails,
-    email,
-  );
+//   const viewInvitationUrl = await getViewInvitationUrl(
+//     invitationResponse.data.id,
+//     inviteeUserDetails,
+//     email,
+//   );
 
-  const userProfileData = await supabaseClient
-    .from('user_profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+//   const userProfileData = await supabaseClient
+//     .from('user_profiles')
+//     .select('*')
+//     .eq('id', user.id)
+//     .single();
 
-  if (userProfileData.error) {
-    return { status: 'error', message: userProfileData.error.message };
-  }
+//   if (userProfileData.error) {
+//     return { status: 'error', message: userProfileData.error.message };
+//   }
 
-  const inviterName = userProfileData.data?.full_name || `User [${user.email}]`;
+//   const inviterName = userProfileData.data?.full_name || `User [${user.email}]`;
 
-  // send email
-  const invitationEmailHTML = await renderAsync(
-    <TeamInvitationEmail
-      viewInvitationUrl={viewInvitationUrl}
-      inviterName={`${inviterName}`}
-      isNewUser={inviteeUserDetails.type === 'USER_CREATED'}
-      organizationName={organizationResponse.data.title}
-    />,
-  );
+//   // send email
+//   const invitationEmailHTML = await renderAsync(
+//     <TeamInvitationEmail
+//       viewInvitationUrl={viewInvitationUrl}
+//       inviterName={`${inviterName}`}
+//       isNewUser={inviteeUserDetails.type === 'USER_CREATED'}
+//       organizationName={organizationResponse.data.title}
+//     />,
+//   );
 
-  await sendEmail({
-    to: email,
-    subject: `Invitation to join ${organizationResponse.data.title}`,
-    html: invitationEmailHTML,
-    from: process.env.ADMIN_EMAIL,
-  });
+//   await sendEmail({
+//     to: email,
+//     subject: `Invitation to join ${organizationResponse.data.title}`,
+//     html: invitationEmailHTML,
+//     from: process.env.ADMIN_EMAIL,
+//   });
 
-  revalidatePath('/organization/[organizationId]');
+//   revalidatePath('/organization/[organizationId]');
 
-  return { status: 'success', data: invitationResponse.data };
-}
+//   return { status: 'success', data: invitationResponse.data };
+// }
 
-export async function acceptInvitationAction(
-  invitationId: string,
-): Promise<string> {
-  'use server';
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const user = await serverGetLoggedInUser();
+// export async function acceptInvitationAction(
+//   invitationId: string,
+// ): Promise<string> {
+//   'use server';
+//   const supabaseClient = createSupabaseUserServerActionClient();
+//   const user = await serverGetLoggedInUser();
 
-  const invitationResponse = await supabaseClient
-    .from('organization_join_invitations')
-    .update({
-      status: 'finished_accepted',
-      invitee_user_id: user.id, // Add this information here, so that our database function can add this id to the team members table
-    })
-    .eq('id', invitationId)
-    .select('*')
-    .single();
+//   const invitationResponse = await supabaseClient
+//     .from('organization_join_invitations')
+//     .update({
+//       status: 'finished_accepted',
+//       invitee_user_id: user.id, // Add this information here, so that our database function can add this id to the team members table
+//     })
+//     .eq('id', invitationId)
+//     .select('*')
+//     .single();
 
-  if (invitationResponse.error) {
-    throw invitationResponse.error;
-  }
+//   if (invitationResponse.error) {
+//     throw invitationResponse.error;
+//   }
 
-  revalidatePath('/');
-  return invitationResponse.data.organization_id;
-}
+//   revalidatePath('/');
+//   return invitationResponse.data.organization_id;
+// }
 
-export async function declineInvitationAction(invitationId: string) {
-  'use server';
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const user = await serverGetLoggedInUser();
+// export async function declineInvitationAction(invitationId: string) {
+//   'use server';
+//   const supabaseClient = createSupabaseUserServerActionClient();
+//   const user = await serverGetLoggedInUser();
 
-  const invitationResponse = await supabaseClient
-    .from('organization_join_invitations')
-    .update({
-      status: 'finished_declined',
-      invitee_user_id: user.id, // Add this information here, so that our database function can add this id to the team members table
-    })
-    .eq('id', invitationId)
-    .select('*')
-    .single();
+//   const invitationResponse = await supabaseClient
+//     .from('organization_join_invitations')
+//     .update({
+//       status: 'finished_declined',
+//       invitee_user_id: user.id, // Add this information here, so that our database function can add this id to the team members table
+//     })
+//     .eq('id', invitationId)
+//     .select('*')
+//     .single();
 
-  if (invitationResponse.error) {
-    throw invitationResponse.error;
-  }
-  revalidatePath('/');
-  redirect('/dashboard/employer');
-}
+//   if (invitationResponse.error) {
+//     throw invitationResponse.error;
+//   }
+//   revalidatePath('/');
+//   redirect('/dashboard/employer');
+// }
 
-export async function getPendingInvitationsOfUser() {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const user = await serverGetLoggedInUser();
+// export async function getPendingInvitationsOfUser() {
+//   const supabaseClient = createSupabaseUserServerComponentClient();
+//   const user = await serverGetLoggedInUser();
 
-  async function idInvitations(userId: string) {
-    const { data, error } = await supabaseClient
-      .from('organization_join_invitations')
-      .select(
-        '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)',
-      )
-      .eq('invitee_user_id', userId)
-      .eq('status', 'active');
+//   async function idInvitations(userId: string) {
+//     const { data, error } = await supabaseClient
+//       .from('organization_join_invitations')
+//       .select(
+//         '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)',
+//       )
+//       .eq('invitee_user_id', userId)
+//       .eq('status', 'active');
 
-    if (error) {
-      throw error;
-    }
+//     if (error) {
+//       throw error;
+//     }
 
-    return data || [];
-  }
+//     return data || [];
+//   }
 
-  const idInvitationsData = await idInvitations(user.id);
+//   const idInvitationsData = await idInvitations(user.id);
 
-  return idInvitationsData;
-}
+//   return idInvitationsData;
+// }
 
-export const getInvitationById = async (invitationId: string) => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
+// export const getInvitationById = async (invitationId: string) => {
+//   const supabaseClient = createSupabaseUserServerComponentClient();
 
-  const { data, error } = await supabaseClient
-    .from('organization_join_invitations')
-    .select(
-      '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)',
-    )
-    .eq('id', invitationId)
-    .eq('status', 'active')
-    .single();
+//   const { data, error } = await supabaseClient
+//     .from('organization_join_invitations')
+//     .select(
+//       '*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)',
+//     )
+//     .eq('id', invitationId)
+//     .eq('status', 'active')
+//     .single();
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error;
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
-export async function getPendingInvitationCountOfUser() {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const user = await serverGetLoggedInUser();
+// export async function getPendingInvitationCountOfUser() {
+//   const supabaseClient = createSupabaseUserServerComponentClient();
+//   const user = await serverGetLoggedInUser();
 
-  async function idInvitations(userId: string) {
-    const { count, error } = await supabaseClient
-      .from('organization_join_invitations')
-      .select('id', { count: 'exact', head: true })
-      .eq('invitee_user_id', userId)
-      .eq('status', 'active');
+//   async function idInvitations(userId: string) {
+//     const { count, error } = await supabaseClient
+//       .from('organization_join_invitations')
+//       .select('id', { count: 'exact', head: true })
+//       .eq('invitee_user_id', userId)
+//       .eq('status', 'active');
 
-    if (error) {
-      throw error;
-    }
+//     if (error) {
+//       throw error;
+//     }
 
-    return count || 0;
-  }
+//     return count || 0;
+//   }
 
-  const idInvitationsCount = await idInvitations(user.id);
+//   const idInvitationsCount = await idInvitations(user.id);
 
-  return idInvitationsCount;
-}
+//   return idInvitationsCount;
+// }

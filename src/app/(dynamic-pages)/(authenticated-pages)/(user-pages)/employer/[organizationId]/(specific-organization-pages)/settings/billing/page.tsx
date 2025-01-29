@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { OrganizationSubscripionDetails } from './OrganizationSubscripionDetails';
-import {
-  getLoggedInUserOrganizationRole,
-  getNormalizedOrganizationSubscription,
-} from '@/data/user/organizations';
+// import { OrganizationSubscripionDetails } from './OrganizationSubscripionDetails';
+// import {
+//   getLoggedInUserOrganizationRole,
+//   getNormalizedOrganizationSubscription,
+// } from '@/data/user/organizations';
 import { Suspense } from 'react';
 import { T } from '@/components/ui/Typography';
 
@@ -12,17 +12,17 @@ const paramsSchema = z.object({
 });
 
 async function Subscription({ organizationId }: { organizationId: string }) {
-  const normalizedSubscription =
-    await getNormalizedOrganizationSubscription(organizationId);
-  const organizationRole =
-    await getLoggedInUserOrganizationRole(organizationId);
-  return (
-    <OrganizationSubscripionDetails
-      organizationId={organizationId}
-      organizationRole={organizationRole}
-      normalizedSubscription={normalizedSubscription}
-    />
-  );
+  // const normalizedSubscription =
+  //   await getNormalizedOrganizationSubscription(organizationId);
+  // const organizationRole =
+  //   await getLoggedInUserOrganizationRole(organizationId);
+  // return (
+  //   <OrganizationSubscripionDetails
+  //     organizationId={organizationId}
+  //     organizationRole={organizationRole}
+  //     normalizedSubscription={normalizedSubscription}
+  //   />
+  // );
 }
 
 export default async function OrganizationSettingsPage({
@@ -33,7 +33,7 @@ export default async function OrganizationSettingsPage({
   const { organizationId } = paramsSchema.parse(params);
   return (
     <Suspense fallback={<T.Subtle>Loading billing details...</T.Subtle>}>
-      <Subscription organizationId={organizationId} />
+      {/* <Subscription organizationId={organizationId} /> */}
     </Suspense>
   );
 }

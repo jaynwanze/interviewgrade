@@ -26,7 +26,11 @@ import { InterviewEvaluation } from '@/types';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
-export type rawDataTypeChart = { date: string; interview_grade: number }[];
+export type rawDataTypeChart = {
+  date: string;
+  interview_grade: number;
+  count: number;
+}[];
 
 const chartConfig = {
   interview_grades: {
@@ -35,6 +39,10 @@ const chartConfig = {
   interview_grade: {
     label: 'Interview Grade',
     color: 'hsl(var(--chart-5))',
+  },
+  count: {
+    label: 'Interview Count',
+    color: 'hsl(var(--chart-6))',
   },
 } satisfies ChartConfig;
 
@@ -66,7 +74,7 @@ export function AreaChartInteractiveOverallGrades({
   completedInterviewEvaluations: InterviewEvaluation[];
 }) {
   const [timeRange, setTimeRange] = useState('90d');
-  let rawChartData: { date: string; interview_grade: number }[] = [];
+  let rawChartData: { date: string; interview_grade: number; count }[] = [];
   const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
   const [interviewEvaluations, setInterviewEvalutations] = useState<
     InterviewEvaluation[]
@@ -74,11 +82,11 @@ export function AreaChartInteractiveOverallGrades({
 
   const fetchInterviews = async () => {
     try {
-   
       rawChartData = completedInterviewEvaluations.map((interviewEval) => {
         return {
           date: interviewEval.created_at.split('T')[0],
           interview_grade: interviewEval.overall_grade,
+          count: 1,
         };
       });
       if (rawChartData.length === 0) {

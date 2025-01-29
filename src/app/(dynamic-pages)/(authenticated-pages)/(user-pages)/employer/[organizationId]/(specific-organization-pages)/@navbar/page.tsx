@@ -1,7 +1,7 @@
 // https://github.com/vercel/next.js/issues/58272
 import { T } from '@/components/ui/Typography';
 import { Badge } from '@/components/ui/badge';
-import { getOrganizationTitle } from '@/data/user/organizations';
+// import { getOrganizationTitle } from '@/data/user/organizations';
 import { UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -14,7 +14,8 @@ const paramsSchema = z.object({
 export async function generateMetadata({ params }: { params: unknown }) {
   const parsedParams = paramsSchema.parse(params);
   const { organizationId } = parsedParams;
-  const organizationTitle = await getOrganizationTitle(organizationId);
+  // const organizationTitle = await getOrganizationTitle(organizationId);
+  const organizationTitle = 'TO:DO';
 
   return {
     title: `${organizationTitle} | Organization | InterviewGrade`,
@@ -23,7 +24,8 @@ export async function generateMetadata({ params }: { params: unknown }) {
 }
 
 async function Title({ organizationId }: { organizationId: string }) {
-  const title = await getOrganizationTitle(organizationId);
+  // const title = await getOrganizationTitle(organizationId);
+  const title = 'TO:DO';
   // className="gap-2 ring-0 bg-purple-50 rounded-full dark:bg-slate-800 text-purple-600 font-medium dark:text-slate-400"
 
   return (

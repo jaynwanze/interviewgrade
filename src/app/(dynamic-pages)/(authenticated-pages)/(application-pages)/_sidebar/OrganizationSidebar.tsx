@@ -1,7 +1,7 @@
 import { ProFeatureGateDialog } from '@/components/ProFeatureGateDialog';
 import { SubscriptionCardSmall } from '@/components/SubscriptionCardSmall';
 import { T } from '@/components/ui/Typography';
-import { fetchSlimOrganizations } from '@/data/user/organizations';
+// import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
 import { CreditCard, DollarSign, FileBox, Home, Settings, UserRound, Building2 } from 'lucide-react';
 
@@ -16,7 +16,14 @@ async function OrganizationSidebarInternal({
 }: {
   organizationId: string;
 }) {
-  const slimOrganizations = await fetchSlimOrganizations();
+  let slimOrganizations;
+  try {
+    // slimOrganizations = await fetchSlimOrganizations();
+    slimOrganizations = [];
+  } catch (error) {
+    slimOrganizations = [];
+    console.error('Failed to fetch organizations:', error);
+  }
   return (
     <div
       className={cn(

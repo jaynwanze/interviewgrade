@@ -2,7 +2,7 @@
 -- Name: product_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE "public"."product_type" AS ENUM ('token_bundle');
+CREATE TYPE "public"."product_type" AS ENUM ('token_bundle' , 'subscription');
 ALTER TYPE "public"."product_type" OWNER TO "postgres";
 
 --

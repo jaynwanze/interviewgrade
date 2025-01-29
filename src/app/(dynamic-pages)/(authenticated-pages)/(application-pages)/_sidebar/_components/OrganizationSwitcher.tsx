@@ -9,7 +9,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { createOrganization } from '@/data/user/organizations';
+// import { createOrganization } from '@/data/user/organizations';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import { cn } from '@/utils/cn';
 import {
@@ -38,8 +38,11 @@ export function OrganizationSwitcher({
     (organization) => organization.id === currentOrganizationId,
   );
   const { mutate, isLoading } = useSAToastMutation(
-    async (organizationTitle: string) => {
-      return await createOrganization(organizationTitle);
+    // async (organizationTitle: string) => {
+    async () => {
+      // const orgId = await createOrganization(organizationTitle);
+      const orgId = 'TO:DO';
+      return { status: 'success', data: orgId };
     },
     {
       loadingMessage: 'Creating organization...',
@@ -54,7 +57,8 @@ export function OrganizationSwitcher({
   );
 
   const onConfirm = (organizationTitle: string) => {
-    mutate(organizationTitle);
+    // mutate(organizationTitle);
+    mutate();
   };
 
   return (

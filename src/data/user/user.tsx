@@ -343,9 +343,9 @@ export const purchaseProduct = async (
     };
   }
 
-  const updatedTokensAvailable = tokenData.tokens_available + product.amount;
+  const updatedTokensAvailable = tokenData.tokens_available + product.quantity;
   const updatedTotalTokensPurchased =
-    (tokenData.total_tokens_purchased || 0) + product.amount;
+    (tokenData.total_tokens_purchased || 0) + product.quantity;
   const currentDate = new Date().toISOString();
 
   // Update tokens
@@ -372,7 +372,7 @@ export const getCurrentCandidateSubscription = async (
   candidateId: string,
 ): Promise<NormalizedSubscription> => {
   const candidate = getCandidateUserProfile(candidateId);
-  const candidateSubscriptionId = candidate.subscription_id;
+  const candidateSubscriptionId = (await candidate).subscription_id;
 
   if (!candidateSubscriptionId) {
     return {
@@ -384,7 +384,7 @@ export const getCurrentCandidateSubscription = async (
     await createSupabaseUserServerActionClient()
       .from('subscriptions')
       .select('*, products(*)')
-      .eq('subscription_id', candidate.subscription_id)
+      .eq('subscription_id', candidateSubscriptionId)
       .in('status', ['trialing', 'active'])
       .single();
 
@@ -410,18 +410,19 @@ export const getCurrentCandidateSubscription = async (
       throw new Error('No product found for the subscription');
     }
 
-    if (subscription.status === 'trialing') {
-      if (!subscription.trial_start || !subscription.trial_end) {
-        throw new Error('No trial start or end found');
-      }
-      return {
-        type: 'trialing',
-        trialStart: subscription.trial_start,
-        trialEnd: subscription.trial_end,
-        product: product,
-        subscription,
-      };
-    } else if (subscription.status) {
+    // if (subscription.status === 'trialing') {
+    //   if (!subscription.trial_start || !subscription.trial_end) {
+    //     throw new Error('No trial start or end found');
+    //   }
+    //   return {
+    //     type: 'trialing',
+    //     trialStart: subscription.trial_start,
+    //     trialEnd: subscription.trial_end,
+    //     product: product,
+    //     subscription,
+    //   };
+    // } else
+    if (subscription.status) {
       return {
         type: subscription.status as
           | 'active'
@@ -528,35 +529,35 @@ export async function createCandidateCheckoutSessionAction({
     });
 
     return stripeSession.id;
-  } else if (isTrial) {
-    const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      billing_address_collection: 'required',
-      customer,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      allow_promotion_codes: true,
-      subscription_data: {
-        trial_period_days: TRIAL_DAYS,
-        trial_settings: {
-          end_behavior: {
-            missing_payment_method: 'cancel',
-          },
-        },
-        metadata: {},
-      },
-      success_url: toSiteURL(
-        `/organization/${organizationId}/settings/billing`,
-      ),
-      cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
-    });
+    // } else if (isTrial) {
+    //   const stripeSession = await stripe.checkout.sessions.create({
+    //     payment_method_types: ['card'],
+    //     billing_address_collection: 'required',
+    //     customer,
+    //     line_items: [
+    //       {
+    //         price: priceId,
+    //         quantity: 1,
+    //       },
+    //     ],
+    //     mode: 'subscription',
+    //     allow_promotion_codes: true,
+    //     subscription_data: {
+    //       trial_period_days: TRIAL_DAYS,
+    //       trial_settings: {
+    //         end_behavior: {
+    //           missing_payment_method: 'cancel',
+    //         },
+    //       },
+    //       metadata: {},
+    //     },
+    //     success_url: toSiteURL(
+    //       `/organization/${organizationId}/settings/billing`,
+    //     ),
+    //     cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+    //   });
 
-    return stripeSession.id;
+    //   return stripeSession.id;
   } else {
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

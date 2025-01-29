@@ -148,8 +148,8 @@ export type Database = {
           pricing_type: Database["public"]["Enums"]["pricing_type"]
           pricing_plan_interval: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count: number
-          trial_period_days: number
-          metadata: string
+          trial_period_days: number | null
+          metadata: JSON | null
 
         }
         Insert: {
@@ -165,7 +165,7 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          metadata: string
+          metadata: JSON | null
         }
         Update: {
           id?: string
@@ -181,7 +181,7 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          metadata?: string
+          metadata?: JSON | null
         }
       }
       tokens: {
@@ -230,7 +230,7 @@ export type Database = {
           ended_at: string
           cancel_at: string
           sidenote: string
-          metadata: string
+          metadata: JSON
           updated_at: string
         }
         Insert: {
@@ -244,7 +244,7 @@ export type Database = {
           ended_at: string
           cancel_at: string
           sidenote: string
-          metadata: string
+          metadata: JSON
           updated_at: string
         },
         Update: {
@@ -258,7 +258,7 @@ export type Database = {
           ended_at?: string
           cancel_at?: string
           sidenote?: string
-          metadata?: string
+          metadata?: JSON
           updated_at?: string
         },
         Relationships: [
@@ -409,7 +409,6 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          interview_evaluation_criteria_id: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -419,7 +418,6 @@ export type Database = {
         Insert: {
           name: string
           user_id?: string
-          interview_evaluation_criteria_id?: string
           description: string
           rubrics: EvaluationRubricType[]
           is_system_defined: boolean
@@ -428,7 +426,6 @@ export type Database = {
         Update: {
           name?: string
           user_id?: string
-          interview_evaluation_criteria_id: string
           description?: string
           rubrics?: EvaluationRubricType[]
           is_system_defined?: boolean
@@ -442,20 +439,14 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "evaluation_criteria_interview_evaluation_criteria_id_fkey"
-            columns: ["interview_evaluation_criteria_id"]
-            isOneToOne: true
-            referencedRelation: "interview_evaluation_criteria"
-            referencedColumns: ["id"]
-          },
         ]
       }
 
       interview_evaluation_criteria: {
         Row: {
           id: string
-          user_id: string
+          user_id?: string
+          template_id?: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -464,6 +455,7 @@ export type Database = {
         }
         Insert: {
           user_id?: string
+          template_id?: string
           name: string
           description: string
           rubrics: EvaluationRubricType[]
@@ -472,6 +464,7 @@ export type Database = {
         }
         Update: {
           user_id?: string
+          template_id?: string
           name?: string
           description?: string
           rubrics?: EvaluationRubricType[]
@@ -484,6 +477,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_evaluation_criteria_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: true
+            referencedRelation: "templates"
             referencedColumns: ["id"]
           },
         ]
@@ -664,37 +664,6 @@ export type Database = {
         ]
       }
 
-      interview_template_template: {
-        Row: {
-          interview_template_id: string
-          template_id: string
-        }
-        Insert: {
-          interview_template_id: string
-          template_id: string
-        }
-        Update: {
-          interview_template_id?: string
-          template_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "interview_template_template_interview_template_id_fkey"
-            columns: ["interview_template_id"]
-            isManyToMany: true
-            referencedRelation: "interview_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "interview_template_template_template_id_fkey"
-            columns: ["template_id"]
-            isManyToMany: true
-            referencedRelation: "templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-
       questions: {
         Row: {
           id: string
@@ -820,7 +789,7 @@ export type Database = {
     }
     Enums: {
       user_types: "employer" | "candidate"
-      product_type: "subscription" | "token"
+      product_type: "token_bundle" | "subscription"
       product_status: "active" | "inactive"
       interview_status: "not_started" | "in_progress" | "completed"
       template_difficulty: "Easy" | "Medium" | "Hard"

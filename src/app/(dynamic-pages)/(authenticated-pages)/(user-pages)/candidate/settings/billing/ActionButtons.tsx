@@ -2,10 +2,9 @@
 
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
-import {
-  createCheckoutSessionAction,
-  createCustomerPortalLinkAction,
-} from '@/data/user/organizations';
+// import {
+//   createCheckoutSessionAction
+// } from '@/data/user/organizations';
 import { createCustomerCandidatePortalLinkAction } from '@/data/user/user';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { getStripe } from '@/utils/stripe-client';
@@ -20,10 +19,10 @@ export function CreateSubscriptionButton({
 }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCheckoutSessionAction({
-        organizationId: organizationId,
-        priceId: priceId,
-      });
+      // return await createCheckoutSessionAction({
+      //   organizationId: organizationId,
+      //   priceId: priceId,
+      // });
     },
     {
       loadingMessage: 'Please wait...',
@@ -31,7 +30,7 @@ export function CreateSubscriptionButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId });
+        stripe?.redirectToCheckout({ sessionId : 'TO:DO' });
       },
     },
   );
@@ -58,11 +57,11 @@ export function StartFreeTrialButton({
 }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCheckoutSessionAction({
-        organizationId: organizationId,
-        priceId: priceId,
-        isTrial: true,
-      });
+      // return await createCheckoutSessionAction({
+      //   organizationId: organizationId,
+      //   priceId: priceId,
+      //   isTrial: true,
+      // });
     },
     {
       loadingMessage: 'Please wait...',
@@ -70,7 +69,7 @@ export function StartFreeTrialButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId });
+        stripe?.redirectToCheckout({ sessionId : 'TO:DO' });
       },
     },
   );
@@ -91,7 +90,7 @@ export function StartFreeTrialButton({
 export function ManageSubscriptionButton() {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCustomerCandidatePortalLinkAction();
+      return await createCustomerCandidatePortalLinkAction('TO:DO');
     },
     {
       loadingMessage: 'Please wait...',

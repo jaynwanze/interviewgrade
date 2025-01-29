@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { EditOrganizationForm } from './EditOrganizationForm';
-import { getOrganizationTitle } from '@/data/user/organizations';
+// import { getOrganizationTitle } from '@/data/user/organizations';
 import { T } from '@/components/ui/Typography';
 import { SetDefaultOrganizationPreference } from './SetDefaultOrganizationPreference';
 
@@ -9,7 +9,8 @@ async function EditOrganization({
 }: {
   organizationId: string;
 }) {
-  const organizationTitle = await getOrganizationTitle(organizationId);
+  // const organizationTitle = await getOrganizationTitle(organizationId);
+  const organizationTitle = 'TO:DO';
   return (
     <EditOrganizationForm
       organizationId={organizationId}

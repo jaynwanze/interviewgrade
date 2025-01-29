@@ -1,9 +1,8 @@
 'use server';
 import {
   getInterviewEvaluationCriteriasByTemplate,
-  getPracticeEvaluationCriteriasByInterviewEvalCriteria,
-  getPracticeTemplateEvaluationsByTemplate,
-  getPracticeTemplateQuestionByInterviewEvaluationCriteria,
+  getPracticeTemplateEvaluationsByTemplateId,
+  getPracticeTemplateQuestionByTemplateId,
   getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
@@ -14,11 +13,12 @@ import type {
   FeedbackData,
   InterviewAnalytics,
   InterviewComplete,
+  InterviewEvaluationCriteriaType,
   InterviewModeType,
   InterviewQuestion,
   InterviewTemplate,
   InterviewUpdate,
-  PracticeInterviewTemplate,
+  PracticeTemplate,
   SAPayload,
   Table,
 } from '@/types';
@@ -27,7 +27,7 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
 export const createPracticeSession = async (
-  practiceTemplate: PracticeInterviewTemplate,
+  practiceTemplate: PracticeTemplate,
   interviewMode: InterviewModeType,
 ): Promise<Table<'interviews'>> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -35,7 +35,7 @@ export const createPracticeSession = async (
   const candidateProfile = await getCandidateUserProfile(user.id);
   const candidateProfileId = candidateProfile.id;
   const practiceTemplateEvaluationCriterias =
-    await getPracticeTemplateEvaluationsByTemplate(practiceTemplate.id);
+    await getPracticeTemplateEvaluationsByTemplateId(practiceTemplate.id);
 
   const { data, error } = await supabase
     .from('interviews')
@@ -118,7 +118,7 @@ export const createInterviewSession = async (
 
 export const createPracticeModeQuestions = async (
   interviewId: string,
-  practiceTemplate: PracticeInterviewTemplate,
+  practiceTemplate: PracticeTemplate,
   practiceTemplateEvaluationCriterias: EvaluationCriteriaType[],
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
@@ -194,7 +194,7 @@ export const createPracticeModeQuestions = async (
 };
 export const createInterviewModeQuestions = async (
   interviewId: string,
-  interviewTemplateEvaluationCriterias: EvaluationCriteriaType[],
+  interviewTemplateEvaluationCriterias: InterviewEvaluationCriteriaType[],
 ): Promise<SAPayload<Table<'interview_questions'>>> => {
   const supabase = createSupabaseUserServerComponentClient();
 
@@ -207,6 +207,26 @@ export const createInterviewModeQuestions = async (
 
   const questionsToInsert: InterviewQuestion[] = [];
 
+  // Select 4 random practice evaluation criterias
+  const selectedInterviewTemplateEvaluationCriterias = getRandomElements(
+    interviewTemplateEvaluationCriterias,
+    4,
+  );
+
+  // fetch practice eval/questions linked to this interview evaluation criteria
+  for (const selectedInterviewTemplateEvalCriteria of selectedInterviewTemplateEvaluationCriterias) {
+    if (
+      !selectedInterviewTemplateEvalCriteria.rubrics ||
+      selectedInterviewTemplateEvalCriteria.rubrics.length === 0
+    ) {
+      console.warn(
+        `Rubrics not found for evaluation criteria ${selectedInterviewTemplateEvalCriteria.id}`,
+      );
+      continue;
+    }
+  }
+
+  //For each selected evaluation criteria, fetch practice questions linked to this evaluation criteria
   for (const interviewTemplateCriteria of interviewTemplateEvaluationCriterias) {
     if (
       !interviewTemplateCriteria.rubrics ||
@@ -218,73 +238,41 @@ export const createInterviewModeQuestions = async (
       continue;
     }
 
-    // Fetch practice evaluation criterias linked to this interview evaluation criteria
-    const practiceEvaluationCriterias =
-      await getPracticeEvaluationCriteriasByInterviewEvalCriteria(
-        interviewTemplateCriteria.id,
-      );
-
-    if (
-      !practiceEvaluationCriterias ||
-      practiceEvaluationCriterias.length === 0
-    ) {
+    //Check if interview evaluation criteria has linked practice questions
+    if (!interviewTemplateCriteria.template_id) {
       console.warn(
-        `No practice evaluation criterias linked to interview evaluation criteria ${interviewTemplateCriteria.id}`,
+        `Template ID not found for interview evaluation criteria ${interviewTemplateCriteria.id}`,
       );
       continue;
     }
-    // Select 4 random practice evaluation criterias
-    const selectedPracticeCriterias = getRandomElements(
-      practiceEvaluationCriterias,
-      4,
+
+    //Get practice questions linked to this interview evaluation criteria and pracetice template
+    const questions = await getPracticeTemplateQuestionByTemplateId(
+      interviewTemplateCriteria.template_id,
     );
 
-    for (const practiceCriteria of selectedPracticeCriterias) {
-      if (!practiceCriteria.rubrics || practiceCriteria.rubrics.length === 0) {
-        console.warn(
-          `Rubrics not found for practice evaluation criteria ${practiceCriteria.id}`,
-        );
-        continue;
+    //Randomise 2 questions for each evaluation criteria
+    const selectedQuestions = getRandomElements(questions, 2);
+
+    //For each selected question, create an interview question
+    selectedQuestions.forEach((randomQuestion) => {
+      if (!randomQuestion) {
+        console.warn('Random question selection failed.');
+        return;
       }
 
-      if (!practiceCriteria.interview_evaluation_criteria_id) {
-        console.warn(
-          `Interview evaluation criteria ID not found for practice evaluation criteria ${practiceCriteria.id}`,
-        );
-        continue;
-      }
-      const tempQuestions =
-        await getPracticeTemplateQuestionByInterviewEvaluationCriteria(
-          practiceCriteria.interview_evaluation_criteria_id,
-        );
+      const interviewQuestion: InterviewQuestion = {
+        id: crypto.randomUUID(),
+        interview_id: interviewId,
+        type: randomQuestion.type,
+        text: randomQuestion.text,
+        evaluation_criteria: interviewTemplateCriteria,
+        sample_answer: randomQuestion.sample_answer,
+      };
 
-      if (!tempQuestions || tempQuestions.length === 0) {
-        console.warn(
-          `No questions found for practice evaluation criteria ${practiceCriteria.id}`,
-        );
-        continue;
-      }
-
-      const selectedQuestions = getRandomElements(tempQuestions, 2);
-
-      selectedQuestions.forEach((randomQuestion) => {
-        if (!randomQuestion) {
-          console.warn('Random question selection failed.');
-          return;
-        }
-
-        const interviewQuestion: InterviewQuestion = {
-          id: crypto.randomUUID(),
-          interview_id: interviewId,
-          type: randomQuestion.type,
-          text: randomQuestion.text,
-          evaluation_criteria: interviewTemplateCriteria,
-          sample_answer: randomQuestion.sample_answer,
-        };
-
-        questionsToInsert.push(interviewQuestion);
-      });
-    }
+      //Add the interview question to the list of questions to insert
+      questionsToInsert.push(interviewQuestion);
+    });
   }
 
   if (questionsToInsert.length === 0) {
@@ -294,6 +282,7 @@ export const createInterviewModeQuestions = async (
     };
   }
 
+  //Insert into interview_questions interview evaluation criteria with linked practice question details
   const { data, error } = await supabase
     .from('interview_questions')
     .insert(questionsToInsert)
@@ -474,16 +463,29 @@ export const insertInterviewEvaluation = async (
 };
 export const getInterviewAnalytics = async (
   candidateId: string,
-  templateId: string,
+  currentTemplateId: string,
+  interviewMode: string,
 ): Promise<InterviewAnalytics | null> => {
   const supabase = createSupabaseUserServerComponentClient();
 
-  // Fetch completed interviews for the candidate and template
+  if (!candidateId) {
+    console.warn('Candidate ID not found.');
+    return null;
+  } else if (!currentTemplateId) {
+    console.warn('Current Template ID not found.');
+    return null;
+  }
+
+  // Fetch completed interviews for the candidate and template id
+  // Determine the template ID and column name
+  const templateColumn =
+    interviewMode === 'Practice Mode' ? 'template_id' : 'interview_template_id';
+
   const { data: interviews, error: interviewError } = await supabase
     .from('interviews')
     .select('*')
     .eq('candidate_id', candidateId)
-    .eq('template_id', templateId)
+    .eq(templateColumn, currentTemplateId)
     .eq('status', 'completed'); // Assuming you only want completed interviews
 
   if (interviewError) {
@@ -562,20 +564,37 @@ export const getInterviewAnalytics = async (
   // Assuming all interviews have the same title and description
   const { title: interviewTitle, description: interviewDescription } =
     interviews[0];
-
-  return {
-    template_id: templateId,
-    interview_title: interviewTitle,
-    interview_description: interviewDescription,
-    total_interviews: totalInterviews,
-    question_count: totalQuestions,
-    avg_overall_grade: avgOverallGrade,
-    avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
-    strengths_summary: strengthsSummary,
-    areas_for_improvement_summary: areasForImprovementSummary,
-    recommendations_summary: recommendationsSummary,
-    completed_interview_evaluations: evaluations,
-  };
+  if (interviewMode === 'Practice Mode') {
+    return {
+      template_id: currentTemplateId,
+      interview_template_id: null,
+      interview_title: interviewTitle,
+      interview_description: interviewDescription,
+      total_interviews: totalInterviews,
+      question_count: totalQuestions,
+      avg_overall_grade: avgOverallGrade,
+      avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
+      strengths_summary: strengthsSummary,
+      areas_for_improvement_summary: areasForImprovementSummary,
+      recommendations_summary: recommendationsSummary,
+      completed_interview_evaluations: evaluations,
+    };
+  } else {
+    return {
+      template_id: null,
+      interview_template_id: currentTemplateId,
+      interview_title: interviewTitle,
+      interview_description: interviewDescription,
+      total_interviews: totalInterviews,
+      question_count: totalQuestions,
+      avg_overall_grade: avgOverallGrade,
+      avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
+      strengths_summary: strengthsSummary,
+      areas_for_improvement_summary: areasForImprovementSummary,
+      recommendations_summary: recommendationsSummary,
+      completed_interview_evaluations: evaluations,
+    };
+  }
 };
 
 export const getInterviewHistory = async (

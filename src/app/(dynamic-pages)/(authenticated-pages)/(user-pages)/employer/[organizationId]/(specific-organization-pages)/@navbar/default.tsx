@@ -1,6 +1,6 @@
 // https://github.com/vercel/next.js/issues/58272
 import { T } from '@/components/ui/Typography';
-import { getOrganizationTitle } from '@/data/user/organizations';
+// import { getOrganizationTitle } from '@/data/user/organizations';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { z } from 'zod';
@@ -10,7 +10,8 @@ const paramsSchema = z.object({
 });
 
 async function Title({ organizationId }: { organizationId: string }) {
-  const title = await getOrganizationTitle(organizationId);
+  // const title = await getOrganizationTitle(organizationId);
+  const title = 'TO:DO';
 
   return <T.P>{title}</T.P>;
 }

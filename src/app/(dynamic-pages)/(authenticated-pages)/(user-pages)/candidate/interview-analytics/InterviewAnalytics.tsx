@@ -1,7 +1,6 @@
 'use client';
 
 import { InterviewAverageDetails } from '@/components/Interviews/InterviewAnalytics/InterviewAverageDetails';
-import { InterviewCurrentAverageKeyMetrics } from '@/components/Interviews/InterviewAnalytics/InterviewCurrentAverageKeyMetrics';
 import { InterviewLatestCard } from '@/components/Interviews/InterviewAnalytics/InterviewLatestCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
@@ -132,11 +131,15 @@ export default function InterviewAnalyticsPage() {
 
   useEffect(() => {
     if (overview?.latestInterview && !selectedTemplateId) {
-      fetchDetailedData(overview.latestInterview.template_id).then((data) => {
+      const currentTemplateId =
+        activeSwitch === 'Practice Mode'
+          ? overview.latestInterview.template_id
+          : overview.latestInterview.interview_template_id;
+      fetchDetailedData(currentTemplateId, activeSwitch).then((data) => {
         if (data && overview?.latestInterview) {
           setDetailed(data);
           setValue(overview.latestInterview.title);
-          setSelectedTemplateId(overview.latestInterview.template_id);
+          setSelectedTemplateId(currentTemplateId);
         }
         return;
       });
@@ -227,19 +230,23 @@ export default function InterviewAnalyticsPage() {
                   <CommandEmpty>No template found.</CommandEmpty>
                   <CommandGroup>
                     {uniqueFilteredTemplateInterviews &&
-                      uniqueFilteredTemplateInterviews?.map((interiew) => (
+                      uniqueFilteredTemplateInterviews?.map((interview) => (
                         <CommandItem
-                          key={interiew.id}
-                          value={interiew.title}
+                          key={interview.id}
+                          value={interview.title}
                           onSelect={(currentValue) => {
                             const selectedValue =
                               currentValue === value.toLowerCase()
                                 ? ''
-                                : interiew.title;
+                                : interview.title;
                             setValue(selectedValue);
                             if (selectedValue) {
-                              setSelectedTemplateId(interiew.template_id);
-                              fetchDetailedData(interiew.template_id).then(
+                              const currentTemplateId =
+                                activeSwitch === 'Practice Mode'
+                                  ? interview.template_id
+                                  : interview.interview_template_id;
+                              setSelectedTemplateId(currentTemplateId);
+                              fetchDetailedData(currentTemplateId, activeSwitch).then(
                                 (data) => {
                                   if (data) {
                                     setDetailed(data);
@@ -257,12 +264,12 @@ export default function InterviewAnalyticsPage() {
                           <Check
                             className={cn(
                               'mr-2 h-4 w-4',
-                              value === interiew.title
+                              value === interview.title
                                 ? 'opacity-100'
                                 : 'opacity-0',
                             )}
                           />
-                          {interiew.title}
+                          {interview.title}
                         </CommandItem>
                       ))}
                   </CommandGroup>

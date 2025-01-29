@@ -108,7 +108,8 @@ export type InterviewTemplateCategory = {
   category: Database['public']['Enums']['template_category'];
 };
 export type InterviewAnalytics = {
-  template_id: string;
+  template_id: string | null;
+  interview_template_id: string | null;
   interview_title: string;
   interview_description: string;
   total_interviews: number;

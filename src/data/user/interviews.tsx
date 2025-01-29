@@ -463,16 +463,29 @@ export const insertInterviewEvaluation = async (
 };
 export const getInterviewAnalytics = async (
   candidateId: string,
-  templateId: string,
+  currentTemplateId: string,
+  interviewMode: string,
 ): Promise<InterviewAnalytics | null> => {
   const supabase = createSupabaseUserServerComponentClient();
 
-  // Fetch completed interviews for the candidate and template
+  if (!candidateId) {
+    console.warn('Candidate ID not found.');
+    return null;
+  } else if (!currentTemplateId) {
+    console.warn('Current Template ID not found.');
+    return null;
+  }
+
+  // Fetch completed interviews for the candidate and template id
+  // Determine the template ID and column name
+  const templateColumn =
+    interviewMode === 'Practice Mode' ? 'template_id' : 'interview_template_id';
+
   const { data: interviews, error: interviewError } = await supabase
     .from('interviews')
     .select('*')
     .eq('candidate_id', candidateId)
-    .eq('template_id', templateId)
+    .eq(templateColumn, currentTemplateId)
     .eq('status', 'completed'); // Assuming you only want completed interviews
 
   if (interviewError) {
@@ -551,20 +564,37 @@ export const getInterviewAnalytics = async (
   // Assuming all interviews have the same title and description
   const { title: interviewTitle, description: interviewDescription } =
     interviews[0];
-
-  return {
-    template_id: templateId,
-    interview_title: interviewTitle,
-    interview_description: interviewDescription,
-    total_interviews: totalInterviews,
-    question_count: totalQuestions,
-    avg_overall_grade: avgOverallGrade,
-    avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
-    strengths_summary: strengthsSummary,
-    areas_for_improvement_summary: areasForImprovementSummary,
-    recommendations_summary: recommendationsSummary,
-    completed_interview_evaluations: evaluations,
-  };
+  if (interviewMode === 'Practice Mode') {
+    return {
+      template_id: currentTemplateId,
+      interview_template_id: null,
+      interview_title: interviewTitle,
+      interview_description: interviewDescription,
+      total_interviews: totalInterviews,
+      question_count: totalQuestions,
+      avg_overall_grade: avgOverallGrade,
+      avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
+      strengths_summary: strengthsSummary,
+      areas_for_improvement_summary: areasForImprovementSummary,
+      recommendations_summary: recommendationsSummary,
+      completed_interview_evaluations: evaluations,
+    };
+  } else {
+    return {
+      template_id: null,
+      interview_template_id: currentTemplateId,
+      interview_title: interviewTitle,
+      interview_description: interviewDescription,
+      total_interviews: totalInterviews,
+      question_count: totalQuestions,
+      avg_overall_grade: avgOverallGrade,
+      avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
+      strengths_summary: strengthsSummary,
+      areas_for_improvement_summary: areasForImprovementSummary,
+      recommendations_summary: recommendationsSummary,
+      completed_interview_evaluations: evaluations,
+    };
+  }
 };
 
 export const getInterviewHistory = async (

@@ -48,7 +48,10 @@ export const useAnalyticsData = () => {
   };
 
   // Fetch Detailed Data
-  const fetchDetailedData = async (currentTemplateId: string) => {
+  const fetchDetailedData = async (
+    currentTemplateId: string,
+    interviewMode: string,
+  ) => {
     const templateId = currentTemplateId;
     if (!templateId || !userId) {
       setError('Template ID or User ID not found.');
@@ -60,7 +63,11 @@ export const useAnalyticsData = () => {
     try {
       setLoadingDetailed(true);
       setError(null);
-      const analytics = await getInterviewAnalytics(userId, templateId);
+      const analytics = await getInterviewAnalytics(
+        userId,
+        templateId,
+        interviewMode,
+      );
       if (!analytics) {
         setError('Failed to fetch detailed analytics data.');
         console.error('Failed to fetch detailed analytics data.');

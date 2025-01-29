@@ -213,7 +213,7 @@ export default function InterviewFlow({
       let readingMark = false;
       let readingSummary = false;
       let readingAdvice = false;
-
+      setIsFetchingSpecificFeedback(false);
       while (!doneReading) {
         const { value, done } = await reader.read();
         if (done) {
@@ -228,66 +228,77 @@ export default function InterviewFlow({
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const data = line.replace(/^data: /, '').trim();
+            const data = line.replace(/^data:/, '').trim();
             if (data === '[DONE]') {
               doneReading = true;
               break;
             }
+            console.log('data:', data);
+            // /// check what coming on the frontend and if it matches the data
+            // if (data === 'mark') {
+            //   readingMark = true;
+            // }
+            // if (data === 'summary') {
+            //   readingSummary = true;
+            // }
+            // if (data === '"advice_for_next_question"') {
+            //   readingAdvice = true;
+            // }
 
-            /// check what coming on the frontend and if it matches the data
-            console.log('datafronted:', data);
-            if (data === 'mark') {
-              readingMark = true;
-            }
-            if (data === 'summary') {
-              readingSummary = true;
-            }
-            if (data === 'advice_for_next_question') {
-              readingAdvice = true;
-            }
+            // if (readingMark) {
+            //   markDisplayText += data + ' ';
+            //   setQuestionFeedbackMarkDisplayText((prev) => ({
+            //     ...prev,
+            //     [currentQuestionIndex]: markDisplayText,
+            //   }));
+            // }
+            // if (readingSummary) {
+            //   summaryDisplayText += data + ' ';
+            //   setQuestionFeedbackSummaryDisplayText((prev) => ({
+            //     ...prev,
+            //     [currentQuestionIndex]: summaryDisplayText,
+            //   }));
+            // }
+            // if (readingAdvice) {
+            //   adviceDisplayText += data + ' ';
+            //   setQuestionFeedbackAdviceDisplayText((prev) => ({
+            //     ...prev,
+            //     [currentQuestionIndex]: adviceDisplayText,
+            //   }));
+            // }
+            // accumulatedText += data;
+             // Parse the raw JSON string
+             try {
+              const parsed = JSON.parse(data);
+              // Validate the structure
+              if (
+                typeof parsed.mark === 'number' &&
+                typeof parsed.summary === 'string' &&
+                typeof parsed.advice_for_next_question === 'string'
+              ) {
+                // Update the state with the parsed feedback
+                setQuestionFeedback((prev) => ({
+                  ...prev,
+                  [currentQuestionIndex]: parsed,
+                }));
+              } else {
+                throw new Error('Invalid feedback structure');
+              }
 
-            if (readingMark) {
-              markDisplayText += data;
-              setQuestionFeedbackMarkDisplayText((prev) => ({
-                ...prev,
-                [currentQuestionIndex]: markDisplayText,
-              }));
-            }
-            if (readingSummary) {
-              summaryDisplayText += data;
-              setQuestionFeedbackSummaryDisplayText((prev) => ({
-                ...prev,
-                [currentQuestionIndex]: summaryDisplayText,
-              }));
-            }
-            if (readingAdvice) {
-              adviceDisplayText += data;
-              setQuestionFeedbackAdviceDisplayText((prev) => ({
-                ...prev,
-                [currentQuestionIndex]: adviceDisplayText,
-              }));
-            }
-            accumulatedText += data;
           }
         }
       }
       // Now, parse the accumulated JSON
-      try {
-        // const parsedFeedback = JSON.parse(accumulatedText);
-        // setQuestionFeedback(parsedFeedback);
-      } catch (err) {
-        console.error('Error parsing accumulated feedback JSON:', err);
-        setQuestionFeedback((prevFeedback) => ({
-          ...prevFeedback,
-          [currentQuestionIndex]: {
-            mark: 0,
-            summary: 'Error parsing feedback.',
-            advice_for_next_question: 'Please try again later.',
-          },
-        }));
-      }
     } catch (error) {
       console.error('Error fetching specific feedback:', error);
+      setQuestionFeedback((prevFeedback) => ({
+        ...prevFeedback,
+        [currentQuestionIndex]: {
+          mark: 0,
+          summary: 'Error parsing feedback.',
+          advice_for_next_question: 'Please try again later.',
+        },
+      }));
     } finally {
       setIsFetchingSpecificFeedback(false);
     }
@@ -536,7 +547,10 @@ export default function InterviewFlow({
                   <p>Fetching feedback...</p>
                   <LoadingSpinner />
                 </div>
-              ) : questionFeedback[currentQuestionIndex] ? (
+              ) : questionFeedback[currentQuestionIndex] ||
+                questionFeedbackMarkDisplayText ||
+                questionFeedbackAdviceDisplayText ||
+                questionFeedbackAdviceDisplayText ? (
                 <>
                   <div className="text-left space-y-2">
                     {/* <p>
@@ -557,24 +571,36 @@ export default function InterviewFlow({
                         }
                       </p>
                     )} */}
-                    <p>
-                      <strong>Mark:</strong>{' '}
-                      {questionFeedbackMarkDisplayText[currentQuestionIndex]}/
-                      {maxScorePerQuestion}
-                    </p>
-                    <p>
-                      <strong>Summary:</strong>{' '}
-                      {questionFeedbackSummaryDisplayText[currentQuestionIndex]}
-                    </p>
-                    {currentQuestionIndex < questions.length - 1 && (
+                    {questionFeedbackMarkDisplayText && (
                       <p>
-                        <strong>Advice for Next Question:</strong>{' '}
+                        <strong>Mark:</strong>{' '}
+                        {questionFeedbackMarkDisplayText[currentQuestionIndex]}/
+                        {maxScorePerQuestion}
+                      </p>
+                    )}
+                    {questionFeedbackSummaryDisplayText && (
+                      <p>
+                        <strong>Summary:</strong>{' '}
                         {
-                          questionFeedbackAdviceDisplayText[
+                          questionFeedbackSummaryDisplayText[
                           currentQuestionIndex
                           ]
                         }
                       </p>
+                    )}
+                    {questionFeedbackMarkDisplayText && (
+                      <>
+                        {currentQuestionIndex < questions.length - 1 && (
+                          <p>
+                            <strong>Advice for Next Question:</strong>{' '}
+                            {
+                              questionFeedbackAdviceDisplayText[
+                              currentQuestionIndex
+                              ]
+                            }
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                   <div className="flex items-center justify-center space-x-2">

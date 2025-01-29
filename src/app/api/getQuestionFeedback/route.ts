@@ -37,9 +37,7 @@ export async function POST(req: NextRequest) {
         for await (const chunk of stream) {
           const data = chunk.choices?.[0]?.delta?.content;
           if (data) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
-            );
+            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
             console.log('data:', data);
           }
         }

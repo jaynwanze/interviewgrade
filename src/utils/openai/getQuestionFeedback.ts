@@ -39,7 +39,6 @@ const openai = new OpenAI({
 //   apiKey: deepSeekKey,
 // });
 
-
 /**
  * Constructs the prompt for OpenAI based on the current question and answer
  */
@@ -123,7 +122,7 @@ const callOpenAIWithRetries = async (
     try {
       const completion = await openai.chat.completions.create({
         // model: 'deepseek-chat',
-        model: 'gpt-4',
+        model: 'gpt-4-turbo',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200,
         temperature: 0.2,
@@ -160,6 +159,7 @@ const callOpenAIWithRetries = async (
 const callOpenAI = async (prompt: string): Promise<string> => {
   try {
     const aiMessage = await callOpenAIWithRetries(prompt);
+    console.log('Question Feedback Prompt: ', prompt);
     return aiMessage;
   } catch (error) {
     // Enhanced error handling

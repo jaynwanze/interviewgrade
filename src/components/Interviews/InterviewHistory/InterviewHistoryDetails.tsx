@@ -164,28 +164,30 @@ export const InterviewHistoryDetails = ({
     : 'N/A';
 
   return (
-    <div className="p-4 max-w-3xl mx-auto text-center">
-      <div className="w-full max-w-4xl mx-auto p-">
-        <Card className="shadow-lg p-4">
-          <h1 className="text-2xl font-bold mb-1">
-            {' '}
-            {interviewModeDisplayString}: {title}
-          </h1>
-          <p>
-            <strong>Status:</strong> {formattedStatus}
-          </p>
-          <p>
-            <strong>Started At:</strong> {formattedStartedAt}
-          </p>
-          <p>
-            <strong>Completed At:</strong> {formattedCompletedAt}
-          </p>
-        </Card>
+    <>
+      <div className="p-4 max-w-3xl mx-auto text-center">
+        <div className="w-full max-w-4xl mx-auto p-4">
+          <Card className="shadow-lg p-4">
+            <h1 className="text-2xl font-bold mb-1">
+              {' '}
+              {interviewModeDisplayString}: {title}
+            </h1>
+            <p>
+              <strong>Status:</strong> {formattedStatus}
+            </p>
+            <p>
+              <strong>Started At:</strong> {formattedStartedAt}
+            </p>
+            <p>
+              <strong>Completed At:</strong> {formattedCompletedAt}
+            </p>
+          </Card>
+        </div>
       </div>
 
       {(status === 'completed' && evaluation && (
-        <div className="w-full max-w-4xl mx-auto p-4">
-          <div className="flex">
+        <div className="interview-flow-container flex flex-col items-center min-h-screen">
+          <div className="left-side w-3/4 p-4 flex flex-col items-center justify-center">
             <Card className="shadow-lg">
               <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4">
                 Report
@@ -265,58 +267,61 @@ export const InterviewHistoryDetails = ({
                 </section>
               </CardContent>
             </Card>
-            <Card className="shadow-lg p-4">
-              {/* Question Answer Feedback */}
-              {evaluation.question_answer_feedback &&
-                evaluation.question_answer_feedback.length > 0 && (
-                  <div className="flex-1">
-                    <section className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">
-                        Answer Feedback
-                      </h3>
-                      {evaluation.question_answer_feedback.map(
-                        (qa: QuestionAnswerFeedback, index: number) => (
-                          <div
-                            key={index}
-                            className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800"
-                          >
-                            <h4 className="text-md font-semibold mb-2">
-                              Question {index + 1}: {qa.question}
-                            </h4>
-                            <p className="mb-2">
-                              <strong>Answer:</strong> {qa.answer || 'N/A'}
-                            </p>
-                            <p className="mb-2">
-                              <strong>Mark:</strong> {qa.mark}/
-                              {(
-                                100 / evaluation.question_answer_feedback.length
-                              ).toFixed(2)}
-                            </p>
-                            <p>
-                              <strong>Feedback:</strong> {qa.feedback}
-                            </p>
-                          </div>
-                        ),
-                      )}
-                    </section>
-                  </div>
-                )}
-            </Card>
           </div>
+
+          {/* Question Answer Feedback */}
+          {evaluation.question_answer_feedback &&
+            evaluation.question_answer_feedback.length > 0 && (
+              <div className="right-side w-3/4 p-4 flex flex-col justify-center">
+                <Card className="shadow-lg">
+                  <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4 text-center">
+                    Answer Feedback
+                  </CardHeader>
+                  <section className="mb-6">
+                    {evaluation.question_answer_feedback.map(
+                      (qa: QuestionAnswerFeedback, index: number) => (
+                        <div
+                          key={index}
+                          className="p-4 mx-5 mb-4 border rounded-lg bg-gray-50 dark:bg-gray-800"
+                        >
+                          <h4 className="text-md font-semibold mb-2">
+                            Question {index + 1}: {qa.question}
+                          </h4>
+                          <p className="mb-2">
+                            <strong>Answer:</strong> {qa.answer || 'N/A'}
+                          </p>
+                          <p className="mb-2">
+                            <strong>Mark:</strong> {qa.mark}/
+                            {(
+                              100 / evaluation.question_answer_feedback.length
+                            ).toFixed(2)}
+                          </p>
+                          <p>
+                            <strong>Feedback:</strong> {qa.feedback}
+                          </p>
+                        </div>
+                      ),
+                    )}
+                  </section>
+                </Card>
+              </div>
+            )}
         </div>
       )) || (
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">
-                Interview Feedback
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center p-1">No feedback available yet.</div>
-            </CardContent>
-          </Card>
+          <div className="p-4 max-w-3xl mx-auto text-center">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">
+                  Interview Feedback
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center p-1">No feedback available yet.</div>
+              </CardContent>
+            </Card>
+          </div>
         )}
-    </div>
+    </>
   );
 };
 

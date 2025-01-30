@@ -32,12 +32,6 @@ export const useInterviewHistory = () => {
       }
       setInterviews(data);
       setFilteredInterviews(data);
-      setCounts({
-        all: data.length,
-        completed: data.filter((i) => i.status === 'completed').length,
-        notCompleted: data.filter((i) => i.status === 'in_progress').length,
-        notStarted: data.filter((i) => i.status === 'not_started').length,
-      });
     } catch (error) {
       console.error('Error fetching interview history:', error);
       setError(error.message || 'Failed to fetch interview history');
@@ -72,6 +66,12 @@ export const useInterviewHistory = () => {
     } else if (activeSwitch === 'Interview Mode') {
       filtered = filtered.filter((i) => i.mode === 'interview');
     }
+    setCounts({
+      all: filtered.length,
+      completed: filtered.filter((i) => i.status === 'completed').length,
+      notCompleted: filtered.filter((i) => i.status === 'in_progress').length,
+      notStarted: filtered.filter((i) => i.status === 'not_started').length,
+    });
 
     // Further filter based on activeTab
     switch (activeTab) {

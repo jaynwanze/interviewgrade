@@ -62,17 +62,22 @@ function aggregateDataByDate(data: InterviewChartData[]) {
     });
   });
 
-  return Object.values(aggregated).map(({ date, scores }) => {
-    const averagedScores = Object.entries(scores).reduce(
-      (acc, [name, { total, count }]) => {
-        acc[name] = total / count;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+  // Convert the aggregated data into an array sorted by date
+  const aggregatedArray = Object.values(aggregated)
+    .map(({ date, scores }) => {
+      const averagedScores = Object.entries(scores).reduce(
+        (acc, [name, { total, count }]) => {
+          acc[name] = total / count;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
-    return { date, ...averagedScores };
-  });
+      return { date, ...averagedScores };
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  return aggregatedArray;
 }
 
 export function BarChartInteractiveEvaluationScores({
@@ -252,6 +257,7 @@ export function BarChartInteractiveEvaluationScores({
                   return date.toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
+                    
                   });
                 }}
               />

@@ -42,16 +42,13 @@ const chartConfig = {
   },
   count: {
     label: 'Interview Count',
-    color: 'hsl(var(--chart-6))',
+    color: 'hsl(var(--chart-4))',
   },
 } satisfies ChartConfig;
 
 // Helper function to group by date and calculate the average grade
 function aggregateDataByDate(data: rawDataTypeChart) {
-  const aggregated: Record<
-    string,
-    { date: string; interview_grade: number; count: number }
-  > = {};
+  const aggregated: rawDataTypeChart = [];
 
   data.forEach(({ date, interview_grade }) => {
     if (!aggregated[date]) {
@@ -62,10 +59,16 @@ function aggregateDataByDate(data: rawDataTypeChart) {
     }
   });
 
-  return Object.values(aggregated).map(({ date, interview_grade, count }) => ({
-    date,
-    interview_grade: interview_grade / count,
-  }));
+  // Convert the aggregated data into an array sorted by date
+  const aggregatedArray = Object.values(aggregated)
+    .map(({ date, interview_grade, count }) => ({
+      date,
+      interview_grade: interview_grade / count,
+      count,
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  return aggregatedArray;
 }
 
 export function AreaChartInteractiveOverallGrades({
@@ -74,8 +77,10 @@ export function AreaChartInteractiveOverallGrades({
   completedInterviewEvaluations: InterviewEvaluation[];
 }) {
   const [timeRange, setTimeRange] = useState('90d');
-  let rawChartData: { date: string; interview_grade: number; count }[] = [];
-  const [chartData, setChartData] = useState(aggregateDataByDate(rawChartData));
+  let rawChartData: rawDataTypeChart = [];
+  const [chartData, setChartData] = useState<rawDataTypeChart>(
+    aggregateDataByDate(rawChartData),
+  );
   const [interviewEvaluations, setInterviewEvalutations] = useState<
     InterviewEvaluation[]
   >([]);
@@ -164,7 +169,7 @@ export function AreaChartInteractiveOverallGrades({
               No data available for the selected time range.
             </div>
           ) : (
-            <AreaChart data={filteredData}>
+            <AreaChart accessibilityLayer data={filteredData}>
               <defs>
                 <linearGradient
                   id="fillInterviewGrade"
@@ -216,6 +221,7 @@ export function AreaChartInteractiveOverallGrades({
                       return new Date(value).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
+                        year: 'numeric',
                       });
                     }}
                     indicator="dot"

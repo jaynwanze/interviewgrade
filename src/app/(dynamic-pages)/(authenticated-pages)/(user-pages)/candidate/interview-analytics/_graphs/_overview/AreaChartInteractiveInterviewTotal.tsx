@@ -177,7 +177,7 @@ export function AreaChartInteractiveInterviewTotal({
               No data available for the selected time range.
             </div>
           ) : (
-            <AreaChart data={filteredData}>
+            <AreaChart accessibilityLayer data={filteredData}>
               <defs>
                 <linearGradient id="fillInterview" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -222,6 +222,7 @@ export function AreaChartInteractiveInterviewTotal({
                       return new Date(value).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
+                        year: 'numeric',
                       });
                     }}
                     indicator="dot"

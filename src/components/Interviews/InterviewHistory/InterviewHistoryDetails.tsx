@@ -185,90 +185,95 @@ export const InterviewHistoryDetails = ({
 
       {(status === 'completed' && evaluation && (
         <div className="w-full max-w-4xl mx-auto p-4">
-          <Card className="shadow-lg">
-            <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4">
-              Report
-            </CardHeader>
-            <CardContent>
-              {/* Overall Score */}
-              <section className="mb-2">
-                <h2 className="text-xl font-semibold">Overall Grade</h2>
-                <p className={`text-3xl font-bold ${gradeStringColour}`}>
-                  {evaluation.overall_grade}/100
-                </p>
-              </section>
+          <div className="flex">
+            <Card className="shadow-lg">
+              <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4">
+                Report
+              </CardHeader>
+              <CardContent>
+                {/* Overall Score */}
+                <section className="mb-2">
+                  <h2 className="text-xl font-semibold">Overall Grade</h2>
+                  <p className={`text-3xl font-bold ${gradeStringColour}`}>
+                    {evaluation.overall_grade}/100
+                  </p>
+                </section>
 
-              {/* Strengths */}
-              <section className="mb-6">
-                <h2 className="text-xl font-semibold mb-2">Strengths</h2>
-                <p>
-                  {evaluation.strengths
-                    ? evaluation.strengths
-                    : 'None Provided'}
-                </p>
-              </section>
+                {/* Strengths */}
+                <section className="mb-6">
+                  <h2 className="text-xl font-semibold mb-2">Strengths</h2>
+                  <p>
+                    {evaluation.strengths
+                      ? evaluation.strengths
+                      : 'None Provided'}
+                  </p>
+                </section>
 
-              {/* Areas for Improvement */}
-              <section className="mb-6">
-                <h2 className="text-xl font-semibold mb-2">
-                  Areas for Improvement
-                </h2>
-                <p>
-                  {evaluation.areas_for_improvement
-                    ? evaluation.areas_for_improvement
-                    : 'None Provided'}
-                </p>
-              </section>
+                {/* Areas for Improvement */}
+                <section className="mb-6">
+                  <h2 className="text-xl font-semibold mb-2">
+                    Areas for Improvement
+                  </h2>
+                  <p>
+                    {evaluation.areas_for_improvement
+                      ? evaluation.areas_for_improvement
+                      : 'None Provided'}
+                  </p>
+                </section>
 
-              {/* Recommendations */}
-              <section className="mb-6">
-                <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
-                <p>
-                  {evaluation.recommendations
-                    ? evaluation.recommendations
-                    : 'None Provided'}
-                </p>
-              </section>
+                {/* Recommendations */}
+                <section className="mb-6">
+                  <h2 className="text-xl font-semibold mb-2">
+                    Recommendations
+                  </h2>
+                  <p>
+                    {evaluation.recommendations
+                      ? evaluation.recommendations
+                      : 'None Provided'}
+                  </p>
+                </section>
 
-              {/* Evaluation Scores */}
-              <section className="mb-6">
-                <h2 className="text-xl font-semibold mb-2">
-                  Evaluation Scores
-                </h2>
-                <table className="min-w-full border">
-                  <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-800 font-bold">
-                      <th className="px-4 py-2 border">Criterion</th>
-                      <th className="px-4 py-2 border">Score</th>
-                      <th className="px-4 py-2 border">Feedback</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {evaluation.evaluation_scores.map((score) => (
-                      <tr key={score.id}>
-                        <td className="px-4 py-2 border bold font-semibold">
-                          {score.name || 'N/A'}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {score.score}/10
-                        </td>
-                        <td className="px-4 py-2 border italic">
-                          {score.feedback}
-                        </td>
+                {/* Evaluation Scores */}
+                <section className="mb-6">
+                  <h2 className="text-xl font-semibold mb-2">
+                    Evaluation Scores
+                  </h2>
+                  <table className="min-w-full border">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800 font-bold">
+                        <th className="px-4 py-2 border">Criterion</th>
+                        <th className="px-4 py-2 border">Score</th>
+                        <th className="px-4 py-2 border">Feedback</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </section>
-
+                    </thead>
+                    <tbody>
+                      {evaluation.evaluation_scores.map((score) => (
+                        <tr key={score.id}>
+                          <td className="px-4 py-2 border bold font-semibold">
+                            {score.name || 'N/A'}
+                          </td>
+                          <td className="px-4 py-2 border font-semibold">
+                            {score.score}/10
+                          </td>
+                          <td className="px-4 py-2 border italic">
+                            {score.feedback}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              </CardContent>
+            </Card>
+            <Card className="shadow-lg p-4">
               {/* Question Answer Feedback */}
               {evaluation.question_answer_feedback &&
                 evaluation.question_answer_feedback.length > 0 && (
-                  <section className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Answer Feedback
-                    </h3>
-                    <div className="space-y-4">
+                  <div className="flex-1">
+                    <section className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Answer Feedback
+                      </h3>
                       {evaluation.question_answer_feedback.map(
                         (qa: QuestionAnswerFeedback, index: number) => (
                           <div
@@ -293,11 +298,11 @@ export const InterviewHistoryDetails = ({
                           </div>
                         ),
                       )}
-                    </div>
-                  </section>
+                    </section>
+                  </div>
                 )}
-            </CardContent>
-          </Card>
+            </Card>
+          </div>
         </div>
       )) || (
           <Card className="shadow-lg">

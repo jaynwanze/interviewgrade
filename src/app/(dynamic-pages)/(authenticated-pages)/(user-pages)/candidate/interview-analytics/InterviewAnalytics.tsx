@@ -33,6 +33,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
 import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOverview';
 
+export type TemplateAndSwitchModeDetails = {
+  current_template_id: string;
+  current_switch_mode: string;
+};
+
 export default function InterviewAnalyticsPage() {
   const {
     loadingOverview,
@@ -125,21 +130,44 @@ export default function InterviewAnalyticsPage() {
     [overview],
   );
 
+  const getCurrentTemplateIdOnInit = (
+    latestInterview: Interview,
+  ): TemplateAndSwitchModeDetails => {
+    let currentTemplateId: string = '';
+    let currentSwitchMode: string = '';
+    if (latestInterview.template_id) {
+      currentTemplateId = latestInterview.template_id;
+      currentSwitchMode = 'Practice Mode';
+      setActiveSwitch('Practice Mode');
+    } else {
+      currentTemplateId = latestInterview.interview_template_id;
+      currentSwitchMode = 'Interview Mode';
+      setActiveSwitch('Interview Mode');
+    }
+    return {
+      current_template_id: currentTemplateId,
+      current_switch_mode: currentSwitchMode,
+    };
+  };
+
   useEffect(() => {
     handleSwitchChange(activeSwitch);
   }, [handleSwitchChange, activeSwitch]);
 
   useEffect(() => {
     if (overview?.latestInterview && !selectedTemplateId) {
-      const currentTemplateId =
-        activeSwitch === 'Practice Mode'
-          ? overview.latestInterview.template_id
-          : overview.latestInterview.interview_template_id;
-      fetchDetailedData(currentTemplateId, activeSwitch).then((data) => {
+      const currentTemplateAndSwitchDetails: TemplateAndSwitchModeDetails =
+        getCurrentTemplateIdOnInit(overview.latestInterview);
+      fetchDetailedData(
+        currentTemplateAndSwitchDetails.current_template_id,
+        currentTemplateAndSwitchDetails.current_switch_mode,
+      ).then((data) => {
         if (data && overview?.latestInterview) {
           setDetailed(data);
           setValue(overview.latestInterview.title);
-          setSelectedTemplateId(currentTemplateId);
+          setSelectedTemplateId(
+            currentTemplateAndSwitchDetails.current_template_id,
+          );
         }
         return;
       });
@@ -241,19 +269,19 @@ export default function InterviewAnalyticsPage() {
                                 : interview.title;
                             setValue(selectedValue);
                             if (selectedValue) {
-                              const currentTemplateId =
-                                activeSwitch === 'Practice Mode'
-                                  ? interview.template_id
-                                  : interview.interview_template_id;
+                              const currentTemplateId = interview.template_id
+                                ? interview.template_id
+                                : interview.interview_template_id;
                               setSelectedTemplateId(currentTemplateId);
-                              fetchDetailedData(currentTemplateId, activeSwitch).then(
-                                (data) => {
-                                  if (data) {
-                                    setDetailed(data);
-                                  }
-                                  return;
-                                },
-                              );
+                              fetchDetailedData(
+                                currentTemplateId,
+                                activeSwitch,
+                              ).then((data) => {
+                                if (data) {
+                                  setDetailed(data);
+                                }
+                                return;
+                              });
                             } else {
                               setSelectedTemplateId(null);
                               setDetailed(null);

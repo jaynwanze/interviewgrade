@@ -187,7 +187,7 @@ export const InterviewHistoryDetails = ({
 
       {(status === 'completed' && evaluation && (
         <div className="interview-flow-container flex flex-col items-center min-h-screen">
-          <div className="left-side w-3/4 p-4 flex flex-col items-center justify-center">
+          <div className="left-side w-3/4 p-4 flex flex-col items-center justify-center text-center">
             <Card className="shadow-lg">
               <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4">
                 Report

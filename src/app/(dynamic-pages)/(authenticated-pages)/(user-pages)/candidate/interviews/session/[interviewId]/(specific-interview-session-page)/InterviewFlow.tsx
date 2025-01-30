@@ -3,7 +3,6 @@
 import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import {
@@ -177,8 +176,6 @@ export default function InterviewFlow({
     },
     [questions, questionFeedback, currentQuestionIndex, interview],
   );
-  // components/Interviews/InterviewFlow.tsx
-
   const fetchSpecificFeedback = async (answer: string) => {
     setIsFetchingSpecificFeedback(true);
     try {
@@ -202,100 +199,72 @@ export default function InterviewFlow({
         return;
       }
 
+      const reader = response.body?.getReader();
+      if (!reader) return;
+
+      const partialTextBuffer = '';
+      const jsonBuffer = '';
+      let isReadingMark = false;
+      const isParsingMark = false;
+      let markValue: number | null = null;
+      let isReadingSummary = false;
+      const isReadingAdvice = false;
+      const isDone = false;
       let accumulatedText = '';
-      let markDisplayText = '';
-      let summaryDisplayText = '';
-      let adviceDisplayText = '';
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let doneReading = false;
-      let readingMark = false;
-      let readingSummary = false;
-      let readingAdvice = false;
-      setIsFetchingSpecificFeedback(false);
-      while (!doneReading) {
+      while (!isDone) {
         const { value, done } = await reader.read();
-        if (done) {
-          doneReading = true;
-          break;
-        }
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedText += chunk;
+        if (done) break;
 
-        const lines = accumulatedText.split('\n\n');
-        accumulatedText = lines.pop() || '';
+        const chunk = new TextDecoder().decode(value, { stream: true });
+        const lines = chunk.split('\n\n');
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.replace(/^data:/, '').trim();
-            if (data === '[DONE]') {
-              doneReading = true;
-              break;
-            }
-            console.log('data:', data);
-            // /// check what coming on the frontend and if it matches the data
-            // if (data === 'mark') {
-            //   readingMark = true;
-            // }
-            // if (data === 'summary') {
-            //   readingSummary = true;
-            // }
-            // if (data === '"advice_for_next_question"') {
-            //   readingAdvice = true;
-            // }
-
-            // if (readingMark) {
-            //   markDisplayText += data + ' ';
-            //   setQuestionFeedbackMarkDisplayText((prev) => ({
-            //     ...prev,
-            //     [currentQuestionIndex]: markDisplayText,
-            //   }));
-            // }
-            // if (readingSummary) {
-            //   summaryDisplayText += data + ' ';
-            //   setQuestionFeedbackSummaryDisplayText((prev) => ({
-            //     ...prev,
-            //     [currentQuestionIndex]: summaryDisplayText,
-            //   }));
-            // }
-            // if (readingAdvice) {
-            //   adviceDisplayText += data + ' ';
-            //   setQuestionFeedbackAdviceDisplayText((prev) => ({
-            //     ...prev,
-            //     [currentQuestionIndex]: adviceDisplayText,
-            //   }));
-            // }
-            // accumulatedText += data;
-             // Parse the raw JSON string
-             try {
-              const parsed = JSON.parse(data);
-              // Validate the structure
-              if (
-                typeof parsed.mark === 'number' &&
-                typeof parsed.summary === 'string' &&
-                typeof parsed.advice_for_next_question === 'string'
-              ) {
-                // Update the state with the parsed feedback
-                setQuestionFeedback((prev) => ({
-                  ...prev,
-                  [currentQuestionIndex]: parsed,
-                }));
-              } else {
-                throw new Error('Invalid feedback structure');
-              }
-
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.replace('data: ', '').trim();
+          console.log('raw:', raw);
+          if (raw === '[DONE]') {
+            return;
           }
+
+          // If we see the sentinel for JSON start
+          if (raw.includes('Mark')) {
+            isReadingMark = true;
+            continue; // skip showing this to user
+          }
+          // If we see the sentinel for JSON end
+          if (raw.includes('Summary')) {
+            isReadingSummary = true;
+            continue; // skip showing this to user
+          }
+          if (raw.includes('AdviceforNextQuestion')) {
+            isReadingSummary = true;
+            continue; // skip showing this to user
+          }
+
+          if (isReadingMark) {
+            const convertedValue = Number(raw.trim());
+            if (convertedValue) {
+              markValue = convertedValue;
+              console.log(markValue);
+            }
+            isReadingMark = false;
+          }
+
+          // Otherwise, it's user-friendly text, show it
+          accumulatedText += raw + ' ';
         }
       }
-      // Now, parse the accumulated JSON
     } catch (error) {
-      console.error('Error fetching specific feedback:', error);
+      console.error(
+        'Error fetching specific feedback:',
+        error.message || error,
+      );
       setQuestionFeedback((prevFeedback) => ({
         ...prevFeedback,
         [currentQuestionIndex]: {
           mark: 0,
-          summary: 'Error parsing feedback.',
+          summary: 'Error fetching feedback.',
           advice_for_next_question: 'Please try again later.',
         },
       }));
@@ -547,22 +516,25 @@ export default function InterviewFlow({
                   <p>Fetching feedback...</p>
                   <LoadingSpinner />
                 </div>
-              ) : questionFeedback[currentQuestionIndex] ||
-                questionFeedbackMarkDisplayText ||
-                questionFeedbackAdviceDisplayText ||
-                questionFeedbackAdviceDisplayText ? (
-                <>
-                  <div className="text-left space-y-2">
-                    {/* <p>
-                      <strong>Mark:</strong>{' '}
-                      {questionFeedback[currentQuestionIndex]?.mark}/
-                      {maxScorePerQuestion}
-                    </p>
+              ) : questionFeedback[currentQuestionIndex] ? (
+                <div className="text-left space-y-2">
+                  {questionFeedback[currentQuestionIndex]?.mark !==
+                    undefined && (
+                      <p>
+                        <strong>Mark:</strong>{' '}
+                        {questionFeedback[currentQuestionIndex]?.mark} /{' '}
+                        {maxScorePerQuestion}
+                      </p>
+                    )}
+                  {questionFeedback[currentQuestionIndex]?.summary && (
                     <p>
                       <strong>Summary:</strong>{' '}
                       {questionFeedback[currentQuestionIndex]?.summary}
                     </p>
-                    {currentQuestionIndex < questions.length - 1 && (
+                  )}
+                  {currentQuestionIndex < questions.length - 1 &&
+                    questionFeedback[currentQuestionIndex]
+                      ?.advice_for_next_question && (
                       <p>
                         <strong>Advice for Next Question:</strong>{' '}
                         {
@@ -570,49 +542,10 @@ export default function InterviewFlow({
                             ?.advice_for_next_question
                         }
                       </p>
-                    )} */}
-                    {questionFeedbackMarkDisplayText && (
-                      <p>
-                        <strong>Mark:</strong>{' '}
-                        {questionFeedbackMarkDisplayText[currentQuestionIndex]}/
-                        {maxScorePerQuestion}
-                      </p>
                     )}
-                    {questionFeedbackSummaryDisplayText && (
-                      <p>
-                        <strong>Summary:</strong>{' '}
-                        {
-                          questionFeedbackSummaryDisplayText[
-                          currentQuestionIndex
-                          ]
-                        }
-                      </p>
-                    )}
-                    {questionFeedbackMarkDisplayText && (
-                      <>
-                        {currentQuestionIndex < questions.length - 1 && (
-                          <p>
-                            <strong>Advice for Next Question:</strong>{' '}
-                            {
-                              questionFeedbackAdviceDisplayText[
-                              currentQuestionIndex
-                              ]
-                            }
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <Button onClick={handleNextQuestion} className="mt-4">
-                      {currentQuestionIndex === questions.length - 1
-                        ? 'Finish Interview'
-                        : 'Next Question'}
-                    </Button>{' '}
-                  </div>
-                </>
+                </div>
               ) : (
-                'After the question is answered, feedback will be loaded.'
+                <p>Feedback will be available after question is answered.</p>
               )}
             </CardContent>
           </Card>

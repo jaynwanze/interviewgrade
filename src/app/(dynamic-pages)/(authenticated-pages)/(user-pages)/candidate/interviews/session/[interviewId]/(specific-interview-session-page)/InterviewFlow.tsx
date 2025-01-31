@@ -47,6 +47,9 @@ export default function InterviewFlow({
   const [completionMessage, setCompletionMessage] = useState<string | null>(
     null,
   );
+  const [evaluationCriterias, setEvaluationCriterias] = useState<
+    EvaluationCriteriaType[]
+  >([]);
   const [isFetchingSpecificFeedback, setIsFetchingSpecificFeedback] =
     useState(false);
   const [specificFeedback, setSpecificFeedback] =
@@ -106,6 +109,11 @@ export default function InterviewFlow({
       }
       setQuestions(interviewQuestions);
       setCurrentQuestionIndex(interview.current_question_index);
+
+      const evaluationCriterias: EvaluationCriteriaType[] = interviewQuestions
+        .map((question) => [question.evaluation_criteria])
+        .flat();
+      setEvaluationCriterias(evaluationCriterias);
 
       if (interview.current_question_index !== 0) {
         answers.current = interviewQuestions
@@ -178,6 +186,7 @@ export default function InterviewFlow({
         answer,
         nextQuestion,
         interview?.question_count ?? 0,
+        evaluationCriterias,
       );
       if (specificFeedbackData) {
         setQuestionFeedback((prev) => ({

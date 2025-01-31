@@ -2,7 +2,11 @@
 
 'use server';
 
-import { InterviewQuestion, specificFeedbackType } from '@/types';
+import {
+  EvaluationCriteriaType,
+  InterviewQuestion,
+  specificFeedbackType,
+} from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
@@ -48,6 +52,7 @@ const constructQuestionFeedbackPrompt = (
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
   interview_question_count: number,
+  intervieEvaluationsCriterias: EvaluationCriteriaType[],
 ): string => {
   // Helper function to format rubrics
   const formatRubrics = (
@@ -59,10 +64,15 @@ const constructQuestionFeedbackPrompt = (
       .join('\n');
 
   // Format the evaluation criteria
-  const formattedCriteria = `**${currentQuestion.evaluation_criteria.name}**: ${currentQuestion.evaluation_criteria.description}\n   
+  const formattedCriteria = intervieEvaluationsCriterias
+    .map(
+      (criterion, index) =>
+        `${index + 1}. **${criterion.name}**: ${criterion.description}\n   
 | Percentage Range | Description |
 |------------------|-------------|
-${formatRubrics(currentQuestion.evaluation_criteria.rubrics)}`;
+${formatRubrics(criterion.rubrics)}`,
+    )
+    .join('\n\n');
 
   const numberOfQuestions = interview_question_count || 1;
   const maxTotalScore = 100;
@@ -79,6 +89,8 @@ Evaluate the candidate based on the following criteria, using the rubric provide
 ${formattedCriteria}
 
 ### Current Question
+**Linked Evaluation Criteria**: ${currentQuestion.evaluation_criteria.name}
+
 **Question**: ${currentQuestion.text}
 
 **Answer**: "${currentAnswer}"
@@ -122,7 +134,7 @@ const callOpenAIWithRetries = async (
     try {
       const completion = await openai.chat.completions.create({
         // model: 'deepseek-chat',
-        model: 'gpt-4-turbo',
+        model: 'gpt-4',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 200,
         temperature: 0.2,
@@ -226,6 +238,7 @@ export const getQuestionFeedback = async (
   currentAnswer: string,
   nextQuestion: InterviewQuestion | null,
   interview_question_count: number,
+  intervieEvaluationsCriterias: EvaluationCriteriaType[],
 ): Promise<specificFeedbackType | null> => {
   // Input Validation
   if (!currentQuestion.text.trim()) {
@@ -243,6 +256,7 @@ export const getQuestionFeedback = async (
     currentAnswer,
     nextQuestion,
     interview_question_count,
+    intervieEvaluationsCriterias,
   );
 
   // Call OpenAI API

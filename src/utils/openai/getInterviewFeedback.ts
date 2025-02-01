@@ -129,15 +129,12 @@ Your evaluation should include:
 - **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10.
 - **Strengths and Areas for Improvement**: Specific feedback highlighting areas where the candidate excelled or could improve.
 - **Recommendations**: Suggestions for how the candidate could improve.
-(Note: In case, a mark or feedback field is empty, populate its field accordingly)
-- **Question Answer Feedback**: The grade based on specific corresponding feedback and evaluation criteria for each question and answer pair out of equal marks which add up overall score(grade).
 - **Mark**: Within "question_answer_feedback" for each mark for each answer should be marked out of ${maxScorePerQuestion} and ensure that the sum of all marks add up to "overall_grade".
 
 ### Guidelines
-1. **Link Feedback to Specific Answers**: Reference specific answers related to each criterion. For example, when evaluating a specific criterion, mention how the candidate's answer to the linked question demonstrates their skills in that area.
-2. **Balanced Feedback**: Address both strengths and areas for improvement for each criterion, especially if the candidate performed variably across different questions.
-3. **Avoid Generalizations**: Provide concrete examples from the candidate's answers to support your evaluations.
-4. **Constructive Criticism**: Offer actionable feedback that the candidate can use to improve their performance.
+1. **Balanced Feedback**: Address both strengths and areas for improvement for each criterion, especially if the candidate performed variably across different questions.
+2. **Avoid Generalizations**: Provide concrete examples from the candidate's answers to support your evaluations.
+3. **Constructive Criticism**: Offer actionable feedback that the candidate can use to improve their performance.
 
 ### Output Format
 Provide your evaluation in the following JSON format without any additional text.
@@ -158,12 +155,7 @@ Provide your evaluation in the following JSON format without any additional text
 \`\`\`
 
 **Note**: 
--Ensure the JSON is properly formatted for parsing.
--If the candidate's response is not provided, assume a score of 0 for that question.
--If the candidate's response is not relevant to the evaluation criteria, provide feedback accordingly.
--If the candidate's response is lacking or terrible, score it really low or zero marks if necessary and provide constructive feedback.
--If the candidate's response is partially relevant, provide partial credit based on the relevance.
--If the candidate's response is exemplary, provide full credit, fulls marks where due and highlight the strengths.`;
+-Ensure the JSON is properly formatted for parsing.`;
 };
 
 /**

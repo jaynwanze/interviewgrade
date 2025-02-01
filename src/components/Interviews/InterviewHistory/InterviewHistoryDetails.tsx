@@ -292,9 +292,9 @@ export const InterviewHistoryDetails = ({
                           </p>
                           <p className="mb-2">
                             <strong>Mark:</strong> {qa.mark}/
-                            {(
-                              100 / evaluation.question_answer_feedback.length
-                            ).toFixed(2)}
+                            {Math.floor(
+                              100 / evaluation.question_answer_feedback.length,
+                            )}
                           </p>
                           <p>
                             <strong>Feedback:</strong> {qa.feedback}

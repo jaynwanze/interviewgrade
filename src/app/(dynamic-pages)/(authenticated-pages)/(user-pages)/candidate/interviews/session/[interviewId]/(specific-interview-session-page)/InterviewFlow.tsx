@@ -59,6 +59,7 @@ export default function InterviewFlow({
   const [questionFeedback, setQuestionFeedback] = useState<{
     [key: number]: specificFeedbackType | null;
   }>({});
+  const [scoreStringColour, setScoreStringColour] = useState('');
   const { addNotification } = useNotifications();
 
   const startTimer = () => {
@@ -288,6 +289,22 @@ export default function InterviewFlow({
       }
     }
   };
+  useEffect(() => {
+    if (questionFeedback[currentQuestionIndex]) {
+      const score = Math.round(
+        ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
+          maxScorePerQuestion) *
+        100,
+      );
+      if (score >= 80) {
+        setScoreStringColour('text-green-600');
+      } else if (score >= 60) {
+        setScoreStringColour('text-yellow-600');
+      } else {
+        setScoreStringColour('text-red-600');
+      }
+    }
+  }, [questionFeedback[currentQuestionIndex]]);
 
   const handleNextQuestion = useCallback(() => {
     setCurrentQuestionIndex((prevIndex) => {
@@ -398,12 +415,22 @@ export default function InterviewFlow({
                 </div>
               ) : questionFeedback[currentQuestionIndex] ? (
                 <>
-                  <div className="text-left space-y-2">
-                    <p>
-                      <strong>Mark:</strong>{' '}
-                      {questionFeedback[currentQuestionIndex]?.mark}/
-                      {maxScorePerQuestion}
-                    </p>
+                  <div className="text-left text-lg space-y-2">
+                    <div className="text-center">
+                      <strong className="text-center">Score(%):</strong>{' '}
+                      <p
+                        className={`text-3xl text-center font-bold ${scoreStringColour}`}
+                      >
+                        {Math.round(
+                          ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
+                            maxScorePerQuestion) *
+                          100,
+                        )}
+                        /100%{' '}
+                        {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/
+                      {maxScorePerQuestion}) */}
+                      </p>
+                    </div>
                     <p>
                       <strong>Summary:</strong>{' '}
                       {questionFeedback[currentQuestionIndex]?.summary}

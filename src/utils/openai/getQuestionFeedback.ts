@@ -119,6 +119,11 @@ Provide your evaluation in the following JSON format without any additional text
 - Ensure the JSON is properly formatted for parsing.
 - If there is no next question, set "advice_for_next_question" to "N/A".
 - Provide actionable and constructive advice to help the candidate improve.
+-If the candidate's response is not provided, assume a score of 0 for that question.
+-If the candidate's response is not relevant to the evaluation criteria, provide feedback accordingly.
+-If the candidate's response is lacking or terrible, score it really low or zero marks if necessary and provide constructive feedback.
+-If the candidate's response is partially relevant, provide partial credit based on the relevance.
+-If the candidate's response is exemplary, provide full credit, fulls marks where due and highlight the strengths.
 `;
 };
 

@@ -96,10 +96,10 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
               checkoutSession.line_items?.data[0].price?.metadata
                 .product_type === 'token_bundle'
             ) {
-              const productId =
-                checkoutSession.line_items.data[0].price?.metadata.product_type;
+              const productQuantity =
+                checkoutSession.line_items.data[0].quantity;
               await manageTokenBundlePurchase(
-                productId as string,
+                productQuantity as number,
                 checkoutSession.customer as string,
               );
             }

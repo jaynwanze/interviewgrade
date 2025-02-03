@@ -507,10 +507,9 @@ export async function createCandidateCheckoutSessionAction({
       customer,
       line_items: [
         {
-          quantity: product.quantity,
+          quantity: 1,
           price_data: {
             currency: product.currency,
-            product: product.id,
             product_data: {
               name: product.title,
               description: product.description,
@@ -528,9 +527,10 @@ export async function createCandidateCheckoutSessionAction({
         setup_future_usage: 'off_session',
         metadata: {},
       },
-      success_url: toSiteURL(`/candidate/purchase-tokens`),
+      success_url: toSiteURL(
+        `/candidate/purchase-tokens/success/{CHECKOUT_SESSION_ID}`,
+      ),
       cancel_url: toSiteURL(`/candidate/purchase-tokens`),
-      metadata: {},
     });
 
     return stripeSession.id;
@@ -589,3 +589,9 @@ export async function createCandidateCheckoutSessionAction({
     return stripeSession.id;
   }
 }
+
+export const retriveStripeCheckoutSessionPurchaseDetails = async (
+  checkoutSessionId: string,
+) => {
+  return await stripe.checkout.sessions.retrieve(checkoutSessionId);
+};

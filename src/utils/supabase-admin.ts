@@ -1,9 +1,8 @@
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
-import { useRouter } from 'next/navigation';
 
 export const manageTokenBundlePurchase = async (
+  quantity: number,
   stripeCustomer: string,
-  productId: string,
 ) => {
   //Get candidate's ID
   const { data: candidateData, error: noCandidateError } =
@@ -16,17 +15,6 @@ export const manageTokenBundlePurchase = async (
   if (!candidateData) {
     throw new Error('No candidate data');
   }
-  //Get product's quantity
-  const { data: productData, error: noProductError } = await supabaseAdminClient
-    .from('products')
-    .select('quantity')
-    .eq('id', productId)
-    .single();
-  if (noProductError) throw noProductError;
-  if (!productData) {
-    throw new Error('No product data');
-  }
-  const { quantity } = productData;
 
   //Update tokens linked to candidate
   const { id: candidateId } = candidateData;
@@ -38,8 +26,6 @@ export const manageTokenBundlePurchase = async (
     .eq('id', candidateId);
   if (error) throw error;
   console.log(`Token bundle purchased for candidate [${candidateId}]`);
-
-  //Redirect to candidate's dashboard with success message
 };
 
 // const upsertProductRecord = async (product: Stripe.Product) => {

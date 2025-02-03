@@ -218,7 +218,7 @@ export function BarChartInteractiveEvaluationScores({
           })}
         </div>
       </CardHeader>
-      <CardContent className="px-2 sm:p-6">
+      <CardContent className="shadow rounded-lg px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
@@ -257,7 +257,6 @@ export function BarChartInteractiveEvaluationScores({
                   return date.toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
-                    
                   });
                 }}
               />

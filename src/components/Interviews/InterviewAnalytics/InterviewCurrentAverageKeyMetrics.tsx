@@ -63,8 +63,8 @@ export const InterviewCurrentAverageKeyMetrics = ({
       </Card> */}
 
       {/* Average Evaluation Criteria Scores */}
-      <Card className=" p-4 rounded">
-        <CardTitle className='mb-5'>
+      <Card className="p-4 shadow rounded-lg">
+        <CardTitle className="mb-5">
           Current Average Evaluation Criteria Scores (Out of 10)
         </CardTitle>
         <div className="grid grid-cols-3 gap-1 text-ellipsis text-wrap">

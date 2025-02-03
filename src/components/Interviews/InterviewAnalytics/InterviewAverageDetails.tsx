@@ -31,23 +31,26 @@ export const InterviewAverageDetails = ({
                     </CardHeader>
                     <CardContent>
                         <p className="text-4xl font-bold text-center mb-2">
-                            {analyticsData.avg_overall_grade.toFixed(2)}
+                            {analyticsData.avg_overall_grade.toFixed(1)}%
                         </p>
                         <p>Current grade averaged over all sessions.</p>
                     </CardContent>
                 </Card>
-                <Card className="shadow rounded-lg ">
+                <Card className="shadow rounded-lg">
                     <CardHeader>
-                        <CardTitle>Average Mark Per Question </CardTitle>
+                        <CardTitle>Average Mark Per Question</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-4xl font-bold text-center mb-2">
-                            {/* avg grade/ question.length / 100/ question.length */}
+                            {(
+                                analyticsData.avg_overall_grade / analyticsData.question_count
+                            ).toFixed(2)}
+                            /{Math.floor(100 / analyticsData.question_count)}
                         </p>
                         <p>Current average marks you are scoring per question</p>
                     </CardContent>
                 </Card>
-                <Card className="shadow rounded-lg ">
+                <Card className="shadow rounded-lg">
                     <CardHeader>
                         <CardTitle>Total Sessions Count</CardTitle>
                     </CardHeader>
@@ -56,8 +59,8 @@ export const InterviewAverageDetails = ({
                             {analyticsData?.total_interviews || 0}
                         </p>
                         <p>
-                            Total completed {analyticsData.interview_title.toLowerCase()} sessions.
-                            .
+                            Total completed {analyticsData.interview_title.toLowerCase()}{' '}
+                            sessions. .
                         </p>
                     </CardContent>
                 </Card>

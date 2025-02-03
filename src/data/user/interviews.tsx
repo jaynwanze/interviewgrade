@@ -511,10 +511,7 @@ export const getInterviewAnalytics = async (
 
   // Aggregate data
   const totalInterviews = interviews.length;
-  const totalQuestions = interviews.reduce(
-    (acc, interview) => acc + interview.question_count,
-    0,
-  );
+
   const avgOverallGrade =
     evaluations.reduce((acc, evalItem) => acc + evalItem.overall_grade, 0) /
     evaluations.length;
@@ -562,7 +559,7 @@ export const getInterviewAnalytics = async (
   );
 
   // Assuming all interviews have the same title and description
-  const { title: interviewTitle, description: interviewDescription } =
+  const { title: interviewTitle, description: interviewDescription, question_count: interviewQuestionCount } =
     interviews[0];
   if (interviewMode === 'Practice Mode') {
     return {
@@ -571,7 +568,7 @@ export const getInterviewAnalytics = async (
       interview_title: interviewTitle,
       interview_description: interviewDescription,
       total_interviews: totalInterviews,
-      question_count: totalQuestions,
+      question_count: interviewQuestionCount,
       avg_overall_grade: avgOverallGrade,
       avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
       strengths_summary: strengthsSummary,
@@ -586,7 +583,7 @@ export const getInterviewAnalytics = async (
       interview_title: interviewTitle,
       interview_description: interviewDescription,
       total_interviews: totalInterviews,
-      question_count: totalQuestions,
+      question_count: interviewQuestionCount,
       avg_overall_grade: avgOverallGrade,
       avg_evaluation_criteria_scores: avgEvaluationCriteriaScores,
       strengths_summary: strengthsSummary,

@@ -31,7 +31,7 @@ export const InterviewAverageDetails = ({
                     </CardHeader>
                     <CardContent>
                         <p className="text-4xl font-bold text-center mb-2">
-                            {analyticsData.avg_overall_grade.toFixed(1)}%
+                            {analyticsData.avg_overall_grade.toFixed(2)}%
                         </p>
                         <p>Current grade averaged over all sessions.</p>
                     </CardContent>

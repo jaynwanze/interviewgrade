@@ -1,11 +1,12 @@
+// app/api/stripe-webhook/route.ts
 import { errors } from '@/utils/errors';
 import { stripe } from '@/utils/stripe';
 import { manageTokenBundlePurchase } from '@/utils/supabase-admin';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse, NextRequest } from 'next/server';
 import { Readable } from 'node:stream';
 import Stripe from 'stripe';
 
-// Utility to convert Readable stream to Buffer
+// Utility to convert a Readable stream to a Buffer
 async function buffer(readable: Readable) {
   const chunks: Array<Buffer> = [];
   for await (const chunk of readable) {
@@ -14,7 +15,7 @@ async function buffer(readable: Readable) {
   return Buffer.concat(chunks);
 }
 
-// Define relevant Stripe events
+// Define the set of Stripe event types that you care about.
 const relevantEvents = new Set([
   'product.created',
   'product.updated',
@@ -24,41 +25,44 @@ const relevantEvents = new Set([
   'customer.subscription.deleted',
 ]);
 
-/**
- * Webhook handler which receives Stripe events and updates the database.
- * Events handled are product.created, product.updated,
- * checkout.session.completed, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted.
- *
- * IMPORTANT! Ensure the webhook secret is set in environment variables
- * and the webhook is configured in the Stripe dashboard.
- */
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const buf = await buffer(req);
-    const sig = req.headers['stripe-signature'];
+export async function POST(req: NextRequest) {
+  try {
+    // Read the raw body from the request.
+    // In Next.js 13, req.body is a ReadableStream.
+    const rawBody = await buffer(req.body as unknown as Readable);
+
+    // Get the Stripe signature from headers.
+    const sig = req.headers.get('stripe-signature');
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!sig || !webhookSecret) {
+      return NextResponse.json(
+        { message: 'Missing Stripe signature or webhook secret.' },
+        { status: 400 }
+      );
+    }
 
     let event: Stripe.Event;
 
     try {
-      if (!sig || !webhookSecret) {
-        throw new Error('Missing Stripe signature or webhook secret.');
-      }
-      event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
-    } catch (error: unknown) {
+      // Verify the event by constructing it using the Stripe SDK.
+      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+    } catch (error) {
       errors.add(error);
-      if (error instanceof Error) {
-        return res.status(400).send(`Webhook error: ${error.message}`);
-      }
-
-      return res.status(400).send(`Webhook Error: ${String(error)}`);
+      return NextResponse.json(
+        { message: `Webhook error: ${error.message}` },
+        { status: 400 }
+      );
     }
 
+    // Process only the events we care about.
     if (relevantEvents.has(event.type)) {
       try {
         switch (event.type) {
           case 'product.created':
           case 'product.updated':
+            // TODO: upsert the product record in your database
+            // Example:
             // await upsertProductRecord(event.data.object as Stripe.Product);
             break;
 
@@ -66,37 +70,29 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
           case 'customer.subscription.updated':
           case 'customer.subscription.deleted': {
             const subscription = event.data.object as Stripe.Subscription;
-            // await manageSubscriptionStatusChange(
-            //   subscription.id,
-            //   subscription.customer as string,
-            //   event.type === 'customer.subscription.created',
-            // );
+            // TODO: update the subscription status in your database
+            // Example:
+            // await manageSubscriptionStatusChange(subscription.id, subscription.customer as string, event.type === 'customer.subscription.created');
             break;
           }
 
           case 'checkout.session.completed': {
-            const checkoutSession = event.data
-              .object as Stripe.Checkout.Session;
+            const checkoutSession = event.data.object as Stripe.Checkout.Session;
             if (checkoutSession.mode === 'subscription') {
               const subscriptionId = checkoutSession.subscription;
-              //   await manageSubscriptionStatusChange(
-              //     subscriptionId as string,
-              //     checkoutSession.customer as string,
-              //     true,
-              //   );
+              // TODO: update subscription status if needed
+              // Example:
+              // await manageSubscriptionStatusChange(subscriptionId as string, checkoutSession.customer as string, true);
             } else if (
               checkoutSession.mode === 'payment' &&
-              checkoutSession.line_items?.data[0].price?.metadata
-                .product_type === 'token_bundle'
+              checkoutSession.line_items?.data[0].price?.metadata.product_type === 'token_bundle'
             ) {
-              const productQuantity =
-                checkoutSession.line_items.data[0].quantity;
+              const productQuantity = checkoutSession.line_items.data[0].quantity;
               await manageTokenBundlePurchase(
                 productQuantity as number,
-                checkoutSession.customer as string,
+                checkoutSession.customer as string
               );
             }
-
             break;
           }
 
@@ -105,15 +101,17 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
       } catch (error) {
         errors.add(error);
-        return res
-          .status(400)
-          .send('Webhook error: "Webhook handler failed. View logs."');
+        return NextResponse.json(
+          { message: 'Webhook handler failed. View logs.' },
+          { status: 400 }
+        );
       }
     }
 
-    res.json({ received: true });
-  } else {
-    res.setHeader('Allow', 'POST');
-    res.status(405).end('Method Not Allowed');
+    // Return a 200 response to acknowledge receipt of the event.
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    errors.add(error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -4,7 +4,9 @@ declare global {
       NEXT_PUBLIC_SUPABASE_URL: string;
       NEXT_PUBLIC_SUPABASE_ANON_KEY: string;
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST: string;
       STRIPE_SECRET_KEY: string;
+      STRIPE_SECRET_KEY_TEST: string;
       NODE_ENV: 'test' | 'development' | 'production';
       PORT?: string;
       PWD: string;

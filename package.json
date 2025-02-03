@@ -118,6 +118,7 @@
     "react-tooltip": "^5.28.0",
     "recharts": "^2.12.7",
     "resend": "^2.1.0",
+    "retry-stripe-loader": "^0.3.0",
     "rooks": "^7.14.1",
     "server-only": "^0.0.1",
     "shadcn-ui": "^0.2.3",

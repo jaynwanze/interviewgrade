@@ -507,12 +507,16 @@ export async function createCandidateCheckoutSessionAction({
       customer,
       line_items: [
         {
-          quantity: 1,
+          quantity: product.quantity,
           price_data: {
             currency: product.currency,
+            product: product.id,
             product_data: {
               name: product.title,
               description: product.description,
+              metadata: {
+                product_type: product.product_type,
+              },
             },
             unit_amount: product.price_unit_amount,
           },
@@ -526,6 +530,7 @@ export async function createCandidateCheckoutSessionAction({
       },
       success_url: toSiteURL(`/candidate/purchase-tokens`),
       cancel_url: toSiteURL(`/candidate/purchase-tokens`),
+      metadata: {},
     });
 
     return stripeSession.id;

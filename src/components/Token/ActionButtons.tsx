@@ -7,11 +7,7 @@ import { Product } from '@/types';
 import { getStripe } from '@/utils/stripe-client';
 import { ShoppingCartIcon } from '@heroicons/react/solid';
 
-export function CreateTokenPurchaseButton({
-    product,
-}: {
-    product: Product;
-}) {
+export function CreateTokenPurchaseButton({ product }: { product: Product }) {
     const { mutate, isLoading } = useToastMutation(
         async () => {
             return await createCandidateCheckoutSessionAction({

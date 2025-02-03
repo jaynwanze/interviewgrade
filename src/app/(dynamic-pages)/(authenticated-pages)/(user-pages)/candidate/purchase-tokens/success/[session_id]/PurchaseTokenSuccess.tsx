@@ -1,15 +1,16 @@
 'use client';
 import { retriveStripeCheckoutSessionPurchaseDetails } from '@/data/user/user';
+import { StripeCheckoutSessionDetails } from '@/types';
 import { useEffect, useState } from 'react';
-import Stripe from 'stripe';
-
 export default function PurchaseTokensSuccess({
   checkoutSessionId,
 }: {
   checkoutSessionId: string;
 }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [session, setSession] = useState<Stripe.Checkout.Session | null>(null);
+  const [session, setSession] = useState<StripeCheckoutSessionDetails | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   //Latest checkout session details
   console.log(checkoutSessionId);
@@ -21,9 +22,9 @@ export default function PurchaseTokensSuccess({
     setIsLoading(true);
     const fetchCheckoutSession = async () => {
       try {
-        const session =
+        const sessionDetails =
           await retriveStripeCheckoutSessionPurchaseDetails(checkoutSessionId);
-        setSession(session);
+        setSession(sessionDetails);
       } catch (err) {
         console.error('Error fetching checkout session:', err);
         setError('Failed to load purchase details');

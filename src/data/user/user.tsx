@@ -6,6 +6,7 @@ import type {
   NormalizedSubscription,
   Product,
   SAPayload,
+  StripeCheckoutSessionDetails,
   SupabaseFileUploadOptions,
   Table,
 } from '@/types';
@@ -592,6 +593,33 @@ export async function createCandidateCheckoutSessionAction({
 
 export const retriveStripeCheckoutSessionPurchaseDetails = async (
   checkoutSessionId: string,
-) => {
-  return await stripe.checkout.sessions.retrieve(checkoutSessionId);
+): Promise<StripeCheckoutSessionDetails> => {
+  const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+  if (!session) {
+    throw new Error('No session found');
+  }
+
+  const customerDetails = session.customer_details;
+  if (!customerDetails) {
+    throw new Error('No customer details found');
+  }
+
+  // if (!session.line_items) {
+  //   throw new Error('No line items found');
+  // }
+  // const product = session.line_items[0];
+  // if (!product) {
+  //   throw new Error('No product found');
+  // }
+
+  return {
+    customer_details: {
+      name: customerDetails?.name || '',
+    },
+    // product: {
+    //   name: product.custom.name,
+    //   price: product.amount_total / 100,
+    //   quantity: product.quantity,
+    // },
+  };
 };

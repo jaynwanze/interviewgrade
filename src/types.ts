@@ -1,6 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './lib/database.types';
-import { S } from 'vitest/dist/reporters-5f784f42';
 
 export type AppSupabaseClient = SupabaseClient<Database>;
 export type Table<T extends keyof Database['public']['Tables']> =
@@ -42,6 +41,16 @@ export type QuestionAnswerFeedback = {
   feedback: string;
 };
 
+export type StripeCheckoutSessionDetails = {
+  customer_details: {
+    name: string;
+  };
+  product?: {
+    name: string;
+    price: number;
+    quantity: number;
+  };
+};
 export type EvaluationScores = {
   id: string;
   name: string;
@@ -61,7 +70,7 @@ export type Token = Table<'tokens'>;
 export type InterviewAnswerDetail = {
   question: string;
   answer: string;
-  mark: number
+  mark: number;
   feedback: string;
   evaluation_criteria_name: string;
 };
@@ -119,7 +128,7 @@ export type InterviewAnalytics = {
   strengths_summary: string[];
   areas_for_improvement_summary: string[];
   recommendations_summary: string[];
-  completed_interview_evaluations: InterviewEvaluation[]
+  completed_interview_evaluations: InterviewEvaluation[];
 };
 export type AvgEvaluationScores = {
   name: string;

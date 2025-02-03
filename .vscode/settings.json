@@ -28,7 +28,6 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
-  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "[sql]": {
     "editor.defaultFormatter": "mtxr.sqltools"
   }

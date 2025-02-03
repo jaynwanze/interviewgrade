@@ -5,10 +5,9 @@ import {
     SelectTrigger,
     SelectValue,
   } from "@/components/ui/select";
-  import { filterCountries } from "@/lib/address-helpers";
-  //@ts-expect-error: country-region-data does not have TypeScript definitions
-  import countryRegionData from "country-region-data/dist/data-umd";
-  import { useEffect, useState } from "react";
+  // import { filterCountries } from "@/lib/address-helpers";
+  // import countryRegionData from "country-region-data/dist/data-umd";
+  // import { useEffect, useState } from "react";
   
   export interface Region {
     name: string;
@@ -40,13 +39,13 @@ import {
     placeholder = "Country",
     
   }: CountrySelectProps) {
-    const [countries, setCountries] = useState<CountryRegion[]>([]);
+    // const [countries, setCountries] = useState<CountryRegion[]>([]);
   
-    useEffect(() => {
-      setCountries(
-        filterCountries(countryRegionData, priorityOptions, whitelist, blacklist),
-      );
-    }, []);
+    // useEffect(() => {
+    //   setCountries(
+    //     // filterCountries(countryRegionData, priorityOptions, whitelist, blacklist),
+    //   );
+    // }, []);
   
     return (
       <Select
@@ -59,11 +58,11 @@ import {
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          {countries.map(({ countryName, countryShortCode }) => (
+          {/* {countries.map(({ countryName, countryShortCode }) => (
             <SelectItem key={countryShortCode} value={countryShortCode}>
               {countryName}
             </SelectItem>
-          ))}
+          ))} */}
         </SelectContent>
       </Select>
     );

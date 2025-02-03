@@ -5,10 +5,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { filterRegions } from '@/lib/address-helpers';
+// import { filterRegions } from '@/lib/address-helpers';
 
-//@ts-expect-error: countryRegionData does not have TypeScript definitions
-import countryRegionData from 'country-region-data/dist/data-umd';
+// //@ts-expect-error: countryRegionData does not have TypeScript definitions
+// import countryRegionData from 'country-region-data/dist/data-umd';
 import { useEffect, useState } from 'react';
 
 export interface Region {
@@ -44,15 +44,15 @@ function RegionSelect({
   const [regions, setRegions] = useState<Region[]>([]);
 
   useEffect(() => {
-    const regions = countryRegionData.find(
-      (country: CountryRegion) => country.countryShortCode === countryCode,
-    );
+    // const regions = countryRegionData.find(
+    //   (country: CountryRegion) => country.countryShortCode === countryCode,
+    // );
 
-    if (regions) {
-      setRegions(
-        filterRegions(regions.regions, priorityOptions, whitelist, blacklist),
-      );
-    }
+    // if (regions) {
+    //   setRegions(
+    //     filterRegions(regions.regions, priorityOptions, whitelist, blacklist),
+    //   );
+    // }
   }, [countryCode]);
 
   return (

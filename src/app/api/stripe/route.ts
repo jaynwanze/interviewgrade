@@ -5,7 +5,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Readable } from 'node:stream';
 import Stripe from 'stripe';
 
-
 // Utility to convert Readable stream to Buffer
 async function buffer(readable: Readable) {
   const chunks: Array<Buffer> = [];
@@ -33,7 +32,7 @@ const relevantEvents = new Set([
  * IMPORTANT! Ensure the webhook secret is set in environment variables
  * and the webhook is configured in the Stripe dashboard.
  */
-const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
+export async function POST(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const buf = await buffer(req);
     const sig = req.headers['stripe-signature'];
@@ -117,6 +116,4 @@ const webhookHandler = async (req: NextApiRequest, res: NextApiResponse) => {
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
   }
-};
-
-export default webhookHandler;
+}

@@ -6,6 +6,7 @@ export default {
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
+      allowedOrigins: ['my-proxy.com', '*.my-proxy.com'],
     },
   },
   images: {

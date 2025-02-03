@@ -5,12 +5,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Readable } from 'node:stream';
 import Stripe from 'stripe';
 
-// Stripe requires the raw body to construct the event.
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 // Utility to convert Readable stream to Buffer
 async function buffer(readable: Readable) {

@@ -9,7 +9,6 @@ interface RadioCardProps {
 const RadioCard = function RadioCard({ label, icon }: RadioCardProps) {
     return (
         <div className="flex items-center p-4 border rounded-lg">
-            <icon className="mr-2" />
             <span>{label}</span>
         </div>
     );
@@ -29,4 +28,3 @@ const RadioCards = function RadioCards() {
 };
 
 export { RadioCard, RadioCards };
-

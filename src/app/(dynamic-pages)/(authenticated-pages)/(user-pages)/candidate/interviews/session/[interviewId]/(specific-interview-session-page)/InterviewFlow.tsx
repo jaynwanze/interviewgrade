@@ -33,7 +33,6 @@ export default function InterviewFlow({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isInterviewComplete, setIsInterviewComplete] = useState(false);
   const [isQuestionsComplete, setIsQuestionsComplete] = useState(false);
-  const [answersLength, setAnswersLength] = useState(0);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const answers = useRef<string[]>([]);
   const [interviewFeedback, setInterviewFeedback] =
@@ -120,7 +119,6 @@ export default function InterviewFlow({
         answers.current = interviewQuestions
           .slice(0, interview.current_question_index)
           .map(() => '');
-        setAnswersLength(answers.current.length);
       }
       setEvaluationCriteria(interview.evaluation_criterias ?? []);
       setIsCameraOn(true);
@@ -143,10 +141,10 @@ export default function InterviewFlow({
   }, []);
 
   useEffect(() => {
-    if (isQuestionsComplete && answersLength === questions.length) {
+    if (isQuestionsComplete && answers.current.length === questions.length) {
       handleInterviewComplete();
     }
-  }, [isQuestionsComplete, answersLength, questions.length]);
+  }, [isQuestionsComplete, answers.current.length, questions.length]);
 
   const handleAnswer = useCallback(
     async (answer: string) => {
@@ -158,12 +156,12 @@ export default function InterviewFlow({
           // Retry the answer and start recording again
           return;
         }
-        // Push the answer to the answers array
-        answers.current.push(answer);
-        setAnswersLength(answers.current.length);
 
+        //Perfrom database operations
         await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
         await updateInterviewState(currentQuestionIndex + 1);
+        // Push the answer to the answers array
+        answers.current.push(answer);
         if (interview?.mode === INTERVIEW_PRACTICE_MODE) {
           await fetchSpecificFeedback(answer);
         }
@@ -300,6 +298,8 @@ export default function InterviewFlow({
         setScoreStringColour('text-green-600');
       } else if (score >= 60) {
         setScoreStringColour('text-yellow-600');
+      } else if (score >= 40) {
+        setScoreStringColour('text-orange-600');
       } else {
         setScoreStringColour('text-red-600');
       }
@@ -361,15 +361,6 @@ export default function InterviewFlow({
   return (
     <div className="interview-flow-container flex flex-col items-center min-h-screen">
       {/* Main Cards: AIQuestionSpeaker and UserCamera */}
-      <div className="flex items-center justify-center space-x-2">
-        <Card className=" p-4 text-center">
-          <h1 className="2xl font-bold">Timer</h1>
-          <p>
-            {Math.floor(recordingTime / 60)}:
-            {('0' + (recordingTime % 60)).slice(-2)}
-          </p>
-        </Card>
-      </div>
       <div className="flex w-full max-w-4xl">
         <div className="left-side w-1/2 p-4">
           <AIQuestionSpeaker
@@ -378,7 +369,14 @@ export default function InterviewFlow({
             questionsLength={questions.length}
           />
         </div>
-        <div className="right-side w-1/2 p-4">
+        <div className="right-side w-1/2 p-4 jusitfy-center ">
+          <Card className=" p-4 text-center mb-5">
+            <h1 className="2xl font-bold">Timer</h1>
+            <p>
+              {Math.floor(recordingTime / 60)}:
+              {('0' + (recordingTime % 60)).slice(-2)}
+            </p>
+          </Card>
           <Card className="max-w-md mx-auto text-center">
             <CardHeader>
               <CardTitle>Candidate</CardTitle>

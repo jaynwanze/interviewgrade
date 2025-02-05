@@ -1,5 +1,3 @@
-
-
 # InterviewGrade
 
 **InterviewGrade** is an advanced AI-driven mock interview platform designed to simulate real-world interviews and provide candidates with personalized feedback. It also offers tools for employers to streamline their hiring processes using data-driven insights.

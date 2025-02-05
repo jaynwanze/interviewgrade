@@ -1,6 +1,7 @@
 'use client';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Analytics } from '@vercel/analytics/next';
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import React, { Suspense } from 'react';
 import { Toaster as HotToaster } from 'react-hot-toast';
@@ -30,6 +31,7 @@ export function AppProviders({
         <NotificationsProvider>
           <QueryClientProvider client={queryClient}>
             {children}
+            <Analytics />
             <ReactNoSSR>
               <SonnerToaster theme={'light'} />
               <HotToaster />
@@ -45,6 +47,7 @@ export function AppProviders({
           </QueryClientProvider>
         </NotificationsProvider>
       </ThemeProvider>
+      ={' '}
     </>
   );
 }

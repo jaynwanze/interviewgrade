@@ -8,7 +8,7 @@ export const manageTokenBundlePurchase = async (
   const { data: candidateData, error: noCandidateError } =
     await supabaseAdminClient
       .from('candidates')
-      .select('id')
+      .select('token_id')
       .eq('stripe_customer_id', stripeCustomer)
       .single();
   if (noCandidateError) throw noCandidateError;
@@ -25,7 +25,7 @@ export const manageTokenBundlePurchase = async (
     })
     .eq('id', tokenId);
   if (error) throw error;
-  console.log(`Token bundle purchased for candidate [${candidateId}]`);
+  console.log(`Token bundle purchased for candidate [${tokenId}]`);
 };
 
 // const upsertProductRecord = async (product: Stripe.Product) => {

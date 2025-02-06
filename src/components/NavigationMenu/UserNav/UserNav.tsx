@@ -1,10 +1,10 @@
 import Notifications from '@/components/Notifcations';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Tokens } from '@/components/Tokens';
 import { getUserProfile } from '@/data/user/user';
 import { getUserAvatarUrl } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { UserNavDropDownMenu } from './UserNavDropDownMenu';
-import { Tokens } from '@/components/Tokens';
 
 export async function UserNav() {
   const user = await serverGetLoggedInUser();
@@ -28,7 +28,7 @@ export async function UserNav() {
         userEmail={email}
         userId={user.id}
       />
-      {/* <Tokens /> */}
+      <Tokens />
     </>
   );
 }

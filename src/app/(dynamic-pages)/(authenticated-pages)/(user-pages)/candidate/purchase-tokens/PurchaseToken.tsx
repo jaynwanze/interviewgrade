@@ -1,46 +1,33 @@
-// pages/purchase-tokens.tsx
-
 import { CreateTokenPurchaseButton } from '@/components/Token/ActionButtons';
 import { Card } from '@/components/ui/card';
+import { getActiveProductsByType } from '@/data/user/user';
 import { Product } from '@/types';
 import { useEffect, useState } from 'react';
-
-const prods: Product[] = [
-  {
-    id: 'price_1MxyzABCDEF123456', // Stripe Price ID
-    product_type: 'token_bundle',
-    title: 'Starter Purchase',
-    description: 'Get started with 10 tokens to explore our platform.',
-    price: 1.0,
-    currency: 'eur',
-    status: 'active',
-    price_unit_amount: 100,
-    pricing_type: 'one-time',
-    pricing_plan_interval: 'month',
-    pricing_plan_interval_count: 1,
-    // metadata: {
-    //   unit_amount: '999',
-    //   currency: 'usd',
-    //   type: 'one_time',
-    //   amount: '10', // Number of tokens
-    // },
-    quantity: 10,
-    trial_period_days: null,
-    metadata: null,
-  },
-];
 
 export default function PurchaseTokens() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case 'usd':
+        return '$';
+      case 'eur':
+        return '€';
+      case 'gbp':
+        return '£';
+      default:
+        return '';
+    }
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // const activeProducts = await getActiveProducts();
-        // setProducts(activeProducts);
-        setProducts(prods);
+        const activeProducts = await getActiveProductsByType('token_bundle');
+        setProducts(activeProducts);
+        setProducts(activeProducts);
       } catch (err) {
         console.error('Error fetching products:', err);
         setError('Failed to load products');
@@ -51,29 +38,6 @@ export default function PurchaseTokens() {
 
     fetchProducts();
   }, []);
-
-  const handlePurchase = async (productId: string) => {
-    try {
-      // Assuming you have user context or authentication
-      //   const response = await fetch('/api/create-token-checkout-session', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({ priceId: productId }),
-      //   });
-      //   const data = await response.json();
-      //   if (data.url) {
-      //     const stripe = await getStripe();
-      //     stripe?.redirectToCheckout({ sessionId: data.sessionId });
-      //   } else {
-      //     throw new Error('No URL returned from server.');
-      //   }
-    } catch (err) {
-      console.error('Error during purchase:', err);
-      alert('Failed to initiate purchase. Please try again.');
-    }
-  };
 
   if (loading) {
     return <div className="text-center text-white">Loading Products...</div>;
@@ -108,7 +72,8 @@ export default function PurchaseTokens() {
             </div>
             <div>
               <p className="text-lg font-bold mb-2">
-                Price: ${product.price} {product.currency.toUpperCase()}
+                Price: {getCurrencySymbol(product.currency.toLowerCase())}
+                {product.price}
               </p>
               <p className="mb-4">Tokens Included: {product.quantity}</p>
               <CreateTokenPurchaseButton product={product} />

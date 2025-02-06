@@ -289,23 +289,33 @@ export const getCandidateUserProfile = async (
   return data;
 };
 
-//Get avaialble products for the user
-export const getAvaliableUserProducts = async (): Promise<
-  Table<'products'>[]
-> => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('product_type', 'token')
-    .order('tokens_bundle', { ascending: true });
+export const getCurrentCandidatesTokens =
+  async (): Promise<Table<'tokens'> | null> => {
+    const user = await serverGetLoggedInUser();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const candidate = await getCandidateUserProfile(user.id);
+    if (!candidate) {
+      throw new Error('Candidate not found');
+    }
+    const { data, error } = await createSupabaseUserServerComponentClient()
+      .from('tokens')
+      .select('*')
+      .eq('id', candidate.token_id)
+      .single();
 
-  if (error) {
-    throw error;
-  }
+    if (error) {
+      throw error;
+    }
 
-  return data;
-};
+    if (!data) {
+      console.error('No tokens found for candidate:', candidate);
+      return null;
+    }
+
+    return data;
+  };
 
 export const purchaseProduct = async (
   candidateId: string,
@@ -465,10 +475,13 @@ export async function createCustomerCandidatePortalLinkAction(
   return url;
 }
 
-export const getActiveProducts = async (): Promise<Product[]> => {
+export const getActiveProductsByType = async (
+  productType: string,
+): Promise<Product[]> => {
   const { data, error } = await createSupabaseUserServerComponentClient()
     .from('products')
     .select('*')
+    .eq('product_type', productType)
     .eq('status', 'active');
 
   if (error) {

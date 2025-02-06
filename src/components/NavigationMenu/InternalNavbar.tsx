@@ -6,7 +6,7 @@ import { UserNav } from './UserNav';
 
 export async function InternalNavbar({ children }: { children: ReactNode }) {
   return (
-    <header className="sticky top-0 w-full z-10 dark:bg-slate-900/50 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 w-full z-10 dark:bg-neutral-900/15 bg-white/90 backdrop-blur">
       <div
         className={cn(
           'h-full  text-sm font-medium flex gap-2 mx-auto pl-6 pr-6 border-b dark:border-gray-700/50 py-3 w-full justify-between items-center',

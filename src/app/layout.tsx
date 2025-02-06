@@ -26,7 +26,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={GeistSans.className}>
+    <html lang="en" className={GeistSans.className} suppressHydrationWarning>
       <head></head>
       <body className="bg-background">
         <AppProviders>{children}</AppProviders>

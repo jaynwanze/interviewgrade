@@ -27,7 +27,11 @@ export function AppProviders({
 }) {
   return (
     <>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+      >
         <NotificationsProvider>
           <QueryClientProvider client={queryClient}>
             {children}
@@ -47,7 +51,6 @@ export function AppProviders({
           </QueryClientProvider>
         </NotificationsProvider>
       </ThemeProvider>
-      ={' '}
     </>
   );
 }

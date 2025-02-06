@@ -55,13 +55,13 @@ body {
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222.2 0% 5%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 0% 6%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 0% 8%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
@@ -70,8 +70,8 @@ body {
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217.2 32.6% 15%;
+    --muted-foreground: 215 20.2% 75%;
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
@@ -79,6 +79,7 @@ body {
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
+    /* make it a greey color and find out how to change nav bar */
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
@@ -88,18 +89,21 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-2: 340 75% 55%;
+    --chart-6: 2 50% 100%;
   }
 }
 
-.hide-dialog-close > .absolute.right-4.top-4 {
+.hide-dialog-close>.absolute.right-4.top-4 {
   /* Adjust selector based on actual rendered classes of DialogClose */
-  display: none; /* This assumes you know the classes applied to DialogClose, adjust selector accordingly */
+  display: none;
+  /* This assumes you know the classes applied to DialogClose, adjust selector accordingly */
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings:
@@ -107,4 +111,5 @@ body {
       'calt' 1;
   }
 }
+
 @tailwind variants;

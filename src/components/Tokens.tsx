@@ -1,8 +1,9 @@
 'use client';
 
+import { getCurrentCandidatesTokens } from '@/data/user/user';
 import { NormalizedSubscription, Token } from '@/types';
 import { ShoppingCartIcon } from '@heroicons/react/solid';
-import tokenImg from '@public/images/token.jpg';
+import tokenImg from '@public/images/one_token.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -29,8 +30,8 @@ export const Tokens: React.FC = () => {
     };
     const fetchTokens = async () => {
         try {
-            //const response = await fetch('/api/tokens');
-            //setTokens(data);
+            const tokens = await getCurrentCandidatesTokens();
+            setTokens(tokens);
         } catch (err) {
             console.error('Error fetching tokens:', err);
             setError('Failed to load tokens');
@@ -58,28 +59,25 @@ export const Tokens: React.FC = () => {
                     <div
                         data-testid="user-token"
                         data-user-id={tokens?.id}
-                        className="flex items-center h-[24px] w-[50px] border rounded-full focus:ring-0"
+                        className="flex items-center h-[24px] w-[50px] focus:ring-0 cursor-pointer"
                     >
-                        <span className="ml-2 flex items-center cursor-pointer">
-                            5{tokens?.tokens_available}
-                            <Image
-                                src={tokenImg}
-                                alt="Token Icon"
-                                width={20}
-                                height={20}
-                                quality={100}
-                                sizes="100vw"
-                                className="ml-2"
-                                style={{
-                                    borderRadius: '50%',
-                                }}
-                            />
-                        </span>
+                        5
+                        <Image
+                            src={tokenImg}
+                            alt="Token Icon"
+                            width={35}
+                            height={20}
+                            quality={100}
+                            sizes="100vw"
+                            style={{
+                                borderRadius: '50%',
+                            }}
+                        />
                     </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-80">
                     <DropdownMenuLabel className="font-semibold">
-                        Your Tokens
+                        Your Token Details
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <div className="px-4 py-2">
@@ -102,7 +100,7 @@ export const Tokens: React.FC = () => {
                                 : 'N/A'}
                         </p>
                         <hr className="my-2" />
-                        <p className="text-sm">
+                        {/* <p className="text-sm">
                             <span className="font-medium">Subscription:</span>{' '}
                             {subscription ? subscription.type : 'No Subscription'}
                         </p>
@@ -123,7 +121,7 @@ export const Tokens: React.FC = () => {
                                         : ''}
                                 </p>
                             </>
-                        )}
+                        )} */}
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

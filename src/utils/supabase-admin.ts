@@ -17,13 +17,13 @@ export const manageTokenBundlePurchase = async (
   }
 
   //Update tokens linked to candidate
-  const { id: candidateId } = candidateData;
+  const { token_id: tokenId } = candidateData;
   const { error } = await supabaseAdminClient
     .from('tokens')
     .update({
       total_tokens_purchased: quantity,
     })
-    .eq('id', candidateId);
+    .eq('id', tokenId);
   if (error) throw error;
   console.log(`Token bundle purchased for candidate [${candidateId}]`);
 };

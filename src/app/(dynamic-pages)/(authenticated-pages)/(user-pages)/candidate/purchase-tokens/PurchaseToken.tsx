@@ -2,6 +2,8 @@ import { CreateTokenPurchaseButton } from '@/components/Token/ActionButtons';
 import { Card } from '@/components/ui/card';
 import { getActiveProductsByType } from '@/data/user/user';
 import { Product } from '@/types';
+import tokenImg from '@public/images/one_token.svg';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export default function PurchaseTokens() {
@@ -67,6 +69,19 @@ export default function PurchaseTokens() {
                                     className="w-full h-32 object-contain mb-4"
                                 />
                             )} */}
+              <div className="w-full h-32 object-contain mb-4">
+                <Image
+                  src={tokenImg}
+                  alt="Token Icon"
+                  width={100}
+                  height={60}
+                  quality={100}
+                  sizes="100vw"
+                  style={{
+                    borderRadius: '50%',
+                  }}
+                />
+              </div>
               <h2 className="text-xl font-semibold mb-2">{product.title}</h2>
               <p className="text-gray-300 mb-4">{product.description}</p>
             </div>

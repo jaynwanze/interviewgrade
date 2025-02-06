@@ -2,7 +2,7 @@
 import { errors } from '@/utils/errors';
 import { stripe } from '@/utils/stripe';
 import { manageTokenBundlePurchase } from '@/utils/supabase-admin';
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Readable } from 'node:stream';
 import Stripe from 'stripe';
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (!sig || !webhookSecret) {
       return NextResponse.json(
         { message: 'Missing Stripe signature or webhook secret.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       errors.add(error);
       return NextResponse.json(
         { message: `Webhook error: ${error.message}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -77,7 +77,8 @@ export async function POST(req: NextRequest) {
           }
 
           case 'checkout.session.completed': {
-            const checkoutSession = event.data.object as Stripe.Checkout.Session;
+            const checkoutSession = event.data
+              .object as Stripe.Checkout.Session;
             if (checkoutSession.mode === 'subscription') {
               const subscriptionId = checkoutSession.subscription;
               // TODO: update subscription status if needed
@@ -85,12 +86,15 @@ export async function POST(req: NextRequest) {
               // await manageSubscriptionStatusChange(subscriptionId as string, checkoutSession.customer as string, true);
             } else if (
               checkoutSession.mode === 'payment' &&
-              checkoutSession.line_items?.data[0].price?.metadata.product_type === 'token_bundle'
+              checkoutSession.line_items?.data[0].price?.metadata
+                .product_type === 'token_bundle'
             ) {
-              const productQuantity = checkoutSession.line_items.data[0].quantity;
+              console.log(checkoutSession);
+              const productQuantity =
+                checkoutSession.line_items.data[0].quantity;
               await manageTokenBundlePurchase(
                 productQuantity as number,
-                checkoutSession.customer as string
+                checkoutSession.customer as string,
               );
             }
             break;
@@ -103,7 +107,7 @@ export async function POST(req: NextRequest) {
         errors.add(error);
         return NextResponse.json(
           { message: 'Webhook handler failed. View logs.' },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -112,6 +116,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error) {
     errors.add(error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Internal Server Error' },
+      { status: 500 },
+    );
   }
 }

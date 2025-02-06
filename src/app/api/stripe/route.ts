@@ -3,17 +3,7 @@ import { errors } from '@/utils/errors';
 import { stripe } from '@/utils/stripe';
 import { manageTokenBundlePurchase } from '@/utils/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
-import { Readable } from 'node:stream';
 import Stripe from 'stripe';
-
-// Utility to convert a Readable stream to a Buffer
-async function buffer(readable: Readable) {
-  const chunks: Array<Buffer> = [];
-  for await (const chunk of readable) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
-}
 
 // Define the set of Stripe event types that you care about.
 const relevantEvents = new Set([
@@ -28,8 +18,7 @@ const relevantEvents = new Set([
 export async function POST(req: NextRequest) {
   try {
     // Read the raw body from the request.
-    // In Next.js 13, req.body is a ReadableStream.
-    const rawBody = await buffer(req.body as unknown as Readable);
+    const rawBody = await req.text();
 
     // Get the Stripe signature from headers.
     const sig = req.headers.get('stripe-signature');
@@ -44,13 +33,20 @@ export async function POST(req: NextRequest) {
 
     let event: Stripe.Event;
 
+    // 2. Verify Stripe signature
     try {
-      // Verify the event by constructing it using the Stripe SDK.
+      if (!sig || !webhookSecret) {
+        return NextResponse.json(
+          { message: 'Missing Stripe signature or webhook secret.' },
+          { status: 400 },
+        );
+      }
+
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    } catch (error) {
-      errors.add(error);
+    } catch (err) {
+      // If signature verification fails, you’ll see the “No signatures found…” error
       return NextResponse.json(
-        { message: `Webhook error: ${error.message}` },
+        { error: `Webhook error: ${err.message}` },
         { status: 400 },
       );
     }
@@ -79,21 +75,20 @@ export async function POST(req: NextRequest) {
           case 'checkout.session.completed': {
             const checkoutSession = event.data
               .object as Stripe.Checkout.Session;
+            const productType = checkoutSession.metadata?.product_type;
+            const quantity = parseInt(
+              checkoutSession.metadata?.quantity ?? '0',
+              10,
+            );
             if (checkoutSession.mode === 'subscription') {
               const subscriptionId = checkoutSession.subscription;
               // TODO: update subscription status if needed
               // Example:
               // await manageSubscriptionStatusChange(subscriptionId as string, checkoutSession.customer as string, true);
-            } else if (
-              checkoutSession.mode === 'payment' &&
-              checkoutSession.line_items?.data[0].price?.metadata
-                .product_type === 'token_bundle'
-            ) {
-              console.log(checkoutSession);
-              const productQuantity =
-                checkoutSession.line_items.data[0].quantity;
+            } else if (productType === 'token_bundle') {
+              // handle awarding tokens
               await manageTokenBundlePurchase(
-                productQuantity as number,
+                quantity,
                 checkoutSession.customer as string,
               );
             }

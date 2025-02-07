@@ -28,7 +28,7 @@ export const InterviewModeCard = (interviewMode: InterviewMode) => {
     <>
       <Card
         key={interviewMode.name}
-        className="border rounded-lg p-4 shadow-sm text-center max-w-96"
+        className="border rounded-lg p-4 shadow-sm text-center min-h-56 max-w-96"
       >
         <CardTitle className="text-xl font-semibold">
           {interviewModeNameDisplay}

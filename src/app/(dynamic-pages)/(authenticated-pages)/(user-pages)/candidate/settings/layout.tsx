@@ -30,7 +30,7 @@ export default function UserSettingsClientLayout({
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen">
       <PageHeading
         title="User Settings"
         subTitle="Manage your account, security and billing settings here."

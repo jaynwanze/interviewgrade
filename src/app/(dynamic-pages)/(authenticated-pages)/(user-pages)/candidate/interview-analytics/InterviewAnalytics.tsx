@@ -363,7 +363,6 @@ export default function InterviewAnalyticsPage() {
           <TabsTrigger value="overview">Dashboard Overview</TabsTrigger>
           <TabsTrigger value="details">Detailed Analytics</TabsTrigger>
         </TabsList>
-
         <TabsContent value="overview">{renderOverview()}</TabsContent>
         <TabsContent value="details">{renderDetailed()}</TabsContent>
       </Tabs>

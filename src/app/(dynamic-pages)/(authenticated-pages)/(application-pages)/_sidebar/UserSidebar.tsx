@@ -1,5 +1,3 @@
-import { SubscriptionCardSmall } from '@/components/SubscriptionCardSmall';
-import { T } from '@/components/ui/Typography';
 import { cn } from '@/utils/cn';
 import {
   BarChart3Icon,
@@ -9,7 +7,6 @@ import {
   Shield,
   TableProperties,
 } from 'lucide-react';
-import { Suspense } from 'react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
 
@@ -18,7 +15,7 @@ export async function UserSidebar() {
     <div
       className={cn(
         'flex flex-col justify-between h-full',
-        'lg:px-3 lg:py-4 lg:pt-2.5 ',
+        'lg:px-3 lg:py-4 lg:pt-2. bg-gray-50/25 dark:bg-gray-950/15',
       )}
     >
       <div>

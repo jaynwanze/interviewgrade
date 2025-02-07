@@ -61,7 +61,7 @@ export const Tokens: React.FC = () => {
                         data-user-id={tokens?.id}
                         className="flex items-center h-[24px] w-[50px] focus:ring-0 cursor-pointer"
                     >
-                        5
+                        {tokens?.tokens_available}
                         <Image
                             src={tokenImg}
                             alt="Token Icon"

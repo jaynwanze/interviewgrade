@@ -5,27 +5,49 @@ export const manageTokenBundlePurchase = async (
   stripeCustomer: string,
 ) => {
   //Get candidate's ID
-  const { data: candidateData, error: noCandidateError } =
+  console.log(`stripeCustomer: ${stripeCustomer} manageTokenBundlePurchase`);
+  const { data: candidateTokenId, error: noCandidateError } =
     await supabaseAdminClient
       .from('candidates')
       .select('token_id')
       .eq('stripe_customer_id', stripeCustomer)
       .single();
   if (noCandidateError) throw noCandidateError;
-  if (!candidateData) {
+  if (!candidateTokenId) {
     throw new Error('No candidate data');
   }
 
   //Update tokens linked to candidate
-  const { token_id: tokenId } = candidateData;
+  const { data: candidateTokens, error: tokenError } = await supabaseAdminClient
+    .from('tokens')
+    .select('*')
+    .eq('id', candidateTokenId.token_id)
+    .single();
+
+  if (tokenError) throw tokenError;
+
+  //Update tokens available and total tokens purchased
+  const {
+    tokens_available: availableTokens,
+    total_tokens_purchased: totalPurchasedTokens,
+  } = candidateTokens;
+  const updatedTokensAvailable = availableTokens + quantity;
+  const updatedPurchasedTokens = totalPurchasedTokens + quantity;
+  const { token_id: tokenId } = candidateTokenId;
+
+  //Update tokens available and total tokens purchased
   const { error } = await supabaseAdminClient
     .from('tokens')
     .update({
-      total_tokens_purchased: quantity,
+      total_tokens_purchased: updatedPurchasedTokens,
+      tokens_available: updatedTokensAvailable,
+      last_purchase_date: new Date().toISOString(),
     })
     .eq('id', tokenId);
   if (error) throw error;
-  console.log(`Token bundle purchased for candidate [${tokenId}]`);
+  console.log(
+    `Token bundle of [${quantity}] purchased for candidate with token id:[${tokenId}]`,
+  );
 };
 
 // const upsertProductRecord = async (product: Stripe.Product) => {

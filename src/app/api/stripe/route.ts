@@ -80,17 +80,23 @@ export async function POST(req: NextRequest) {
               checkoutSession.metadata?.quantity ?? '0',
               10,
             );
+            console.log('Checkout session completed:', checkoutSession.id);
+            console.log('Product type:', productType);
+            console.log('Quantity:', quantity);
             if (checkoutSession.mode === 'subscription') {
               const subscriptionId = checkoutSession.subscription;
               // TODO: update subscription status if needed
               // Example:
               // await manageSubscriptionStatusChange(subscriptionId as string, checkoutSession.customer as string, true);
-            } else if (productType === 'token_bundle') {
-              // handle awarding tokens
-              await manageTokenBundlePurchase(
-                quantity,
-                checkoutSession.customer as string,
-              );
+            } else if (checkoutSession.mode === 'payment') {
+              if (productType === 'token_bundle') {
+                console.log('Token bundle purchase detected');
+                // handle awarding tokens
+                await manageTokenBundlePurchase(
+                  quantity,
+                  checkoutSession.customer as string,
+                );
+              }
             }
             break;
           }

@@ -13,7 +13,6 @@ export default function PurchaseTokensSuccess({
   );
   const [error, setError] = useState<string | null>(null);
   //Latest checkout session details
-  console.log(checkoutSessionId);
   useEffect(() => {
     if (!checkoutSessionId) {
       setIsLoading(false);

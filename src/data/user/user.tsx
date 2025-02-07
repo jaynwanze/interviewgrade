@@ -519,7 +519,6 @@ export async function createCandidateCheckoutSessionAction({
       payment_method_types: ['card'],
       billing_address_collection: 'required',
       customer,
-      expand: ['line_items'],
       metadata: {
         product_type: product.product_type,
         quantity: product.quantity,

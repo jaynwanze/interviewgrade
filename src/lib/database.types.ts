@@ -204,7 +204,7 @@ export type Database = {
           tokens_available?: number
           total_tokens_used?: number
           total_tokens_purchased?: number
-          last_token_purchase_date?: number
+          last_purchase_date?: string
         }
         Relationships: [
           {

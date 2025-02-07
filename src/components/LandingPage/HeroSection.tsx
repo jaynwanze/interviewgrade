@@ -25,13 +25,13 @@ export default function HeroSection() {
             Prep smarter, Learn faster, and Recieve valuable interview feedback
             easier
           </p>
-          <div className="flex flex-col md:flex-row items-center max-w-md w-full  gap-3 pt-2 ">
+          {/* <div className="flex flex-col md:flex-row items-center max-w-md w-full  gap-3 pt-2 ">
             <Button className="w-full">
               Log In
               <ArrowRight size={16} className="ml-2" />
             </Button>
             
-          </div>
+          </div> */}
         </div>
         <div className="rounded-md border-2 flex-1 overflow-hidden border-border shadow-sm">
           <Image

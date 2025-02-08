@@ -1,7 +1,17 @@
 'use client';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   getInterviewAnswers,
   getInterviewById,
@@ -13,11 +23,10 @@ import {
   Interview,
   InterviewAnswerDetail,
   InterviewEvaluation,
-  QuestionAnswerFeedback,
 } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
-import { TabsList } from '@radix-ui/react-tabs';
+import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 export const InterviewHistoryDetails = ({
@@ -32,9 +41,7 @@ export const InterviewHistoryDetails = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
-  const [gradeStringColour, setGradeStringColour] = useState<string>('');
   const hasFetched = useRef(false);
-  const [selected, setSelected] = useState<string>('');
 
   const retryFeedbackFetch = async (interview: Interview) => {
     setIsFetchingFeedback(true);
@@ -110,19 +117,6 @@ export const InterviewHistoryDetails = ({
     }
   }, [interviewId]);
 
-  useEffect(() => {
-    if (evaluation) {
-      const grade = evaluation.overall_grade;
-      if (grade >= 80) {
-        setGradeStringColour('text-green-600');
-      } else if (grade >= 60) {
-        setGradeStringColour('text-yellow-600');
-      } else {
-        setGradeStringColour('text-red-600');
-      }
-    }
-  }, [evaluation]);
-
   if (loading) {
     return (
       <div className="flex justify-center items-center">
@@ -175,175 +169,249 @@ export const InterviewHistoryDetails = ({
   };
 
   const renderDetailed = (evaluation: InterviewEvaluation) => {
+    if (!evaluation.question_answer_feedback?.length) {
+      return (
+        <div className="flex justify-center items-center p-6 text-gray-600">
+          No detailed feedback available.
+        </div>
+      );
+    }
+
     return (
-      <div className="interview-flow-container flex flex-col items-center">
-        {/* Question Answer Feedback */}
-        {evaluation.question_answer_feedback &&
-          evaluation.question_answer_feedback.length > 0 && (
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4 text-center">
-                Detailed
-              </CardHeader>
-              <section className="mb-6">
-                {evaluation.question_answer_feedback.map(
-                  (qa: QuestionAnswerFeedback, index: number) => (
-                    <div
-                      key={index}
-                      className="p-4 mx-5 mb-4 border rounded-lg bg-gray-50 dark:bg-gray-800"
-                    >
-                      <h4 className="text-md font-semibold mb-2">
-                        Question {index + 1}: {qa.question}
-                      </h4>
-                      <p className="mb-2">
-                        <strong>Answer:</strong> {qa.answer || 'N/A'}
-                      </p>
-                      <p className="mb-2">
-                        <strong>Mark:</strong> {qa.mark}/
-                        {Math.floor(
+      <div className="w-full max-w-4xl mx-auto space-y-4">
+        {evaluation.question_answer_feedback.map((qa, index) => (
+          <Card key={index} className="shadow-sm border">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">
+                Question {index + 1}
+              </CardTitle>
+              <p className="text-sm text-gray-500">{qa.question}</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* User's Answer */}
+              <div className="text-gray-700">
+                <span className="font-semibold">Your Response:</span>{' '}
+                <span className="text-gray-900">{qa.answer || 'N/A'}</span>
+              </div>
+
+              {/* Feedback Analysis */}
+              <div>
+                <span className="font-semibold">AI Analysis:</span>
+                <p className="text-sm text-gray-600">{qa.feedback}</p>
+              </div>
+
+              <Separator className="my-3" />
+
+              {/* Score */}
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">Score:</span>
+                <Badge
+                  className={`text-white ${qa.mark >=
+                      80 /
+                      Math.floor(
+                        100 / evaluation.question_answer_feedback.length,
+                      )
+                      ? 'bg-green-600'
+                      : qa.mark >=
+                        60 /
+                        Math.floor(
                           100 / evaluation.question_answer_feedback.length,
-                        )}
-                      </p>
-                      <p>
-                        <strong>Feedback:</strong> {qa.feedback}
-                      </p>
-                    </div>
-                  ),
-                )}
-              </section>
-            </Card>
-          )}
+                        )
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
+                    }`}
+                >
+                  {qa.mark}/
+                  {Math.floor(100 / evaluation.question_answer_feedback.length)}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   };
 
   const renderOverview = (evaluation: InterviewEvaluation) => {
+    const getScoreColor = (score: number) => {
+      return score >= 80
+        ? 'bg-green-600'
+        : score >= 60
+          ? 'bg-yellow-500'
+          : 'bg-red-500';
+    };
+
     return (
-      <Card className="border-none shadow-lg">
-        <CardHeader className="bg-gray-100 dark:bg-gray-800 text-2xl font-bold mb-4">
-          Overview
+      <div className="w-full max-w-4xl mx-auto space-y-6">
+        {/* Overall Score */}
+        <CardHeader>
+          <h1 className="text-xl font-semibold">Overall Score</h1>
+        </CardHeader>
+        <CardContent className="flex items-center justify-between">
+          <span className="text-lg font-semibold">Performance:</span>
+          <Badge
+            className={`text-white text-lg px-4 py-2 ${getScoreColor(evaluation.overall_grade)}`}
+          >
+            {evaluation.overall_grade}/100
+          </Badge>
+        </CardContent>
+        <Separator className="my-3" />
+
+        {/* Strengths */}
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
+        </CardHeader>
+        <CardContent className="text-gray-700">
+          {evaluation.strengths
+            ? evaluation.strengths
+            : 'No strengths identified.'}
+        </CardContent>
+        <Separator className="my-3" />
+
+        {/* Areas for Improvement */}
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Areas for Improvement
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-gray-700">
+          {evaluation.areas_for_improvement
+            ? evaluation.areas_for_improvement
+            : 'No areas identified.'}
+        </CardContent>
+        <Separator className="my-3" />
+
+        {/* Recommendations */}
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-gray-700">
+          {evaluation.recommendations
+            ? evaluation.recommendations
+            : 'No recommendations provided.'}
+        </CardContent>
+        <Separator className="my-3" />
+
+        {/* Radial Chart (To Be Added) */}
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Skill Breakdown
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Overall Score */}
-          <section className="mb-2">
-            <h2 className="text-xl font-semibold">Overall Grade</h2>
-            <p className={`text-3xl font-bold ${gradeStringColour}`}>
-              {evaluation.overall_grade}/100
-            </p>
-          </section>
-
-          {/* Strengths */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Strengths</h2>
-            <p>
-              {evaluation.strengths ? evaluation.strengths : 'None Provided'}
-            </p>
-          </section>
-
-          {/* Areas for Improvement */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">
-              Areas for Improvement
-            </h2>
-            <p>
-              {evaluation.areas_for_improvement
-                ? evaluation.areas_for_improvement
-                : 'None Provided'}
-            </p>
-          </section>
-
-          {/* Recommendations */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
-            <p>
-              {evaluation.recommendations
-                ? evaluation.recommendations
-                : 'None Provided'}
-            </p>
-          </section>
-
-          {/* Radial */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Radial Chart</h2>
-            TO DO : ADD RADIAL CHART
-          </section>
-
-          {/* Evaluation Scores */}
-          <section className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Evaluation Scores</h2>
-            <table className="min-w-full border">
-              <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800 font-bold">
-                  <th className="px-4 py-2 border">Criterion</th>
-                  <th className="px-4 py-2 border">Score</th>
-                  <th className="px-4 py-2 border">Feedback</th>
-                </tr>
-              </thead>
-              <tbody>
-                {evaluation.evaluation_scores.map((score) => (
-                  <tr key={score.id}>
-                    <td className="px-4 py-2 border bold font-semibold">
-                      {score.name || 'N/A'}
-                    </td>
-                    <td className="px-4 py-2 border font-semibold">
-                      {score.score}/10
-                    </td>
-                    <td className="px-4 py-2 border italic">
-                      {score.feedback}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+          <p className="text-gray-500">[Insert Radial Chart Here]</p>
         </CardContent>
-      </Card>
+        <Separator className="my-3" />
+
+        {/* Evaluation Scores Table */}
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Evaluation Scores
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow className="bg-gray-100 dark:bg-gray-900/5 font-bold">
+                <TableHead className="text-left px-4 py-2 border">
+                  Criterion
+                </TableHead>
+                <TableHead className="text-center px-4 py-2 border">
+                  Score
+                </TableHead>
+                <TableHead className="text-left px-4 py-2 border">
+                  Feedback
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {evaluation.evaluation_scores.map((score) => (
+                <TableRow key={score.id} className="border-b">
+                  <TableCell className="px-4 py-2 font-semibold">
+                    {score.name || 'N/A'}
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-center">
+                    <Badge
+                      className={`text-white ${getScoreColor(score.score * 10)}`}
+                    >
+                      {score.score}/10
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-gray-600">
+                    {score.feedback}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </div>
     );
   };
-
   return (
-    <div className="p-4 max-w-5xl mx-auto text-center">
-      <Card className="shadow-lg pt-4">
-        <h1 className="text-2xl font-bold mb-1">
-          {' '}
-          {interviewModeDisplayString}: {title}
-        </h1>
-        <p>
-          <strong>Status:</strong> {formattedStatus}
-        </p>
-        <p>
-          <strong>Started At:</strong> {formattedStartedAt}
-        </p>
-        <p>
-          <strong>Completed At:</strong> {formattedCompletedAt}
-        </p>
-        {(status === 'completed' && evaluation && (
-          <>
-            <Tabs defaultValue="overview">
-              <TabsList className=" mt-5 grid grid-cols-3 w-full mx-auto mb-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="details">Detailed</TabsTrigger>
-                <TabsTrigger value="coach">Ai Interview Coach</TabsTrigger>
-              </TabsList>
+    <div className="p-6 max-w-5xl mx-auto">
+      {/* Header Section */}
+      <div className="flex items-start justify-between">
+        {/* Back Button */}
+        <button
+          className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+          onClick={() => window.history.back()}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
 
-              <TabsContent value="overview">
-                {renderOverview(evaluation)}
-              </TabsContent>
-              <TabsContent value="details">
-                {renderDetailed(evaluation)}
-              </TabsContent>
-              <TabsContent value="coach">
-                {renderCoach(evaluation)}{' '}
-              </TabsContent>
-            </Tabs>
-          </>
-        )) || (
-            <div className="p-4 max-w-3xl mx-auto text-center">
-              <div className="text-center p-1">
-                No interview feedback available yet.
-              </div>
+        {/* Interview Details */}
+        <div className="flex-1 text-left space-y-2">
+          <div className="flex items-center space-x-2">
+            <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
+              AI
+            </Badge>
+            <h1 className="text-3xl font-bold">Interview Report</h1>
+          </div>
+          <p className="text-lg text-gray-600">{interview.title}</p>
+
+          {/* Meta Info Row */}
+          <div className="flex items-center space-x-4 text-gray-500">
+            <div className="flex items-center space-x-1">
+              <CalendarIcon className="h-5 w-5" />
+              <span>{new Date(interview.start_time).toLocaleString()}</span>
             </div>
-          )}
-      </Card>
+            <div className="flex items-center space-x-1">
+              <ClockIcon className="h-5 w-5" />
+              <span>{interview.duration} mins</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Separator className="my-4" />
+
+      {/* Tabs Section */}
+      {interview.status === 'completed' && evaluation ? (
+        <Tabs defaultValue="overview" className="p-5">
+          <TabsList className="grid grid-cols-3 w-full mx-auto">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="details">Detailed</TabsTrigger>
+            <TabsTrigger value="coach">AI Interview Coach</TabsTrigger>
+          </TabsList>
+
+          <div className="shadow-lg mt-5 p-6 rounded-lg border">
+            <TabsContent value="overview">
+              {renderOverview(evaluation)}
+            </TabsContent>
+            <TabsContent value="details">
+              {renderDetailed(evaluation)}
+            </TabsContent>
+            <TabsContent value="coach">{renderCoach(evaluation)}</TabsContent>
+          </div>
+        </Tabs>
+      ) : (
+        <div className="text-center p-4">
+          No interview feedback available yet.
+        </div>
+      )}
     </div>
   );
 };

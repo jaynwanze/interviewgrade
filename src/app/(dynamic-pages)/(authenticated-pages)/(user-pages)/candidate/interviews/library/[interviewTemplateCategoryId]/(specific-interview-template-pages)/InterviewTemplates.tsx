@@ -2,8 +2,9 @@
 
 import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import {
   getInterviewTemplatesByCategory,
   getPracticeTemplatesByCategoryAndMode,
@@ -14,6 +15,7 @@ import {
   PracticeTemplate,
 } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
+import { ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function InterviewTemplates({
@@ -32,8 +34,10 @@ export function InterviewTemplates({
   const [isLoading, setIsLoading] = useState(true);
   const displayString =
     interviewMode === INTERVIEW_PRACTICE_MODE
-      ? 'Practice Mode : Select Practice Session'
-      : 'Interview Mode : Select Mock Interview';
+      ? 'Select Practice Session'
+      : 'Select Mock Interview';
+  const interviewModeString =
+    interviewMode === 'practice' ? 'Practice Mode' : 'Interview Mode';
 
   const fetchInterviews = async () => {
     setIsLoading(true);
@@ -80,22 +84,38 @@ export function InterviewTemplates({
   }
 
   return (
-    <div>
-      <Card className="mb-6 text-center">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center">
-            {displayString}
-          </CardTitle>
-        </CardHeader>
-      </Card>
-      <div className="flex justify-center mb-6">
+    <div className="p-3 mx-auto max-w-5xl">
+      <button
+        className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+        onClick={() => window.history.back()}
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+      <div className="text-center">
+        <Badge className="mb-2 bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
+          {interviewModeString}
+        </Badge>
+        <h1 className="text-3xl font-bold">{displayString}</h1>
+        <p className="text-gray-500 mt-2">
+          {' '}
+          Select a mock interview that aligns with your role, industry, or skill
+          focus.
+        </p>
+      </div>
+
+      <Separator className="my-6" />
+
+      <div className="flex justify-center">
         <Input
-          placeholder="Search position or company"
-          className="max-w-screen-2xl"
+          placeholder="Search position or company..."
+          className="max-w-lg shadow-md"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+
+      <Separator className="my-6" />
+
       <div className="flex justify-center">
         {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -108,10 +128,11 @@ export function InterviewTemplates({
             ))}
           </div>
         ) : (
-          <div className="w-full max-w-96 border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-200">
+          <div className="w-full max-w-lg border rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-900">
             <h3 className="text-xl font-semibold">No interviews found</h3>
-            <div>No interviews found for this search.</div>
-            <div className="text-gray-600">Please check back later.</div>
+            <p className="text-gray-600 mt-2">
+              No results for this search. Please check back later.
+            </p>
           </div>
         )}
       </div>

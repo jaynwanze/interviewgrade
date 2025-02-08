@@ -5,6 +5,7 @@ import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/I
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useInterviewHistory } from '@/hooks/useInterviewHistory';
 import { useMemo } from 'react';
@@ -58,37 +59,45 @@ export default function InterviewHistoryPage() {
   }
 
   return (
-    <div className="p-4">
-      <Card className="mb-6 text-center">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center">
-            Interview History
-          </CardTitle>
-        </CardHeader>
-      </Card>
-      <div className="flex justify-center items-center space-x-2 mb-4">
+    <div className="p-6 max-w-5xl mx-auto">
+      {/* Page Header */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold">Interview History</h1>
+        <p className="text-gray-500">Review your past interviews and practice sessions.</p>
+      </div>
+
+      <Separator className="my-4" />
+
+      {/* Mode Toggle */}
+      <div className="flex justify-center items-center space-x-3 mb-6">
+        <Label htmlFor="history-mode" className="text-lg font-medium">
+          {memoizedValues.activeSwitch === "Interview Mode"
+            ? "Interview Mode"
+            : "Practice Mode"}
+        </Label>
         <Switch
           id="history-mode"
-          checked={memoizedValues.activeSwitch === 'Interview Mode'}
+          checked={memoizedValues.activeSwitch === "Interview Mode"}
           onCheckedChange={() =>
             handleSwitchChange(
-              memoizedValues.activeSwitch === 'Practice Mode'
-                ? 'Interview Mode'
-                : 'Practice Mode',
+              memoizedValues.activeSwitch === "Practice Mode"
+                ? "Interview Mode"
+                : "Practice Mode"
             )
           }
         />
-        <Label htmlFor="history-mode">
-          {memoizedValues.activeSwitch === 'Interview Mode'
-            ? 'Interview Mode'
-            : 'Practice Mode'}
-        </Label>
       </div>
+
+      {/* Filters */}
       <InterviewHistoryFilter
         activeTab={memoizedValues.activeTab}
         counts={memoizedValues.counts}
         onTabChange={memoizedValues.handleTabChange}
       />
+
+      <Separator className="my-4" />
+
+      {/* Interview List */}
       <InterviewHistoryList
         interviews={memoizedValues.filteredInterviews}
         interviewModeToggle={memoizedValues.activeSwitch}

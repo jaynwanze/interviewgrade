@@ -1,5 +1,6 @@
 'use client';
 
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
 
 interface HistoryFilterProps {
@@ -20,37 +21,24 @@ export const InterviewHistoryFilter: React.FC<HistoryFilterProps> = ({
   counts,
   onTabChange,
 }) => {
-  const tabs: {
-    label: string;
-    value: 'All' | 'Completed' | 'Not Completed' | 'Not Started';
-    count: number;
-  }[] = [
-      { label: 'All Interviews', value: 'All', count: counts.all },
-      { label: 'Completed', value: 'Completed', count: counts.completed },
-      {
-        label: 'Not Completed',
-        value: 'Not Completed',
-        count: counts.notCompleted,
-      },
-      { label: 'Not Started', value: 'Not Started', count: counts.notStarted },
-    ];
-
   return (
-    <div className="flex justify-center items-center">
-      <div className="col items-center flex-wrap space-x-4 mb-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            className={`px-4 py-2 rounded m-2 ${activeTab === tab.value
-                ? 'bg-gray-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              } transition duration-200`}
-            onClick={() => onTabChange(tab.value)}
-          >
-            {tab.label} ({tab.count})
-          </button>
-        ))}
-      </div>
-    </div>
+    <Tabs
+      defaultValue={activeTab}
+      onValueChange={(value) => onTabChange(value as typeof activeTab)}
+      className="w-full"
+    >
+      <TabsList className="grid grid-cols-4 w-full  mx-auto">
+        <TabsTrigger value="All">All ({counts.all})</TabsTrigger>
+        <TabsTrigger value="Completed">
+          Completed ({counts.completed})
+        </TabsTrigger>
+        <TabsTrigger value="Not Completed">
+          Not Completed ({counts.notCompleted})
+        </TabsTrigger>
+        <TabsTrigger value="Not Started">
+          Not Started ({counts.notStarted})
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 };

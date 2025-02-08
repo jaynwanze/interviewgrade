@@ -1,7 +1,8 @@
 'use client';
 
-import { Interview } from '@/types';
-import { InterviewHistoryItem } from './InterviewHistoryItem';
+import { Interview } from "@/types";
+import { InterviewHistoryItem } from "./InterviewHistoryItem";
+import { Card } from "@/components/ui/card";
 
 export const InterviewHistoryList = ({
   interviews,
@@ -10,24 +11,29 @@ export const InterviewHistoryList = ({
   interviews: Interview[];
   interviewModeToggle: string;
 }) => {
-  const interviewModeDisplayString = interviewModeToggle === 'Interview Mode'? 'interviews' : 'practice sessions' ;
+  const interviewModeDisplayString =
+    interviewModeToggle === "Interview Mode"
+      ? "interviews"
+      : "practice sessions";
+
   return (
-    <div className="flex justify-center items-center">
-      <div className="w-full max-w-screen-md space-y-4">
-        {interviews.length > 0 ? (
-          interviews.map((interview) => (
+    <div className="w-full max-w-4xl mx-auto">
+      {interviews.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4">
+          {interviews.map((interview) => (
             <InterviewHistoryItem key={interview.id} interview={interview} />
-          ))
-        ) : (
-          <div className="w-full max-w-screen-md  border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-200">
-            <h3 className="text-xl font-semibold">No {interviewModeDisplayString} found</h3>
-            <p className="text-gray-600">
-              <div>No {interviewModeDisplayString} found for this filter.</div>
-              <div className="text-gray-600">Please check back later.</div>
-            </p>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <Card className="p-6 text-center shadow-md">
+          <h3 className="text-xl font-semibold">No {interviewModeDisplayString} found</h3>
+          <p className="text-gray-500">
+            No {interviewModeDisplayString} found for this filter.
+            <br />
+            Please check back later.
+          </p>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,25 +1,26 @@
 'use client';
 
 import { InterviewModeCard } from '@/components/Interviews/InterviewLibrary/InterviewModeCard';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { INTERVIEW_MODES } from '@/utils/constants';
 
 export function InterviewMode() {
   return (
-    <div>
-      <Card className="mb-6 text-center">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center">
-            Select Interview Mode
-          </CardTitle>
-        </CardHeader>
-      </Card>
-      <div className="mt-4 flex items-center justify-center min-h-[50vh]">
-      <div className="grid grid-cols-2 gap-6">
-          {INTERVIEW_MODES.map((mode) => (
-            <InterviewModeCard key={mode} name={mode} />
-          ))}
-        </div>
+    <div className="p-6 mx-auto max-w-4xl">
+      {/* Page Header */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold"> Select Interview Mode</h1>
+        <p className="text-gray-500">
+          Choose the best mode for your mock interview experience.
+        </p>
+      </div>
+
+      <Separator className="my-4" />
+
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mt-6">
+        {INTERVIEW_MODES.map((mode) => (
+          <InterviewModeCard key={mode} name={mode} />
+        ))}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export function ClientShell({
     >
       <SidebarShell>{sidebar}</SidebarShell>
       <div className="h-full overflow-y-auto">
-        <div className="relative flex-1 h-auto w-full overflow-auto">
+        <div className="relative flex-1 h-auto w-full overflow-auto bg-white/90 dark:bg-neutral-900/15">
           {children}
         </div>
       </div>

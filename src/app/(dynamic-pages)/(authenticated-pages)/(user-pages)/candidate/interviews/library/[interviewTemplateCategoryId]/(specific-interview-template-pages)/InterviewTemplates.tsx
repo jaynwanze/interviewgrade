@@ -92,7 +92,7 @@ export function InterviewTemplates({
         <ChevronLeft className="h-6 w-6" />
       </button>
       <div className="text-center">
-        <Badge className="mb-2 bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
+        <Badge className="mb-3 bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
           {interviewModeString}
         </Badge>
         <h1 className="text-3xl font-bold">{displayString}</h1>

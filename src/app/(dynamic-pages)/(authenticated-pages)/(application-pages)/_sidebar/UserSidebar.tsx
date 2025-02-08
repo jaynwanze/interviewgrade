@@ -15,7 +15,7 @@ export async function UserSidebar() {
     <div
       className={cn(
         'flex flex-col justify-between h-full',
-        'lg:px-3 lg:py-4 lg:pt-2. bg-white/90 dark:bg-neutral-900/15',
+        'lg:px-3 lg:py-4 lg:pt-2.',
       )}
     >
       <div>

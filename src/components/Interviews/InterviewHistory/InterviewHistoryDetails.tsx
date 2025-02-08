@@ -218,6 +218,12 @@ export const InterviewHistoryDetails = ({
                           100 / evaluation.question_answer_feedback.length,
                         )
                         ? 'bg-yellow-500'
+                        : qa.mark >=
+                          40 /
+                          Math.floor(
+                            100 / evaluation.question_answer_feedback.length,
+                          )
+                          ? 'bg-orange-500'
                         : 'bg-red-500'
                     }`}
                 >
@@ -237,10 +243,11 @@ export const InterviewHistoryDetails = ({
       return score >= 80
         ? 'bg-green-600'
         : score >= 60
-          ? 'bg-yellow-500'
-          : 'bg-red-500';
+        ? 'bg-orange-500'
+        : score >= 40
+        ? 'bg-yellow-500'
+        : 'bg-red-500';
     };
-
     return (
       <div className="w-full max-w-4xl mx-auto space-y-6">
         {/* Overall Score */}

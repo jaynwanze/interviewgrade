@@ -23,6 +23,7 @@ import {
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
+import { ChevronLeft } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function InterviewFlow({
@@ -360,7 +361,14 @@ export default function InterviewFlow({
 
   return (
     <div className="interview-flow-container flex flex-col items-center min-h-screen">
-      exit session
+      <Button
+        className="p-2 rounded-md bg-red-600 hover:bg-red-500 "
+        onClick={() => window.history.back()}
+      >
+        <ChevronLeft className="h-6 w-6"></ChevronLeft>
+          Leave Session
+      </Button>
+
       {/* Main Cards: AIQuestionSpeaker and UserCamera */}
       <div className="flex w-full max-w-4xl">
         <div className="left-side w-1/2 p-4">

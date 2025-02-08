@@ -3,7 +3,6 @@
 import { InterviewHistoryFilter } from '@/components/Interviews/InterviewHistory/InterviewHistoryFilter';
 import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/InterviewHistoryList';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
@@ -59,11 +58,13 @@ export default function InterviewHistoryPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-2 max-w-5xl mx-auto">
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Interview History</h1>
-        <p className="text-gray-500">Review your past interviews and practice sessions.</p>
+        <h1 className="text-3xl font-bold mb-1">Interview History</h1>
+        <p className="text-gray-500">
+          Review your past interviews and practice sessions.
+        </p>
       </div>
 
       <Separator className="my-4" />
@@ -71,18 +72,18 @@ export default function InterviewHistoryPage() {
       {/* Mode Toggle */}
       <div className="flex justify-center items-center space-x-3 mb-6">
         <Label htmlFor="history-mode" className="text-lg font-medium">
-          {memoizedValues.activeSwitch === "Interview Mode"
-            ? "Interview Mode"
-            : "Practice Mode"}
+          {memoizedValues.activeSwitch === 'Interview Mode'
+            ? 'Interview Mode'
+            : 'Practice Mode'}
         </Label>
         <Switch
           id="history-mode"
-          checked={memoizedValues.activeSwitch === "Interview Mode"}
+          checked={memoizedValues.activeSwitch === 'Interview Mode'}
           onCheckedChange={() =>
             handleSwitchChange(
-              memoizedValues.activeSwitch === "Practice Mode"
-                ? "Interview Mode"
-                : "Practice Mode"
+              memoizedValues.activeSwitch === 'Practice Mode'
+                ? 'Interview Mode'
+                : 'Practice Mode',
             )
           }
         />

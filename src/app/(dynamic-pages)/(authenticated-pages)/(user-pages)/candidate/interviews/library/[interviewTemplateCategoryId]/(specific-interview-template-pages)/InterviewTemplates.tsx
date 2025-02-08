@@ -84,7 +84,7 @@ export function InterviewTemplates({
   }
 
   return (
-    <div className="p-3 mx-auto max-w-5xl">
+    <div className="p-2 mx-auto max-w-5xl">
       <button
         className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
         onClick={() => window.history.back()}
@@ -92,7 +92,7 @@ export function InterviewTemplates({
         <ChevronLeft className="h-6 w-6" />
       </button>
       <div className="text-center">
-        <Badge className="mb-3 bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
+        <Badge className="text-center mb-3 bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
           {interviewModeString}
         </Badge>
         <h1 className="text-3xl font-bold">{displayString}</h1>
@@ -102,9 +102,7 @@ export function InterviewTemplates({
           focus.
         </p>
       </div>
-
       <Separator className="my-6" />
-
       <div className="flex justify-center">
         <Input
           placeholder="Search position or company..."
@@ -113,9 +111,7 @@ export function InterviewTemplates({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-
       <Separator className="my-6" />
-
       <div className="flex justify-center">
         {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -45,7 +45,7 @@ export const Tokens: React.FC = () => {
     }, []);
 
     if (loading) {
-        return <div className="text-white">Loading Tokens...</div>;
+        return <div>Loading Tokens...</div>;
     }
 
     if (error) {

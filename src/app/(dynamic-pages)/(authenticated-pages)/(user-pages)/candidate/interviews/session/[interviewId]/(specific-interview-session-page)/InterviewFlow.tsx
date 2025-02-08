@@ -360,6 +360,7 @@ export default function InterviewFlow({
 
   return (
     <div className="interview-flow-container flex flex-col items-center min-h-screen">
+      exit session
       {/* Main Cards: AIQuestionSpeaker and UserCamera */}
       <div className="flex w-full max-w-4xl">
         <div className="left-side w-1/2 p-4">
@@ -397,7 +398,6 @@ export default function InterviewFlow({
           </Card>
         </div>
       </div>
-
       {/* Feedback Card: Appears beneath the main cards in practice mode */}
       {interview && interview.mode === INTERVIEW_PRACTICE_MODE && (
         <div className="w-full max-w-4xl p-4">

@@ -145,21 +145,7 @@ export const InterviewHistoryDetails = ({
   if (interview.status === 'not_started') {
     return <div className="text-center p-4">Session has not started yet.</div>;
   }
-
-  const { title, mode, status, start_time, end_time } = interview;
-
-  const interviewModeDisplayString =
-    mode === INTERVIEW_PRACTICE_MODE ? 'Practice Session' : 'Interview Session';
-
-  const formattedStatus = status === 'completed' ? 'Completed' : 'In Progress';
-
-  const formattedStartedAt = start_time
-    ? new Date(start_time).toLocaleString()
-    : 'N/A';
-  const formattedCompletedAt = end_time
-    ? new Date(end_time).toLocaleString()
-    : 'N/A';
-
+  
   const renderCoach = (evaluation: InterviewEvaluation) => {
     return (
       <div className="interview-flow-container flex flex-col items-center">
@@ -252,7 +238,7 @@ export const InterviewHistoryDetails = ({
       <div className="w-full max-w-4xl mx-auto space-y-6">
         {/* Overall Score */}
         <CardHeader>
-          <h1 className="text-xl font-semibold">Overall Score</h1>
+          <CardTitle className="text-xl font-semibold">Overall Score</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-between">
           <span className="text-lg font-semibold">Performance:</span>
@@ -262,7 +248,7 @@ export const InterviewHistoryDetails = ({
             {evaluation.overall_grade}/100
           </Badge>
         </CardContent>
-        <Separator className="my-3" />
+        <Separator />
 
         {/* Strengths */}
         <CardHeader>
@@ -273,7 +259,7 @@ export const InterviewHistoryDetails = ({
             ? evaluation.strengths
             : 'No strengths identified.'}
         </CardContent>
-        <Separator className="my-3" />
+        <Separator />
 
         {/* Areas for Improvement */}
         <CardHeader>
@@ -286,7 +272,7 @@ export const InterviewHistoryDetails = ({
             ? evaluation.areas_for_improvement
             : 'No areas identified.'}
         </CardContent>
-        <Separator className="my-3" />
+        <Separator/>
 
         {/* Recommendations */}
         <CardHeader>
@@ -299,7 +285,7 @@ export const InterviewHistoryDetails = ({
             ? evaluation.recommendations
             : 'No recommendations provided.'}
         </CardContent>
-        <Separator className="my-3" />
+        <Separator />
 
         {/* Radial Chart (To Be Added) */}
         <CardHeader>
@@ -310,7 +296,7 @@ export const InterviewHistoryDetails = ({
         <CardContent>
           <p className="text-gray-500">[Insert Radial Chart Here]</p>
         </CardContent>
-        <Separator className="my-3" />
+        <Separator />
 
         {/* Evaluation Scores Table */}
         <CardHeader>
@@ -319,7 +305,7 @@ export const InterviewHistoryDetails = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table className="w-full">
+          <Table className="w-full border rounded-sm">
             <TableHeader>
               <TableRow className="bg-gray-100 dark:bg-gray-900/5 font-bold">
                 <TableHead className="text-left px-4 py-2 border">
@@ -358,7 +344,7 @@ export const InterviewHistoryDetails = ({
     );
   };
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-2 max-w-5xl mx-auto">
       {/* Header Section */}
       <div className="flex items-start justify-between">
         {/* Back Button */}

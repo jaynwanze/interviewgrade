@@ -32,6 +32,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
 import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOverview';
+import { Separator } from '@/components/ui/separator';
 
 export type TemplateAndSwitchModeDetails = {
   current_template_id: string;
@@ -350,14 +351,14 @@ export default function InterviewAnalyticsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <Card className="mb-6 text-center">
-        <CardHeader>
-          <CardTitle className="text-3xl text-center">
-            Interview Analytics Dashboard
-          </CardTitle>
-        </CardHeader>
-      </Card>
+    <div className="container mx-auto p-2">
+      <h1 className="text-3xl font-bold text-center mb-1">
+        Interview Analytics Dashboard
+      </h1>
+      <p className="text-center text-gray-500">
+        View and analyze your interview performance.
+      </p>
+      <Separator className="my-4" />
       <Tabs defaultValue="overview">
         <TabsList className="grid grid-cols-2 w-full mx-auto mb-5">
           <TabsTrigger value="overview">Dashboard Overview</TabsTrigger>

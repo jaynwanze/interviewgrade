@@ -41,7 +41,8 @@ CREATE TABLE "public"."products" (
   "pricing_plan_interval" "public"."pricing_plan_interval_type",
   "pricing_interval_count" bigint,
   "trial_period_days" bigint,
-  "metadata" "jsonb"
+  "img_url" text DEFAULT NOT NULL
+  "metadata" "jsonb",
   );
 ALTER TABLE "public"."products" OWNER TO "postgres";
 

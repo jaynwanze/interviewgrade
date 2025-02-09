@@ -1,12 +1,12 @@
 'use client';
 
-import { getCurrentCandidatesTokens } from '@/data/user/user';
-import { NormalizedSubscription, Token } from '@/types';
+import { useTokens } from '@/hooks/useTokens';
+import { NormalizedSubscription } from '@/types';
 import { ShoppingCartIcon } from '@heroicons/react/solid';
 import tokenImg from '@public/images/one_token.svg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,7 +17,6 @@ import {
 } from './ui/dropdown-menu';
 
 export const Tokens: React.FC = () => {
-    const [tokens, setTokens] = useState<Token | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [subscription, setSubscription] =
@@ -25,30 +24,18 @@ export const Tokens: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const router = useRouter();
 
+    // Use hooks to fetch the user's tokens
+    const { data: tokens, isLoading, isError } = useTokens();
+
     const handleClick = () => {
         router.push('/candidate/purchase-tokens');
     };
-    const fetchTokens = async () => {
-        try {
-            const tokens = await getCurrentCandidatesTokens();
-            setTokens(tokens);
-        } catch (err) {
-            console.error('Error fetching tokens:', err);
-            setError('Failed to load tokens');
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    useEffect(() => {
-        fetchTokens();
-    }, []);
-
-    if (loading) {
+    if (isLoading) {
         return <div>Loading Tokens...</div>;
     }
 
-    if (error) {
+    if (isError) {
         return <div className="text-red-500">Error: {error}</div>;
     }
 

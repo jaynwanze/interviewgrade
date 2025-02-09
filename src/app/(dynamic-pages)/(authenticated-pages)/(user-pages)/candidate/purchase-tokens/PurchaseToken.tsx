@@ -1,8 +1,8 @@
 import { CreateTokenPurchaseButton } from '@/components/Token/ActionButtons';
 import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { getActiveProductsByType } from '@/data/user/user';
 import { Product } from '@/types';
-import tokenImg from '@public/images/one_token.svg';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -52,28 +52,22 @@ export default function PurchaseTokens() {
   return (
     <div className="min-h-screen py-10">
       <h1 className="text-3xl font-bold text-center mb-4">Purchase Tokens</h1>
-      <p className="text-center text-gray-300 mb-8">
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
         Choose a token bundle to make a one time payment.
       </p>
-      <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Separator className="my-4" />
+      <div className="mt-10 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <Card
             key={product.id}
             className="rounded-lg p-6 flex flex-col justify-between"
           >
             <div>
-              {/* {product.image && (
-                                <img
-                                    src={product.image}
-                                    alt={product.title}
-                                    className="w-full h-32 object-contain mb-4"
-                                />
-                            )} */}
-              <div className="w-full h-32 object-contain mb-4">
+              <div className="w-full h-32 object-contain mb-4 flex justify-center">
                 <Image
-                  src={tokenImg}
+                  src={product.img_url}
                   alt="Token Icon"
-                  width={100}
+                  width={150}
                   height={60}
                   quality={100}
                   sizes="100vw"
@@ -83,7 +77,9 @@ export default function PurchaseTokens() {
                 />
               </div>
               <h2 className="text-xl font-semibold mb-2">{product.title}</h2>
-              <p className="text-gray-300 mb-4">{product.description}</p>
+              <p className="text-gray-500  dark:text-gray-400 mb-2">
+                {product.description}
+              </p>
             </div>
             <div>
               <p className="text-lg font-bold mb-2">

@@ -26,6 +26,85 @@ import { getRandomElements } from '@/utils/getRandomElements';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import moment from 'moment';
 
+/**
+ * This action starts an interview or practice session (depending on interviewMode).
+ * It checks tokens before creating the session and deducts tokens if successful.
+ *
+ * @param template - The practice or interview template to use
+ * @param interviewMode - 'practice' or 'interview'
+ * @returns The newly created interview row
+ */
+export async function startInterviewAction(
+  template: PracticeTemplate | InterviewTemplate,
+  interviewMode: InterviewModeType,
+): Promise<Table<'interviews'>> {
+  //Get current user
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    throw new Error('User is not logged in.');
+  }
+
+  //Get candidate
+  const candidateProfile = await getCandidateUserProfile(user.id);
+  if (!candidateProfile) {
+    throw new Error('Candidate profile not found.');
+  }
+
+  //  Fetch tokens
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('tokens')
+    .select('*')
+    .eq('id', candidateProfile.token_id)
+    .single();
+
+  if (!tokenData || tokenError) {
+    throw new Error('Unable to fetch token data.');
+  }
+
+  // e.g. practice = 1 token, interview = 3 tokens
+  const tokensRequired = interviewMode === 'practice' ? 1 : 3;
+  if (tokenData.tokens_available < tokensRequired) {
+    throw new Error('Insufficient tokens.');
+  }
+
+  // Create the session
+  let newInterview: Table<'interviews'>;
+  if (interviewMode === 'practice') {
+    // Typecast because TypeScript doesn’t know if template is a PracticeTemplate or InterviewTemplate
+    newInterview = await createPracticeSession(
+      template as PracticeTemplate,
+      interviewMode,
+    );
+  } else {
+    newInterview = await createInterviewSession(
+      template as InterviewTemplate,
+      interviewMode,
+    );
+  }
+
+  //Deduct tokens
+  const updatedTokens = tokenData.tokens_available - tokensRequired;
+  const usedTokens = tokenData.total_tokens_used + tokensRequired;
+  const { error: updateError } = await supabase
+    .from('tokens')
+    .update({
+      tokens_available: updatedTokens,
+      total_tokens_used: usedTokens,
+    })
+    .eq('id', candidateProfile.token_id);
+
+  if (updateError) {
+    // Ideally, you’d roll back the interview creation if your plan supports transactions.
+   // Delete the interview if the token deduction fails
+    await supabase.from('interviews').delete().eq('id', newInterview.id);
+    throw new Error('Failed to update token count.');
+  }
+
+  // 7) Return the newly created interview row
+  return newInterview;
+}
+
 export const createPracticeSession = async (
   practiceTemplate: PracticeTemplate,
   interviewMode: InterviewModeType,
@@ -559,8 +638,11 @@ export const getInterviewAnalytics = async (
   );
 
   // Assuming all interviews have the same title and description
-  const { title: interviewTitle, description: interviewDescription, question_count: interviewQuestionCount } =
-    interviews[0];
+  const {
+    title: interviewTitle,
+    description: interviewDescription,
+    question_count: interviewQuestionCount,
+  } = interviews[0];
   if (interviewMode === 'Practice Mode') {
     return {
       template_id: currentTemplateId,

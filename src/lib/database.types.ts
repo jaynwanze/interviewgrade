@@ -149,6 +149,7 @@ export type Database = {
           pricing_plan_interval: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count: number
           trial_period_days: number | null
+          img_url: string
           metadata: JSON | null
 
         }
@@ -165,6 +166,7 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
+          img_url: string
           metadata: JSON | null
         }
         Update: {
@@ -181,6 +183,7 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
+          img_url?: string
           metadata?: JSON | null
         }
       }

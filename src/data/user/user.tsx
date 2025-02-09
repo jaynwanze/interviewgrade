@@ -482,7 +482,8 @@ export const getActiveProductsByType = async (
     .from('products')
     .select('*')
     .eq('product_type', productType)
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .order('price_unit_amount', { ascending: true });
 
   if (error) {
     console.error('Error fetching active products:', error);

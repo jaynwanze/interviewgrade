@@ -15,7 +15,7 @@ const categories: InterviewTemplateFilter[] = [
 export default function InterviewTemplates() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-center">Select Interview</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Select Interview</h1>
 
       {/* Filters Section */}
       <div className="flex items-center justify-between mb-4">

@@ -27,7 +27,7 @@ export const InterviewHistoryFilter: React.FC<HistoryFilterProps> = ({
       onValueChange={(value) => onTabChange(value as typeof activeTab)}
       className="w-full"
     >
-      <TabsList className="grid grid-cols-4 w-full  mx-auto">
+      <TabsList className="grid grid-cols-4 w-3/4 mx-auto">
         <TabsTrigger value="All">All ({counts.all})</TabsTrigger>
         <TabsTrigger value="Completed">
           Completed ({counts.completed})

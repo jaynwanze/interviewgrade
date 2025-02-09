@@ -1,8 +1,8 @@
 'use client';
 
-import { Interview } from "@/types";
-import { InterviewHistoryItem } from "./InterviewHistoryItem";
-import { Card } from "@/components/ui/card";
+import { Card } from '@/components/ui/card';
+import { Interview } from '@/types';
+import { InterviewHistoryItem } from './InterviewHistoryItem';
 
 export const InterviewHistoryList = ({
   interviews,
@@ -12,9 +12,9 @@ export const InterviewHistoryList = ({
   interviewModeToggle: string;
 }) => {
   const interviewModeDisplayString =
-    interviewModeToggle === "Interview Mode"
-      ? "interviews"
-      : "practice sessions";
+    interviewModeToggle === 'Interview Mode'
+      ? 'interviews'
+      : 'practice sessions';
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -25,8 +25,10 @@ export const InterviewHistoryList = ({
           ))}
         </div>
       ) : (
-        <Card className="p-6 text-center shadow-md">
-          <h3 className="text-xl font-semibold">No {interviewModeDisplayString} found</h3>
+        <Card className="p-6 w-full max-w-2xl mx-auto shadow-md hover:shadow-lg transition duration-200">
+          <h3 className="text-xl font-semibold">
+            No {interviewModeDisplayString} found
+          </h3>
           <p className="text-gray-500">
             No {interviewModeDisplayString} found for this filter.
             <br />

@@ -361,9 +361,9 @@ export const InterviewHistoryDetails = ({
             <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
               AI
             </Badge>
-            <h1 className="text-3xl font-bold">Interview Report</h1>
+            <h1 className="text-2xl font-bold">Interview Report</h1>
           </div>
-          <p className="text-lg text-gray-600">{interview.title}</p>
+          <p className="text-, text-gray-600">{interview.title}</p>
 
           {/* Meta Info Row */}
           <div className="flex items-center space-x-4 text-gray-500">
@@ -383,7 +383,7 @@ export const InterviewHistoryDetails = ({
 
       {/* Tabs Section */}
       {interview.status === 'completed' && evaluation ? (
-        <Tabs defaultValue="overview" className="p-5">
+        <Tabs defaultValue="overview" className="p-4">
           <TabsList className="grid grid-cols-3 w-full mx-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="details">Detailed</TabsTrigger>

@@ -336,7 +336,7 @@ export default function InterviewFlow({
   } else if (!interview && !isLoading) {
     return (
       <div className="interview-flow-container flex justify-center items-center min-h-screen">
-        <h1 className="text-3xl font-bold text-center">
+        <h1 className="text-2xl font-bold text-center">
           Interview not found. Please check the interview link
         </h1>
       </div>

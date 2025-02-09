@@ -9,7 +9,7 @@ export function InterviewMode() {
     <div className="p-2 mx-auto max-w-4xl">
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-1"> Select Interview Mode</h1>
+        <h1 className="text-2xl font-bold mb-1"> Select Interview Mode</h1>
         <p className="text-gray-500">
           Choose the best mode for your mock interview experience.
         </p>

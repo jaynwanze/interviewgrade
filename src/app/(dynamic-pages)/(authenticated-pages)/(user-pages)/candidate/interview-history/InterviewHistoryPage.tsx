@@ -61,7 +61,7 @@ export default function InterviewHistoryPage() {
     <div className="p-2 max-w-5xl mx-auto">
       {/* Page Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-1">Interview History</h1>
+        <h1 className="text-2xl font-bold mb-1">Interview History</h1>
         <p className="text-gray-500">
           Review your past interviews and practice sessions.
         </p>
@@ -71,7 +71,7 @@ export default function InterviewHistoryPage() {
 
       {/* Mode Toggle */}
       <div className="flex justify-center items-center space-x-3 mb-6">
-        <Label htmlFor="history-mode" className="text-lg font-medium">
+        <Label htmlFor="history-mode" className="text-sm font-medium">
           {memoizedValues.activeSwitch === 'Interview Mode'
             ? 'Interview Mode'
             : 'Practice Mode'}
@@ -95,8 +95,9 @@ export default function InterviewHistoryPage() {
         counts={memoizedValues.counts}
         onTabChange={memoizedValues.handleTabChange}
       />
-
-      <Separator className="my-4" />
+      <div className="flex justify-center">
+        <Separator className="flex justify-center my-4 w-3/4" />
+      </div>
 
       {/* Interview List */}
       <InterviewHistoryList

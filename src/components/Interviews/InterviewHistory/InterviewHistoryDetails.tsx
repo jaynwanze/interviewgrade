@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   getInterviewAnswers,
   getInterviewById,
@@ -24,8 +24,9 @@ import {
   InterviewAnswerDetail,
   InterviewEvaluation,
 } from '@/types';
-import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -40,6 +41,7 @@ export const InterviewHistoryDetails = ({
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>('overview');
   const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
   const hasFetched = useRef(false);
 
@@ -145,7 +147,7 @@ export const InterviewHistoryDetails = ({
   if (interview.status === 'not_started') {
     return <div className="text-center p-4">Session has not started yet.</div>;
   }
-  
+
   const renderCoach = (evaluation: InterviewEvaluation) => {
     return (
       <div className="interview-flow-container flex flex-col items-center">
@@ -207,10 +209,11 @@ export const InterviewHistoryDetails = ({
                         : qa.mark >=
                           40 /
                           Math.floor(
-                            100 / evaluation.question_answer_feedback.length,
+                            100 /
+                            evaluation.question_answer_feedback.length,
                           )
                           ? 'bg-orange-500'
-                        : 'bg-red-500'
+                          : 'bg-red-500'
                     }`}
                 >
                   {qa.mark}/
@@ -229,10 +232,10 @@ export const InterviewHistoryDetails = ({
       return score >= 80
         ? 'bg-green-600'
         : score >= 60
-        ? 'bg-orange-500'
-        : score >= 40
-        ? 'bg-yellow-500'
-        : 'bg-red-500';
+          ? 'bg-orange-500'
+          : score >= 40
+            ? 'bg-yellow-500'
+            : 'bg-red-500';
     };
     return (
       <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -272,7 +275,7 @@ export const InterviewHistoryDetails = ({
             ? evaluation.areas_for_improvement
             : 'No areas identified.'}
         </CardContent>
-        <Separator/>
+        <Separator />
 
         {/* Recommendations */}
         <CardHeader>
@@ -343,67 +346,113 @@ export const InterviewHistoryDetails = ({
       </div>
     );
   };
+
+  const generatePDF = () => {
+    if (!interview || !evaluation) return;
+
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Interview Report', 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Title: ${interview.title}`, 14, 32);
+    doc.text(
+      `Date: ${new Date(interview.start_time).toLocaleString()}`,
+      14,
+      42,
+    );
+    doc.text(`Duration: ${interview.duration} mins`, 14, 52);
+
+    autoTable(doc, {
+      startY: 62,
+      body: evaluation.evaluation_scores.map((score) => [
+        score.name || 'N/A',
+        `${score.score}/10`,
+        score.feedback,
+      ]),
+    });
+
+    doc.save('interview_report.pdf');
+  };
+
   return (
     <div className="p-2 max-w-5xl mx-auto">
-      {/* Header Section */}
-      <div className="flex items-start justify-between">
-        {/* Back Button */}
-        <button
-          className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
-          onClick={() => window.history.back()}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-
-        {/* Interview Details */}
-        <div className="flex-1 text-left space-y-2">
-          <div className="flex items-center space-x-2">
-            <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
-              AI
-            </Badge>
-            <h1 className="text-2xl font-bold">Interview Report</h1>
-          </div>
-          <p className="text-, text-gray-600">{interview.title}</p>
-
-          {/* Meta Info Row */}
-          <div className="flex items-center space-x-4 text-gray-500">
-            <div className="flex items-center space-x-1">
-              <CalendarIcon className="h-5 w-5" />
-              <span>{new Date(interview.start_time).toLocaleString()}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <ClockIcon className="h-5 w-5" />
-              <span>{interview.duration} mins</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Separator className="my-4" />
-
-      {/* Tabs Section */}
       {interview.status === 'completed' && evaluation ? (
-        <Tabs defaultValue="overview" className="p-4">
-          <TabsList className="grid grid-cols-3 w-full mx-auto">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="details">Detailed</TabsTrigger>
-            <TabsTrigger value="coach">AI Interview Coach</TabsTrigger>
-          </TabsList>
+        <>
+          {/* Header Section */}
+          <div className="flex items-start justify-between">
+            {/* Back Button */}
+            <button
+              className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+              onClick={() => window.history.back()}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
 
-          <div className="shadow-lg mt-5 p-6 rounded-lg border">
-            <TabsContent value="overview">
-              {renderOverview(evaluation)}
-            </TabsContent>
-            <TabsContent value="details">
-              {renderDetailed(evaluation)}
-            </TabsContent>
-            <TabsContent value="coach">{renderCoach(evaluation)}</TabsContent>
+            {/* Interview Details */}
+            <div className="flex-1 text-left space-y-2">
+              <div className="flex items-center space-x-2">
+                <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
+                  AI
+                </Badge>
+                <h1 className="text-2xl font-bold">Interview Report</h1>
+              </div>
+              <p className="text-gray-600">{interview.title}</p>
+
+              {/* Meta Info Row */}
+              <div className="flex items-center space-x-4 text-gray-500">
+                <div className="flex items-center space-x-1">
+                  <CalendarIcon className="h-5 w-5" />
+                  <span>{new Date(interview.start_time).toLocaleString()}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <ClockIcon className="h-5 w-5" />
+                  <span>{interview.duration} mins</span>
+                </div>
+              </div>
+            </div>
+            {/* <button
+                  className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+                  onClick={generatePDF}
+                >
+                  <PrinterIcon className="h-6 w-6" />
+                </button> */}
+            {/* Tabs Section */}
+            <Tabs
+              defaultValue="overview"
+              className="p-4"
+              onValueChange={(value) => setSelectedTab(value)}
+            >
+              <TabsList className="grid grid-cols-3 w-full mx-auto">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="details">Detailed</TabsTrigger>
+                <TabsTrigger value="coach">AI Interview Coach</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
-        </Tabs>
+
+          <Separator className="my-4" />
+
+          {/* Tabs Content */}
+          <div className="shadow-lg mt-5 p-6 rounded-lg border">
+            {/* Tabs Content */}
+            {selectedTab === 'overview' && renderOverview(evaluation)}
+            {selectedTab === 'details' && renderDetailed(evaluation)}
+            {selectedTab === 'coach' && renderCoach(evaluation)}
+          </div>
+        </>
       ) : (
-        <div className="text-center p-4">
-          No interview feedback available yet.
-        </div>
+        <>
+          <button
+            className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+            onClick={() => window.history.back()}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+
+          <div className="text-center p-4">
+            No interview feedback available yet.
+          </div>
+        </>
       )}
     </div>
   );

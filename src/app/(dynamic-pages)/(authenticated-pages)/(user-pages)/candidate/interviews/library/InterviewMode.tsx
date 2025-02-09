@@ -6,7 +6,7 @@ import { INTERVIEW_MODES } from '@/utils/constants';
 
 export function InterviewMode() {
   return (
-    <div className="p-2 mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl">
       {/* Page Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-1"> Select Interview Mode</h1>

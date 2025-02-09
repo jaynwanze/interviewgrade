@@ -58,7 +58,7 @@ export default function InterviewHistoryPage() {
   }
 
   return (
-    <div className="p-2 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* Page Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-1">Interview History</h1>
@@ -68,9 +68,15 @@ export default function InterviewHistoryPage() {
       </div>
 
       <Separator className="my-4" />
+      <div className="flex items-center justify-center">
+        {/* Filters */}
+        <InterviewHistoryFilter
+          activeTab={memoizedValues.activeTab}
+          counts={memoizedValues.counts}
+          onTabChange={memoizedValues.handleTabChange}
+        />
 
-      {/* Mode Toggle */}
-      <div className="flex justify-center items-center space-x-3 mb-6">
+        {/* Mode Toggle */}
         <Label htmlFor="history-mode" className="text-sm font-medium">
           {memoizedValues.activeSwitch === 'Interview Mode'
             ? 'Interview Mode'
@@ -88,16 +94,7 @@ export default function InterviewHistoryPage() {
           }
         />
       </div>
-
-      {/* Filters */}
-      <InterviewHistoryFilter
-        activeTab={memoizedValues.activeTab}
-        counts={memoizedValues.counts}
-        onTabChange={memoizedValues.handleTabChange}
-      />
-      <div className="flex justify-center">
-        <Separator className="flex justify-center my-4 w-3/4" />
-      </div>
+      <Separator className="my-4 " />
 
       {/* Interview List */}
       <InterviewHistoryList

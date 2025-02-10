@@ -377,6 +377,32 @@ export const createInterviewModeQuestions = async (
   };
 };
 
+export const getRecentInterviews = async (
+): Promise<Table<'interviews'>[]> => {
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    throw new Error('User is not logged in.');
+  }
+  const candidateProfile = await getCandidateUserProfile(user.id);
+  if (!candidateProfile) {
+    throw new Error('Candidate profile not found.');
+  }
+
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('interviews')
+    .select('*')
+    .eq('candidate_id', candidateProfile.id)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
 export const updateInterview = async (
   data: InterviewUpdate,
 ): Promise<Table<'interviews'>> => {

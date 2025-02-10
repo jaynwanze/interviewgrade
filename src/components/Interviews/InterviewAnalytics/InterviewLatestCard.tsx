@@ -13,14 +13,14 @@ export const InterviewLatestCard = ({
 }) => {
   if (!latestInterview) {
     return (
-      <Card className="shadow-lg rounded-lg p-2 text-center">
+      <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2 text-center">
         <p className="text-gray-500 text-lg">No latest interview data available.</p>
       </Card>
     );
   }
 
   return (
-    <Card className="shadow-lg rounded-lg p-2">
+    <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-semibold">
           Latest {latestInterview.mode === INTERVIEW_PRACTICE_MODE ? 'Practice Session' : 'Mock Interview'}

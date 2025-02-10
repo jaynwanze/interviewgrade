@@ -29,17 +29,15 @@ export const InterviewAverageDetails = ({
         </Card>
         {/* Overall Grade + Best Skill Badge */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 ">
-          <CardHeader className="flex flex-col items-center">
             <Trophy className="w-10 h-10 text-yellow-500" />
             <CardTitle className="mt-2">Current Average Score</CardTitle>
-          </CardHeader>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.avg_overall_grade.toFixed(2)}%
             </p>
             <Badge variant="outline" className="mt-2 text-sm">
-              {analyticsData.best_skill
-                ? `Best Skill: ${analyticsData.best_skill}`
+              {analyticsData.best_evaluation_crieria
+                ? `Best Skill: ${analyticsData.best_evaluation_crieria}`
                 : 'No Data'}
             </Badge>
             <p className="text-gray-500 mt-2">
@@ -50,10 +48,8 @@ export const InterviewAverageDetails = ({
 
         {/* Total Sessions Count */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
-          <CardHeader className="flex flex-col items-center">
             <ClipboardList className="w-10 h-10 text-blue-500" />
             <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
-          </CardHeader>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.total_interviews || 0}
@@ -64,10 +60,8 @@ export const InterviewAverageDetails = ({
 
         {/* Average Mark Per Question */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
-          <CardHeader className="flex flex-col items-center">
             <Star className="w-10 h-10 text-purple-500" />
             <CardTitle className="mt-2">Average Score Per Question</CardTitle>
-          </CardHeader>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {(

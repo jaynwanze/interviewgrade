@@ -4,7 +4,6 @@ import { InterviewAverageDetails } from '@/components/Interviews/InterviewAnalyt
 import { InterviewLatestCard } from '@/components/Interviews/InterviewAnalytics/InterviewLatestCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Command,
   CommandEmpty,
@@ -191,13 +190,18 @@ export default function InterviewAnalyticsPage() {
     return (
       <>
         {/* Key Analytics Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-5 justify-center items-center">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-5 justify-center items-center">
           {/* Latest Interview Summary */}
-          <div className="flex flex-col md:col-span-2">
+          <div className="flex flex-col justify-center items-center h-full md:col-span-1">
             <InterviewLatestCard latestInterview={overview?.latestInterview} />
           </div>
-
-          {/* Performance Overview */}
+          {/* Overview Graph */}
+          <div className="flex flex-col justify-center items-center h-full md:col-span-2">
+            <InterviewGraphsOverview
+              interviewsCompleted={overview?.completedInterviews || []}
+            />
+          </div>
+          {/* Performance Overview
           <div className="flex flex-col md:col-span-2 lg:col-span-1">
             <Card className="flex flex-col justify-center items-center shadow-lg rounded-lg mb-5">
               <CardHeader className="text-center">
@@ -228,13 +232,8 @@ export default function InterviewAnalyticsPage() {
                 </p>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
-
-        {/* Overview Graph */}
-        <InterviewGraphsOverview
-          interviewsCompleted={overview?.completedInterviews || []}
-        />
       </>
     );
   };

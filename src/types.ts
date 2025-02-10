@@ -129,6 +129,7 @@ export type InterviewAnalytics = {
   areas_for_improvement_summary: string[];
   recommendations_summary: string[];
   completed_interview_evaluations: InterviewEvaluation[];
+  best_evaluation_crieria: string;
 };
 export type AvgEvaluationScores = {
   name: string;

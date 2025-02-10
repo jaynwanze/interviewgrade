@@ -75,7 +75,7 @@ export function AreaChartInteractiveInterviewTotal({
 
   if (!interviewsCompleted || interviewsCompleted.length === 0) {
     return (
-      <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
+      <Card className="shadow rounded-lg p-6 flex flex-col justify-center items-center h-full space-y-4 mb-5">
         <p className="text-center">
           No interviews completed data available at this time.
         </p>
@@ -118,7 +118,7 @@ export function AreaChartInteractiveInterviewTotal({
   }, [chartConfig]);
 
   return (
-    <Card>
+    <Card className="shadow-lg rounded-lg  h-full">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6 overflow-auto">
           <CardTitle>Overall Interviews Progression</CardTitle>

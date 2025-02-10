@@ -96,7 +96,7 @@ export async function startInterviewAction(
 
   if (updateError) {
     // Ideally, you’d roll back the interview creation if your plan supports transactions.
-   // Delete the interview if the token deduction fails
+    // Delete the interview if the token deduction fails
     await supabase.from('interviews').delete().eq('id', newInterview.id);
     throw new Error('Failed to update token count.');
   }
@@ -377,8 +377,7 @@ export const createInterviewModeQuestions = async (
   };
 };
 
-export const getRecentInterviews = async (
-): Promise<Table<'interviews'>[]> => {
+export const getRecentInterviews = async (): Promise<Table<'interviews'>[]> => {
   const user = await serverGetLoggedInUser();
   if (!user) {
     throw new Error('User is not logged in.');
@@ -663,6 +662,11 @@ export const getInterviewAnalytics = async (
     (evalItem) => evalItem.recommendations,
   );
 
+  //Get the best evaluation criteria
+  const bestEvaluationCriteria = avgEvaluationCriteriaScores.reduce(
+    (prev, current) => (prev.avg_score > current.avg_score ? prev : current),
+  );
+
   // Assuming all interviews have the same title and description
   const {
     title: interviewTitle,
@@ -683,6 +687,7 @@ export const getInterviewAnalytics = async (
       areas_for_improvement_summary: areasForImprovementSummary,
       recommendations_summary: recommendationsSummary,
       completed_interview_evaluations: evaluations,
+      best_evaluation_crieria: bestEvaluationCriteria.name,
     };
   } else {
     return {
@@ -698,6 +703,7 @@ export const getInterviewAnalytics = async (
       areas_for_improvement_summary: areasForImprovementSummary,
       recommendations_summary: recommendationsSummary,
       completed_interview_evaluations: evaluations,
+      best_evaluation_crieria: bestEvaluationCriteria.name,
     };
   }
 };
@@ -819,7 +825,7 @@ export const getInterviewEvaluations = async (
   const { data, error } = await supabase
     .from('interview_evaluations')
     .select('*')
-    .in('interview_id', completedInterviewsIds);
+    .in('interview_id', completedInterviewsIds)
 
   if (error) {
     throw error;

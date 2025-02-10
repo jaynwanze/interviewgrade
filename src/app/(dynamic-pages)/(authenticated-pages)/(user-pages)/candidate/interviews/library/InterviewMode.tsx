@@ -74,7 +74,6 @@ export function InterviewMode() {
         <>
           {loading ? (
             <div className="text-center">
-              Loading Recent Interviews...
               <LoadingSpinner />
             </div>
           ) : (

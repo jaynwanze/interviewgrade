@@ -70,10 +70,10 @@ export function ExternalNavigation() {
             </div>
           )}
         </div>
-        <Menu
+        {/* <Menu
           onClick={() => setMobileMenuOpen((prev) => !prev)}
           className="hover:cursor-pointer lg:hidden -mr-2"
-        />
+        /> */}
       </nav>
       {mobileMenuOpen && (
         <ul className="md:hidden w-full shadow-2xl py-2 flex flex-col items-start font-medium pb-2">

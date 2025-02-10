@@ -382,8 +382,8 @@ export const InterviewHistoryDetails = ({
       {interview.status === 'completed' && evaluation ? (
         <>
           {/* Header Section */}
-          <div className="flex items-start justify-between">
-            {/* Back Button */}
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4 w-full">
+          {/* Back Button */}
             <button
               className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
               onClick={() => window.history.back()}

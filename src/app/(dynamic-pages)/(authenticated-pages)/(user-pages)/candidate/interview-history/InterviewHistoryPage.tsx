@@ -68,8 +68,8 @@ export default function InterviewHistoryPage() {
       </div>
 
       <Separator className="my-4" />
-      <div className="flex justify-center items-center ">
-        {/* Filters */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+      {/* Filters */}
         <InterviewHistoryFilter
           activeTab={memoizedValues.activeTab}
           counts={memoizedValues.counts}

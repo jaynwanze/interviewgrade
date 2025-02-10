@@ -22,23 +22,22 @@ export const InterviewHistoryFilter: React.FC<HistoryFilterProps> = ({
   onTabChange,
 }) => {
   return (
-    <Tabs
-      defaultValue={activeTab}
-      onValueChange={(value) => onTabChange(value as typeof activeTab)}
-      className="w-full"
-    >
-      <TabsList className="grid grid-cols-4 w-3/4 mx-auto">
-        <TabsTrigger value="All">All ({counts.all})</TabsTrigger>
-        <TabsTrigger value="Completed">
-          Completed ({counts.completed})
-        </TabsTrigger>
-        <TabsTrigger value="Not Completed">
-          Not Completed ({counts.notCompleted})
-        </TabsTrigger>
-        <TabsTrigger value="Not Started">
-          Not Started ({counts.notStarted})
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
+    <>
+    <span className="text-sm text-muted-foreground">
+        {counts[activeTab.toLowerCase().replace(' ', '')] || 0} results
+      </span>
+      <Tabs
+        defaultValue={activeTab}
+        onValueChange={(value) => onTabChange(value as typeof activeTab)}
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-4 mx-auto">
+          <TabsTrigger value="All">All</TabsTrigger>
+          <TabsTrigger value="Completed">Completed</TabsTrigger>
+          <TabsTrigger value="Not Completed">Not Completed</TabsTrigger>
+          <TabsTrigger value="Not Started">Not Started</TabsTrigger>
+        </TabsList>
+      </Tabs>
+    </>
   );
 };

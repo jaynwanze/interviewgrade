@@ -28,6 +28,7 @@ const activeProducts: Product[] = [
     pricing_type: 'recurring',
     pricing_plan_interval: 'month',
     pricing_plan_interval_count: 0,
+    img_url: 'https://via.placeholder.com/150',
   },
 ];
 

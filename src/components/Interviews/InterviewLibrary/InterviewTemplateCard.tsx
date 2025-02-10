@@ -1,12 +1,13 @@
 'use client';
 
-import InterviewDetailsDialog from '@/components/Interviews/InterviewLibrary/InterviewDetailsDialog'; // Corrected import
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import InterviewDetailsDialog from '@/components/Interviews/InterviewLibrary/InterviewDetailsDialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   InterviewModeType,
   InterviewTemplate,
   PracticeTemplate,
 } from '@/types';
+import { BarChart3, Clock, ListOrdered } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../ui/button';
 
@@ -19,35 +20,56 @@ export const InterviewCardTemplate = ({
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleClick = () => {
-    setIsDialogOpen(true);
-  };
+  const handleClick = () => setIsDialogOpen(true);
+  const handleClose = () => setIsDialogOpen(false);
 
-  const handleClose = () => {
-    setIsDialogOpen(false);
-  };
+  // Determine badge color based on difficulty level
+  const difficultyBadge =
+    selectedTemplate.difficulty === 'Easy'
+      ? 'bg-green-500 text-white'
+      : selectedTemplate.difficulty === 'Medium'
+        ? 'bg-yellow-500 text-white'
+        : 'bg-red-500 text-white';
 
   return (
     <>
       <Card
         key={selectedTemplate.id}
-        className="border rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-900 transition duration-200 shadow-sm text-center max-w-96"
+        className="border rounded-lg shadow-lg hover:shadow-xl transition duration-200 text-center max-w-80"
       >
-        <CardTitle className="text-xl font-semibold">
-          {selectedTemplate.title}
-        </CardTitle>
-        <CardDescription className="text-sm text-gray-600">
-          {selectedTemplate.description}
-        </CardDescription>
-        <p className="text-sm mt-2">
-          Difficulty: {selectedTemplate.difficulty}
-        </p>
-        <p className="text-sm">Questions: {selectedTemplate.question_count}</p>
-        <p className="text-sm">Duration: {selectedTemplate.duration} min</p>
-        <Button className="mt-4" onClick={handleClick}>
-          Start Interview
-        </Button>
+        <CardHeader className="flex flex-col items-center">
+          <CardTitle className="text-lg font-semibold">
+            {selectedTemplate.title}
+          </CardTitle>
+          {/* <Badge className={`mt-2 px-3 py-1 text-sm ${difficultyBadge}`}>
+            {selectedTemplate.difficulty}
+          </Badge> */}
+        </CardHeader>
+
+        <CardContent className="space-y-3 text-gray-600">
+          <p className="text-sm">{selectedTemplate.description}</p>
+
+          <div className="flex justify-between items-center text-sm text-gray-700">
+            <div className="flex items-center space-x-1">
+              <ListOrdered className="w-4 h-4 text-blue-500" />
+              <span>{selectedTemplate.question_count} Questions</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Clock className="w-4 h-4 text-purple-500" />
+              <span>{selectedTemplate.duration} min</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <BarChart3 className="w-4 h-4 text-gray-700" />
+              <span>Mode: {interviewMode}</span>
+            </div>
+          </div>
+
+          <Button className="w-full mt-3" onClick={handleClick}>
+            Start Session
+          </Button>
+        </CardContent>
       </Card>
+
       {isDialogOpen && (
         <InterviewDetailsDialog
           isOpen={isDialogOpen}

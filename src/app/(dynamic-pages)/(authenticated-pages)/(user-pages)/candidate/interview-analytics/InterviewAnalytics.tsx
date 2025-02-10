@@ -198,7 +198,7 @@ export default function InterviewAnalyticsPage() {
           </div>
 
           {/* Performance Overview */}
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center">
             <Card className="shadow-lg rounded-lg mb-5">
               <CardHeader className="text-center">
                 <CardTitle>Performance Overview</CardTitle>

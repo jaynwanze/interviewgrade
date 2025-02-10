@@ -1,6 +1,7 @@
 'use client';
 
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { InterviewMode } from '@/types';
 import {
   INTERVIEW_INTERVIEW_MODE,
@@ -9,10 +10,12 @@ import {
 } from '@/utils/constants';
 import { useRouter } from 'next/navigation';
 import { Button } from '../../ui/button';
+import { Briefcase, BookOpen } from 'lucide-react';
 
 export const InterviewModeCard = (interviewMode: InterviewMode) => {
   const interviewModeNameDisplay: string =
-    interviewMode.name === INTERVIEW_INTERVIEW_MODE ? 'Interview' : 'Practice';
+    interviewMode.name === INTERVIEW_INTERVIEW_MODE ? 'Mock Interview' : 'Practice Mode';
+
   const interviewDescription: string =
     interviewMode.name === INTERVIEW_INTERVIEW_MODE
       ? INTERVIEW_MODE_INTERVIEW_DESCRIPTION
@@ -24,21 +27,38 @@ export const InterviewModeCard = (interviewMode: InterviewMode) => {
     router.push(`/candidate/interviews/library/${interviewMode.name}`);
   };
 
+  // Determine badge color and icon based on mode
+  const modeBadge =
+    interviewMode.name === INTERVIEW_INTERVIEW_MODE
+      ? 'bg-blue-500 text-white'
+      : 'bg-green-500 text-white';
+
+  const modeIcon =
+    interviewMode.name === INTERVIEW_INTERVIEW_MODE ? <Briefcase className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />;
+
   return (
     <>
       <Card
         key={interviewMode.name}
-        className="border rounded-lg p-4 shadow-sm text-center min-h-56 max-w-96"
+        className="border rounded-lg shadow-lg hover:shadow-xl transition duration-200 text-center max-w-80"
       >
-        <CardTitle className="text-xl font-semibold">
-          {interviewModeNameDisplay}
-        </CardTitle>
-        <CardDescription className="text-sm text-gray-600">
-          <span>{interviewDescription}</span>
-        </CardDescription>
-        <Button className="mt-4" onClick={handleClick}>
-          Show {interviewModeNameDisplay} Templates
-        </Button>
+        <CardHeader className="flex flex-col items-center">
+          <div className="flex items-center space-x-2">
+            {modeIcon}
+            <CardTitle className="text-lg font-semibold">{interviewModeNameDisplay}</CardTitle>
+          </div>
+          <Badge className={`mt-2 px-3 py-1 text-sm ${modeBadge}`}>
+            {interviewModeNameDisplay}
+          </Badge>
+        </CardHeader>
+
+        <CardContent className="text-gray-600 space-y-3">
+          <p className="text-sm">{interviewDescription}</p>
+
+          <Button className="w-full mt-3" onClick={handleClick}>
+            Browse {interviewModeNameDisplay} Templates
+          </Button>
+        </CardContent>
       </Card>
     </>
   );

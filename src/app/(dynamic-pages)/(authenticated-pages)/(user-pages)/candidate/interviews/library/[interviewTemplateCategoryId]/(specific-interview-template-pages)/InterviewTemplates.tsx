@@ -14,7 +14,10 @@ import {
   InterviewTemplate,
   PracticeTemplate,
 } from '@/types';
-import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
+import {
+  INTERVIEW_INTERVIEW_MODE,
+  INTERVIEW_PRACTICE_MODE,
+} from '@/utils/constants';
 import { ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -37,7 +40,12 @@ export function InterviewTemplates({
       ? 'Select Practice Session'
       : 'Select Mock Interview';
   const interviewModeString =
-    interviewMode === 'practice' ? 'Practice Mode' : 'Interview Mode';
+    interviewMode === 'practice' ? 'Practice Mode' : 'Mock Interview';
+  // Determine badge color and icon based on mode
+  const modeBadge =
+    interviewMode === INTERVIEW_INTERVIEW_MODE
+      ? 'bg-blue-500 text-white'
+      : 'bg-green-500 text-white';
 
   const fetchInterviews = async () => {
     setIsLoading(true);
@@ -102,7 +110,7 @@ export function InterviewTemplates({
       </div>
       <Separator className="my-6" />
       <div className="flex justify-center items-center space-x-4">
-        <Badge className="bg-black dark:bg-slate-600 text-white text-sm">
+        <Badge className={`bg-black dark:bg-slate-600 text-sm ${modeBadge}`}>
           {interviewModeString}
         </Badge>
         <Input
@@ -115,7 +123,7 @@ export function InterviewTemplates({
       <Separator className="my-6" />
       <div className="flex justify-center">
         {filteredTemplates.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center items-center">
             {filteredTemplates.map((template) => (
               <InterviewCardTemplate
                 key={template.id}

@@ -61,7 +61,7 @@ export function InterviewMode() {
         </p>
       </div>
       <Separator className="my-4" />
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mt-6">
+      <div className="grid xs:grid-cols-1 sm:grid-cols-2 mt-6 justify-items-center">
         {INTERVIEW_MODES.map((mode) => (
           <InterviewModeCard key={mode} name={mode} />
         ))}

@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
@@ -32,7 +33,6 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
 import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOverview';
-import { Separator } from '@/components/ui/separator';
 
 export type TemplateAndSwitchModeDetails = {
   current_template_id: string;
@@ -190,35 +190,48 @@ export default function InterviewAnalyticsPage() {
 
     return (
       <>
-        <InterviewLatestCard latestInterview={overview?.latestInterview} />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-5">
-          <Card>
-            <CardHeader>
-              <CardTitle>Practice Sessions Count</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-center">
-                {overview?.completedInterviews?.filter(
-                  (interview) => interview.mode === INTERVIEW_PRACTICE_MODE,
-                ).length || 0}
-              </p>
-              <p>Total completed practice sessions.</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Interview Sessions Count</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-center">
-                {overview?.completedInterviews?.filter(
-                  (interview) => interview.mode === INTERVIEW_INTERVIEW_MODE,
-                ).length || 0}
-              </p>
-              <p>Total completed interview sessions.</p>
-            </CardContent>
-          </Card>
+        {/* Key Analytics Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-5 justify-center items-center">
+          {/* Latest Interview Summary */}
+          <div className="flex flex-col md:col-span-2">
+            <InterviewLatestCard latestInterview={overview?.latestInterview} />
+          </div>
+
+          {/* Performance Overview */}
+          <div className="flex flex-col">
+            <Card className="shadow-lg rounded-lg mb-5">
+              <CardHeader className="text-center">
+                <CardTitle>Performance Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col justify-center items-center flex-grow">
+                <p className="text-lg font-medium">Best Skill</p>
+                <p className="text-2xl font-bold text-green-500">
+                  {overview?.bestSkill || 'N/A'}
+                </p>
+                <Separator className="my-2 w-full" />
+                <p className="text-lg font-medium">Needs Improvement</p>
+                <p className="text-2xl font-bold text-red-500">
+                  {overview?.weakestSkill || 'N/A'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="shadow-lg rounded-lg">
+              <CardHeader className="text-center">
+                <CardTitle>Average Interview Score</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col justify-center items-center flex-grow">
+                <p className="text-4xl font-bold text-center">
+                  {overview?.averageScore ?? 'N/A'}%
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Across all completed interviews.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+
+        {/* Overview Graph */}
         <InterviewGraphsOverview
           interviewsCompleted={overview?.completedInterviews || []}
         />
@@ -351,7 +364,7 @@ export default function InterviewAnalyticsPage() {
   };
 
   return (
-    <div className="container mx-auto p-2">
+    <div className="container mx-auto p-2 w-3/4">
       <h1 className="text-2xl font-bold text-center mb-1">
         Interview Analytics Dashboard
       </h1>

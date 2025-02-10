@@ -1,6 +1,5 @@
 'use client';
 
-
 export const InterviewInfo = ({
   interviewId,
   title,
@@ -14,32 +13,46 @@ export const InterviewInfo = ({
   startDate?: string;
   endDate?: string;
 }) => {
+  // Format Dates & Times Properly
+  const formatDate = (date?: string) =>
+    date
+      ? new Intl.DateTimeFormat('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(new Date(date))
+      : 'N/A';
+
   return (
-    <div>
-      <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
+    <div className="space-y-3">
+      {/* Title */}
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
         {title || 'Deleted Template'}
       </h3>
-      <p className="text-gray-600 dark:text-gray-300">
+
+      {/* Description */}
+      <p className="text-gray-600 dark:text-gray-300 text-sm">
         {description || 'No description available.'}
       </p>
+
+      {/* Start & End Date */}
       {startDate && endDate && (
-        <>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Start Time/Date:{new Date(startDate).toLocaleTimeString()} -{' '}
-            {new Date(startDate).toLocaleDateString()}
+        <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            <strong>Start:</strong> {formatDate(startDate)}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            End Time/Date: {new Date(endDate).toLocaleTimeString()} -{' '}
-            {new Date(endDate).toLocaleDateString()}
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            <strong>End:</strong> {formatDate(endDate)}
           </p>
-        </>
+        </div>
       )}
+
+      {/* View Session History Link */}
       {interviewId && (
         <a
           href={`/candidate/interview-history/${interviewId}`}
-          className="text-blue-500 dark:text-blue-400 hover:underline"
+          className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition"
         >
-          View session history
+          🔍 View session history
         </a>
       )}
     </div>

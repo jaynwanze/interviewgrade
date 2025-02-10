@@ -1,5 +1,7 @@
 'use client';
-import { Card, CardTitle } from '@/components/ui/card';
+
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Interview } from '@/types';
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { InterviewInfo } from './InterviewInfo';
@@ -11,39 +13,29 @@ export const InterviewLatestCard = ({
 }) => {
   if (!latestInterview) {
     return (
-      <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
-        <p className="text-center">
-          No latest interview data available at this time.
-        </p>
+      <Card className="shadow-lg rounded-lg p-2 text-center">
+        <p className="text-gray-500 text-lg">No latest interview data available.</p>
       </Card>
     );
   }
 
   return (
-    <div className="text-center">
-      <Card className="shadow rounded-lg p-6 flex flex-col space-y-4 mb-5">
-        <CardTitle className="text-3xl">
-          Latest{' '}
-          {latestInterview.mode === INTERVIEW_PRACTICE_MODE
-            ? 'Practice Session'
-            : 'Mock Interview'}{' '}
+    <Card className="shadow-lg rounded-lg p-2">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-semibold">
+          Latest {latestInterview.mode === INTERVIEW_PRACTICE_MODE ? 'Practice Session' : 'Mock Interview'}
         </CardTitle>
+      </CardHeader>
+      <Separator className="my-2" />
+      <CardContent>
         <InterviewInfo
-          interviewId = {latestInterview.id}
-          title={
-            latestInterview.title
-              ? latestInterview.title
-              : 'Deleted interview template'
-          }
-          description={
-            latestInterview.description
-              ? latestInterview.description
-              : 'No description available.'
-          }
+          interviewId={latestInterview.id}
+          title={latestInterview.title || 'Deleted interview template'}
+          description={latestInterview.description || 'No description available.'}
           startDate={latestInterview.start_time}
           endDate={latestInterview.end_time}
         />
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

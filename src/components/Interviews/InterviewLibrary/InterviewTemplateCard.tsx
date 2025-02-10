@@ -35,7 +35,7 @@ export const InterviewCardTemplate = ({
     <>
       <Card
         key={selectedTemplate.id}
-        className="border rounded-lg shadow-lg hover:shadow-xl transition duration-200 text-center max-w-80"
+        className="flex flex-col justify-center items-center border rounded-lg shadow-lg hover:shadow-xl transition duration-200 text-center max-w-80 h-full"
       >
         <CardHeader className="flex flex-col items-center">
           <CardTitle className="text-lg font-semibold">
@@ -60,7 +60,9 @@ export const InterviewCardTemplate = ({
             </div>
             <div className="flex items-center space-x-1">
               <BarChart3 className="w-4 h-4 text-gray-700" />
-              <span>Mode: {interviewMode}</span>
+              <span>
+                Mode: {interviewMode === 'practice' ? 'Practice' : 'Interview'}
+              </span>
             </div>
           </div>
 
@@ -69,7 +71,6 @@ export const InterviewCardTemplate = ({
           </Button>
         </CardContent>
       </Card>
-
       {isDialogOpen && (
         <InterviewDetailsDialog
           isOpen={isDialogOpen}

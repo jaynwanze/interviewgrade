@@ -50,7 +50,7 @@ export default function PurchaseTokens() {
   }
 
   return (
-    <div className="min-h-screen py-10">
+    <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-center mb-4">Purchase Tokens</h1>
       <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
         Choose a token bundle to make a one time payment.

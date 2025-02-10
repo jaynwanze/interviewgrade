@@ -68,7 +68,7 @@ export default function InterviewHistoryPage() {
       </div>
 
       <Separator className="my-4" />
-      <div className="flex items-center justify-center">
+      <div className="flex justify-center items-center ">
         {/* Filters */}
         <InterviewHistoryFilter
           activeTab={memoizedValues.activeTab}

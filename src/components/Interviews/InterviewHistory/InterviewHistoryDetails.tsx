@@ -240,74 +240,77 @@ export const InterviewHistoryDetails = ({
     return (
       <div className="w-full max-w-4xl mx-auto space-y-6">
         {/* Overall Score */}
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Overall Score</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <span className="text-lg font-semibold">Performance:</span>
+        <div className="flex items-center justify-between space-y-12">
+          <span className="flex flex-col space-y-6">
+            <CardTitle className="text-xl font-semibold ">
+              Overall Score
+            </CardTitle>
+            <span className="space-y-10 text-lg font-semibold">
+              Performance:
+            </span>
+          </span>
           <Badge
             className={`text-white text-lg px-4 py-2 ${getScoreColor(evaluation.overall_grade)}`}
           >
             {evaluation.overall_grade}/100
           </Badge>
-        </CardContent>
+        </div>
         <Separator />
 
         {/* Strengths */}
-        <CardHeader>
+        <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
-        </CardHeader>
-        <CardContent className="text-gray-700">
-          {evaluation.strengths
-            ? evaluation.strengths
-            : 'No strengths identified.'}
-        </CardContent>
+          <span className="text-gray-700">
+            {evaluation.strengths
+              ? evaluation.strengths
+              : 'No strengths identified.'}
+          </span>
+        </div>
+
         <Separator />
 
         {/* Areas for Improvement */}
-        <CardHeader>
+        <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Areas for Improvement
           </CardTitle>
-        </CardHeader>
-        <CardContent className="text-gray-700">
-          {evaluation.areas_for_improvement
-            ? evaluation.areas_for_improvement
-            : 'No areas identified.'}
-        </CardContent>
+          <span className="text-gray-700">
+            {evaluation.areas_for_improvement
+              ? evaluation.areas_for_improvement
+              : 'No areas identified.'}
+          </span>
+        </div>
         <Separator />
 
         {/* Recommendations */}
-        <CardHeader>
+        <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Recommendations
           </CardTitle>
-        </CardHeader>
-        <CardContent className="text-gray-700">
-          {evaluation.recommendations
-            ? evaluation.recommendations
-            : 'No recommendations provided.'}
-        </CardContent>
+          <span className="text-gray-700">
+            {evaluation.recommendations
+              ? evaluation.recommendations
+              : 'No recommendations provided.'}
+          </span>
+        </div>
         <Separator />
 
         {/* Radial Chart (To Be Added) */}
-        <CardHeader>
+        <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Skill Breakdown
           </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500">[Insert Radial Chart Here]</p>
-        </CardContent>
+          <span>
+            <p className="text-gray-500">[Insert Radial Chart Here]</p>
+          </span>
+        </div>
         <Separator />
 
         {/* Evaluation Scores Table */}
-        <CardHeader>
+        <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Evaluation Scores
           </CardTitle>
-        </CardHeader>
-        <CardContent>
           <Table className="w-full border rounded-sm">
             <TableHeader>
               <TableRow className="bg-gray-100 dark:bg-gray-900/5 font-bold">
@@ -342,7 +345,7 @@ export const InterviewHistoryDetails = ({
               ))}
             </TableBody>
           </Table>
-        </CardContent>
+        </div>
       </div>
     );
   };
@@ -394,7 +397,12 @@ export const InterviewHistoryDetails = ({
                 <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
                   AI
                 </Badge>
-                <h1 className="text-2xl font-bold">Interview Report</h1>
+                <h1 className="text-2xl font-bold">
+                  {interview.mode === 'practice'
+                    ? 'Practice Session'
+                    : 'Interview Session'}{' '}
+                  Report
+                </h1>
               </div>
               <p className="text-gray-600">{interview.title}</p>
 

@@ -86,25 +86,25 @@ export function InterviewTemplates({
   return (
     <div className=" mx-auto max-w-5xl">
       <div className="flex items-center justify-self-center">
-      <button
-        className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
-        onClick={() => window.history.back()}
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-      <div className="flex flex-col items-center">
-        <Badge className="mb-3 bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
-        {interviewModeString}
-        </Badge>
-        <h1 className="text-2xl font-bold">{displayString}</h1>
-        <p className="text-gray-500 mt-2">
-        Select a mock interview that aligns with your role, industry, or
-        skill focus.
-        </p>
-      </div>
+        <button
+          className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+          onClick={() => window.history.back()}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        <div className="flex flex-col items-center">
+          <h1 className="text-2xl font-bold">{displayString}</h1>
+          <p className="text-gray-500 mt-2">
+            Select a mock interview that aligns with your role, industry, or
+            skill focus.
+          </p>
+        </div>
       </div>
       <Separator className="my-6" />
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center space-x-4">
+        <Badge className="bg-black dark:bg-slate-600 text-white text-sm">
+          {interviewModeString}
+        </Badge>
         <Input
           placeholder="Search position or company..."
           className="max-w-lg shadow-md"

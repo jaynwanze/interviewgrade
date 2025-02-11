@@ -110,7 +110,7 @@ export function InterviewTemplates({
       </div>
       <Separator className="my-6" />
       <div className="flex justify-center items-center space-x-4">
-        <Badge className={`bg-black dark:bg-slate-600 text-sm ${modeBadge}`}>
+        <Badge className={`bg-black text-sm ${modeBadge}`}>
           {interviewModeString}
         </Badge>
         <Input

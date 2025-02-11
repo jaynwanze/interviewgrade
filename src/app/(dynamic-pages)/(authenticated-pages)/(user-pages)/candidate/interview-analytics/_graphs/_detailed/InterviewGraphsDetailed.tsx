@@ -3,6 +3,7 @@ import { InterviewAnalytics } from '@/types';
 import { motion } from 'framer-motion';
 import { AreaChartInteractiveOverallGrades } from './AreaChartInteractiveOverallGrades';
 import { BarChartInteractiveEvaluationScores } from './BarCharInteractiveEvaluationScores';
+import { RadialChartEvaluationsScoreAverages } from './RadialChartEvaluationsScoreAverages';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -38,14 +39,23 @@ export function InterviewGraphsDetailed({
       initial="hidden"
       animate="visible"
     >
-      <motion.div variants={itemVariants}>
-        <AreaChartInteractiveOverallGrades
-          completedInterviewEvaluations={
-            analyticsData.completed_interview_evaluations
-          }
-        />
-      </motion.div>
-      <motion.div variants={itemVariants}>
+      <div className="grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-5 items-center">
+        <motion.div className="sm:col-span-2" variants={itemVariants}>
+          <RadialChartEvaluationsScoreAverages
+            avgEvaluationCriteriaScores={
+              analyticsData.avg_evaluation_criteria_scores
+            }
+          />
+        </motion.div>
+        <motion.div className="sm:col-span-2" variants={itemVariants}>
+          <AreaChartInteractiveOverallGrades
+            completedInterviewEvaluations={
+              analyticsData.completed_interview_evaluations
+            }
+          />
+        </motion.div>
+      </div>
+      <motion.div className="lg:grid-cols-2" variants={itemVariants}>
         <BarChartInteractiveEvaluationScores
           completedInterviewEvaluations={
             analyticsData.completed_interview_evaluations

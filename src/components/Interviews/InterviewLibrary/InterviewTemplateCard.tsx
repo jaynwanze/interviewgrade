@@ -7,7 +7,7 @@ import {
   InterviewTemplate,
   PracticeTemplate,
 } from '@/types';
-import { BarChart3, Clock, ListOrdered } from 'lucide-react';
+import { Clock, ListOrdered } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../ui/button';
 
@@ -49,7 +49,7 @@ export const InterviewCardTemplate = ({
         <CardContent className="space-y-3 text-gray-600">
           <p className="text-sm">{selectedTemplate.description}</p>
 
-          <div className="flex justify-between items-center text-sm text-gray-700">
+          <div className="flex justify-center items-center space-x-3 text-sm text-gray-700">
             <div className="flex items-center space-x-1">
               <ListOrdered className="w-4 h-4 text-blue-500" />
               <span>{selectedTemplate.question_count} Questions</span>
@@ -58,12 +58,12 @@ export const InterviewCardTemplate = ({
               <Clock className="w-4 h-4 text-purple-500" />
               <span>{selectedTemplate.duration} min</span>
             </div>
-            <div className="flex items-center space-x-1">
+            {/* <div className="flex items-center space-x-1">
               <BarChart3 className="w-4 h-4 text-gray-700" />
               <span>
                 Mode: {interviewMode === 'practice' ? 'Practice' : 'Interview'}
               </span>
-            </div>
+            </div> */}
           </div>
 
           <Button className="w-full mt-3" onClick={handleClick}>

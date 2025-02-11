@@ -76,12 +76,12 @@ export const InterviewAverageDetails = ({
         </Card>
       </div>
 
-      {/* Evaluation Criteria Key Metrics */}
+      {/* Evaluation Criteria Key Metrics
       <InterviewCurrentAverageKeyMetrics
         totalInterviews={analyticsData.total_interviews}
         avgOverallScore={analyticsData.avg_overall_grade}
         avgEvaluationCriteria={analyticsData.avg_evaluation_criteria_scores}
-      />
+      /> */}
     </>
   );
 };

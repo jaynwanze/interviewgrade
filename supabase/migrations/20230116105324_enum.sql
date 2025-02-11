@@ -147,3 +147,33 @@ CREATE TYPE "public"."subscription_status" AS ENUM (
 );
 
 ALTER TYPE "public"."subscription_status" OWNER TO "postgres";
+
+--
+-- Name: organization_join_invitation_link_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."organization_join_invitation_link_status" AS ENUM (
+  'active',
+  'finished_accepted',
+  'finished_declined',
+  'inactive'
+);
+ALTER TYPE "public"."organization_join_invitation_link_status" OWNER TO "postgres";
+--
+-- Name: organization_joining_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."organization_joining_status" AS ENUM (
+  'invited',
+  'joinied',
+  'declined_invitation',
+  'joined'
+);
+ALTER TYPE "public"."organization_joining_status" OWNER TO "postgres";
+--
+-- Name: organization_member_role; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE "public"."organization_member_role" AS ENUM ('owner', 'admin', 'member', 'readonly');
+ALTER TYPE "public"."organization_member_role" OWNER TO "postgres";
+

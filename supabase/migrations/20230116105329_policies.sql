@@ -17,6 +17,21 @@ WITH CHECK ((auth.uid() = "id"));
 
 CREATE POLICY "users_can_view_own_profile" ON "public"."user_profiles" FOR
 SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
+
+--
+-- Name employer Only the employer can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "employer_can_view_own_information" ON "public"."employers" FOR
+SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
+
+--
+-- Name employer Only the employer can update their information; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "employer_can_update_own_information" ON "public"."employers" FOR
+UPDATE TO "authenticated" USING (("auth"."uid"() = "id"))
+WITH CHECK (("auth"."uid"() = "id"));
 --
 -- Name: candidates Only the candidates can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
 --
@@ -621,10 +636,204 @@ USING (
 
 
 --
+-- Name: organizations All authenticated users can create organizations; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "All authenticated users can create organizations" ON "public"."organizations" FOR
+INSERT TO "authenticated";
+--
+-- Name: organizations All organization members can read organizations; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "All organization members can read organizations" ON "public"."organizations" FOR
+SELECT TO "authenticated" USING (
+    (
+      ("auth"."uid"() = "created_by")
+      OR (
+        "auth"."uid"() IN (
+          SELECT "public"."get_organization_member_ids"("organizations"."id") AS "get_organization_member_ids"
+        )
+      )
+    )
+  );
+
+CREATE POLICY "All organization members can update organizations" ON "public"."organizations" FOR
+UPDATE TO "authenticated" USING (
+    (
+      (
+        "auth"."uid"() IN (
+          SELECT "public"."get_organization_member_ids"("organizations"."id") AS "get_organization_member_ids"
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Any organization mate can view a user's public profile " ON "public"."user_profiles" FOR
+SELECT TO "authenticated" USING (
+    (
+      EXISTS (
+        SELECT 1
+        FROM "public"."organization_members"
+        WHERE (
+            (
+              "organization_members"."member_id" = "auth"."uid"()
+            )
+            AND (
+              "organization_members"."organization_id" IN (
+                SELECT "organization_members_1"."organization_id" AS "organization_id"
+                FROM "public"."organization_members" "organization_members_1"
+                WHERE (
+                    "organization_members_1"."member_id" = "user_profiles"."id"
+                  )
+              )
+            )
+          )
+      )
+    )
+  );
+--
+-- Name: organization_join_invitations Anyone can view; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+CREATE POLICY "Anyone can view" ON "public"."organization_join_invitations" FOR
+SELECT USING (TRUE);
+
+--
+-- Name: subscriptions Everyone organization member can view the subscription on  organization; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Everyone organization member can view the subscription on  organization" ON "public"."subscriptions" FOR
+SELECT TO "authenticated" USING (
+    (
+      "auth"."uid"() IN (
+        SELECT "public"."get_organization_member_ids"("subscriptions"."organization_id") AS "get_organization_member_ids"
+      )
+    )
+  );
+--
+-- Name: organization_members Only organization admins can insert new members; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Only organization admins can insert new members" ON "public"."organization_members" FOR
+INSERT TO "authenticated" WITH CHECK (
+    (
+      "auth"."uid"() IN (
+        SELECT "public"."get_organization_admin_ids"("organization_members"."organization_id") AS "get_organization_admin_ids"
+      )
+    )
+  );
+--
+-- Name: organization_join_invitations Only organization admins can invite other users; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "Only organization admins can invite other users" ON "public"."organization_join_invitations" FOR
+INSERT TO "authenticated" WITH CHECK (
+    (
+      (
+        "auth"."uid"() IN (
+          SELECT "public"."get_organization_admin_ids"(
+              "organization_join_invitations"."organization_id"
+            ) AS "get_organization_admin_ids"
+        )
+      )
+    )
+  );
+--
+-- Name: organization_members Only organization admins can update organization members; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Only organization admins can update organization members" ON "public"."organization_members" FOR
+UPDATE TO "authenticated" USING (
+    (
+      "auth"."uid"() IN (
+        SELECT "public"."get_organization_admin_ids"("organization_members"."organization_id") AS "get_organization_admin_ids"
+      )
+    )
+  );
+--
+-- Name: organizations Only organization admins/owners can delete organizations; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Only organization admins/owners can delete organizations" ON "public"."organizations" FOR DELETE TO "authenticated" USING (
+  (
+    (
+      "auth"."uid"() IN (
+        SELECT "public"."get_organization_admin_ids"("organizations"."id") AS "get_organization_admin_ids"
+      )
+    )
+  )
+);
+--
+-- Name: organizations_private_info Only organization owners/admins can update private organizations info; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "Only organization owners/admins can update private organizations info" ON "public"."organizations_private_info" FOR
+UPDATE TO "authenticated" USING (
+    (
+      "auth"."uid"() IN (
+        SELECT "public"."get_organization_admin_ids"("organizations_private_info"."id") AS "get_organization_admin_ids"
+      )
+    )
+  );
+--
+-- Name: organizations_private_info Only organization owners/admins can view private organizations info; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "Only organization owners/admins can view private organizations info" ON "public"."organizations_private_info" FOR
+SELECT TO "authenticated" USING (
+    (
+      "auth"."uid"() IN (
+        SELECT "public"."get_organization_admin_ids"("organizations_private_info"."id") AS "get_organization_admin_ids"
+      )
+    )
+  );
+--
+-- Name: organization_join_invitations Only the invited user can edit the invitation; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "Only the invited user can edit the invitation" ON "public"."organization_join_invitations" FOR
+UPDATE TO "authenticated" USING (
+    "public"."check_if_authenticated_user_owns_email"("invitee_user_email")
+  );
+--
+-- Name: user_profiles Only the own user can update it; Type: POLICY; Schema: public; Owner: postgres
+--
+
+
+--
 -- Name: user_profiles; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
 ALTER TABLE "public"."user_profiles" ENABLE ROW LEVEL SECURITY;
+--
+-- Name: organization_join_invitations; Type: ROW SECURITY; Schema: public; Owner: supabase_admin
+--
+
+ALTER TABLE "public"."organization_join_invitations" ENABLE ROW LEVEL SECURITY;
+--
+-- Name: organization_members; Type: ROW SECURITY; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."organization_members" ENABLE ROW LEVEL SECURITY;
+--
+-- Name: organizations; Type: ROW SECURITY; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."organizations" ENABLE ROW LEVEL SECURITY;
+--
+-- Name: organizations_private_info; Type: ROW SECURITY; Schema: public; Owner: supabase_admin
+--
+
+ALTER TABLE "public"."organizations_private_info" ENABLE ROW LEVEL SECURITY;
+--
+-- Name: prices; Type: ROW SECURITY; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."subscriptions" ENABLE ROW LEVEL SECURITY;
+--
+-- Name :employer; Type: ROW SECURITY; Schema: public; Owner: postgres
+--
+
+ALTER TABLE "public"."employer" ENABLE ROW LEVEL SECURITY;
 --
 -- Name: candidates; Type: ROW SECURITY; Schema: public; Owner: postgres
 --

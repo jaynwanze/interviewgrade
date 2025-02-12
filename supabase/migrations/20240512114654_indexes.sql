@@ -25,10 +25,6 @@ CREATE INDEX idx_templates_is_system_defined ON "public"."templates" ("is_system
 -- Indexes for interview_template
 CREATE INDEX idx_interview_templates_id ON "public"."interview_templates" ("id");
 
--- Indexes for interview_template_template
-CREATE INDEX idx_interview_template_interview_template_id ON "public"."interview_template_template" ("interview_template_id");
-CREATE INDEX idx_interview_template_template_template_id ON "public"."interview_template_template" ("template_id");
-
 -- Indexes for questions
 CREATE INDEX idx_questions_id ON "public"."questions" ("id");
 CREATE INDEX idx_questions_template_id ON "public"."questions" ("template_id");
@@ -41,7 +37,6 @@ CREATE INDEX idx_interview_evaluations_interview_id ON "public"."interview_evalu
 -- Indexes for evaluation_criteria
 CREATE INDEX idx_evaluation_criteria_id ON "public"."evaluation_criteria" ("id");
 CREATE INDEX idx_evaluation_criteria_is_system_defined ON "public"."evaluation_criteria" ("is_system_defined");
-CREATE INDEX idx_evaluation_criteria_interview_evaluation_criteria_id ON "public"."evaluation_criteria" ("interview_evaluation_criteria_id");
 
 -- Indexes for interview_evaluation_criteria
 CREATE INDEX idx_interview_evaluation_criteria_id ON "public"."interview_evaluation_criteria" ("id");
@@ -72,18 +67,26 @@ CREATE INDEX idx_job_application_tracker_candidate_id ON "public"."job_applicati
 CREATE INDEX idx_account_delete_tokens_user_id ON public.account_delete_tokens("user_id");
 
 -- Indexes for organizations_members
-CREATE INDEX idx_organizations_members_id ON "public"."organizations_members" ("id");
-CREATE INDEX idx_organizations_members_organization_id ON "public"."organizations_members" ("organization_id");
+CREATE INDEX idx_organizations_members_id ON "public"."organization_members" ("id");
+CREATE INDEX idx_organizations_members_organization_id ON "public"."organization_members" ("organization_id");
 
 -- Indexes for organizations
 CREATE INDEX idx_organizations_id ON "public"."organizations" ("id");
-CREATE INDEX idx_organizations_created_by ON "public"."organizations" ("created_by");
+-- CREATE INDEX idx_organizations_created_by ON "public"."organizations" ("created_by");
 
 -- Indexes for organization_join_invitations
 CREATE INDEX idx_organization_join_invitations_id ON "public"."organization_join_invitations" ("id");
 CREATE INDEX idx_organization_join_invitations_organization_id ON "public"."organization_join_invitations" ("organization_id");
-CREATE INDEX idx_organization_join_invitations_inviter_user_id_user_id ON "public"."organization_join_invitations" ("user_id");
-CREATE INDEX idx_organization_join_invitations_invitee_user_id_inviter_user_id ON "public"."organization_join_invitations" ("user_id");
+CREATE INDEX idx_organization_join_invitations_inviter_user_id_user_id ON "public"."organization_join_invitations" ("inviter_user_id");
+CREATE INDEX idx_organization_join_invitations_invitee_user_id_inviter_user_id ON "public"."organization_join_invitations" ("invitee_user_id");
 
 -- Indexes for organizations_private_info
 CREATE INDEX idx_organizations_private_info_id ON "public"."organizations_private_info" ("id");
+
+-- Indexes for subscription
+CREATE INDEX idx_subscriptions_id ON "public"."subscriptions" ("id");
+CREATE INDEX idx_subscriptions_organization_id ON "public"."subscriptions" ("organization_id");
+
+-- Indexes for employees
+CREATE INDEX idx_employees_id ON "public"."employees" ("id");
+CREATE INDEX idx_employees_default_organization_id ON "public"."employees" ("default_organization");

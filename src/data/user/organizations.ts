@@ -47,7 +47,7 @@ export const createOrganization = async (
 
   if (isOnboardingFlow) {
     const { error: updateError } = await supabaseClient
-      .from('user_private_info')
+      .from('employees')
       .update({ default_organization: organizationId })
       .eq('id', user.id);
 
@@ -447,7 +447,7 @@ export const getDefaultOrganization = async () => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const user = await serverGetLoggedInUser();
   const { data: preferences, error } = await supabaseClient
-    .from('user_private_info')
+    .from('employees')
     .select('id, default_organization')
     .eq('id', user.id)
     .single();
@@ -463,7 +463,7 @@ export async function setDefaultOrganization(organizationId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const user = await serverGetLoggedInUser();
   const { error: updateError } = await supabaseClient
-    .from('user_private_info')
+    .from('employees')
     .update({ default_organization: organizationId })
     .eq('id', user.id);
 

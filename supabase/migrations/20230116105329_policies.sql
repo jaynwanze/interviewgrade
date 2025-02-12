@@ -449,64 +449,19 @@ USING (
     is_system_defined = FALSE AND "user_id" = "auth"."uid"()
 );
 --
--- Name: interview_template_template Only users can view system defined and their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "users_can_view_system_defined_and_own_interview_template_template" ON "public"."interview_template_template" FOR
-SELECT TO "authenticated" USING (
-    EXISTS (
-        SELECT 1 FROM "public"."interview_templates"
-        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
-          AND ("interview_templates"."user_id" = "auth"."uid"() OR "interview_templates"."is_system_defined" = TRUE)
-    )
-);
---
--- Name: interview_template_template Only users can insert their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "users_can_manage_own_interview_template_template_insert" ON "public"."interview_template_template" FOR
-INSERT TO "authenticated" WITH CHECK (
-    EXISTS (
-        SELECT 1 FROM "public"."interview_templates"
-        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
-          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
-    )
-);
---
--- Name: interview_template_template Only users can update their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "users_can_manage_own_interview_template_template_update" ON "public"."interview_template_template" FOR
-UPDATE TO "authenticated" USING (
-    EXISTS (
-        SELECT 1 FROM "public"."interview_templates"
-        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
-          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
-    )
-);
---
--- Name: interview_template_template Only users can delete their own interview template template; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "users_can_manage_own_interview_template_template_delete" ON "public"."interview_template_template" FOR
-DELETE TO "authenticated" USING (
-    EXISTS (
-        SELECT 1 FROM "public"."interview_templates"
-        WHERE "interview_templates"."id" = "interview_template_template"."interview_template_id"
-          AND ("interview_templates"."user_id" = "auth"."uid"() AND "interview_templates"."is_system_defined" = FALSE)
-    )
-);
---
 -- Name interview_evaluation_criteria Only users can view system defined and their own interview evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
 CREATE POLICY "users_can_view_system_defined_and_own_interview_evaluation_criteria" ON "public"."interview_evaluation_criteria" FOR
 SELECT TO "authenticated" USING (
     EXISTS (
-          is_system_defined = TRUE AND "user_id" IS NULL
-    OR
-    is_system_defined = FALSE AND "user_id" = "auth"."uid"()
-    
+        SELECT 1
+        FROM "public"."interview_evaluation_criteria"
+        WHERE (
+            is_system_defined = TRUE AND "user_id" IS NULL
+        ) OR (
+            is_system_defined = FALSE AND "user_id" = "auth"."uid"()
+        )
     )
 );
 --
@@ -579,6 +534,28 @@ TO "authenticated"
 USING (
     is_system_defined = FALSE AND "user_id" = "auth"."uid"()
 );
+
+--
+-- Name: employees Only the employees can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "employees_can_view_own_information" ON "public"."employees" FOR
+SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
+
+--
+-- Name: employees Only the employees can update their information; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "employees_can_update_own_information" ON "public"."employees" FOR
+UPDATE TO "authenticated" USING (("auth"."uid"() = "id"))
+WITH CHECK (("auth"."uid"() = "id"));
+
+--
+-- Name: employees Only the employees can delete their own information Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "employees_can_delete_own_information" ON "public"."employees" FOR
+DELETE TO "authenticated" USING (("auth"."uid"() = "id"));
 --
 -- Name candidates_can_view_own_job_applications: Only candidates can view their own job applications; Type: POLICY; Schema: public; Owner: supabase_admin
 --

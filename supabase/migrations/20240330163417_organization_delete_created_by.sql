@@ -21,7 +21,6 @@ TO authenticated
 USING (true);
 
 
-DROP TRIGGER on_auth_user_created_create_team ON auth.users;
 DROP TRIGGER on_organization_created_create_owner ON public.organizations;
 
 

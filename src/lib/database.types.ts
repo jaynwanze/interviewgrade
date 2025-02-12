@@ -134,6 +134,187 @@ export type Database = {
           },
         ]
       }
+      employer: {
+        Row: {
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          id: string
+          organization_id: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employer_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employer_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+
+      organizations: {
+        Row: {
+          id: string
+          title: string
+          created_at: string
+          created_by: string
+        }
+        Insert: {
+          id: string
+          title: string
+          created_at: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+          created_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      organization_members: {
+        Row: {
+          id: string
+          organization_id: string
+          member_id: string
+          member_role: string
+          created_at: string
+        }
+        Insert: {
+          id: string
+          organization_id: string
+          member_id: string
+          member_role: string
+          created_at: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          member_id?: string
+          member_role?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      organization_join_invitations: {
+        row: {
+          Id: string
+          invited_user_id: string
+          status: PublicSchema["Enums"]["organization_join_invitation_status"]
+          invitee_user_email: string
+          invitee_organization_role: PublicSchema["Enums"]["organization_member_role"]
+          invitee_user_id: string
+          organization_id: string
+          created_at: string
+        }
+        Insert: {
+          invited_user_id: string
+          status: PublicSchema["Enums"]["organization_join_invitation_link_status"]
+          invitee_user_email: string
+          invitee_organization_role: PublicSchema["Enums"]["organization_member_role"]
+          invitee_user_id: string
+          organization_id: string
+          created_at: string
+        }
+        Update: {
+          invited_user_id?: string
+          status?: PublicSchema["Enums"]["organization_join_invitation_status"]
+          invitee_user_email?: string
+          invitee_organization_role?: PublicSchema["Enums"]["organization_member_role"]
+          invitee_user_id?: string
+          organization_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_join_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_join_invitations_invitee_user_id_fkey"
+            columns: ["invitee_user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_join_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
+      organizations_private_info: {
+        Row: {
+          id: string
+          billing_address: string
+          payment_method: string
+        }
+        Insert: {
+          id: string
+          billing_address: string
+          payment_method: string
+        }
+        Update: {
+          id?: string
+          billing_address?: string
+          payment_method?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_private_info_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+
       products: {
         Row: {
           id: string
@@ -803,6 +984,9 @@ export type Database = {
       subscription_status: "active" | "paused" | "cancelled" | "trialing" | "past_due" | "unpaid" | "incomplete" | "incomplete_expired"
       pricing_type: "recurring" | "one-time"
       pricing_plan_interval_type: "day" | "week" | "month" | "year"
+      organization_member_role: "admin" | "member" | "owner" | "readonly"
+      organization_join_invitation_status: "invited" | "joinied" | "declined_invitation"
+      organization_join_invitation_link_status: "active" | "finished_accepted" | "finished_declined" | "inactive"
     }
     CompositeTypes: {
       [_ in never]: never

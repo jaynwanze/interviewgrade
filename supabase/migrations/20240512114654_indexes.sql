@@ -70,3 +70,23 @@ CREATE INDEX idx_job_application_tracker_candidate_id ON "public"."job_applicati
 
 -- Index on account_delete_tokens
 CREATE INDEX idx_account_delete_tokens_user_id ON public.account_delete_tokens("user_id");
+
+-- Indexes for employers
+CREATE INDEX idx_employers_id ON "public"."employers" ("id");
+
+-- Indexes for organizations_members
+CREATE INDEX idx_organizations_members_id ON "public"."organizations_members" ("id");
+CREATE INDEX idx_organizations_members_organization_id ON "public"."organizations_members" ("organization_id");
+
+-- Indexes for organizations
+CREATE INDEX idx_organizations_id ON "public"."organizations" ("id");
+CREATE INDEX idx_organizations_created_by ON "public"."organizations" ("created_by");
+
+-- Indexes for organization_join_invitations
+CREATE INDEX idx_organization_join_invitations_id ON "public"."organization_join_invitations" ("id");
+CREATE INDEX idx_organization_join_invitations_organization_id ON "public"."organization_join_invitations" ("organization_id");
+CREATE INDEX idx_organization_join_invitations_inviter_user_id_user_id ON "public"."organization_join_invitations" ("user_id");
+CREATE INDEX idx_organization_join_invitations_invitee_user_id_inviter_user_id ON "public"."organization_join_invitations" ("user_id");
+
+-- Indexes for organizations_private_info
+CREATE INDEX idx_organizations_private_info_id ON "public"."organizations_private_info" ("id");

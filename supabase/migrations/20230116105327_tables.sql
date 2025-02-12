@@ -23,7 +23,7 @@ CREATE TABLE "public"."organization_join_invitations" (
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,
   "inviter_user_id" "uuid" NOT NULL,
   "status" "public"."organization_join_invitation_link_status" DEFAULT 'active'::"public"."organization_join_invitation_link_status" NOT NULL,
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL, 
   "invitee_user_email" character varying NOT NULL,
   "organization_id" "uuid" NOT NULL,
   "invitee_organization_role" "public"."organization_member_role" NOT NULL DEFAULT 'member'::organization_member_role,

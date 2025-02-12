@@ -167,7 +167,6 @@ CREATE TYPE "public"."organization_joining_status" AS ENUM (
   'invited',
   'joinied',
   'declined_invitation',
-  'joined'
 );
 ALTER TYPE "public"."organization_joining_status" OWNER TO "postgres";
 --

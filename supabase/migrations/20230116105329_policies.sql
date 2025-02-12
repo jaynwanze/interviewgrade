@@ -17,21 +17,6 @@ WITH CHECK ((auth.uid() = "id"));
 
 CREATE POLICY "users_can_view_own_profile" ON "public"."user_profiles" FOR
 SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
-
---
--- Name employer Only the employer can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "employer_can_view_own_information" ON "public"."employers" FOR
-SELECT TO "authenticated" USING (("auth"."uid"() = "id"));
-
---
--- Name employer Only the employer can update their information; Type: POLICY; Schema: public; Owner: supabase_admin
---
-
-CREATE POLICY "employer_can_update_own_information" ON "public"."employers" FOR
-UPDATE TO "authenticated" USING (("auth"."uid"() = "id"))
-WITH CHECK (("auth"."uid"() = "id"));
 --
 -- Name: candidates Only the candidates can view their information; Type: POLICY; Schema: public; Owner: supabase_admin
 --
@@ -829,11 +814,6 @@ ALTER TABLE "public"."organizations_private_info" ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE "public"."subscriptions" ENABLE ROW LEVEL SECURITY;
---
--- Name :employer; Type: ROW SECURITY; Schema: public; Owner: postgres
---
-
-ALTER TABLE "public"."employer" ENABLE ROW LEVEL SECURITY;
 --
 -- Name: candidates; Type: ROW SECURITY; Schema: public; Owner: postgres
 --

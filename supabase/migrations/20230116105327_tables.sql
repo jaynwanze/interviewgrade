@@ -63,15 +63,6 @@ CREATE TABLE "public"."candidates" (
   "stripe_customer_id" character varying
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";
-
---
--- Name: employer; Type: ENUM; Schema: public; Owner: postgres
---
-CREATE TABLE "public"."employer" (
-  "id" "uuid" NOT NULL,
-  "organization_id" "uuid" NOT NULL
-  );
-ALTER TABLE "public"."candidates" OWNER TO "postgres";
 --
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -343,13 +334,6 @@ ADD CONSTRAINT "organization_members_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."organizations"
 ADD CONSTRAINT "organizations_pkey" PRIMARY KEY ("id");
---
--- Name: employer employer_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."employer"
-ADD CONSTRAINT "employer_pkey" PRIMARY KEY ("id");
---
 -- Name: user_profiles user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 

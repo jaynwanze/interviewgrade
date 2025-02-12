@@ -71,9 +71,6 @@ CREATE INDEX idx_job_application_tracker_candidate_id ON "public"."job_applicati
 -- Index on account_delete_tokens
 CREATE INDEX idx_account_delete_tokens_user_id ON public.account_delete_tokens("user_id");
 
--- Indexes for employers
-CREATE INDEX idx_employers_id ON "public"."employers" ("id");
-
 -- Indexes for organizations_members
 CREATE INDEX idx_organizations_members_id ON "public"."organizations_members" ("id");
 CREATE INDEX idx_organizations_members_organization_id ON "public"."organizations_members" ("organization_id");

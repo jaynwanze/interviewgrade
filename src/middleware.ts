@@ -16,11 +16,11 @@ const onboardingPaths = `/onboarding/(.*)?`;
 const protectedPagePrefixes = [
   `/organization(/.*)?`, // matches /organization and any sub route of /organization
   `/project(/.*)?`, // matches /project and any sub route of /project
-  `/employer/dashboard`,
   `/settings(/.*)?`,
   `/invitations`,
   `/render/(.*)?`,
   `/dashboard/candidate`,
+  `/dashboard/employer`,
   onboardingPaths,
 ];
 

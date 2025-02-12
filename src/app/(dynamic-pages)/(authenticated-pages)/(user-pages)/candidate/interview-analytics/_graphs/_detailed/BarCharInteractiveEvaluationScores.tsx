@@ -221,7 +221,7 @@ export function BarChartInteractiveEvaluationScores({
       <CardContent className="shadow rounded-lg px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[150px] w-full"
         >
           {filteredData.length === 0 ||
             filteredData.filter((data) => data[activeChart] > 0).length === 0 ? (

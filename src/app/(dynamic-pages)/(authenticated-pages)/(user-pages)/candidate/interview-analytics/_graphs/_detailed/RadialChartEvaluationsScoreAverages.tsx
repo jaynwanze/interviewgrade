@@ -1,18 +1,18 @@
 'use client';
 
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
-    ChartContainer,
-    ChartLegend,
-    ChartTooltip,
-    ChartTooltipContent,
+  ChartContainer,
+  ChartLegend,
+  ChartTooltip,
+  ChartTooltipContent,
 } from '@/components/ui/chart';
 import { AvgEvaluationScores } from '@/types';
 import { useMemo } from 'react';
@@ -93,11 +93,7 @@ export function RadialChartEvaluationsScoreAverages({
             endAngle={-270}
           >
             {/* Ensure domain = 0–10 so bars scale from 0 to 10 */}
-            <PolarAngleAxis
-              type="number"
-              domain={[0, 10]}
-              tick={false}
-            />
+            <PolarAngleAxis type="number" domain={[0, 10]} tick={false} />
 
             <ChartTooltip
               cursor={false}

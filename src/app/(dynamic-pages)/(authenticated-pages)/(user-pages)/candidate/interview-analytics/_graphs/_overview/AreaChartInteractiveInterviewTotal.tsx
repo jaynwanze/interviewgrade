@@ -118,7 +118,7 @@ export function AreaChartInteractiveInterviewTotal({
   }, [chartConfig]);
 
   return (
-    <Card className="shadow-lg rounded-lg  h-full">
+    <Card className="shadow-lg rounded-lg h-full">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6 overflow-auto">
           <CardTitle>Overall Interviews Progression</CardTitle>
@@ -169,7 +169,7 @@ export function AreaChartInteractiveInterviewTotal({
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[150px] w-full"
         >
           {filteredData.length === 0 ||
             filteredData.filter((data) => data[activeChart] > 0).length === 0 ? (

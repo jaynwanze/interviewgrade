@@ -207,184 +207,184 @@ export const updateOrganizationTitle = async (
   return data;
 };
 
-export const getNormalizedOrganizationSubscription = async (
-  organizationId: string,
-): Promise<NormalizedSubscription> => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data: subscriptions, error } = await supabase
-    .from('subscriptions')
-    .select('*, prices(*, products(*))')
-    .eq('organization_id', organizationId)
-    .in('status', ['trialing', 'active']);
+// export const getNormalizedOrganizationSubscription = async (
+//   organizationId: string,
+// ): Promise<NormalizedSubscription> => {
+//   const supabase = createSupabaseUserServerComponentClient();
+//   const { data: subscriptions, error } = await supabase
+//     .from('subscriptions')
+//     .select('*, prices(*, products(*))')
+//     .eq('organization_id', organizationId)
+//     .in('status', ['trialing', 'active']);
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error;
+//   }
 
-  if (!subscriptions || subscriptions.length === 0) {
-    return {
-      type: 'no-subscription',
-    };
-  }
+//   if (!subscriptions || subscriptions.length === 0) {
+//     return {
+//       type: 'no-subscription',
+//     };
+//   }
 
-  try {
-    const subscription = subscriptions[0];
-    console.log(subscription);
+//   try {
+//     const subscription = subscriptions[0];
+//     console.log(subscription);
 
-    const price = Array.isArray(subscription.prices)
-      ? subscription.prices[0]
-      : subscription.prices;
-    if (!price) {
-      throw new Error('No price found');
-    }
+//     const price = Array.isArray(subscription.prices)
+//       ? subscription.prices[0]
+//       : subscription.prices;
+//     if (!price) {
+//       throw new Error('No price found');
+//     }
 
-    const product = Array.isArray(price.products)
-      ? price.products[0]
-      : price.products;
-    if (!product) {
-      throw new Error('No product found');
-    }
+//     const product = Array.isArray(price.products)
+//       ? price.products[0]
+//       : price.products;
+//     if (!product) {
+//       throw new Error('No product found');
+//     }
 
-    if (subscription.status === 'trialing') {
-      if (!subscription.trial_start || !subscription.trial_end) {
-        throw new Error('No trial start or end found');
-      }
-      return {
-        type: 'trialing',
-        trialStart: subscription.trial_start,
-        trialEnd: subscription.trial_end,
-        product: product,
-        price: price,
-        subscription,
-      };
-    } else if (subscription.status) {
-      return {
-        type: subscription.status,
-        product: product,
-        price: price,
-        subscription,
-      };
-    } else {
-      return {
-        type: 'no-subscription',
-      };
-    }
-  } catch (err) {
-    return {
-      type: 'no-subscription',
-    };
-  }
-};
+//     if (subscription.status === 'trialing') {
+//       if (!subscription.trial_start || !subscription.trial_end) {
+//         throw new Error('No trial start or end found');
+//       }
+//       return {
+//         type: 'trialing',
+//         trialStart: subscription.trial_start,
+//         trialEnd: subscription.trial_end,
+//         product: product,
+//         price: price,
+//         subscription,
+//       };
+//     } else if (subscription.status) {
+//       return {
+//         type: subscription.status,
+//         product: product,
+//         price: price,
+//         subscription,
+//       };
+//     } else {
+//       return {
+//         type: 'no-subscription',
+//       };
+//     }
+//   } catch (err) {
+//     return {
+//       type: 'no-subscription',
+//     };
+//   }
+// };
 
-export async function createCustomerPortalLinkAction(organizationId: string) {
-  'use server';
-  const user = await serverGetLoggedInUser();
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const { data, error } = await supabaseClient
-    .from('organizations')
-    .select('id, title')
-    .eq('id', organizationId)
-    .single();
+// export async function createCustomerPortalLinkAction(organizationId: string) {
+//   'use server';
+//   const user = await serverGetLoggedInUser();
+//   const supabaseClient = createSupabaseUserServerActionClient();
+//   const { data, error } = await supabaseClient
+//     .from('organizations')
+//     .select('id, title')
+//     .eq('id', organizationId)
+//     .single();
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error;
+//   }
 
-  if (!data) {
-    throw new Error('Organization not found');
-  }
+//   if (!data) {
+//     throw new Error('Organization not found');
+//   }
 
-  const customer = await createOrRetrieveCustomer({
-    organizationId: organizationId,
-    organizationTitle: data.title,
-    email: user.email || '',
-  });
+//   const customer = await createOrRetrieveCustomer({
+//     organizationId: organizationId,
+//     organizationTitle: data.title,
+//     email: user.email || '',
+//   });
 
-  if (!customer) throw Error('Could not get customer');
-  const { url } = await stripe.billingPortal.sessions.create({
-    customer,
-    return_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
-  });
+//   if (!customer) throw Error('Could not get customer');
+//   const { url } = await stripe.billingPortal.sessions.create({
+//     customer,
+//     return_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+//   });
 
-  return url;
-}
+//   return url;
+// }
 
-export async function createCheckoutSessionAction({
-  organizationId,
-  priceId,
-  isTrial = false,
-}: {
-  organizationId: string;
-  priceId: string;
-  isTrial?: boolean;
-}) {
-  'use server';
-  const TRIAL_DAYS = 14;
-  const user = await serverGetLoggedInUser();
+// export async function createCheckoutSessionAction({
+//   organizationId,
+//   priceId,
+//   isTrial = false,
+// }: {
+//   organizationId: string;
+//   priceId: string;
+//   isTrial?: boolean;
+// }) {
+//   'use server';
+//   const TRIAL_DAYS = 14;
+//   const user = await serverGetLoggedInUser();
 
-  const organizationTitle = await getOrganizationTitle(organizationId);
+//   const organizationTitle = await getOrganizationTitle(organizationId);
 
-  const customer = await createOrRetrieveCustomer({
-    organizationId: organizationId,
-    organizationTitle: organizationTitle,
-    email: user.email || '',
-  });
-  if (!customer) throw Error('Could not get customer');
-  if (isTrial) {
-    const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      billing_address_collection: 'required',
-      customer,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      allow_promotion_codes: true,
-      subscription_data: {
-        trial_period_days: TRIAL_DAYS,
-        trial_settings: {
-          end_behavior: {
-            missing_payment_method: 'cancel',
-          },
-        },
-        metadata: {},
-      },
-      success_url: toSiteURL(
-        `/organization/${organizationId}/settings/billing`,
-      ),
-      cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
-    });
+//   const customer = await createOrRetrieveCustomer({
+//     organizationId: organizationId,
+//     organizationTitle: organizationTitle,
+//     email: user.email || '',
+//   });
+//   if (!customer) throw Error('Could not get customer');
+//   if (isTrial) {
+//     const stripeSession = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       billing_address_collection: 'required',
+//       customer,
+//       line_items: [
+//         {
+//           price: priceId,
+//           quantity: 1,
+//         },
+//       ],
+//       mode: 'subscription',
+//       allow_promotion_codes: true,
+//       subscription_data: {
+//         trial_period_days: TRIAL_DAYS,
+//         trial_settings: {
+//           end_behavior: {
+//             missing_payment_method: 'cancel',
+//           },
+//         },
+//         metadata: {},
+//       },
+//       success_url: toSiteURL(
+//         `/organization/${organizationId}/settings/billing`,
+//       ),
+//       cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+//     });
 
-    return stripeSession.id;
-  } else {
-    const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      billing_address_collection: 'required',
-      customer,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      allow_promotion_codes: true,
-      subscription_data: {
-        trial_from_plan: true,
-        metadata: {},
-      },
-      success_url: toSiteURL(
-        `/organization/${organizationId}/settings/billing`,
-      ),
-      cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
-    });
+//     return stripeSession.id;
+//   } else {
+//     const stripeSession = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       billing_address_collection: 'required',
+//       customer,
+//       line_items: [
+//         {
+//           price: priceId,
+//           quantity: 1,
+//         },
+//       ],
+//       mode: 'subscription',
+//       allow_promotion_codes: true,
+//       subscription_data: {
+//         trial_from_plan: true,
+//         metadata: {},
+//       },
+//       success_url: toSiteURL(
+//         `/organization/${organizationId}/settings/billing`,
+//       ),
+//       cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+//     });
 
-    return stripeSession.id;
-  }
-}
+//     return stripeSession.id;
+//   }
+// }
 
 export const getActiveProductsWithPrices = async () => {
   const supabase = createSupabaseUserServerComponentClient();

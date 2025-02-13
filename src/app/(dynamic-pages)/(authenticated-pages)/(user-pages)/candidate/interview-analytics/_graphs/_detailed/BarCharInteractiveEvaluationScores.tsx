@@ -200,14 +200,16 @@ export function BarChartInteractiveEvaluationScores({
             </SelectContent>
           </Select>
         </div>
-        <div className="grid">
+        <div
+          className={`grid gap-1 ${Object.keys(chartConfig).length > 5 ? 'grid-cols-2' : 'sm:grid-cols-1'} sm:grid-cols-2`}
+        >
           {Object.keys(chartConfig).map((key) => {
             const chart = key as keyof typeof chartConfig;
             return (
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-3 py-3 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0"
                 onClick={() => setActiveChart(chart)}
               >
                 <span className="text-center text-xs font-bold text-muted-foreground">
@@ -221,7 +223,7 @@ export function BarChartInteractiveEvaluationScores({
       <CardContent className="shadow rounded-lg px-2 sm:p-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[150px] w-full"
+          className="aspect-auto h-[250px] w-full"
         >
           {filteredData.length === 0 ||
             filteredData.filter((data) => data[activeChart] > 0).length === 0 ? (

@@ -21,11 +21,9 @@ export const InterviewLatestCard = ({
 
   return (
     <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-semibold">
+        <CardTitle className="text-xl font-semibold">
           Latest {latestInterview.mode === INTERVIEW_PRACTICE_MODE ? 'Practice Session' : 'Mock Interview'}
         </CardTitle>
-      </CardHeader>
       <Separator className="my-2" />
       <CardContent>
         <InterviewInfo

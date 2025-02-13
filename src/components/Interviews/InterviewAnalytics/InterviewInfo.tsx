@@ -1,5 +1,7 @@
 'use client';
 
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+
 export const InterviewInfo = ({
   interviewId,
   title,
@@ -23,7 +25,7 @@ export const InterviewInfo = ({
       : 'N/A';
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       {/* Title */}
       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
         {title || 'Deleted Template'}
@@ -52,7 +54,9 @@ export const InterviewInfo = ({
           href={`/candidate/interview-history/${interviewId}`}
           className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition"
         >
-          🔍 View session history
+          <MagnifyingGlassIcon className="inline w-4 h-4 mr-1" />
+           View session history
+          
         </a>
       )}
     </div>

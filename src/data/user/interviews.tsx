@@ -613,6 +613,11 @@ export const getInterviewAnalytics = async (
     throw evalError;
   }
 
+  if (!evaluations || evaluations.length === 0) {
+    console.warn('No evaluations found.');
+    return null;
+  }
+
   // Aggregate data
   const totalInterviews = interviews.length;
 
@@ -825,7 +830,7 @@ export const getInterviewEvaluations = async (
   const { data, error } = await supabase
     .from('interview_evaluations')
     .select('*')
-    .in('interview_id', completedInterviewsIds)
+    .in('interview_id', completedInterviewsIds);
 
   if (error) {
     throw error;

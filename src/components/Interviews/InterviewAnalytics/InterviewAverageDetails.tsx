@@ -30,7 +30,7 @@ export const InterviewAverageDetails = ({
         {/* Overall Grade + Best Skill Badge */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 ">
             <Trophy className="w-10 h-10 text-yellow-500" />
-            <CardTitle className="mt-2">Current Average Score</CardTitle>
+            <CardTitle className="mt-2">Current Average Grade</CardTitle>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.avg_overall_grade.toFixed(2)}%
@@ -40,9 +40,9 @@ export const InterviewAverageDetails = ({
                 ? `Best Skill: ${analyticsData.best_evaluation_crieria}`
                 : 'No Data'}
             </Badge>
-            <p className="text-gray-500 mt-2">
+            {/* <p className="text-gray-500 mt-2">
               Performance averaged over all sessions.
-            </p>
+            </p> */}
           </div>
         </Card>
 

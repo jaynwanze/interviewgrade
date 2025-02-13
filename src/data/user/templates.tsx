@@ -87,17 +87,7 @@ export const getPracticeTemplateEvaluationsByTemplateId = async (
   // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
   return data
     .filter((item) => item.evaluation_criteria !== null)
-    .map((item) => ({
-      id: item.evaluation_criteria?.id ?? '',
-      name: item.evaluation_criteria?.name ?? '',
-      description: item.evaluation_criteria?.description ?? '',
-      rubrics:
-        typeof item.evaluation_criteria?.rubrics === 'string'
-          ? JSON.parse(item.evaluation_criteria.rubrics)
-          : (item.evaluation_criteria?.rubrics ?? []),
-      is_system_defined: item.evaluation_criteria?.is_system_defined ?? false,
-      created_at: item.evaluation_criteria?.created_at ?? '',
-    }));
+    .flatMap((item) => item.evaluation_criteria);
 };
 
 export const getInterviewEvaluationCriteriasByTemplate = async (
@@ -135,20 +125,7 @@ export const getInterviewEvaluationCriteriasByTemplate = async (
   // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
   return data
     .filter((item) => item.interview_evaluation_criteria !== null)
-    .map((item) => ({
-      id: item.interview_evaluation_criteria?.id ?? '',
-      user_id: item.interview_evaluation_criteria?.user_id ?? '',
-      template_id: item.interview_evaluation_criteria?.template_id ?? '',
-      name: item.interview_evaluation_criteria?.name ?? '',
-      description: item.interview_evaluation_criteria?.description ?? '',
-      rubrics:
-        typeof item.interview_evaluation_criteria?.rubrics === 'string'
-          ? JSON.parse(item.interview_evaluation_criteria.rubrics)
-          : (item.interview_evaluation_criteria?.rubrics ?? []),
-      is_system_defined:
-        item.interview_evaluation_criteria?.is_system_defined ?? false,
-      created_at: item.interview_evaluation_criteria?.created_at ?? '',
-    }));
+    .flatMap((item) => item.interview_evaluation_criteria);
 };
 
 export const getPracticeEvaluationCriteriasByInterviewEvalCriteria = async (
@@ -180,20 +157,10 @@ export const getPracticeEvaluationCriteriasByInterviewEvalCriteria = async (
   if (!data) {
     return [];
   }
-
+  
   return data
     .filter((item) => item.evaluation_criteria !== null)
-    .map((item) => ({
-      id: item.evaluation_criteria?.id ?? '',
-      name: item.evaluation_criteria?.name ?? '',
-      description: item.evaluation_criteria?.description ?? '',
-      rubrics:
-        typeof item.evaluation_criteria?.rubrics === 'string'
-          ? JSON.parse(item.evaluation_criteria.rubrics)
-          : (item.evaluation_criteria?.rubrics ?? []),
-      is_system_defined: item.evaluation_criteria?.is_system_defined ?? false,
-      created_at: item.evaluation_criteria?.created_at ?? '',
-    }));
+    .flatMap((item) => item.evaluation_criteria);
 };
 
 export const getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria = async (

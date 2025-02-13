@@ -951,8 +951,6 @@ export type Database = {
           },
         ]
       }
-      //and job status
-
     }
     Views: {
       [_ in never]: never
@@ -969,6 +967,39 @@ export type Database = {
           email: string
         }
         Returns: boolean
+      }
+      get_invited_organizations_for_user_v2: {
+        Args: {
+          user_id: string
+          user_email: string
+        }
+        Returns: {
+          organization_id: string
+        }[]
+      }
+      get_organization_admin_ids: {
+        Args: {
+          organization_id: string
+        }
+        Returns: {
+          member_id: string
+        }[]
+      }
+      get_organization_member_ids: {
+        Args: {
+          organization_id: string
+        }
+        Returns: {
+          member_id: string
+        }[]
+      }
+      get_organizations_for_user: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          organization_id: string
+        }[]
       }
     }
     Enums: {

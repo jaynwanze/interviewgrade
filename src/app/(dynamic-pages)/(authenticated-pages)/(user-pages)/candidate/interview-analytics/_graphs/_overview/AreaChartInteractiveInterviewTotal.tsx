@@ -76,7 +76,7 @@ export function AreaChartInteractiveInterviewTotal({
   if (!interviewsCompleted || interviewsCompleted.length === 0) {
     return (
       <Card className="shadow rounded-lg p-6 flex flex-col justify-center items-center h-full space-y-4 mb-5">
-        <p className="text-center">
+        <p className="text-gray-500 text-lg text-center">
           No interviews completed data available at this time.
         </p>
       </Card>
@@ -123,14 +123,29 @@ export function AreaChartInteractiveInterviewTotal({
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6 overflow-auto">
           <CardTitle>Overall Interviews Progression</CardTitle>
           <CardDescription>
-            Showing total amount of interviews completed over the last{' '}
-            {timeRangeString}
+            Total interviews in the last {timeRangeString}
           </CardDescription>
         </div>
-        <div className="mr-5">
+
+        <div className="grid">
+          {Object.keys(chartConfig).map((key) => {
+            const chart = key as keyof typeof chartConfig;
+            return (
+              <button
+                key={chart}
+                data-active={activeChart === chart}
+                className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-3 py-3 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 "
+                onClick={() => setActiveChart(chart)}
+              >
+                <span className="text-center text-xs font-bold text-muted-foreground">
+                  {chartConfig[chart].label}
+                </span>
+              </button>
+            );
+          })}
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
-              className="w-[160px] rounded-lg sm:ml-auto"
+              className="mt-4 w-[160px] rounded-lg sm:ml-auto"
               aria-label="Select a value"
             >
               <SelectValue placeholder="Last 3 months" />
@@ -147,23 +162,6 @@ export function AreaChartInteractiveInterviewTotal({
               </SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        <div className="grid">
-          {Object.keys(chartConfig).map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                onClick={() => setActiveChart(chart)}
-              >
-                <span className="text-center text-xs font-bold text-muted-foreground">
-                  {chartConfig[chart].label}
-                </span>
-              </button>
-            );
-          })}
         </div>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">

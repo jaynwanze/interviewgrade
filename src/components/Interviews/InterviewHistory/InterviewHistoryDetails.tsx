@@ -295,7 +295,7 @@ export const InterviewHistoryDetails = ({
         </div>
         <Separator />
 
-        {/* Radial Chart (To Be Added) */}
+        {/* Radial Chart (To Be Added)
         <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Skill Breakdown
@@ -304,7 +304,7 @@ export const InterviewHistoryDetails = ({
             <p className="text-gray-500">[Insert Radial Chart Here]</p>
           </span>
         </div>
-        <Separator />
+        <Separator /> */}
 
         {/* Evaluation Scores Table */}
         <div className="flex flex-col justify-between space-y-6">

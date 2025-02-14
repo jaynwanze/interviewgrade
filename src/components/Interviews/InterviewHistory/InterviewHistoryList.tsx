@@ -34,7 +34,10 @@ export const InterviewHistoryList = ({
   // Calculate indexes for pagination
   const indexOfLastInterview = currentPage * interviewsPerPage;
   const indexOfFirstInterview = indexOfLastInterview - interviewsPerPage;
-  const currentInterviews = interviews.slice(indexOfFirstInterview, indexOfLastInterview);
+  const currentInterviews = interviews.slice(
+    indexOfFirstInterview,
+    indexOfLastInterview,
+  );
 
   // Handle page navigation
   const goToPage = (page: number) => {
@@ -63,7 +66,9 @@ export const InterviewHistoryList = ({
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => goToPage(currentPage - 1)}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  className={
+                    currentPage === 1 ? 'pointer-events-none opacity-50' : ''
+                  }
                 />
               </PaginationItem>
 
@@ -83,7 +88,11 @@ export const InterviewHistoryList = ({
               <PaginationItem>
                 <PaginationNext
                   onClick={() => goToPage(currentPage + 1)}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  className={
+                    currentPage === totalPages
+                      ? 'pointer-events-none opacity-50'
+                      : ''
+                  }
                 />
               </PaginationItem>
             </PaginationContent>

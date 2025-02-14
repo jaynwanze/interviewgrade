@@ -71,7 +71,7 @@ ALTER TABLE "public"."candidates" OWNER TO "postgres";
 
 CREATE TABLE "public"."employees" (
   "id" "uuid" NOT NULL,
-  "default_organization" "uuid" NOT NULL,
+  "default_organization" "uuid",
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres

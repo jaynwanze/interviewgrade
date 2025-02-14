@@ -336,7 +336,7 @@ export const purchaseProduct = async (
     console.error('Error fetching product:', productError);
     return {
       status: 'error',
-      message: 'Product not found ' + productError.message,
+      message: 'Product not found ' + productError?.message,
     };
   }
 
@@ -350,7 +350,7 @@ export const purchaseProduct = async (
     console.error('Error fetching tokens:', tokenError);
     return {
       status: 'error',
-      message: 'Tokens not found ' + tokenError.message,
+      message: 'Tokens not found ' + tokenError?.message,
     };
   }
 

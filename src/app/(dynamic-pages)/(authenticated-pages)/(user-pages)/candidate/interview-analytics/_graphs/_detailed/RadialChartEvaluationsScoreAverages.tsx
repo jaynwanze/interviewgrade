@@ -149,7 +149,7 @@ export function RadialChartEvaluationsScoreAverages({
 
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="leading-none text-muted-foreground">
-          Showing average scores for your evaluation criteria
+          Showing average scores for your skills
         </div>
       </CardFooter>
     </Card>

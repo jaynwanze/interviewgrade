@@ -1,8 +1,8 @@
 'use server';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import type { AuthProvider, SAPayload } from '@/types';
-import { toSiteURL } from '@/utils/helpers';
 import { UserType } from '@/types/userTypes';
+import { toSiteURL } from '@/utils/helpers';
 export const signUp = async (
   email: string,
   password: string,
@@ -16,8 +16,6 @@ export const signUp = async (
     options: {
       emailRedirectTo: toSiteURL('/auth/callback'),
       data: { userType },
-
-      
     },
   });
   if (error) {
@@ -88,7 +86,7 @@ export const signInWithMagicLink = async (
 
 export const signInWithProvider = async (
   provider: AuthProvider,
-   // Accept userType as a parameter
+  // Accept userType as a parameter
   next?: string,
 ): Promise<
   SAPayload<{
@@ -106,17 +104,11 @@ export const signInWithProvider = async (
       redirectTo: redirectToURL.toString(),
       skipBrowserRedirect: true,
     },
-
   });
 
   if (error) {
     return { status: 'error', message: error.message };
   }
-
-
-
-
-  
 
   const providerUrl = data.url;
 
@@ -124,11 +116,8 @@ export const signInWithProvider = async (
     status: 'success',
     data: {
       url: providerUrl,
-
-      
     },
   };
-  
 };
 
 export const resetPassword = async (email: string): Promise<SAPayload> => {

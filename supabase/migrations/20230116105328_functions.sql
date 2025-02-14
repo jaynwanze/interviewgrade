@@ -49,8 +49,6 @@ BEGIN
         --Insert into employer
         INSERT INTO public.employees(id)
         VALUES (NEW.id);
-       -- Call the function to create an organization
-         PERFORM public.handle_create_organization_for_auth_user();
     END IF;
     
     RETURN NEW;

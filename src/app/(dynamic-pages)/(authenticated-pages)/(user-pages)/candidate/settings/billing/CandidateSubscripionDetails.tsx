@@ -32,7 +32,6 @@ const activeProducts: Product[] = [
   },
 ];
 
-
 function getProductsSortedByPrice(products: Product[]) {
   return products
     .filter((product) => product.status === 'active')

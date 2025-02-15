@@ -13,9 +13,9 @@ export default function Logout() {
     router.replace('/');
   });
 
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <LoadingSpinner />
-      </div>
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <LoadingSpinner />
+    </div>
   );
 }

@@ -23,7 +23,7 @@ export const InterviewHistoryFilter: React.FC<HistoryFilterProps> = ({
 }) => {
   return (
     <>
-    <span className="text-sm text-muted-foreground">
+      <span className="text-sm text-muted-foreground">
         {counts[activeTab.toLowerCase().replace(' ', '')] || 0} results
       </span>
       <Tabs

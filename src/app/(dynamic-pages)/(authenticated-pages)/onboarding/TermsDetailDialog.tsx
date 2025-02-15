@@ -50,7 +50,6 @@ export function TermsDetailDialog({
               ante ipsum primis in faucibus orci luctus et ultrices posuere
               cubilia curae; Sed eu blandit justo. Sed dapibus tempor luctus.
             </p>
-            
           </div>
         </div>
         <DialogFooter>

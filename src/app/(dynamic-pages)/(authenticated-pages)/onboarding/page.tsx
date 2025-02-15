@@ -42,7 +42,8 @@ const getOnboardingConditions = async (userId: string) => {
     getUserProfile(userId),
     getUserType(userId),
   ]);
-  const defaultOrganizationId = userType === 'employer' ? await getDefaultOrganizationOrSet() : null;
+  const defaultOrganizationId =
+    userType === 'employer' ? await getDefaultOrganizationOrSet() : null;
 
   return {
     userProfile,

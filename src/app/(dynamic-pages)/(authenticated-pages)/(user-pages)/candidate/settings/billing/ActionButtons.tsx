@@ -30,7 +30,7 @@ export function CreateSubscriptionButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId : 'TO:DO' });
+        stripe?.redirectToCheckout({ sessionId: 'TO:DO' });
       },
     },
   );
@@ -69,7 +69,7 @@ export function StartFreeTrialButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId : 'TO:DO' });
+        stripe?.redirectToCheckout({ sessionId: 'TO:DO' });
       },
     },
   );

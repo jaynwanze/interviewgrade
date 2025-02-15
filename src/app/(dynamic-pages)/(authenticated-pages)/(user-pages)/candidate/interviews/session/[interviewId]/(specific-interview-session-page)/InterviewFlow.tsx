@@ -293,7 +293,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-        100,
+          100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');
@@ -366,7 +366,7 @@ export default function InterviewFlow({
         onClick={() => window.history.back()}
       >
         <ChevronLeft className="h-6 w-6"></ChevronLeft>
-          Leave Session
+        Leave Session
       </Button>
 
       {/* Main Cards: AIQuestionSpeaker and UserCamera */}
@@ -430,7 +430,7 @@ export default function InterviewFlow({
                         {Math.round(
                           ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
                             maxScorePerQuestion) *
-                          100,
+                            100,
                         )}
                         /100%{' '}
                         {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/

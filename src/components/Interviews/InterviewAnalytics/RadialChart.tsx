@@ -30,11 +30,13 @@ export function RadialChart({
   avgEvaluationCriteria: AvgEvaluationScores[];
 }) {
   const maxScore = 10.0;
-  const maxAngle = 360; 
-  const startAngle = 0; 
+  const maxAngle = 360;
+  const startAngle = 0;
 
   // Example overall score
-  const overallScore = parseFloat(avgEvaluationCriteria[0].avg_score.toFixed(2)); // Assume this comes dynamically
+  const overallScore = parseFloat(
+    avgEvaluationCriteria[0].avg_score.toFixed(2),
+  ); // Assume this comes dynamically
 
   // Calculate end angle
   const endAngle = (overallScore / maxScore) * maxAngle;

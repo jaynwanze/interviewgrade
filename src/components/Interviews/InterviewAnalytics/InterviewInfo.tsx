@@ -1,6 +1,6 @@
 'use client';
 
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 
 export const InterviewInfo = ({
   interviewId,
@@ -55,8 +55,7 @@ export const InterviewInfo = ({
           className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition"
         >
           <MagnifyingGlassIcon className="inline w-4 h-4 mr-1" />
-           View session history
-          
+          View session history
         </a>
       )}
     </div>

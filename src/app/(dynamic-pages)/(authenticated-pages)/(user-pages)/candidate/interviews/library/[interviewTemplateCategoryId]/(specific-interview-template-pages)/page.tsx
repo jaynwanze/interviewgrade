@@ -15,9 +15,5 @@ export default function InterviewsPage({
   const parsedParams = paramsSchema.parse(params);
   const { interviewTemplateCategoryId } = parsedParams;
 
-  return (
-    <InterviewTemplates
-    interviewMode={interviewTemplateCategoryId}
-    />
-  );
+  return <InterviewTemplates interviewMode={interviewTemplateCategoryId} />;
 }

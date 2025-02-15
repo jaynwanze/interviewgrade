@@ -1,12 +1,19 @@
-import { sendApplicationEmail } from "@/app/emails/send-application-email";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { useSAToastMutation } from "@/hooks/useSAToastMutation";
-import { Send } from "lucide-react";
-import { useState } from "react";
+import { sendApplicationEmail } from '@/app/emails/send-application-email';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
+import { useSAToastMutation } from '@/hooks/useSAToastMutation';
+import { Send } from 'lucide-react';
+import { useState } from 'react';
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -14,19 +21,23 @@ interface ShareDialogProps {
   applicationUrl: string;
 }
 
-export function ShareDialog({ isOpen, onClose, applicationUrl }: ShareDialogProps) {
-  const [email, setEmail] = useState("");
-  const [applicantName, setApplicantName] = useState("");
+export function ShareDialog({
+  isOpen,
+  onClose,
+  applicationUrl,
+}: ShareDialogProps) {
+  const [email, setEmail] = useState('');
+  const [applicantName, setApplicantName] = useState('');
   const { toast } = useToast();
 
   const { mutate, isLoading } = useSAToastMutation(sendApplicationEmail, {
-    loadingMessage: "Sending application email...",
-    successMessage: "The application link has been sent successfully.",
-    errorMessage: "Failed to send application email. Please try again. " ,
+    loadingMessage: 'Sending application email...',
+    successMessage: 'The application link has been sent successfully.',
+    errorMessage: 'Failed to send application email. Please try again. ',
     onSuccess: () => {
       onClose();
-      setEmail("");
-      setApplicantName("");
+      setEmail('');
+      setApplicantName('');
     },
   });
 
@@ -75,7 +86,7 @@ export function ShareDialog({ isOpen, onClose, applicationUrl }: ShareDialogProp
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send"}
+              {isLoading ? 'Sending...' : 'Send'}
               <Send className="ml-2 h-4 w-4" />
             </Button>
           </DialogFooter>

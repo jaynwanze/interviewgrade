@@ -194,27 +194,28 @@ export const InterviewHistoryDetails = ({
               <div className="flex items-center justify-between">
                 <span className="font-semibold">Score:</span>
                 <Badge
-                  className={`text-white ${qa.mark >=
-                      80 /
+                  className={`text-white ${
+                    qa.mark >=
+                    80 /
                       Math.floor(
                         100 / evaluation.question_answer_feedback.length,
                       )
                       ? 'bg-green-600'
                       : qa.mark >=
-                        60 /
-                        Math.floor(
-                          100 / evaluation.question_answer_feedback.length,
-                        )
+                          60 /
+                            Math.floor(
+                              100 / evaluation.question_answer_feedback.length,
+                            )
                         ? 'bg-yellow-500'
                         : qa.mark >=
-                          40 /
-                          Math.floor(
-                            100 /
-                            evaluation.question_answer_feedback.length,
-                          )
+                            40 /
+                              Math.floor(
+                                100 /
+                                  evaluation.question_answer_feedback.length,
+                              )
                           ? 'bg-orange-500'
                           : 'bg-red-500'
-                    }`}
+                  }`}
                 >
                   {qa.mark}/
                   {Math.floor(100 / evaluation.question_answer_feedback.length)}
@@ -383,7 +384,7 @@ export const InterviewHistoryDetails = ({
         <>
           {/* Header Section */}
           <div className="flex flex-col md:flex-row items-start justify-between gap-4 w-full">
-          {/* Back Button */}
+            {/* Back Button */}
             <button
               className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
               onClick={() => window.history.back()}

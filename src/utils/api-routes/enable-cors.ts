@@ -12,10 +12,7 @@ export const enableCors = (req: NextApiRequest, res: NextApiResponse) => {
   if (req.headers.origin && allowedOrigins.includes(req.headers.origin)) {
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   } else {
-    res.setHeader(
-      'Access-Control-Allow-Origin',
-      'https://interviewgrade.io',
-    );
+    res.setHeader('Access-Control-Allow-Origin', 'https://interviewgrade.io');
   }
 
   res.setHeader(

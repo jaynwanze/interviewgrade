@@ -1,17 +1,17 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { ArrowUpRight } from "lucide-react"
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -19,26 +19,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table';
 
 interface Column {
-  key: string
-  label: string
-  className?: string
+  key: string;
+  label: string;
+  className?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render?: (value: any, row: any) => React.ReactNode
+  render?: (value: any, row: any) => React.ReactNode;
 }
 
 interface ListTableProps {
-  title: string
-  description: string
-  columns: Column[]
+  title: string;
+  description: string;
+  columns: Column[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[]
-  viewAllLink?: string
+  data: any[];
+  viewAllLink?: string;
 }
 
-export  function ListTable({ title, description, columns, data, viewAllLink }: ListTableProps) {
+export function ListTable({
+  title,
+  description,
+  columns,
+  data,
+  viewAllLink,
+}: ListTableProps) {
   return (
     <Card className="xl:col-span-2">
       <CardHeader className="flex flex-row items-center">
@@ -71,7 +77,9 @@ export  function ListTable({ title, description, columns, data, viewAllLink }: L
               <TableRow key={rowIndex}>
                 {columns.map((column) => (
                   <TableCell key={column.key} className={column.className}>
-                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                    {column.render
+                      ? column.render(row[column.key], row)
+                      : row[column.key]}
                   </TableCell>
                 ))}
               </TableRow>
@@ -80,5 +88,5 @@ export  function ListTable({ title, description, columns, data, viewAllLink }: L
         </Table>
       </CardContent>
     </Card>
-  )
+  );
 }

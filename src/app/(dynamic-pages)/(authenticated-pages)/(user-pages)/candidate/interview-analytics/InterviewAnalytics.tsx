@@ -192,11 +192,9 @@ export default function InterviewAnalyticsPage() {
         {/* Key Analytics Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-5 justify-center items-center">
           {/* Latest Interview Summary */}
-            <div className="flex flex-col justify-center items-center h-full md:col-span-1">
-            <InterviewLatestCard
-              latestInterview={overview?.latestInterview}
-            />
-            </div>
+          <div className="flex flex-col justify-center items-center h-full md:col-span-1">
+            <InterviewLatestCard latestInterview={overview?.latestInterview} />
+          </div>
           {/* Overview Graph */}
           <div className="flex flex-col justify-center items-center h-full md:col-span-2">
             <InterviewGraphsOverview

@@ -18,11 +18,9 @@ export function MobileSidebarShell({
   }
   return (
     <Sheet open={isVisible} onOpenChange={setVisibility}>
-       <SheetTitle>
-  <VisuallyHidden.Root>
-    Menu
-  </VisuallyHidden.Root>
-</SheetTitle>
+      <SheetTitle>
+        <VisuallyHidden.Root>Menu</VisuallyHidden.Root>
+      </SheetTitle>
       <SheetContent side="left">{children}</SheetContent>
     </Sheet>
   );

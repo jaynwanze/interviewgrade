@@ -183,11 +183,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         formData.append('model', 'whisper-1');
         whisperFinalTranscript.current =
           await transcribeInterviewAudio(formData);
-      }
-      else {
+      } else {
         // Handle error when audio conversion fails
         //create a way for them to retry question if it fails
-        console.error('Audio conversion failed - returning error message to display to user');
+        console.error(
+          'Audio conversion failed - returning error message to display to user',
+        );
         isFetchingSpecificFeedback(false);
         return;
       }

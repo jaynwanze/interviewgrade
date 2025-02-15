@@ -57,7 +57,7 @@ export const InterviewFilters: React.FC<FiltersProps> = ({
       <div className="items-center space-x-2 mb-5 dark:bg:gray-900">
         <label className="font-medium">Date Range:</label>
         <DatePicker
-        className='dark:bg-gray-600'
+          className="dark:bg-gray-600"
           selected={startDate}
           onChange={(date) => setStartDate(date)}
           selectsStart

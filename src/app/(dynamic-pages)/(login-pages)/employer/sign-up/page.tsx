@@ -17,10 +17,12 @@ export default function SignupPage({
   return (
     <>
       <AuthLayout link="/candidate/sign-up" text="Sign Up as Candidate">
-        <SignUp next={next} nextActionType={nextActionType} userType={userType} />
+        <SignUp
+          next={next}
+          nextActionType={nextActionType}
+          userType={userType}
+        />
       </AuthLayout>
-      
     </>
-    
   );
 }

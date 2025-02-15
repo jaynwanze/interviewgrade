@@ -16,8 +16,12 @@ export default function EmployerDashboard() {
       <h1 className="text-2xl font-bold mb-4">Employer Dashboard</h1>
       {stats ? (
         <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 shadow bg-white">Your Tokens: {stats.tokensLeft}</div>
-          <div className="p-4 shadow bg-white">Active Searches: {stats.activeSearches}</div>
+          <div className="p-4 shadow bg-white">
+            Your Tokens: {stats.tokensLeft}
+          </div>
+          <div className="p-4 shadow bg-white">
+            Active Searches: {stats.activeSearches}
+          </div>
           <div className="p-4 shadow bg-white">
             New Candidates: {stats.newCandidatesThisWeek}
           </div>

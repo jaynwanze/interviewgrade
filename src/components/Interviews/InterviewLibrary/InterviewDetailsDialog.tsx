@@ -17,7 +17,12 @@ import {
   InterviewTemplate,
   PracticeTemplate,
 } from '@/types';
-import { FileWarning, LucideMessageSquareWarning, MessageCircleWarning, MessageCircleWarningIcon } from 'lucide-react';
+import {
+  FileWarning,
+  LucideMessageSquareWarning,
+  MessageCircleWarning,
+  MessageCircleWarningIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

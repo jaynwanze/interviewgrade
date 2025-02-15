@@ -24,13 +24,17 @@ const AvatarModel: React.FC<{ glbUrl: string; isSpeaking: boolean }> = ({
     if (animations.length && group.current) {
       mixer.current = new AnimationMixer(group.current);
       // Assume the first animation is 'Idle' and the second is 'Speak'
-      const idleClip = animations.find((clip) => clip.name.toLowerCase().includes('idle'));
-      const speakClip = animations.find((clip) => clip.name.toLowerCase().includes('speak'));
-      
+      const idleClip = animations.find((clip) =>
+        clip.name.toLowerCase().includes('idle'),
+      );
+      const speakClip = animations.find((clip) =>
+        clip.name.toLowerCase().includes('speak'),
+      );
+
       if (idleClip && speakClip) {
         const idleAction = mixer.current.clipAction(idleClip, group.current);
         const speakAction = mixer.current.clipAction(speakClip, group.current);
-        
+
         idleAction.play(); // Start with idle animation
         currentAction.current = 'Idle';
       } else {
@@ -46,8 +50,12 @@ const AvatarModel: React.FC<{ glbUrl: string; isSpeaking: boolean }> = ({
   useEffect(() => {
     if (!mixer.current || animations.length === 0) return;
 
-    const idleClip = animations.find((clip) => clip.name.toLowerCase().includes('idle'));
-    const speakClip = animations.find((clip) => clip.name.toLowerCase().includes('speak'));
+    const idleClip = animations.find((clip) =>
+      clip.name.toLowerCase().includes('idle'),
+    );
+    const speakClip = animations.find((clip) =>
+      clip.name.toLowerCase().includes('speak'),
+    );
 
     if (idleClip && speakClip) {
       const idleAction = mixer.current.clipAction(idleClip, group.current);
@@ -75,7 +83,7 @@ const AvatarModel: React.FC<{ glbUrl: string; isSpeaking: boolean }> = ({
 export const Avatar3D: React.FC<Avatar3DProps> = ({ glbUrl, isSpeaking }) => {
   return (
     <Canvas
-      camera={{ position: [0, 1, 10 ], fov: 25 }}
+      camera={{ position: [0, 1, 10], fov: 25 }}
       style={{ width: 400, height: 400 }}
     >
       <ambientLight intensity={0.5} />

@@ -118,7 +118,6 @@ const chartConfig = {
     label: 'Interviews',
     color: 'hsl(var(--chart-1))',
   },
-
 } satisfies ChartConfig;
 
 export function BarChartInteractive() {

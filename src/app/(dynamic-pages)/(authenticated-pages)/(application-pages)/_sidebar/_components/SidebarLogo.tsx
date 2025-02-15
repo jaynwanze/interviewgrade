@@ -32,7 +32,9 @@ export function SidebarLogoAndToggle() {
           )}
         />
 
-        <T.P className="text-sm font-medium text-foreground">InterviewGrade</T.P>
+        <T.P className="text-sm font-medium text-foreground">
+          InterviewGrade
+        </T.P>
       </Link>
 
       <SidebarClose />

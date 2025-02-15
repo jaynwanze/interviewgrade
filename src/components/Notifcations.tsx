@@ -42,7 +42,11 @@ export default function Notifications() {
             <p className="text-sm text-gray-500">No new notifications.</p>
           ) : (
             notifications
-              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+              .sort(
+                (a, b) =>
+                  new Date(b.timestamp).getTime() -
+                  new Date(a.timestamp).getTime(),
+              )
               .map((notification) => (
                 <div
                   key={notification.id}

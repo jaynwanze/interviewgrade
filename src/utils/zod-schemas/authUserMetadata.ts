@@ -9,4 +9,3 @@ export const authUserMetadataSchema = z
   .passthrough();
 
 export type AuthUserMetadata = z.infer<typeof authUserMetadataSchema>;
-

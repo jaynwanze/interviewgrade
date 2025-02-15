@@ -18,7 +18,7 @@ import {
 } from '@/data/auth/auth';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import { supabaseUserClientComponentClient } from '@/supabase-clients/user/supabaseUserClientComponentClient';
-  import type { AuthProvider } from '@/types';
+import type { AuthProvider } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -138,7 +138,6 @@ export function Login({
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>
               <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
-              
             </TabsList>
             <TabsContent value="password">
               <Card className="border-none shadow-none">
@@ -155,10 +154,8 @@ export function Login({
                     loginUrl="/employer/login"
                     onSubmit={(data) => {
                       passwordMutation.mutate(data);
-                      
                     }}
                     view="sign-in"
-                    
                   />
                 </CardContent>
               </Card>

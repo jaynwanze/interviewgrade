@@ -14,7 +14,9 @@ import { Briefcase, BookOpen } from 'lucide-react';
 
 export const InterviewModeCard = (interviewMode: InterviewMode) => {
   const interviewModeNameDisplay: string =
-    interviewMode.name === INTERVIEW_INTERVIEW_MODE ? 'Mock Interview' : 'Practice Mode';
+    interviewMode.name === INTERVIEW_INTERVIEW_MODE
+      ? 'Mock Interview'
+      : 'Practice Mode';
 
   const interviewDescription: string =
     interviewMode.name === INTERVIEW_INTERVIEW_MODE
@@ -34,7 +36,11 @@ export const InterviewModeCard = (interviewMode: InterviewMode) => {
       : 'bg-green-500 text-white';
 
   const modeIcon =
-    interviewMode.name === INTERVIEW_INTERVIEW_MODE ? <Briefcase className="w-6 h-6" /> : <BookOpen className="w-6 h-6" />;
+    interviewMode.name === INTERVIEW_INTERVIEW_MODE ? (
+      <Briefcase className="w-6 h-6" />
+    ) : (
+      <BookOpen className="w-6 h-6" />
+    );
 
   return (
     <>
@@ -45,7 +51,9 @@ export const InterviewModeCard = (interviewMode: InterviewMode) => {
         <CardHeader className="flex flex-col items-center">
           <div className="flex items-center space-x-2">
             {modeIcon}
-            <CardTitle className="text-lg font-semibold">{interviewModeNameDisplay}</CardTitle>
+            <CardTitle className="text-lg font-semibold">
+              {interviewModeNameDisplay}
+            </CardTitle>
           </div>
           <Badge className={`mt-2 px-3 py-1 text-sm ${modeBadge}`}>
             {interviewModeNameDisplay}

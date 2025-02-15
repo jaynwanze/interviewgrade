@@ -121,24 +121,24 @@ export function InterviewTemplates({
         />
       </div>
       <Separator className="my-6" />
-        {filteredTemplates.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center items-center">
-            {filteredTemplates.map((template) => (
-              <InterviewCardTemplate
-                key={template.id}
-                selectedTemplate={template}
-                interviewMode={interviewMode as InterviewModeType}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="w-full max-w-lg border rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-900">
-            <h3 className="text-xl font-semibold">No interviews found</h3>
-            <p className="text-gray-600 mt-2">
-              No results for this search. Please check back later.
-            </p>
-          </div>
-        )}
-      </div>
+      {filteredTemplates.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center items-center">
+          {filteredTemplates.map((template) => (
+            <InterviewCardTemplate
+              key={template.id}
+              selectedTemplate={template}
+              interviewMode={interviewMode as InterviewModeType}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="w-full max-w-lg border rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-900">
+          <h3 className="text-xl font-semibold">No interviews found</h3>
+          <p className="text-gray-600 mt-2">
+            No results for this search. Please check back later.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

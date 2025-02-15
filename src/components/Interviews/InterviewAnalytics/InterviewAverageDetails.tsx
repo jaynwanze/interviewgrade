@@ -29,8 +29,8 @@ export const InterviewAverageDetails = ({
         </Card>
         {/* Overall Grade + Best Skill Badge */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 ">
-            <Trophy className="w-10 h-10 text-yellow-500" />
-            <CardTitle className="mt-2">Current Average Grade</CardTitle>
+          <Trophy className="w-10 h-10 text-yellow-500" />
+          <CardTitle className="mt-2">Current Average Grade</CardTitle>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.avg_overall_grade.toFixed(2)}%
@@ -48,8 +48,8 @@ export const InterviewAverageDetails = ({
 
         {/* Total Sessions Count */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
-            <ClipboardList className="w-10 h-10 text-blue-500" />
-            <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
+          <ClipboardList className="w-10 h-10 text-blue-500" />
+          <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.total_interviews || 0}
@@ -60,8 +60,8 @@ export const InterviewAverageDetails = ({
 
         {/* Average Mark Per Question */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
-            <Star className="w-10 h-10 text-purple-500" />
-            <CardTitle className="mt-2">Average Score Per Question</CardTitle>
+          <Star className="w-10 h-10 text-purple-500" />
+          <CardTitle className="mt-2">Average Score Per Question</CardTitle>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {(

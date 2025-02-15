@@ -157,7 +157,7 @@ export const getPracticeEvaluationCriteriasByInterviewEvalCriteria = async (
   if (!data) {
     return [];
   }
-  
+
   return data
     .filter((item) => item.evaluation_criteria !== null)
     .flatMap((item) => item.evaluation_criteria);

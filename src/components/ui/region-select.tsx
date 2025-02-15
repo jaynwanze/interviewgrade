@@ -47,7 +47,6 @@ function RegionSelect({
     // const regions = countryRegionData.find(
     //   (country: CountryRegion) => country.countryShortCode === countryCode,
     // );
-
     // if (regions) {
     //   setRegions(
     //     filterRegions(regions.regions, priorityOptions, whitelist, blacklist),

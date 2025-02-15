@@ -5,8 +5,6 @@ import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
-
-
 export const EmailAndPassword = ({
   onSubmit,
   view,

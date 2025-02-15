@@ -3,5 +3,5 @@
 import PurchaseTokens from './PurchaseToken';
 
 export default function PurchaseTokenPage() {
-    return <PurchaseTokens />;
+  return <PurchaseTokens />;
 }

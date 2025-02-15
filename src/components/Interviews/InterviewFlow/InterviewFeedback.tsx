@@ -94,8 +94,10 @@ export const InterviewFeedback: FC<InterviewFeedbackProps> = ({
                         </p>
                         <p className="mb-2">
                           <strong>Mark:</strong> {qa.mark}/
-                          {(100 / (feedback.question_answer_feedback.length)).toFixed(2)}
-                          </p>
+                          {(
+                            100 / feedback.question_answer_feedback.length
+                          ).toFixed(2)}
+                        </p>
                         <p>
                           <strong>Feedback:</strong> {qa.feedback}
                         </p>

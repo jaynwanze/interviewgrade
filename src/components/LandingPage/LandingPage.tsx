@@ -21,7 +21,7 @@ export const LandingPage = () => {
       <Pricing />
       <FAQ />
       <CTA /> */}
-      <Footer /> 
+      <Footer />
     </main>
   );
 };

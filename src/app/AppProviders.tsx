@@ -2,6 +2,7 @@
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import React, { Suspense } from 'react';
 import { Toaster as HotToaster } from 'react-hot-toast';
@@ -27,15 +28,12 @@ export function AppProviders({
 }) {
   return (
     <>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-      >
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <NotificationsProvider>
           <QueryClientProvider client={queryClient}>
             {children}
             <Analytics />
+            <SpeedInsights />
             <ReactNoSSR>
               <SonnerToaster theme={'light'} />
               <HotToaster />

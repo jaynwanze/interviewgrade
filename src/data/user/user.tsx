@@ -576,9 +576,9 @@ export async function createCandidateCheckoutSessionAction({
     //       metadata: {},
     //     },
     //     success_url: toSiteURL(
-    //       `/organization/${organizationId}/settings/billing`,
+    //       `/employer/${organizationId}/settings/billing`,
     //     ),
-    //     cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+    //     cancel_url: toSiteURL(`/employer/${organizationId}/settings/billing`),
     //   });
 
     //   return stripeSession.id;

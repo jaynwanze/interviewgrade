@@ -1,7 +1,7 @@
 // https://github.com/vercel/next.js/issues/58272
 import { T } from '@/components/ui/Typography';
 import { Badge } from '@/components/ui/badge';
-// import { getOrganizationTitle } from '@/data/user/organizations';
+import { getOrganizationTitle } from '@/data/user/organizations';
 import { UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -14,8 +14,7 @@ const paramsSchema = z.object({
 export async function generateMetadata({ params }: { params: unknown }) {
   const parsedParams = paramsSchema.parse(params);
   const { organizationId } = parsedParams;
-  // const organizationTitle = await getOrganizationTitle(organizationId);
-  const organizationTitle = 'TO:DO';
+  const organizationTitle = await getOrganizationTitle(organizationId);
 
   return {
     title: `${organizationTitle} | Organization | InterviewGrade`,
@@ -24,8 +23,7 @@ export async function generateMetadata({ params }: { params: unknown }) {
 }
 
 async function Title({ organizationId }: { organizationId: string }) {
-  // const title = await getOrganizationTitle(organizationId);
-  const title = 'TO:DO';
+  const title = await getOrganizationTitle(organizationId);
   // className="gap-2 ring-0 bg-purple-50 rounded-full dark:bg-slate-800 text-purple-600 font-medium dark:text-slate-400"
 
   return (
@@ -47,7 +45,7 @@ export default async function OrganizationNavbar({
   const { organizationId } = paramsSchema.parse(params);
   return (
     <div className="flex items-center">
-      <Link href={`/organization/${organizationId}`}>
+      <Link href={`/employer/${organizationId}`}>
         <span className="space-x-2 flex items-center">
           <Suspense fallback={<span>Loading...</span>}>
             <Title organizationId={organizationId} />

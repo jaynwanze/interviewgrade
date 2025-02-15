@@ -80,7 +80,7 @@ export function ProFeatureGateDialog({
           workspace and more.
         </Typography.P>
         <Link
-          href={`/organization/${organizationId}/settings/billing`}
+          href={`/employer/${organizationId}/settings/billing`}
           className="w-full"
           onClick={() => setIsDialogOpen(false)}
         >

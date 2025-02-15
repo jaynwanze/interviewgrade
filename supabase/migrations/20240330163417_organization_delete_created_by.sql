@@ -22,6 +22,7 @@ USING (true);
 
 
 DROP TRIGGER on_organization_created_create_owner ON public.organizations;
+DROP TRIGGER on_public_employee_created_create_team ON public.employees;
 
 
 -- Drop a function

@@ -23,6 +23,7 @@ export const createOrganization = async (
   const { error } = await supabaseClient.from('organizations').insert({
     title: name,
     id: organizationId,
+    created_by: user.id,
   });
 
   if (error) {
@@ -203,7 +204,7 @@ export const updateOrganizationTitle = async (
     throw error;
   }
 
-  revalidatePath(`/organization/${organizationId}`);
+  revalidatePath(`/employer/${organizationId}`);
   return data;
 };
 
@@ -303,7 +304,7 @@ export const updateOrganizationTitle = async (
 //   if (!customer) throw Error('Could not get customer');
 //   const { url } = await stripe.billingPortal.sessions.create({
 //     customer,
-//     return_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+//     return_url: toSiteURL(`/employer/${organizationId}/settings/billing`),
 //   });
 
 //   return url;
@@ -353,9 +354,9 @@ export const updateOrganizationTitle = async (
 //         metadata: {},
 //       },
 //       success_url: toSiteURL(
-//         `/organization/${organizationId}/settings/billing`,
+//         `/employer/${organizationId}/settings/billing`,
 //       ),
-//       cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+//       cancel_url: toSiteURL(`/employer/${organizationId}/settings/billing`),
 //     });
 
 //     return stripeSession.id;
@@ -377,9 +378,9 @@ export const updateOrganizationTitle = async (
 //         metadata: {},
 //       },
 //       success_url: toSiteURL(
-//         `/organization/${organizationId}/settings/billing`,
+//         `/employer/${organizationId}/settings/billing`,
 //       ),
-//       cancel_url: toSiteURL(`/organization/${organizationId}/settings/billing`),
+//       cancel_url: toSiteURL(`/employer/${organizationId}/settings/billing`),
 //     });
 
 //     return stripeSession.id;

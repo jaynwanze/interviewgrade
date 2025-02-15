@@ -30,7 +30,7 @@ export async function SubscriptionCardSmall({
     return (
       <HoverCard>
         <HoverCardTrigger asChild>
-          <Link href={`/candidate/settings/billing`}>
+          <Link href={`/employer/${organizationId}/settings/billing`}>
             <div className="group cursor-pointer flex flex-col gap-1 items-start p-2 py-2 pb-3 border w-full rounded-lg">
               <T.P className="font-semibold ">{title} Pro</T.P>
               {sidenote ? (
@@ -50,7 +50,7 @@ export async function SubscriptionCardSmall({
         <HoverCardTrigger asChild>
           <Link
             className="w-full cursor-pointer flex mr-2 gap-2 items-center mt-1 rounded-lg"
-            href={`/candidate/settings/billing`}
+            href={`/employer/${organizationId}/settings/billing`}
           >
             <Button variant="default" className="w-full">
               <ArrowUpRight className="h-5 w-5 mr-2 " />

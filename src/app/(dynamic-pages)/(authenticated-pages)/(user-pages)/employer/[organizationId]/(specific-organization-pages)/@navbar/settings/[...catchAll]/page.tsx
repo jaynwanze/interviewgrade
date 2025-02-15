@@ -17,7 +17,7 @@ export default function OrganizationSettingsNavbar({
   return (
     <div className={cn('hidden lg:block', 'relative ')}>
       <T.P className="my-0">
-        <Link href={`/organization/${organizationId}`}>
+        <Link href={`/employer/${organizationId}`}>
           <span className="space-x-2 flex items-center">
             <ArrowLeftIcon />
             <span>Home</span>

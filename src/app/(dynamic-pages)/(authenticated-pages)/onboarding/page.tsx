@@ -35,7 +35,6 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
   await setDefaultOrganization(firstOrganization.id);
 
   return firstOrganization.id;
-  return null;
 }
 
 const getOnboardingConditions = async (userId: string) => {
@@ -43,9 +42,11 @@ const getOnboardingConditions = async (userId: string) => {
     getUserProfile(userId),
     getUserType(userId),
   ]);
+  const defaultOrganizationId = userType === 'employer' ? await getDefaultOrganizationOrSet() : null;
 
   return {
     userProfile,
+    defaultOrganizationId,
     userType,
   };
 };

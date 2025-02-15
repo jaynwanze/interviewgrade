@@ -448,30 +448,37 @@ ADD CONSTRAINT "interview_answers_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."job_application_tracker"
 ADD CONSTRAINT "job_application_tracker_pkey" PRIMARY KEY ("id");
+
+--
+-- Name: organizations_private_info organizations_private_info_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."organizations_private_info"
+ADD CONSTRAINT "organizations_private_info_pkey" PRIMARY KEY ("id");
 --
 -- Name: organization_join_invitations organization_join_invitations_invitee_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
 --
 
 ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_join_invitations_invitee_user_id_fkey" FOREIGN KEY ("invitee_user_id") REFERENCES "public"."user_profiles"("id");
+ADD CONSTRAINT "organization_join_invitations_invitee_user_id_fkey" FOREIGN KEY ("invitee_user_id") REFERENCES "public"."user_profiles"("id") ON DELETE CASCADE;
 --
 -- Name: organization_join_invitations organization_join_invitations_inviter_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
 --
 
 ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_join_invitations_inviter_user_id_fkey" FOREIGN KEY ("inviter_user_id") REFERENCES "public"."user_profiles"("id");
+ADD CONSTRAINT "organization_join_invitations_inviter_user_id_fkey" FOREIGN KEY ("inviter_user_id") REFERENCES "public"."user_profiles"("id") ON DELETE CASCADE;
 --
 -- Name: organization_join_invitations organization_join_invitations_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
 --
 
 ALTER TABLE ONLY "public"."organization_join_invitations"
-ADD CONSTRAINT "organization_join_invitations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
+ADD CONSTRAINT "organization_join_invitations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
 --
 -- Name: organization_members organization_members_member_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."organization_members"
-ADD CONSTRAINT "organization_members_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "public"."user_profiles"("id");
+ADD CONSTRAINT "organization_members_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "public"."user_profiles"("id") ON DELETE CASCADE;
 --
 -- Name: organization_members organization_members_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -489,20 +496,20 @@ ADD CONSTRAINT "organizations_created_by_fkey" FOREIGN KEY ("created_by") REFERE
 --
 
 ALTER TABLE ONLY "public"."organizations_private_info"
-ADD CONSTRAINT "organizations_private_info_id_fkey" FOREIGN KEY ("id") REFERENCES "public"."organizations"("id");
+ADD CONSTRAINT "organizations_private_info_id_fkey" FOREIGN KEY ("id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
 --
 -- Name: subscriptions subscriptions_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."subscriptions"
-ADD CONSTRAINT "subscriptions_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
+ADD CONSTRAINT "subscriptions_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
 
 --
 -- Name: user_profiles user_profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."user_profiles"
-ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 --
 -- Name: employees employee_default_organization_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

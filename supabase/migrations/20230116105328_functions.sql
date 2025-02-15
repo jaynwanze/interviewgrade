@@ -52,9 +52,6 @@ BEGIN
     END IF;
     
     RETURN NEW;
-EXCEPTION WHEN others THEN
-    RAISE NOTICE 'Error in handle_auth_user_created: %', SQLERRM;
-    RETURN NULL;
 END;
 $$;
 

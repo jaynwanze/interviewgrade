@@ -235,7 +235,7 @@ export type Database = {
       }
 
       organization_join_invitations: {
-        row: {
+        Row: {
           Id: string
           invited_user_id: string
           status: PublicSchema["Enums"]["organization_join_invitation_status"]

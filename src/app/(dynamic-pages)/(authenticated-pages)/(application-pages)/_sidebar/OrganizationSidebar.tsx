@@ -11,6 +11,8 @@ import {
   Settings,
   UserRound,
   Building2,
+  Search,
+  Heart,
 } from 'lucide-react';
 
 import { Suspense } from 'react';
@@ -43,17 +45,32 @@ async function OrganizationSidebarInternal({
               href={`/employer/${organizationId}`}
               icon={<Home className="h-5 w-5" />}
             />
-            <SidebarLink
+            {/* <SidebarLink
               label="Interviews"
               href={`/employer/${organizationId}/interviews`}
               icon={<Building2 className="h-5 w-5" />}
+            /> */}
+              <SidebarLink
+              label="Search"
+              href={`/employer/${organizationId}/search`}
+              icon={<Search className="h-5 w-5" />}
+            />
+            <SidebarLink
+              label="Candidates"
+              href={`/employer/${organizationId}/candidates`}
+              icon={<UserRound className="h-5 w-5" />}
+            />
+            <SidebarLink
+              label="Favourites"
+              href={`/employer/${organizationId}/favorites`}
+              icon={<Heart className="h-5 w-5" />}
             />
             <SidebarLink
               label="Settings"
               href={`/employer/${organizationId}/settings`}
               icon={<Settings className="h-5 w-5" />}
             />
-            <SidebarLink
+            {/* <SidebarLink
               label="Members"
               href={`/employer/${organizationId}/settings/members`}
               icon={<UserRound className="h-5 w-5" />}
@@ -62,7 +79,7 @@ async function OrganizationSidebarInternal({
               label="Billing"
               href={`/employer/${organizationId}/settings/billing`}
               icon={<DollarSign className="h-5 w-5" />}
-            />
+            /> */}
           </div>
           {/* <TeamsList organizationId={organizationId} /> */}
         </div>

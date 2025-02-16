@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { z } from 'zod';
 import { OrganizationPageHeading } from './OrganizationPageHeading';
 import { OrganizationGraphs } from './_graphs/OrganizationGraphs';
+import EmployerDashboard from './EmployerDashboard';
 const paramsSchema = z.object({
   organizationId: z.coerce.string(),
 });
@@ -32,7 +33,7 @@ export default async function OrganizationPage({
 
       <div>
         <Suspense>
-          <OrganizationGraphs />
+          <EmployerDashboard />
         </Suspense>
       </div>
     </div>

@@ -1,14 +1,29 @@
 'use client';
 import { useState } from 'react';
 
+const mockCandidates = [
+  { id: 'c1', name: 'Alice Anderson', skill: 'Communication' },
+  { id: 'c2', name: 'Bob Brown', skill: 'Problem Solving' },
+  { id: 'c3', name: 'Charlie Davis', skill: 'Conflict Resolution' },
+];
+
 export default function SearchCandidatePage() {
   const [keyword, setKeyword] = useState('');
   const [results, setResults] = useState<any[]>([]);
 
-  async function handleSearch() {
-    // call your backend or Supabase function
-    // e.g. const data = await searchCandidates(keyword);
-    // setResults(data);
+  // async function handleSearch() {
+  //   // call your backend or Supabase function
+  //   // e.g. const data = await searchCandidates(keyword);
+  //   // setResults(data);
+  // }
+
+  function handleSearch() {
+    // Very naive mock search:
+    const filtered = mockCandidates.filter((c) => {
+      const lower = c.name.toLowerCase() + ' ' + c.skill.toLowerCase();
+      return lower.includes(keyword.toLowerCase());
+    });
+    setResults(filtered);
   }
 
   return (

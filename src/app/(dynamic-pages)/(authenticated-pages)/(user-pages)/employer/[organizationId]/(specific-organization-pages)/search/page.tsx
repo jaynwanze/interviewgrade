@@ -1,5 +1,7 @@
+'use client';
+
 import SearchCandidatePage from './SearchCandidatePage';
 
-const SearchPage = () => {
+export default function SearchPage() {
   return <SearchCandidatePage />;
 };

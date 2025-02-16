@@ -68,12 +68,30 @@ CREATE TABLE "public"."candidates" (
   "stripe_customer_id" character varying
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";
+--
+-- Name: employees; Type: TABLE; Schema: public; Owner: postgres
+--
 
 CREATE TABLE "public"."employees" (
   "id" "uuid" NOT NULL,
   "default_organization" "uuid",
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
+
+ALTER TABLE "public"."employees" OWNER TO "postgres";
+--
+-- Name: employee_candidate_unlocks employee_candidates_unlocks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+CREATE TABLE "public"."employeee_candidate_unlocks"
+(
+  "employee_id" "uuid" NOT NULL,
+  "candidate_id" "uuid" NOT NULL,
+  "created_at " timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+ALTER TABLE "public"."employees" OWNER TO "postgres";
+--
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -359,6 +377,12 @@ ADD CONSTRAINT "candidate_pkey" PRIMARY KEY ("id");
 ALTER TABLE ONLY "public"."employees"
 ADD CONSTRAINT "employees_pkey" PRIMARY KEY ("id");
 --
+-- Name: employee_candidate_unlocks employee_candidate_unlocks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."employee_candidate_unlocks"
+ADD CONSTRAINT "employee_candidate_unlocks_pkey" PRIMARY KEY ("employee_id", "candidate_id");
+--
 -- Name: products product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -535,6 +559,18 @@ ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "to
 ALTER TABLE ONLY "public"."candidates"
 ADD CONSTRAINT "candidate_subscription_id_fkey" FOREIGN KEY ("subscription_id") REFERENCES "subscriptions"("id") ON DELETE CASCADE;
 
+--
+-- Name: employee_candidate_unlocks employee_candidate_unlocks_employee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."employee_candidate_unlocks"
+ADD CONSTRAINT "employee_candidate_unlocks_employee_id_fkey" FOREIGN KEY ("employee_id") REFERENCES "employees"("id") ON DELETE CASCADE;
+--
+-- Name: employee_candidate_unlocks employee_candidate_unlocks_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."employee_candidate_unlocks"
+ADD CONSTRAINT "employee_candidate_unlocks_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "candidates"("id") ON DELETE CASCADE;
 --
 -- Name: interviews interviews_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

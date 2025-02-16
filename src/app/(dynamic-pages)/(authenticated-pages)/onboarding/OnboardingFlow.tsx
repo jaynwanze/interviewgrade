@@ -1,4 +1,5 @@
 'use client';
+import { CandidatePreferences } from '@/components/Employee/CandidatePreferences';
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
 import {
@@ -197,10 +198,10 @@ export function ProfileUpdate({
                       hasImageLoaded
                         ? undefined
                         : {
-                            duration: 0.5,
-                            repeat: Number.POSITIVE_INFINITY,
-                            repeatType: 'reverse',
-                          }
+                          duration: 0.5,
+                          repeat: Number.POSITIVE_INFINITY,
+                          repeatType: 'reverse',
+                        }
                     }
                     onLoad={() => {
                       setHasImageLoaded(true);
@@ -335,7 +336,12 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   );
 }
 
-type FLOW_STATE = 'TERMS' | 'PROFILE' | 'ORGANIZATION' | 'COMPLETE';
+type FLOW_STATE =
+  | 'TERMS'
+  | 'PROFILE'
+  | 'ORGANIZATION'
+  | 'CANDIDATE_PREFS'
+  | 'COMPLETE';
 
 type UserOnboardingFlowProps = {
   userProfile: Table<'user_profiles'>;
@@ -352,6 +358,7 @@ function getInitialFlowState(
     onboardingHasAcceptedTerms,
     onboardingHasCompletedProfile,
     onboardingHasCreatedOrganization,
+    onboardingHasSetCandidatePrefs,
   } = onboardingStatus;
 
   if (!onboardingHasAcceptedTerms && flowStates.includes('TERMS')) {
@@ -368,7 +375,12 @@ function getInitialFlowState(
   ) {
     return 'ORGANIZATION';
   }
-
+  if (
+    !onboardingHasSetCandidatePrefs &&
+    flowStates.includes('CANDIDATE_PREFS')
+  ) {
+    return 'CANDIDATE_PREFS';
+  }
   return 'COMPLETE';
 }
 
@@ -380,6 +392,7 @@ function getAllFlowStates(
     onboardingHasAcceptedTerms,
     onboardingHasCompletedProfile,
     onboardingHasCreatedOrganization,
+    onboardingHasSetCandidatePrefs,
   } = onboardingStatus;
   const flowStates: FLOW_STATE[] = [];
   if (!onboardingHasAcceptedTerms) {
@@ -390,6 +403,9 @@ function getAllFlowStates(
   }
   if (!onboardingHasCreatedOrganization && userType === 'employer') {
     flowStates.push('ORGANIZATION');
+  }
+  if (!onboardingHasSetCandidatePrefs && userType === 'employer') {
+    flowStates.push('CANDIDATE_PREFS');
   }
   flowStates.push('COMPLETE');
   return flowStates;
@@ -442,6 +458,10 @@ export function UserOnboardingFlow({
       )}
       {currentStep === 'ORGANIZATION' && (
         <OrganizationCreation onSuccess={nextStep} />
+      )}
+       {/* NEW STEP */}
+       {currentStep === 'CANDIDATE_PREFS' && (
+        <CandidatePreferences onSuccess={nextStep} />
       )}
     </>
   );

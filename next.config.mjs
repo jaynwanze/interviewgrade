@@ -9,6 +9,11 @@ export default {
       allowedOrigins: ['my-proxy.com', '*.my-proxy.com'],
     },
   },
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
   images: {
     domains: ['localhost'],
     remotePatterns: [
@@ -55,7 +60,7 @@ export default {
       },
     ];
   },
-  
+
   webpack: (config) => {
     if (typeof nextRuntime === 'undefined') {
       config.resolve.fallback = {

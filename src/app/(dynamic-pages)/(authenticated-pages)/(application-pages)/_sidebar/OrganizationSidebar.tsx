@@ -1,18 +1,13 @@
-import { ProFeatureGateDialog } from '@/components/ProFeatureGateDialog';
-import { SubscriptionCardSmall } from '@/components/SubscriptionCardSmall';
-import { T } from '@/components/ui/Typography';
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
 import {
-  CreditCard,
-  DollarSign,
-  FileBox,
-  Home,
-  Settings,
-  UserRound,
-  Building2,
-  Search,
   Heart,
+  Home,
+  MessageCircle,
+  MessageCircleMoreIcon,
+  Search,
+  Settings,
+  UserRound
 } from 'lucide-react';
 
 import { Suspense } from 'react';
@@ -36,7 +31,7 @@ async function OrganizationSidebarInternal({
     >
       <div>
         <div className="flex justify-between items-center">
-          <SidebarLogoAndToggle />
+          <SidebarLogoAndToggle userType="employer" />
         </div>
         <div className="flex flex-col gap-6 h-full overflow-y-auto">
           <div>
@@ -45,25 +40,15 @@ async function OrganizationSidebarInternal({
               href={`/employer/${organizationId}`}
               icon={<Home className="h-5 w-5" />}
             />
-            {/* <SidebarLink
-              label="Interviews"
-              href={`/employer/${organizationId}/interviews`}
-              icon={<Building2 className="h-5 w-5" />}
-            /> */}
-              <SidebarLink
-              label="Search"
-              href={`/employer/${organizationId}/search`}
-              icon={<Search className="h-5 w-5" />}
-            />
             <SidebarLink
               label="Candidates"
-              href={`/employer/${organizationId}/candidates`}
+              href={`/employer/${organizationId}/c`}
               icon={<UserRound className="h-5 w-5" />}
             />
             <SidebarLink
-              label="Favourites"
-              href={`/employer/${organizationId}/favorites`}
-              icon={<Heart className="h-5 w-5" />}
+              label="Messages"
+              href={`/employer/${organizationId}/messages`}
+              icon={<MessageCircleMoreIcon className="h-5 w-5" />}
             />
             <SidebarLink
               label="Settings"

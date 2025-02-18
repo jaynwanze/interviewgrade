@@ -6,11 +6,11 @@ import darkLogo from 'public/logos/nextbase-dark-logo.png';
 import lightLogo from 'public/logos/nextbase-light-logo.png';
 import { SidebarClose } from './SidebarClose';
 
-export function SidebarLogoAndToggle() {
+export function SidebarLogoAndToggle({ userType }: { userType: string }) {
   return (
     <div className="flex justify-between items-center w-full mb-5">
       <Link
-        href="/candidate"
+        href={userType === 'employer' ? '/employer' : '/candidate'}
         className="ml-2 cursor-pointer flex items-center gap-1 w-full"
       >
         <Image

@@ -64,9 +64,10 @@ const mockCandidates = [
   },
 ];
 
+
 const mockEmployerPrefs = {
   location: 'United States',
-  skill: 'Problem Solving',
+  skill: ['Problem Solving', 'Communication'], // multiple skills
 };
 
 export default function EmployerDashboard() {
@@ -77,7 +78,7 @@ export default function EmployerDashboard() {
     newCandidatesThisWeek: 5,
   });
 
-  const [prefs, setPrefs] = useState<any>(null);
+  const [prefs, setPrefs] = useState<typeof mockEmployerPrefs | null>(null);
   const [matched, setMatched] = useState<any[]>([]);
   const [topThree, setTopThree] = useState<any[]>([]);
   const [topProspect, setTopProspect] = useState<any>(null);
@@ -85,6 +86,7 @@ export default function EmployerDashboard() {
   const [skillGapMessage, setSkillGapMessage] = useState<string>('');
   const [percentiles, setPercentiles] = useState<{ [id: string]: number }>({});
   const [weekDelta, setWeekDelta] = useState<number>(0);
+  const [chartCandidates, setChartCandidates] = useState<TopCandidate[]>([]);
 
   useEffect(() => {
     // 1) Suppose we fetch employer’s prefs from DB; using mock for now
@@ -97,7 +99,7 @@ export default function EmployerDashboard() {
           (mockEmployerPrefs.location === 'Remote'
             ? true
             : c.location.includes(mockEmployerPrefs.location)) &&
-          c.skill.includes(mockEmployerPrefs.skill),
+          c.skill.includes(mockEmployerPrefs.skill[0]),
       )
       .sort((a, b) => b.score - a.score);
 

@@ -33,7 +33,7 @@ export default async function OrganizationPage({
 
       <div>
         <Suspense>
-          <EmployerDashboard />
+          <EmployerDashboard  />
         </Suspense>
       </div>
     </div>

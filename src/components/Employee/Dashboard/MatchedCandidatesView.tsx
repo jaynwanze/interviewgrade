@@ -16,6 +16,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useRouter } from 'next/navigation';
 
 export const MatchedCandidatesView = ({
     skillGapMessage,
@@ -25,7 +26,9 @@ export const MatchedCandidatesView = ({
     candidatesToWatch,
     matched,
 }) => {
+    const router = useRouter();
     function handleContact(candidateId: string) {
+        
         alert(`Contacting candidate ${candidateId}... (mock)`);
     }
 

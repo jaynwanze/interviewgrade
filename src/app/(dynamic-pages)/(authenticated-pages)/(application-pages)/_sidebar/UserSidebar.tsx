@@ -20,7 +20,7 @@ export async function UserSidebar() {
     >
       <div>
         <div className="flex justify-between items-center">
-          <SidebarLogoAndToggle />
+        <SidebarLogoAndToggle userType="candidate" />
         </div>
         <SidebarLink
           label="Mock Interviews"

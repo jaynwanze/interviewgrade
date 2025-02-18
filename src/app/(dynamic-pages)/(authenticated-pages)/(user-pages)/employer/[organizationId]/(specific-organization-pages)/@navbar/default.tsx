@@ -25,7 +25,7 @@ export default async function OrganizationNavbar({
       <Link href={`/employer/${organizationId}`}>
         <span className="space-x-2 flex items-center">
           <Suspense fallback={<span>Loading...</span>}>
-            <Title organizationId={organizationId} /> Default
+            <Title organizationId={organizationId} />
           </Suspense>
         </span>
       </Link>

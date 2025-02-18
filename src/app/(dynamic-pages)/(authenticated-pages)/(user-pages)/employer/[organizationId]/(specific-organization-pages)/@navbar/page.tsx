@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: unknown }) {
 
   return {
     title: `${organizationTitle} | Organization | InterviewGrade`,
-    description: 'Organization title',
+    description: 'Organization dashboard',
   };
 }
 

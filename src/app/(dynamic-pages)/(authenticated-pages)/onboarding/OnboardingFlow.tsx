@@ -94,11 +94,13 @@ type ProfileUpdateProps = {
   userProfile: Table<'user_profiles'>;
   onSuccess: () => void;
   userEmail: string | undefined;
+  userType: UserType;
 };
 
 export function ProfileUpdate({
   userProfile,
   onSuccess,
+  userType,
   userEmail,
 }: ProfileUpdateProps) {
   const [fullName, setFullName] = useState(userProfile.full_name ?? '');
@@ -165,103 +167,112 @@ export function ProfileUpdate({
   };
 
   return (
-    <Card className="w-full max-w-[400px]">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          updateProfile();
-        }}
-        data-testid={'create-new-profile'}
-      >
-        <CardHeader>
-          <div className="space-y-0">
-            <div className="p-3 w-fit bg-muted mb-2 rounded-lg">
-              <AddUserIcon className=" w-6 h-6" />
-            </div>
-            <div className="p-1">
-              <CardTitle>Create new profile</CardTitle>
-              <CardDescription>Please fill in your details.</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">Avatar</Label>
-              <div className="mt-1 sm:col-span-2 sm:mt-0">
-                <div className="flex items-center space-x-2">
-                  <MotionImage
-                    animate={{
-                      opacity: hasImageLoaded ? 1 : 0.8,
-                    }}
-                    transition={
-                      hasImageLoaded
-                        ? undefined
-                        : {
-                          duration: 0.5,
-                          repeat: Number.POSITIVE_INFINITY,
-                          repeatType: 'reverse',
-                        }
-                    }
-                    onLoad={() => {
-                      setHasImageLoaded(true);
-                    }}
-                    onLoadStart={() => {
-                      setHasImageLoaded(false);
-                    }}
-                    placeholder="blur"
-                    blurDataURL="data:image/png;base64,iVBORw0KGg0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                    loading="eager"
-                    width={24}
-                    height={24}
-                    className="h-12 w-12 rounded-full"
-                    src={avatarUrlWithFallback}
-                    alt="avatarUrl"
-                  />
-                  <input
-                    disabled={isUploading}
-                    onChange={handleFileChange}
-                    ref={fileInputRef}
-                    type="file"
-                    id="file-input"
-                    hidden
-                    accept="image/*"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      fileInputRef.current?.click();
-                    }}
-                    disabled={isUploading}
-                  >
-                    {isUploading ? 'Please wait...' : 'Change'}
-                  </Button>
-                </div>
+    <>
+      {userType === 'candidate' && (
+        <span className="text-muted-foreground">
+          Candidate profile creation
+        </span>
+      )}
+      (
+      <Card className="w-full max-w-[400px]">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            updateProfile();
+          }}
+          data-testid={'create-new-profile'}
+        >
+          <CardHeader>
+            <div className="space-y-0">
+              <div className="p-3 w-fit bg-muted mb-2 rounded-lg">
+                <AddUserIcon className=" w-6 h-6" />
+              </div>
+              <div className="p-1">
+                <CardTitle>Create new profile</CardTitle>
+                <CardDescription>Please fill in your details.</CardDescription>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">Name</Label>
-              <Input
-                disabled={isUpdatingProfile ?? isUploading}
-                id="name"
-                name="name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Full Name"
-                type="text"
-                required
-              />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Avatar</Label>
+                <div className="mt-1 sm:col-span-2 sm:mt-0">
+                  <div className="flex items-center space-x-2">
+                    <MotionImage
+                      animate={{
+                        opacity: hasImageLoaded ? 1 : 0.8,
+                      }}
+                      transition={
+                        hasImageLoaded
+                          ? undefined
+                          : {
+                            duration: 0.5,
+                            repeat: Number.POSITIVE_INFINITY,
+                            repeatType: 'reverse',
+                          }
+                      }
+                      onLoad={() => {
+                        setHasImageLoaded(true);
+                      }}
+                      onLoadStart={() => {
+                        setHasImageLoaded(false);
+                      }}
+                      placeholder="blur"
+                      blurDataURL="data:image/png;base64,iVBORw0KGg0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                      loading="eager"
+                      width={24}
+                      height={24}
+                      className="h-12 w-12 rounded-full"
+                      src={avatarUrlWithFallback}
+                      alt="avatarUrl"
+                    />
+                    <input
+                      disabled={isUploading}
+                      onChange={handleFileChange}
+                      ref={fileInputRef}
+                      type="file"
+                      id="file-input"
+                      hidden
+                      accept="image/*"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? 'Please wait...' : 'Change'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Name</Label>
+                <Input
+                  disabled={isUpdatingProfile ?? isUploading}
+                  id="name"
+                  name="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Full Name"
+                  type="text"
+                  required
+                />
+              </div>
             </div>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" disabled={isUpdatingProfile || isUploading}>
-            {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isUpdatingProfile || isUploading}>
+              {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+      )
+    </>
   );
 }
 
@@ -453,14 +464,15 @@ export function UserOnboardingFlow({
         <ProfileUpdate
           userEmail={userEmail}
           userProfile={userProfile}
+          userType={userType}
           onSuccess={nextStep}
         />
       )}
       {currentStep === 'ORGANIZATION' && (
         <OrganizationCreation onSuccess={nextStep} />
       )}
-       {/* NEW STEP */}
-       {currentStep === 'CANDIDATE_PREFS' && (
+      {/* NEW STEP */}
+      {currentStep === 'CANDIDATE_PREFS' && (
         <CandidatePreferences onSuccess={nextStep} />
       )}
     </>

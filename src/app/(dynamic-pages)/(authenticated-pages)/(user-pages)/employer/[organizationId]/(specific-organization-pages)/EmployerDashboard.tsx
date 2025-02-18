@@ -1,156 +1,220 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
-import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
+import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
+import type { CandidateRow } from '@/types';
 
-// Mock candidate data
-const mockCandidates = [
+const mockCandidates: CandidateRow[] = [
   {
     id: 'c1',
-    name: 'Alice',
-    location: 'United States',
-    skill: 'Communication',
-    score: 95,
-    avatarUrl: '/images/mock_avatar_f_1.jpg',
-    lastWeekScore: 92, // For "trend" calculation
+    city: 'New York',
+    country: 'United States',
+    phone_number: '(555) 123-4567',
+    summary: 'Enthusiastic engineer with strong communication skills.',
+    role: 'Software Engineer',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
+      { id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
+      { id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
+    ],
+    practice_skill_stats: [
+      { id: 'p1', skill: 'Problem Solving', avg_score: 89, previous_avg: 87 },
+    ],
+    created_at: '2024-04-29T10:00:00Z',
+    full_name: 'Alice Anderson',
+    avatar_url: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
   {
     id: 'c2',
-    name: 'Bob',
-    location: 'United States',
-    skill: 'Problem Solving',
-    score: 92,
-    avatarUrl: '/images/mock_avatar_m_2.jpg',
-    lastWeekScore: 90,
+    city: 'San Francisco',
+    country: 'United States',
+    phone_number: '(555) 555-1234',
+    summary: 'Full-stack developer with a focus on back-end optimization.',
+    role: 'Full-Stack Developer',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '4', skill: 'Problem Solving', avg_score: 85, previous_avg: 82 },
+      { id: '5', skill: 'Communication', avg_score: 80, previous_avg: 78 },
+    ],
+    practice_skill_stats: [
+      { id: 'p2', skill: 'Problem Solving', avg_score: 83, previous_avg: 80 },
+      { id: 'p3', skill: 'Communication', avg_score: 81, previous_avg: 76 },
+    ],
+    created_at: '2024-04-20T09:30:00Z',
+    full_name: 'Bob Brown',
+    avatar_url: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
+
   },
   {
     id: 'c3',
-    name: 'Charlie',
-    location: 'Canada',
-    skill: 'Decision Making',
-    score: 88,
-    avatarUrl: '/images/mock_avatar_m_3.jpg',
-    lastWeekScore: 88,
+    city: 'Toronto',
+    country: 'Canada',
+    phone_number: '(416) 999-0000',
+    summary: 'Skilled data analyst passionate about Decision Making & stats.',
+    role: 'Data Analyst',
+    industry: 'Finance',
+    interview_skill_stats: [
+      { id: '6', skill: 'Decision Making', avg_score: 88, previous_avg: 85 },
+      { id: '7', skill: 'Analytical Thinking', avg_score: 90, previous_avg: 88 },
+    ],
+    practice_skill_stats: [],
+    created_at: '2024-04-22T14:15:00Z',
+    full_name: 'Charlie Davis',
+    avatar_url: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
   {
     id: 'c4',
-    name: 'Diana',
-    location: 'Remote',
-    skill: 'Problem Solving',
-    score: 90,
-    avatarUrl: '/images/mock_avatar_f_4.jpg',
-    lastWeekScore: 89,
+    city: 'Remote',
+    country: 'Remote',
+    phone_number: '(555) 999-9999',
+    summary: 'Problem solver with a knack for creative solutions.',
+    role: 'Product Manager',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '8', skill: 'Problem Solving', avg_score: 90, previous_avg: 85 },
+      { id: '9', skill: 'Leadership', avg_score: 87, previous_avg: 86 },
+    ],
+    practice_skill_stats: [
+      { id: 'p4', skill: 'Leadership', avg_score: 88, previous_avg: 84 },
+    ],
+    created_at: '2024-04-25T11:45:00Z',
+    full_name: 'Diana Evans',
+    avatar_url: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
   {
     id: 'c5',
-    name: 'Burt',
-    location: 'United States',
-    skill: 'Problem Solving',
-    score: 92,
-    avatarUrl: '/images/mock_avatar_m_5.jpg',
-    lastWeekScore: 0, // Maybe new or no data last week
-  },
-  {
-    id: 'c6',
-    name: 'Erin',
-    location: 'United States',
-    skill: 'Communication',
-    score: 89,
-    avatarUrl: '/images/mock_avatar_f_6.jpg',
-    lastWeekScore: 90,
+    city: 'Dublin',
+    country: 'Ireland',
+    phone_number: '+353 12 345 6789',
+    summary: 'Focused on continuous improvement and quick learning.',
+    role: 'Software Engineer',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '10', skill: 'Adaptability', avg_score: 92, previous_avg: 90 },
+      { id: '11', skill: 'Communication', avg_score: 84, previous_avg: 80 },
+    ],
+    practice_skill_stats: [
+      { id: 'p5', skill: 'Adaptability', avg_score: 88, previous_avg: 85 },
+    ],
+    created_at: '2024-04-27T07:00:00Z',
+    full_name: 'Erin Green',
+    avatar_url: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
 ];
 
-
-const mockEmployerPrefs = {
+const employerPrefs = {
   location: 'United States',
-  skill: ['Problem Solving', 'Communication'], // multiple skills
+  skill: 'Problem Solving', // Looking for Problem Solving skill
 };
 
 export default function EmployerDashboard() {
-  // Basic stats
   const [stats] = useState({
     tokensLeft: 8,
     activeSearches: 2,
     newCandidatesThisWeek: 5,
   });
 
-  const [prefs, setPrefs] = useState<typeof mockEmployerPrefs | null>(null);
-  const [matched, setMatched] = useState<any[]>([]);
-  const [topThree, setTopThree] = useState<any[]>([]);
-  const [topProspect, setTopProspect] = useState<any>(null);
-  const [candidatesToWatch, setCandidatesToWatch] = useState<any[]>([]);
-  const [skillGapMessage, setSkillGapMessage] = useState<string>('');
-  const [percentiles, setPercentiles] = useState<{ [id: string]: number }>({});
+  const [candidates, setCandidates] = useState<CandidateRow[]>([]);
+  const [matched, setMatched] = useState<CandidateRow[]>([]);
+  const [topThree, setTopThree] = useState<CandidateRow[]>([]);
+  const [topProspect, setTopProspect] = useState<CandidateRow | null>(null);
+  const [skillGapMessage, setSkillGapMessage] = useState('');
   const [weekDelta, setWeekDelta] = useState<number>(0);
-  const [chartCandidates, setChartCandidates] = useState<TopCandidate[]>([]);
+  const [percentiles, setPercentiles] = useState<{ [id: string]: number }>({});
+
+  // Helper to get average interview skill for sorting
+  function getCandidateInterviewAvg(cand: CandidateRow): number {
+    if (!cand.interview_skill_stats || cand.interview_skill_stats.length === 0) {
+      return 0;
+    }
+    const sum = cand.interview_skill_stats.reduce((acc, s) => acc + s.avg_score, 0);
+    return sum / cand.interview_skill_stats.length;
+  }
+
+  // Check if candidate’s interview_skill_stats contains the target skill
+  function hasSkill(cand: CandidateRow, skill: string): boolean {
+    return cand.interview_skill_stats.some((s) => s.skill === skill);
+  }
+
+  // Check if candidate location is either the same as employerPrefs.location
+  // or “Remote” if that’s acceptable.
+  function locationMatches(cand: CandidateRow, location: string) {
+    if (location === 'Remote') return true; // accept everything
+    return cand.country === location;
+  }
 
   useEffect(() => {
-    // 1) Suppose we fetch employer’s prefs from DB; using mock for now
-    setPrefs(mockEmployerPrefs);
+    // 1) Initially set all mock data
+    setCandidates(mockCandidates);
 
-    // 2) Filter from mockCandidates
-    const filtered = mockCandidates
-      .filter(
-        (c) =>
-          (mockEmployerPrefs.location === 'Remote'
-            ? true
-            : c.location.includes(mockEmployerPrefs.location)) &&
-          c.skill.includes(mockEmployerPrefs.skill[0]),
-      )
-      .sort((a, b) => b.score - a.score);
+    // 2) Filter by location + skill
+    const filtered = mockCandidates.filter((cand) => {
+      // location check
+      const locMatch = locationMatches(cand, employerPrefs.location);
+      // skill check
+      const skillMatch = hasSkill(cand, employerPrefs.skill);
+      return locMatch && skillMatch;
+    });
 
-    setMatched(filtered);
-
-    // 3) If none found => skill gap
+    // If no matches => skillGap
     if (filtered.length === 0) {
       setSkillGapMessage(
-        `No candidates found for skill: ${mockEmployerPrefs.skill} in ${mockEmployerPrefs.location}. 
-         You may broaden your search or consider remote options.`,
+        `No candidates found for skill: ${employerPrefs.skill} in ${employerPrefs.location}. 
+         You may broaden your search or consider remote options.`
       );
-      return;
     } else {
       setSkillGapMessage('');
     }
 
-    // 4) Top 3 => Leaderboard
-    const top3 = filtered.slice(0, 3);
+    // 3) Sort by highest average interview skill
+    const sorted = filtered.slice().sort((a, b) => {
+      return getCandidateInterviewAvg(b) - getCandidateInterviewAvg(a);
+    });
+
+    setMatched(sorted);
+
+    // 4) topThree
+    const top3 = sorted.slice(0, 3);
     setTopThree(top3);
 
-    // 5) The #1 => Top Prospect
-    setTopProspect(top3[0] || null);
+    // 5) topProspect = first of top3 (or null)
+    setTopProspect(top3.length > 0 ? top3[0] : null);
 
-    // 6) Next few => "Candidates to Watch"
-    const watch = filtered.slice(3, 6);
-    setCandidatesToWatch(watch);
+    // 7) Calculate percentiles based on “avg interview skill”
+    if (sorted.length > 0) {
+      const scoresOnly = sorted.map((cand) => getCandidateInterviewAvg(cand)).sort((a,b)=>a-b);
+      const pMap: { [id: string]: number } = {};
+      sorted.forEach((cand) => {
+        const candidateAvg = getCandidateInterviewAvg(cand);
+        // how many are <= my score
+        const lessOrEqual = scoresOnly.filter((s) => s <= candidateAvg).length;
+        const percentile = (lessOrEqual / sorted.length) * 100;
+        pMap[cand.id] = percentile;
+      });
+      setPercentiles(pMap);
+    }
 
-    // 7) Percentile calculation
-    const total = filtered.length;
-    const scoresSorted = filtered.map((m) => m.score).sort((a, b) => a - b);
-    const pMap: { [id: string]: number } = {};
-    filtered.forEach((cand) => {
-      const countLessOrEqual = scoresSorted.filter(
-        (s) => s <= cand.score,
-      ).length;
-      const percentile = (countLessOrEqual / total) * 100;
-      pMap[cand.id] = percentile;
+    // 8) compute overall weekDelta => sum of (avg_score - previous_avg) / count
+    let totalDelta = 0;
+    let deltaCount = 0;
+    mockCandidates.forEach((cand) => {
+      cand.interview_skill_stats.forEach((skill) => {
+        if (skill.previous_avg != null) {
+          totalDelta += (skill.avg_score - skill.previous_avg);
+          deltaCount += 1;
+        }
+      });
     });
-    setPercentiles(pMap);
-
-    // 8) Trend over time => e.g., average difference vs last week
-    const avgThisWeek =
-      filtered.reduce((sum, c) => sum + c.score, 0) / filtered.length;
-    const withLastWeek = filtered.filter(
-      (c) => c.lastWeekScore && c.lastWeekScore > 0,
-    );
-    if (withLastWeek.length > 0) {
-      const avgLastWeek =
-        withLastWeek.reduce((sum, c) => sum + (c.lastWeekScore ?? 0), 0) /
-        withLastWeek.length;
-      setWeekDelta(avgThisWeek - avgLastWeek);
+    if (deltaCount > 0) {
+      setWeekDelta(totalDelta / deltaCount);
     }
   }, []);
 
@@ -158,27 +222,15 @@ export default function EmployerDashboard() {
     <TooltipProvider>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Employer Dashboard</h1>
-        {/* Stats View */}
+        {/* Stats */}
         <StatisticsView stats={stats} weekDelta={weekDelta} />
 
-        {/* Employer Prefs */}
-        {prefs ? (
-          <p className="text-sm text-muted-foreground">
-            Showing matches for location <strong>{prefs.location}</strong> and
-            skill <strong>{prefs.skill}</strong>.
-          </p>
-        ) : (
-          <p>Loading your preferences...</p>
-        )}
         <MatchedCandidatesView
-          {...{
-            matched,
-            topThree,
-            topProspect,
-            candidatesToWatch,
-            percentiles,
-            skillGapMessage,
-          }}
+          skillGapMessage={skillGapMessage}
+          topThree={topThree}
+          topProspect={topProspect}
+          matched={matched}
+          percentiles={percentiles}
         />
       </div>
     </TooltipProvider>

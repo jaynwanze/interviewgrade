@@ -58,6 +58,29 @@ export type EvaluationScores = {
   feedback: string;
 };
 
+export interface CandidateRow {
+  id: string;
+  city: string;
+  country: string;
+  phone_number: string;
+  summary: string;
+  role: string;
+  industry: string;
+  interview_skill_stats: CandidateSkillsStats[];
+  practice_skill_stats: CandidateSkillsStats[];
+  created_at: string;
+  full_name: string;
+  email: string;
+  avatar_url?: string;
+}
+export type CandidateSkillsStats = {
+  id: string;
+  skill: string;
+  avg_score: number;
+  updated_at?: string;
+  previous_avg?: number;
+};
+
 export type InterviewUpdate = Pick<
   Table<'interviews'>,
   'id' | 'status' | 'current_question_index'

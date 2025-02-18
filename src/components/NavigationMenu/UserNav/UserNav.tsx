@@ -8,7 +8,7 @@ import { UserNavDropDownMenu } from './UserNavDropDownMenu';
 
 export async function UserNav() {
   const user = await serverGetLoggedInUser();
-  const { email, user_metadata } = user;
+  const { email} = user;
   if (!email) {
     // unreachable
     throw new Error('User email not found');
@@ -28,7 +28,6 @@ export async function UserNav() {
         userEmail={email}
         userId={user.id}
       />
-      {user_metadata.user_type === 'employer' && <Tokens />}
     </>
   );
 }

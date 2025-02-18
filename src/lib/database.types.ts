@@ -1,4 +1,4 @@
-import { EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
   | number
@@ -129,15 +129,39 @@ export type Database = {
       candidates: {
         Row: {
           id: string
+          city: string
+          country: string
+          phone_number: string
+          summary: string
+          role: string
+          industry: string
+          interview_skill_stats: CandidateSkillsStats[]
+          practice_skill_stats: CandidateSkillsStats[]
           created_at: string
 
         }
         Insert: {
           id: string
+          city: string
+          country: string
+          phone_number: string
+          summary: string
+          role: string
+          industry: string
+          interview_skill_stats: CandidateSkillsStats[]
+          practice_skill_stats: CandidateSkillsStats[]
           created_at: string
         }
         Update: {
           id?: string
+          city?: string
+          country?: string
+          phone_number?: string
+          summary?: string
+          role?: string
+          industry?: string
+          interview_skill_stats?: CandidateSkillsStats[]
+          practice_skill_stats?: CandidateSkillsStats[]
           created_at?: string
         }
         Relationships: [

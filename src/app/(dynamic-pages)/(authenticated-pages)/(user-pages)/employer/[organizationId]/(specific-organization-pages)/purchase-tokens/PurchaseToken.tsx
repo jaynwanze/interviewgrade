@@ -1,3 +1,4 @@
+'use client';
 import { CreateTokenPurchaseButton } from '@/components/Token/ActionButtons';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';

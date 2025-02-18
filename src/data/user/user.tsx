@@ -2,24 +2,17 @@
 import { PRODUCT_NAME } from '@/constants';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type {
-  NormalizedSubscription,
-  Product,
-  SAPayload,
-  StripeCheckoutSessionDetails,
-  SupabaseFileUploadOptions,
-  Table,
-} from '@/types';
+import type { SAPayload, SupabaseFileUploadOptions, Table } from '@/types';
 import { UserType } from '@/types/userTypes';
 import { sendEmail } from '@/utils/api-routes/utils';
 import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import { stripe } from '@/utils/stripe';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { renderAsync } from '@react-email/render';
 import slugify from 'slugify';
 import urlJoin from 'url-join';
 import ConfirmAccountDeletionEmail from '../../../emails/account-deletion-request';
+import { updateCandidateProfileDetailsAction } from './candidate';
 import { refreshSessionAction } from './session';
 
 export async function getIsAppAdmin(): Promise<boolean> {
@@ -121,9 +114,21 @@ export const updateUserProfileNameAndAvatar = async (
   {
     fullName,
     avatarUrl,
+    city,
+    country,
+    phoneNumber,
+    summary,
+    role,
+    industry,
   }: {
     fullName?: string;
     avatarUrl?: string;
+    city?: string;
+    country?: string;
+    phoneNumber?: string;
+    summary?: string;
+    role?: string;
+    industry?: string;
   },
   {
     isOnboardingFlow = false,
@@ -149,6 +154,24 @@ export const updateUserProfileNameAndAvatar = async (
       status: 'error',
       message: error.message,
     };
+  }
+  if (isOnboardingFlow && user.user_metadata.userType === 'candidate') {
+    const updatedCandidateProfile = await updateCandidateProfileDetailsAction({
+      currentUser: user,
+      city,
+      country,
+      phone_number: phoneNumber,
+      summary,
+      role,
+      industry,
+    });
+
+    if (!updatedCandidateProfile) {
+      return {
+        status: 'error',
+        message: 'Failed to update candidate profile',
+      };
+    }
   }
 
   if (isOnboardingFlow) {

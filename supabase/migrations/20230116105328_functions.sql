@@ -35,20 +35,20 @@ BEGIN
     
     -- Handle based on user_type
     IF user_type_value = 'candidate' THEN
-        -- Create a token first
-        INSERT INTO public.tokens (id, tokens_available, total_tokens_used, total_tokens_purchased, last_purchase_date)
-        VALUES (extensions.uuid_generate_v4(), 5, 0, 0, NOW())
-        RETURNING id INTO new_token_id;
-        
-        -- Insert into candidate with the newly created token
-        INSERT INTO public.candidates (id, token_id)
-        VALUES (NEW.id, new_token_id);
+        -- Insert into candidate
+        INSERT INTO public.candidates (id)
+        VALUES (NEW.id);
     END IF;
 
     IF user_type_value = 'employer' THEN
-        --Insert into employer
-        INSERT INTO public.employees(id)
-        VALUES (NEW.id);
+        --Create token for employer
+         INSERT INTO public.tokens (id, tokens_available, total_tokens_used, total_tokens_purchased, last_purchase_date)
+        VALUES (extensions.uuid_generate_v4(), 5, 0, 0, NOW())
+        RETURNING id INTO new_token_id;
+        
+        -- Insert into employee with the newly created token
+        INSERT INTO public.employees (id, token_id)
+        VALUES (NEW.id, new_token_id);
     END IF;
     
     RETURN NEW;

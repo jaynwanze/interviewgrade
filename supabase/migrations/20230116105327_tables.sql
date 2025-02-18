@@ -63,6 +63,14 @@ ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 
 CREATE TABLE "public"."candidates" (
   "id" "uuid" NOT NULL,
+  "city" character varying,
+  "country" character varying,
+  "phone_number" character varying,
+  "summary" text,
+  "role" character varying,
+  "industry" character varying,
+  "interview_skill_stats" "jsonb",
+  "practice_skill_stats" "jsonb",
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";

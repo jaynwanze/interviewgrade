@@ -31,23 +31,33 @@ CREATE POLICY "candidates_can_update_own_information" ON "public"."candidates" F
 UPDATE TO "authenticated" USING (("auth"."uid"() = "id"))
 WITH CHECK (("auth"."uid"() = "id"));
 --
--- Name: tokens Only the candidates can view their own tokens; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: tokens Only the employees can view their own tokens; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "candidates_can_view_own_tokens" ON "public"."tokens" FOR
+CREATE POLICY "employees_can_view_own_tokens" ON "public"."tokens" FOR
 SELECT TO "authenticated" USING (EXISTS (
-    SELECT 1 FROM "public"."candidates" WHERE "candidates"."token_id" = "tokens"."id" AND "candidates"."id" = "auth"."uid"()
+    SELECT 1 FROM "public"."employees" WHERE "employees"."token_id" = "tokens"."id" AND "employees"."id" = "auth"."uid"()
 ));
+
 --
--- Name: tokens Only the candidates can update their own tokens; Type: POLICY; Schema: public; Owner: supabase_admin
+-- Name: tokens Only the employees can insert their own tokens; Type: POLICY; Schema: public; Owner: supabase_admin
 --
 
-CREATE POLICY "candidates_can_update_own_tokens" ON "public"."tokens" FOR
+CREATE POLICY "employees_can_manage_own_tokens_insert" ON "public"."tokens" FOR
+INSERT TO "authenticated" WITH CHECK (EXISTS (
+    SELECT 1 FROM "public"."employees" WHERE "employees"."token_id" = "tokens"."id" AND "employees"."id" = "auth"."uid"()
+));
+
+--
+-- Name: tokens Only the employees can update their own tokens; Type: POLICY; Schema: public; Owner: supabase_admin
+--
+
+CREATE POLICY "employees_can_manage_own_tokens_update" ON "public"."tokens" FOR
 UPDATE TO "authenticated" USING (EXISTS (
-    SELECT 1 FROM "public"."candidates" WHERE "candidates"."token_id" = "tokens"."id" AND "candidates"."id" = "auth"."uid"()
+    SELECT 1 FROM "public"."employees" WHERE "employees"."token_id" = "tokens"."id" AND "employees"."id" = "auth"."uid"()
 ))
 WITH CHECK (EXISTS (
-    SELECT 1 FROM "public"."candidates" WHERE "candidates"."token_id" = "tokens"."id" AND "candidates"."id" = "auth"."uid"()
+    SELECT 1 FROM "public"."employees" WHERE "employees"."token_id" = "tokens"."id" AND "employees"."id" = "auth"."uid"()
 ));
 --
 -- Name: interviews Only the candidates can view their own interviews; Type: POLICY; Schema: public; Owner: supabase_admin

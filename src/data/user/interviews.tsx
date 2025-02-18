@@ -50,24 +50,7 @@ export async function startInterviewAction(
     throw new Error('Candidate profile not found.');
   }
 
-  //  Fetch tokens
   const supabase = createSupabaseUserServerComponentClient();
-  const { data: tokenData, error: tokenError } = await supabase
-    .from('tokens')
-    .select('*')
-    .eq('id', candidateProfile.token_id)
-    .single();
-
-  if (!tokenData || tokenError) {
-    throw new Error('Unable to fetch token data.');
-  }
-
-  // e.g. practice = 1 token, interview = 3 tokens
-  const tokensRequired = interviewMode === 'practice' ? 1 : 3;
-  if (tokenData.tokens_available < tokensRequired) {
-    throw new Error('Insufficient tokens.');
-  }
-
   // Create the session
   let newInterview: Table<'interviews'>;
   if (interviewMode === 'practice') {
@@ -83,25 +66,11 @@ export async function startInterviewAction(
     );
   }
 
-  //Deduct tokens
-  const updatedTokens = tokenData.tokens_available - tokensRequired;
-  const usedTokens = tokenData.total_tokens_used + tokensRequired;
-  const { error: updateError } = await supabase
-    .from('tokens')
-    .update({
-      tokens_available: updatedTokens,
-      total_tokens_used: usedTokens,
-    })
-    .eq('id', candidateProfile.token_id);
-
-  if (updateError) {
-    // Ideally, you’d roll back the interview creation if your plan supports transactions.
-    // Delete the interview if the token deduction fails
-    await supabase.from('interviews').delete().eq('id', newInterview.id);
-    throw new Error('Failed to update token count.');
+  if (!newInterview) {
+    throw new Error('Failed to create interview session.');
   }
 
-  // 7) Return the newly created interview row
+  //Return the newly created interview row
   return newInterview;
 }
 

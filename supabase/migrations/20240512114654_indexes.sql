@@ -3,7 +3,6 @@ CREATE INDEX idx_user_profiles_id ON "public"."user_profiles" ("id");
 
 -- Indexes for candidate
 CREATE INDEX idx_candidates_id ON "public"."candidates" ("id");
-CREATE INDEX idx_candidates_token_id ON "public"."candidates" ("token_id");
 
 -- Indexes for tokens
 CREATE INDEX idx_tokens_id ON "public"."tokens" ("id");
@@ -90,3 +89,4 @@ CREATE INDEX idx_subscriptions_organization_id ON "public"."subscriptions" ("org
 -- Indexes for employees
 CREATE INDEX idx_employees_id ON "public"."employees" ("id");
 CREATE INDEX idx_employees_default_organization_id ON "public"."employees" ("default_organization");
+CREATE INDEX idx_employees_token_id ON "public"."employees" ("token_id");

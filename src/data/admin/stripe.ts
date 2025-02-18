@@ -42,37 +42,37 @@ import { stripe } from '@/utils/stripe';
 //   return data.stripe_customer_id;
 // };
 
-export const createOrRetrieveCandidateCustomer = async ({
-  candidate_id: candidateId,
+export const createOrRetrieveEmployeeCustomer = async ({
+  employee_id: employeeId,
   email,
 }: {
-  candidate_id: string;
+  employee_id: string;
   email?: string;
 }) => {
   const { data, error } = await supabaseAdminClient
-    .from('candidates')
+    .from('employees')
     .select('stripe_customer_id')
-    .eq('id', candidateId)
+    .eq('id', employeeId)
     .single();
   if (error || !data?.stripe_customer_id) {
     // No customer record found, let's create one.
     const customerData: {
-      metadata: { candidate_id: string };
+      metadata: { employee_id: string };
       email?: string;
     } = {
       metadata: {
-        candidate_id: candidateId,
+        employee_id: employeeId,
       },
     };
     if (email) customerData.email = email;
     const customer = await stripe.customers.create(customerData);
     // Now insert the customer ID into our Supabase mapping table.
     const { error: supabaseError } = await supabaseAdminClient
-      .from('candidates')
+      .from('employees')
       .update({ stripe_customer_id: customer.id })
-      .eq('id', candidateId);
+      .eq('id', employeeId);
     if (supabaseError) throw supabaseError;
-    console.log(`New stripe customer created and inserted for ${candidateId}.`);
+    console.log(`New stripe customer created and inserted for ${employeeId}.`);
     return customer.id;
   }
   return data.stripe_customer_id;

@@ -194,28 +194,27 @@ export const InterviewHistoryDetails = ({
               <div className="flex items-center justify-between">
                 <span className="font-semibold">Score:</span>
                 <Badge
-                  className={`text-white ${
-                    qa.mark >=
-                    80 /
+                  className={`text-white ${qa.mark >=
+                      80 /
                       Math.floor(
                         100 / evaluation.question_answer_feedback.length,
                       )
                       ? 'bg-green-600'
                       : qa.mark >=
-                          60 /
-                            Math.floor(
-                              100 / evaluation.question_answer_feedback.length,
-                            )
+                        60 /
+                        Math.floor(
+                          100 / evaluation.question_answer_feedback.length,
+                        )
                         ? 'bg-yellow-500'
                         : qa.mark >=
-                            40 /
-                              Math.floor(
-                                100 /
-                                  evaluation.question_answer_feedback.length,
-                              )
+                          40 /
+                          Math.floor(
+                            100 /
+                            evaluation.question_answer_feedback.length,
+                          )
                           ? 'bg-orange-500'
                           : 'bg-red-500'
-                  }`}
+                    }`}
                 >
                   {qa.mark}/
                   {Math.floor(100 / evaluation.question_answer_feedback.length)}
@@ -257,7 +256,6 @@ export const InterviewHistoryDetails = ({
           </Badge>
         </div>
         <Separator />
-
         {/* Strengths */}
         <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
@@ -267,9 +265,7 @@ export const InterviewHistoryDetails = ({
               : 'No strengths identified.'}
           </span>
         </div>
-
         <Separator />
-
         {/* Areas for Improvement */}
         <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
@@ -282,7 +278,6 @@ export const InterviewHistoryDetails = ({
           </span>
         </div>
         <Separator />
-
         {/* Recommendations */}
         <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
@@ -295,9 +290,9 @@ export const InterviewHistoryDetails = ({
           </span>
         </div>
         <Separator />
-
-        {/* Radial Chart (To Be Added)
-        <div className="flex flex-col justify-between space-y-6">
+        Radar Chart (To Be Added)
+        <Separator />
+        {/* <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Skill Breakdown
           </CardTitle>
@@ -306,7 +301,6 @@ export const InterviewHistoryDetails = ({
           </span>
         </div>
         <Separator /> */}
-
         {/* Evaluation Scores Table */}
         <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
@@ -445,7 +439,9 @@ export const InterviewHistoryDetails = ({
           <div className="shadow-lg mt-5 p-6 rounded-lg border">
             {/* Tabs Content */}
             {selectedTab === 'overview' && renderOverview(evaluation)}
-            {selectedTab === 'details' && renderDetailed(evaluation)}
+            {selectedTab === 'details' &&
+              interview.mode === 'interview' &&
+              renderDetailed(evaluation)}
             {selectedTab === 'coach' && renderCoach(evaluation)}
           </div>
         </>

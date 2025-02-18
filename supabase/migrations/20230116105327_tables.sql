@@ -63,9 +63,7 @@ ALTER TABLE "public"."user_profiles" OWNER TO "postgres";
 
 CREATE TABLE "public"."candidates" (
   "id" "uuid" NOT NULL,
-  "token_id" "uuid" NOT NULL,
-  "subscription_id" "uuid",
-  "stripe_customer_id" character varying
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";
 --
@@ -75,6 +73,8 @@ ALTER TABLE "public"."candidates" OWNER TO "postgres";
 CREATE TABLE "public"."employees" (
   "id" "uuid" NOT NULL,
   "default_organization" "uuid",
+  "token_id" "uuid" NOT NULL,
+  "stripe_customer_id" character varying
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
 
@@ -541,24 +541,17 @@ ADD CONSTRAINT "user_profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."use
 ALTER TABLE ONLY "public"."employees"
 ADD CONSTRAINT "employees_default_organization_fkey" FOREIGN KEY ("default_organization") REFERENCES "public"."organizations"("id") ON DELETE SET NULL;
 --
+-- Name: employees employees_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."employees"
+ADD CONSTRAINT "employees_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
+--
 -- Name: candidate candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."candidates"
 ADD CONSTRAINT "candidate_id_fkey" FOREIGN KEY ("id") REFERENCES "user_profiles"("id") ON DELETE CASCADE;
---
--- Name: candidate candidate_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY "public"."candidates"
-ADD CONSTRAINT "candidate_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
---
--- Name: candidate candidate_subscription_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres 
---
-
-ALTER TABLE ONLY "public"."candidates"
-ADD CONSTRAINT "candidate_subscription_id_fkey" FOREIGN KEY ("subscription_id") REFERENCES "subscriptions"("id") ON DELETE CASCADE;
-
 --
 -- Name: employee_candidate_unlocks employee_candidate_unlocks_employee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

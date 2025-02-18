@@ -1,5 +1,5 @@
 'use client';
-import { retriveStripeCheckoutSessionPurchaseDetails } from '@/data/user/user';
+import { retriveStripeCheckoutSessionPurchaseDetails } from '@/data/user/employee';
 import { StripeCheckoutSessionDetails } from '@/types';
 import { useEffect, useState } from 'react';
 export default function PurchaseTokensSuccess({

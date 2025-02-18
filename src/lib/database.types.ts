@@ -90,25 +90,55 @@ export type Database = {
           },
         ]
       }
-      candidates: {
+      employees: {
         Row: {
           id: string
+          default_organization_id: string
           token_id: string
-          subscription_id: string
           stripe_customer_id: string
-
         }
         Insert: {
           id: string
+          default_organization_id: string
           token_id: string
-          subscription_id: string
           stripe_customer_id: string
         }
         Update: {
           id?: string
+          default_organization_id?: string
           token_id?: string
-          subscription_id?: string
           stripe_customer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: true
+            referencedRelation: "tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          id: string
+          created_at: string
+
+        }
+        Insert: {
+          id: string
+          created_at: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
         }
         Relationships: [
           {
@@ -118,53 +148,8 @@ export type Database = {
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "candidates_token_id_fkey"
-            columns: ["token_id"]
-            isOneToOne: true
-            referencedRelation: "account_delete_tokens"
-            referencedColumns: ["token"]
-          },
-          {
-            foreignKeyName: "candidates_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: true
-            referencedRelation: "subscriptions"
-            referencedColumns: ["id"]
-          },
         ]
       }
-      employer: {
-        Row: {
-          id: string
-          organization_id: string
-        }
-        Insert: {
-          id: string
-          organization_id: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employer_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employer_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-
       organizations: {
         Row: {
           id: string

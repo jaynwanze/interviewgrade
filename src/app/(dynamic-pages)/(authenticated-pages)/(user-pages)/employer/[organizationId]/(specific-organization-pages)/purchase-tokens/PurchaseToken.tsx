@@ -1,7 +1,7 @@
 import { CreateTokenPurchaseButton } from '@/components/Token/ActionButtons';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { getActiveProductsByType } from '@/data/user/user';
+import { getActiveProductsByType } from '@/data/user/employee';
 import { Product } from '@/types';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';

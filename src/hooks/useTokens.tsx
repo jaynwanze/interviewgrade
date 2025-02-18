@@ -1,7 +1,7 @@
 // hooks/useTokens.ts
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Token } from '@/types';
-import { getCurrentCandidatesTokens } from '@/data/user/user';
+import { getCurrentEmployeeTokens } from '@/data/user/employee';
 
 /**
  * React Query hook to fetch the user's tokens from your server method
@@ -11,7 +11,7 @@ export function useTokens() {
     queryKey: ['tokens'],
     queryFn: async () => {
       // This calls your existing fetch function
-      const tokens = await getCurrentCandidatesTokens();
+      const tokens = await getCurrentEmployeeTokens();
       return tokens;
     },
     // Optionally: staleTime, cacheTime, etc.

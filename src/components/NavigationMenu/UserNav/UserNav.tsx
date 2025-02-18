@@ -28,7 +28,7 @@ export async function UserNav() {
         userEmail={email}
         userId={user.id}
       />
-      {user_metadata.user_type === 'candidate' && <Tokens />}
+      {user_metadata.user_type === 'employer' && <Tokens />}
     </>
   );
 }

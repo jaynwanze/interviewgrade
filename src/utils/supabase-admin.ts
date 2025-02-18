@@ -6,22 +6,22 @@ export const manageTokenBundlePurchase = async (
 ) => {
   //Get candidate's ID
   console.log(`stripeCustomer: ${stripeCustomer} manageTokenBundlePurchase`);
-  const { data: candidateTokenId, error: noCandidateError } =
+  const { data: employeeTokenData, error: noEmployeeError } =
     await supabaseAdminClient
-      .from('candidates')
+      .from('employees')
       .select('token_id')
       .eq('stripe_customer_id', stripeCustomer)
       .single();
-  if (noCandidateError) throw noCandidateError;
-  if (!candidateTokenId) {
-    throw new Error('No candidate data');
+  if (noEmployeeError) throw noEmployeeError;
+  if (!employeeTokenData) {
+    throw new Error('No employee data');
   }
 
-  //Update tokens linked to candidate
-  const { data: candidateTokens, error: tokenError } = await supabaseAdminClient
+  //Update tokens linked to emp
+  const { data: employeeTokens, error: tokenError } = await supabaseAdminClient
     .from('tokens')
     .select('*')
-    .eq('id', candidateTokenId.token_id)
+    .eq('id', employeeTokenData.token_id)
     .single();
 
   if (tokenError) throw tokenError;
@@ -30,10 +30,10 @@ export const manageTokenBundlePurchase = async (
   const {
     tokens_available: availableTokens,
     total_tokens_purchased: totalPurchasedTokens,
-  } = candidateTokens;
+  } = employeeTokens;
   const updatedTokensAvailable = availableTokens + quantity;
   const updatedPurchasedTokens = totalPurchasedTokens + quantity;
-  const { token_id: tokenId } = candidateTokenId;
+  const { token_id: tokenId } = employeeTokenData;
 
   //Update tokens available and total tokens purchased
   const { error } = await supabaseAdminClient
@@ -46,7 +46,7 @@ export const manageTokenBundlePurchase = async (
     .eq('id', tokenId);
   if (error) throw error;
   console.log(
-    `Token bundle of [${quantity}] purchased for candidate with token id:[${tokenId}]`,
+    `Token bundle of [${quantity}] purchased for employee with token id:[${tokenId}]`,
   );
 };
 

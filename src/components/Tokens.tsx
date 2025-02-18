@@ -25,7 +25,7 @@ export const Tokens: React.FC = () => {
   const { data: tokens, isLoading, isError } = useTokens();
 
   const handleClick = () => {
-    router.push('/candidate/purchase-tokens');
+    router.push('/employer/purchase-tokens');
   };
 
   if (isLoading) {

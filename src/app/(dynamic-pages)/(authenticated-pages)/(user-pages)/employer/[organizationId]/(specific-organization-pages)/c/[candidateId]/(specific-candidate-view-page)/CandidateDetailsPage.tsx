@@ -1,20 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, ClipboardCheck, Mail } from 'lucide-react';
+import { ClipboardCheck, Lock, Mail, Unlock } from 'lucide-react';
+import { useState } from 'react';
 
 // Mock data (example)
 const mockCandidate = {
@@ -73,13 +72,14 @@ export default function CandidateDetailsPage() {
       <Card>
         <CardHeader className="flex items-center gap-3">
           <Avatar>
-            {candidate.avatarUrl ? (
-              <AvatarImage src={candidate.avatarUrl} alt={candidate.name} />
-            ) : (
-              <AvatarFallback>
-                {candidate.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            )}
+            <AvatarImage src={candidate.avatarUrl} alt={candidate.name} />
+            <AvatarFallback>
+              {candidate.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <div>
             <CardTitle className="text-lg">{candidate.name}</CardTitle>
@@ -173,9 +173,7 @@ export default function CandidateDetailsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Your Private Notes</CardTitle>
-          <CardDescription>
-            Only visible to you (organization).
-          </CardDescription>
+          <CardDescription>Only visible to you (organization).</CardDescription>
         </CardHeader>
         <CardContent>
           <Textarea
@@ -198,9 +196,7 @@ export default function CandidateDetailsPage() {
           <CardTitle>Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-2">
-          <Button onClick={handleInviteToInterview}>
-            Invite to Interview
-          </Button>
+          <Button onClick={handleInviteToInterview}>Invite to Interview</Button>
           <Button variant="outline" onClick={handleRequestMoreInfo}>
             Request More Info
           </Button>

@@ -14,8 +14,8 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 
 export interface StatsProps {
   tokensLeft: number;
-  activeSearches: number;
-  newCandidatesThisWeek: number;
+  incomingPipeline: number;    // Replacing `newCandidatesThisWeek`
+  unlockedCandidates: number; // Replacing `activeSearches` 
 }
 
 export function StatisticsView({
@@ -28,6 +28,7 @@ export function StatisticsView({
   return (
     <>
       <div className="grid grid-cols-3 gap-4">
+        {/* 1) Tokens */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Your Tokens</CardTitle>
@@ -54,28 +55,32 @@ export function StatisticsView({
           )}
         </Card>
 
+        {/* 2) Incoming Pipeline */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Active Searches</CardTitle>
+            <CardTitle className="text-sm">Incoming Pipeline</CardTitle>
             <CardDescription>
-              Job roles you’re currently hiring for
+              Newly matched candidates this week
             </CardDescription>
           </CardHeader>
           <CardContent>
             <span className="text-xl font-semibold">
-              {stats.activeSearches}
+              {stats.incomingPipeline}
             </span>
           </CardContent>
         </Card>
 
+        {/* 3) Unlocked Candidates */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">New Candidates (This Week)</CardTitle>
-            <CardDescription>Incoming pipeline</CardDescription>
+            <CardTitle className="text-sm">Unlocked Candidates</CardTitle>
+            <CardDescription>
+              How many you’ve already unlocked
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <span className="text-xl font-semibold">
-              {stats.newCandidatesThisWeek}
+              {stats.unlockedCandidates}
             </span>
           </CardContent>
         </Card>

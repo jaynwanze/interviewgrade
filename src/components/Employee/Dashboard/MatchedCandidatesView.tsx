@@ -227,16 +227,17 @@ export function MatchedCandidatesView({
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        {cand.avatar_url ? (
                           <AvatarImage
-                            src={cand.avatar_url}
-                            alt={cand.full_name}
-                          />
-                        ) : (
-                          <AvatarFallback>
-                            {cand.full_name.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        )}
+                          src={cand.avatar_url}
+                          alt={cand.full_name}
+                        />
+                        <AvatarFallback>
+                          {cand.full_name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{cand.full_name}</p>

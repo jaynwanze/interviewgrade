@@ -13,52 +13,121 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { CandidateRow } from '@/types';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-type Candidate = {
-  id: string;
-  name: string;
-  jobTitle: string;
-  skill: string;
-  location: string;
-  industry: string;
-  avatarUrl?: string;
-  overallScore: number;
-  tokensCost: number;
-};
-
-const mockCandidates: Candidate[] = [
+const mockCandidates: CandidateRow[] = [
   {
     id: 'c1',
-    name: 'Alice Anderson',
-    jobTitle: 'Marketing Specialist',
-    skill: 'Communication',
-    location: 'United States',
-    industry: 'Marketing',
-    overallScore: 90,
-    tokensCost: 5,
+    city: 'New York',
+    country: 'United States',
+    phone_number: '(555) 123-4567',
+    summary: 'Enthusiastic engineer with strong communication skills.',
+    role: 'Software Engineer',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
+      { id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
+      { id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
+    ],
+    practice_skill_stats: [
+      { id: 'p1', skill: 'Problem Solving', avg_score: 89, previous_avg: 87 },
+    ],
+    created_at: '2024-04-29T10:00:00Z',
+    full_name: 'Alice Anderson',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
   {
     id: 'c2',
-    name: 'Bob Brown',
-    jobTitle: 'Financial Analyst',
-    skill: 'Problem Solving',
-    location: 'Canada',
-    industry: 'Finance',
-    overallScore: 82,
-    tokensCost: 4,
+    city: 'San Francisco',
+    country: 'United States',
+    phone_number: '(555) 555-1234',
+    summary: 'Full-stack developer with a focus on back-end optimization.',
+    role: 'Full-Stack Developer',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '4', skill: 'Problem Solving', avg_score: 85, previous_avg: 82 },
+      { id: '5', skill: 'Communication', avg_score: 80, previous_avg: 78 },
+    ],
+    practice_skill_stats: [
+      { id: 'p2', skill: 'Problem Solving', avg_score: 83, previous_avg: 80 },
+      { id: 'p3', skill: 'Communication', avg_score: 81, previous_avg: 76 },
+    ],
+    created_at: '2024-04-20T09:30:00Z',
+    full_name: 'Bob Brown',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
   {
     id: 'c3',
-    name: 'Charlie Davis',
-    jobTitle: 'Software Engineer',
-    skill: 'Decision Making',
-    location: 'Remote',
-    industry: 'Technology',
-    overallScore: 93,
-    tokensCost: 6,
+    city: 'Toronto',
+    country: 'Canada',
+    phone_number: '(416) 999-0000',
+    summary: 'Skilled data analyst passionate about Decision Making & stats.',
+    role: 'Data Analyst',
+    industry: 'Finance',
+    interview_skill_stats: [
+      { id: '6', skill: 'Decision Making', avg_score: 88, previous_avg: 85 },
+      {
+        id: '7',
+        skill: 'Analytical Thinking',
+        avg_score: 90,
+        previous_avg: 88,
+      },
+    ],
+    practice_skill_stats: [],
+    created_at: '2024-04-22T14:15:00Z',
+    full_name: 'Charlie Davis',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
+  },
+  {
+    id: 'c4',
+    city: 'Remote',
+    country: 'Remote',
+    phone_number: '(555) 999-9999',
+    summary: 'Problem solver with a knack for creative solutions.',
+    role: 'Product Manager',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '8', skill: 'Problem Solving', avg_score: 90, previous_avg: 85 },
+      { id: '9', skill: 'Leadership', avg_score: 87, previous_avg: 86 },
+    ],
+    practice_skill_stats: [
+      { id: 'p4', skill: 'Leadership', avg_score: 88, previous_avg: 84 },
+    ],
+    created_at: '2024-04-25T11:45:00Z',
+    full_name: 'Diana Evans',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
+  },
+  {
+    id: 'c5',
+    city: 'Dublin',
+    country: 'Ireland',
+    phone_number: '+353 12 345 6789',
+    summary: 'Focused on continuous improvement and quick learning.',
+    role: 'Software Engineer',
+    industry: 'Tech',
+    interview_skill_stats: [
+      { id: '10', skill: 'Adaptability', avg_score: 92, previous_avg: 90 },
+      { id: '11', skill: 'Communication', avg_score: 84, previous_avg: 80 },
+    ],
+    practice_skill_stats: [
+      { id: 'p5', skill: 'Adaptability', avg_score: 88, previous_avg: 85 },
+    ],
+    created_at: '2024-04-27T07:00:00Z',
+    full_name: 'Erin Green',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'jonjfjegji',
   },
 ];
 
@@ -67,9 +136,11 @@ export default function CandidatesListPage({
 }: {
   organizationId: string;
 }) {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidates, setCandidates] = useState<CandidateRow[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
+  const [filteredCandidates, setFilteredCandidates] = useState<CandidateRow[]>(
+    [],
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -78,10 +149,11 @@ export default function CandidatesListPage({
   }, []);
 
   useEffect(() => {
-    const filtered = candidates.filter((candidate) =>
-      candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      candidate.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      candidate.jobTitle.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = candidates.filter(
+      (candidate) =>
+        candidate.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        candidate.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        candidate.role.toLowerCase().includes(searchQuery.toLowerCase()),
     );
     setFilteredCandidates(filtered);
   }, [searchQuery, candidates]);
@@ -119,10 +191,10 @@ export default function CandidatesListPage({
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Job Title</TableHead>
-                <TableHead>Overall Score</TableHead>
+                <TableHead>Overall Average Score</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Industry</TableHead>
-                <TableHead>Primary Skill</TableHead>
+                <TableHead>Top Skill</TableHead>
                 <TableHead>Tokens Cost</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
@@ -133,32 +205,31 @@ export default function CandidatesListPage({
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        {candidate.avatarUrl ? (
-                          <AvatarImage
-                            src={candidate.avatarUrl}
-                            alt={candidate.name}
-                          />
-                        ) : (
-                          <AvatarFallback>
-                            {candidate.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')
-                              .toUpperCase()}
-                          </AvatarFallback>
-                        )}
+                        <AvatarImage
+                          src={candidate.avatar_url}
+                          alt={candidate.full_name}
+                        />
+                        <AvatarFallback>
+                          {candidate.full_name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
-                      {candidate.name}
+                      {candidate.full_name}
                     </div>
                   </TableCell>
-                  <TableCell>{candidate.jobTitle}</TableCell>
-                  <TableCell>{candidate.overallScore}%</TableCell>
-                  <TableCell>{candidate.location}</TableCell>
+                  <TableCell>{candidate.role}</TableCell>
+                  <TableCell>Skill%</TableCell>
+                  <TableCell>
+                    {candidate.city}, {candidate.country}
+                  </TableCell>
                   <TableCell>{candidate.industry}</TableCell>
-                  <TableCell>{candidate.skill}</TableCell>
+                  <TableCell></TableCell>
                   <TableCell>
                     <Badge className="bg-purple-500 text-white">
-                      {candidate.tokensCost}
+                      Maybe Calculate cost based off rank or skill?
                     </Badge>
                   </TableCell>
                   <TableCell>

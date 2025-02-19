@@ -118,8 +118,8 @@ const employerPrefs = {
 export default function EmployerDashboard() {
   const [stats] = useState({
     tokensLeft: 8,
-    activeSearches: 2,
-    newCandidatesThisWeek: 5,
+    incomingPipeline: 2,
+    unlockedCandidates: 5,
   });
 
   const [candidates, setCandidates] = useState<CandidateRow[]>([]);

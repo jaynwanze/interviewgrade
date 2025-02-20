@@ -1,26 +1,33 @@
 'use client';
 
+import { useState } from 'react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ClipboardCheck, Lock, Mail, Unlock } from 'lucide-react';
-import { useState } from 'react';
+
+import { ClipboardCheck, Lock, Unlock, Mail, PhoneCall, Star } from 'lucide-react';
+
+type PerformanceStats = {
+  interviewsCompleted: number;
+  highestSkill: string;
+  averageScore: number;
+};
 
 // Mock data (example)
 const mockCandidate = {
   id: 'c1',
-  name: 'Alice Anderson',
-  location: 'United States',
-  avatarUrl: '/images/mock_avatar_f_1.jpg',
+  full_name: 'Alice Anderson',
+  country: 'United States',
+  avatar_url: '/images/mock_avatar_f_1.jpg',
   topSkills: ['Communication', 'Teamwork', 'Problem Solving'],
   isUnlocked: false,
   email: 'alice@example.com',
@@ -31,11 +38,10 @@ const mockCandidate = {
     interviewsCompleted: 3,
     highestSkill: 'Problem Solving',
     averageScore: 88,
-  },
+  } as PerformanceStats,
 };
 
 export default function CandidateDetailsPage() {
-  // We'll keep the candidate in state just to simulate lock/unlock changes
   const [candidate, setCandidate] = useState(mockCandidate);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
@@ -48,22 +54,19 @@ export default function CandidateDetailsPage() {
       setError('You do not have enough tokens to unlock contact info.');
       return;
     }
-    // In real code: call your server action or API to spend 1 token,
-    // and record an unlock in employee_candidate_unlocks, etc.
-
+    // In real code: call your server action or API to spend tokens
+    // and record an unlock in e.g. employee_candidate_unlocks
     setTokensLeft((prev) => prev - 1);
     setCandidate((prev) => ({ ...prev, isUnlocked: true }));
     setError('');
   }
 
-  // CTA Example: “Invite to Interview”
   function handleInviteToInterview() {
-    alert(`Inviting ${candidate.name} to an interview...`);
+    alert(`Inviting ${candidate.full_name} to an interview... (mock)`);
   }
 
-  // CTA Example: “Request More Info”
   function handleRequestMoreInfo() {
-    alert(`Requesting more info from ${candidate.name}...`);
+    alert(`Requesting more info from ${candidate.full_name}... (mock)`);
   }
 
   return (
@@ -72,9 +75,9 @@ export default function CandidateDetailsPage() {
       <Card>
         <CardHeader className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={candidate.avatarUrl} alt={candidate.name} />
+            <AvatarImage src={candidate.avatar_url} alt={candidate.full_name} />
             <AvatarFallback>
-              {candidate.name
+              {candidate.full_name
                 .split(' ')
                 .map((n) => n[0])
                 .join('')
@@ -82,9 +85,9 @@ export default function CandidateDetailsPage() {
             </AvatarFallback>
           </Avatar>
           <div>
-            <CardTitle className="text-lg">{candidate.name}</CardTitle>
-            <CardDescription className="flex items-center gap-2">
-              <Badge variant="secondary">{candidate.location}</Badge>
+            <CardTitle className="text-lg">{candidate.full_name}</CardTitle>
+            <CardDescription className="flex justify-center items-center gap-2 mt-1">
+              <Badge variant="secondary">{candidate.country}</Badge>
             </CardDescription>
           </div>
         </CardHeader>
@@ -105,45 +108,51 @@ export default function CandidateDetailsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Contact Details</CardTitle>
+          <CardDescription>
+            {candidate.isUnlocked
+              ? 'You have unlocked this candidate’s contact info.'
+              : 'Spend 1 token to unlock their contact info.'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!candidate.isUnlocked ? (
             <div className="space-y-2">
               <p className="text-sm">
-                Contact info is locked. Spend 1 token to unlock?
+                <Lock className="inline-block mr-1 h-4 w-4 text-muted-foreground" />
+                Contact info is locked.
               </p>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button onClick={handleUnlock}>
+              <Button onClick={handleUnlock} variant="default">
                 <Lock className="mr-2 h-4 w-4" />
                 Unlock (Tokens Left: {tokensLeft})
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{candidate.email}</span>
+                <span className="text-sm">{candidate.email}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Unlock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{candidate.phone}</span>
+                <PhoneCall className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{candidate.phone}</span>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Performance Stats (optional) */}
+      {/* Performance Stats */}
       {candidate.performanceStats && (
         <Card>
           <CardHeader>
             <CardTitle>Performance Overview</CardTitle>
             <CardDescription>
-              Stats from candidate’s completed interviews
+              Candidate’s interview metrics (AI-based or real interviews)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-6">
               <div>
                 <p className="text-sm text-muted-foreground">
                   Interviews Completed
@@ -154,7 +163,8 @@ export default function CandidateDetailsPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Highest Skill</p>
-                <Badge variant="outline">
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Star className="h-4 w-4 text-yellow-500" />
                   {candidate.performanceStats.highestSkill}
                 </Badge>
               </div>
@@ -169,15 +179,17 @@ export default function CandidateDetailsPage() {
         </Card>
       )}
 
-      {/* Employer’s Private Notes (optional) */}
+      {/* Employer’s Private Notes */}
       <Card>
         <CardHeader>
           <CardTitle>Your Private Notes</CardTitle>
-          <CardDescription>Only visible to you (organization).</CardDescription>
+          <CardDescription>
+            Only visible to your organization.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Textarea
-            placeholder="Write your notes here..."
+            placeholder="Write any private notes here..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
@@ -195,7 +207,7 @@ export default function CandidateDetailsPage() {
         <CardHeader>
           <CardTitle>Actions</CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-2">
+        <CardContent className="flex gap-2 flex-wrap">
           <Button onClick={handleInviteToInterview}>Invite to Interview</Button>
           <Button variant="outline" onClick={handleRequestMoreInfo}>
             Request More Info

@@ -1,5 +1,9 @@
 'use client';
 
+import { ChevronLeft, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,10 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { CandidateRow } from '@/types';
-import { ChevronLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { CandidateRow, CandidateSkillsStats } from '@/types';
 
 const mockCandidates: CandidateRow[] = [
   {
@@ -27,19 +30,19 @@ const mockCandidates: CandidateRow[] = [
     summary: 'Enthusiastic engineer with strong communication skills.',
     role: 'Software Engineer',
     industry: 'Tech',
-    interview_skill_stats: [
+    practice_skill_stats: [
       { id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
       { id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
       { id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
     ],
-    practice_skill_stats: [
-      { id: 'p1', skill: 'Problem Solving', avg_score: 89, previous_avg: 87 },
+    interview_skill_stats: [
+      { id: 'p1', skill: 'Behavioural', avg_score: 89, previous_avg: 87 },
     ],
     created_at: '2024-04-29T10:00:00Z',
     full_name: 'Alice Anderson',
     avatar_url:
       'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'jonjfjegji',
+    email: 'alice@example.com',
   },
   {
     id: 'c2',
@@ -49,19 +52,19 @@ const mockCandidates: CandidateRow[] = [
     summary: 'Full-stack developer with a focus on back-end optimization.',
     role: 'Full-Stack Developer',
     industry: 'Tech',
-    interview_skill_stats: [
-      { id: '4', skill: 'Problem Solving', avg_score: 85, previous_avg: 82 },
-      { id: '5', skill: 'Communication', avg_score: 80, previous_avg: 78 },
-    ],
     practice_skill_stats: [
       { id: 'p2', skill: 'Problem Solving', avg_score: 83, previous_avg: 80 },
       { id: 'p3', skill: 'Communication', avg_score: 81, previous_avg: 76 },
+    ],
+    interview_skill_stats: [
+      { id: '4', skill: 'Behavioural', avg_score: 85, previous_avg: 82 },
+      { id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
     ],
     created_at: '2024-04-20T09:30:00Z',
     full_name: 'Bob Brown',
     avatar_url:
       'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'jonjfjegji',
+    email: 'bob@example.com',
   },
   {
     id: 'c3',
@@ -72,10 +75,10 @@ const mockCandidates: CandidateRow[] = [
     role: 'Data Analyst',
     industry: 'Finance',
     interview_skill_stats: [
-      { id: '6', skill: 'Decision Making', avg_score: 88, previous_avg: 85 },
+      { id: '6', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
       {
         id: '7',
-        skill: 'Analytical Thinking',
+        skill: 'Technical',
         avg_score: 90,
         previous_avg: 88,
       },
@@ -85,7 +88,7 @@ const mockCandidates: CandidateRow[] = [
     full_name: 'Charlie Davis',
     avatar_url:
       'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'jonjfjegji',
+    email: 'charlie@example.com',
   },
   {
     id: 'c4',
@@ -95,18 +98,18 @@ const mockCandidates: CandidateRow[] = [
     summary: 'Problem solver with a knack for creative solutions.',
     role: 'Product Manager',
     industry: 'Tech',
-    interview_skill_stats: [
+    practice_skill_stats: [
       { id: '8', skill: 'Problem Solving', avg_score: 90, previous_avg: 85 },
       { id: '9', skill: 'Leadership', avg_score: 87, previous_avg: 86 },
     ],
-    practice_skill_stats: [
-      { id: 'p4', skill: 'Leadership', avg_score: 88, previous_avg: 84 },
+    interview_skill_stats: [
+      { id: 'p4', skill: 'Behavioural', avg_score: 88, previous_avg: 84 },
     ],
     created_at: '2024-04-25T11:45:00Z',
     full_name: 'Diana Evans',
     avatar_url:
       'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'jonjfjegji',
+    email: 'diana@example.com',
   },
   {
     id: 'c5',
@@ -116,68 +119,194 @@ const mockCandidates: CandidateRow[] = [
     summary: 'Focused on continuous improvement and quick learning.',
     role: 'Software Engineer',
     industry: 'Tech',
-    interview_skill_stats: [
+    practice_skill_stats: [
       { id: '10', skill: 'Adaptability', avg_score: 92, previous_avg: 90 },
       { id: '11', skill: 'Communication', avg_score: 84, previous_avg: 80 },
     ],
-    practice_skill_stats: [
-      { id: 'p5', skill: 'Adaptability', avg_score: 88, previous_avg: 85 },
+    interview_skill_stats: [
+      { id: 'p5', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
     ],
     created_at: '2024-04-27T07:00:00Z',
     full_name: 'Erin Green',
     avatar_url:
       'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'jonjfjegji',
+    email: 'erin@example.com',
   },
 ];
 
+interface CandidatesListPageProps {
+  organizationId: string;
+}
+
 export default function CandidatesListPage({
   organizationId,
-}: {
-  organizationId: string;
-}) {
+}: CandidatesListPageProps) {
   const [candidates, setCandidates] = useState<CandidateRow[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [filteredCandidates, setFilteredCandidates] = useState<CandidateRow[]>(
     [],
   );
-  const router = useRouter();
+  const [mode, setMode] = useState<'interview' | 'practice'>('interview');
 
+  const [searchQuery, setSearchQuery] = useState('');
+  // We add skill selection + minScore
+  const [skillFilter, setSkillFilter] = useState('');
+  const [minScore, setMinScore] = useState<number>(0);
+
+  const router = useRouter();
+  // On mount, load the candidates
   useEffect(() => {
-    // In a real app, fetch candidates from your API or DB
     setCandidates(mockCandidates);
   }, []);
 
+  // Helper: Returns the candidate’s skill score for the selected mode
+  function getCandidateSkillScore(
+    cand: CandidateRow,
+    skill: string,
+  ): number | null {
+    const stats =
+      mode === 'interview'
+        ? cand.interview_skill_stats
+        : cand.practice_skill_stats;
+    const found = stats.find((s) => s.skill === skill);
+    return found ? found.avg_score : null;
+  }
+
+  // Helper: Compute candidate's best skill average from the selected mode stats
+  function getBestSkillAvg(cand: CandidateRow): number {
+    const stats =
+      mode === 'interview'
+        ? cand.interview_skill_stats
+        : cand.practice_skill_stats;
+    if (!stats || stats.length === 0) return 0;
+    return stats.reduce((max, s) => Math.max(max, s.avg_score), 0);
+  }
+
+  // Calculate unlock cost based on best skill average.
+  function getUnlockCost(cand: CandidateRow): number {
+    const bestAvg = getBestSkillAvg(cand);
+    if (bestAvg >= 90) return 3;
+    if (bestAvg >= 80) return 2;
+    return 1;
+  }
   useEffect(() => {
-    const filtered = candidates.filter(
-      (candidate) =>
-        candidate.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        candidate.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        candidate.role.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    // 1) Filter out candidates that don’t have any stats for the selected mode.
+    let filtered = candidates.filter((cand) => {
+      if (mode === 'interview' && cand.interview_skill_stats.length === 0)
+        return false;
+      if (mode === 'practice' && cand.practice_skill_stats.length === 0)
+        return false;
+      return true;
+    });
+
+    // 2) Basic text search on name, role, or industry.
+    if (searchQuery.trim() !== '') {
+      filtered = filtered.filter((c) => {
+        const fullStr = c.full_name + c.role + c.industry;
+        return fullStr.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    }
+
+    // 3) If a skill filter is chosen, filter by that skill and minimum score.
+    if (skillFilter.trim() !== '') {
+      filtered = filtered.filter((cand) => {
+        const score = getCandidateSkillScore(cand, skillFilter);
+        return score !== null && score >= minScore;
+      });
+    }
+
     setFilteredCandidates(filtered);
-  }, [searchQuery, candidates]);
+  }, [searchQuery, skillFilter, minScore, candidates, mode]);
 
   function handleViewCandidate(candidateId: string) {
     router.push(`/employer/${organizationId}/c/${candidateId}`);
   }
 
+  // Use the mode state from your component in this helper.
+  function getBestSkillObject(cand: CandidateRow): CandidateSkillsStats | null {
+    const stats =
+      mode === 'interview'
+        ? cand.interview_skill_stats
+        : cand.practice_skill_stats;
+    if (stats.length === 0) return null;
+    let best = stats[0];
+    for (const s of stats) {
+      if (s.avg_score > best.avg_score) {
+        best = s;
+      }
+    }
+    return best;
+  }
+
+  // Example of "Unlock" flow
+  function handleUnlockCandidate(candidate: CandidateRow) {
+    const cost = getUnlockCost(candidate);
+    // In real code: call server action to spend tokens
+    alert(
+      `Unlocking ${candidate.full_name} for cost of ${cost} tokens (mock)!`,
+    );
+  }
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header and Search */}
-      <div className="flex items-center space-x-4 mb-4">
+    <div className="p-6 max-w-7xl mx-auto space-y-4">
+      {/* Tabs for Mode Selection */}
+      <Tabs
+        defaultValue="practice"
+        onValueChange={(value) => setMode(value as 'interview' | 'practice')}
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="practice">Practice Mode</TabsTrigger>
+          <TabsTrigger value="interview">Interview Mode</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      {/* Header / Nav / Filter */}
+      <div className="flex items-center h-full justify-between  gap-4 space-x-4">
         <button
           onClick={() => window.history.back()}
-          className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+          className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 p-1"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
         <Input
-          placeholder="Search candidates, industry, job title..."
+          placeholder="Search name, role, industry..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-lg"
         />
+
+        {/* Skill + Min Score Filter Row */}
+        <div className="flex flex-col">
+          <label className="text-sm text-muted-foreground mb-1">
+            Skill Filter
+          </label>
+          <select
+            value={skillFilter}
+            onChange={(e) => setSkillFilter(e.target.value)}
+            className="border border-gray-300 bg-white dark:bg-gray-800 rounded-md px-3 py-2 focus:outline-none text-sm"
+          >
+            <option value="">All Skills</option>
+            <option value="Problem Solving">Problem Solving</option>
+            <option value="Communication">Communication</option>
+            <option value="Teamwork">Teamwork</option>
+            <option value="Leadership">Leadership</option>
+            <option value="Adaptability">Adaptability</option>
+            <option value="Decision Making">Decision Making</option>
+            <option value="Analytical Thinking">Analytical Thinking</option>
+            {/* Add any other skill in your dataset */}
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm text-muted-foreground mb-1">
+            Minimum Score
+          </label>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={minScore}
+            onChange={(e) => setMinScore(Number(e.target.value))}
+            className="max-w-[100px]"
+          />
+        </div>
       </div>
 
       {/* Candidate Results Table */}
@@ -186,65 +315,100 @@ export default function CandidatesListPage({
           <CardTitle>Candidate Results</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Job Title</TableHead>
-                <TableHead>Overall Average Score</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Industry</TableHead>
-                <TableHead>Top Skill</TableHead>
-                <TableHead>Tokens Cost</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCandidates.map((candidate) => (
-                <TableRow key={candidate.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage
-                          src={candidate.avatar_url}
-                          alt={candidate.full_name}
-                        />
-                        <AvatarFallback>
-                          {candidate.full_name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      {candidate.full_name}
-                    </div>
-                  </TableCell>
-                  <TableCell>{candidate.role}</TableCell>
-                  <TableCell>Skill%</TableCell>
-                  <TableCell>
-                    {candidate.city}, {candidate.country}
-                  </TableCell>
-                  <TableCell>{candidate.industry}</TableCell>
-                  <TableCell></TableCell>
-                  <TableCell>
-                    <Badge className="bg-purple-500 text-white">
-                      Maybe Calculate cost based off rank or skill?
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewCandidate(candidate.id)}
-                    >
-                      Message
-                    </Button>
-                  </TableCell>
+          {filteredCandidates.length === 0 ? (
+            <p className="text-sm text-gray-500">No candidates found.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Job Title</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Industry</TableHead>
+                  <TableHead>Top Skill</TableHead>
+                  <TableHead>Cost (Tokens)</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredCandidates.map((candidate) => {
+                  const cost = getUnlockCost(candidate);
+                  return (
+                    <TableRow key={candidate.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage
+                              src={candidate.avatar_url}
+                              alt={candidate.full_name}
+                            />
+                            <AvatarFallback>
+                              {candidate.full_name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {candidate.full_name}
+                        </div>
+                      </TableCell>
+                      <TableCell>{candidate.role}</TableCell>
+                      <TableCell>
+                        {candidate.city}, {candidate.country}
+                      </TableCell>
+                      <TableCell>{candidate.industry}</TableCell>
+                      <TableCell>
+                        <TableCell className="flex justify-center items-center">
+                          {(() => {
+                            const bestSkill = getBestSkillObject(candidate);
+                            if (!bestSkill) {
+                              return (
+                                <span className="text-sm text-muted-foreground"></span>
+                              );
+                            }
+
+                            return (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="gap-1">
+                                  <Star className="h-4 w-4 text-yellow-500" />
+                                  {bestSkill.skill}
+                                </Badge>
+                                {/* <span className="text-sm text-foreground">({bestSkill.avg_score})</span> */}
+                              </div>
+                            );
+                          })()}
+                        </TableCell>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {cost} {cost > 1 ? 'tokens' : 'token'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUnlockCandidate(candidate)}
+                          >
+                            Unlock
+                          </Button>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleViewCandidate(candidate.id)}
+                          >
+                            View
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

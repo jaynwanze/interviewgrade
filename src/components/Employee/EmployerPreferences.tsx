@@ -1,10 +1,18 @@
-// CandidatePreferences.tsx (example)
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { saveEmployerPreferences } from '@/data/user/employee';
+import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import { useState } from 'react';
 
 type CandidatePreferencesForm = {
@@ -13,11 +21,7 @@ type CandidatePreferencesForm = {
   skills: string;
 };
 
-export function CandidatePreferences({
-  onSuccess,
-}: {
-  onSuccess: () => void;
-}) {
+export function EmployerPreferences({ onSuccess }: { onSuccess: () => void }) {
   const [formValues, setFormValues] = useState<CandidatePreferencesForm>({
     location: '',
     industry: '',
@@ -26,26 +30,30 @@ export function CandidatePreferences({
   const [submitting, setSubmitting] = useState(false);
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) {
     setFormValues((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   }
+  const { mutate } = useSAToastMutation(
+    async (preferences: CandidatePreferencesForm) =>
+      await saveEmployerPreferences(preferences, { isOnboardingFlow: true }),
+    {
+      successMessage: 'Preferences saved!',
+      errorMessage: 'Failed to save employer preferences',
+      onSuccess: () => {
+        onSuccess();
+      },
+    },
+  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-
-    // In real code, you'd call a "saveEmployerCandidatePrefsAction" or similar.
-    // For now, just mock it:
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Maybe update "onboardingHasSetCandidatePrefs = true" in the user's metadata
-    // Once done:
+    mutate(formValues);
     setSubmitting(false);
-    onSuccess();
   }
 
   return (

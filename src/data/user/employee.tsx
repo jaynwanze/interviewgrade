@@ -1,17 +1,19 @@
 'use server';
-'use server';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
-  NormalizedSubscription,
+  CandidatePreferences,
   Product,
+  SAPayload,
   StripeCheckoutSessionDetails,
-  Table
+  Table,
 } from '@/types';
 import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { stripe } from '@/utils/stripe';
+import { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { createOrRetrieveEmployeeCustomer } from '../admin/stripe';
+import { refreshSessionAction } from './session';
 import { getEmployeeUserProfile } from './user';
 
 export async function unlockCandidateAction(
@@ -316,3 +318,99 @@ export const retriveStripeCheckoutSessionPurchaseDetails = async (
   };
 };
 
+export const saveEmployerPreferences = async (
+  {
+    location,
+    industry,
+    skills,
+  }: {
+    location: string;
+    industry: string;
+    skills: string;
+  },
+  {
+    isOnboardingFlow = false,
+  }: {
+    isOnboardingFlow?: boolean;
+  } = {},
+): Promise<SAPayload<Table<'employees'>>> => {
+  'use server';
+  const supabaseClient = createSupabaseUserServerActionClient();
+  const user = await serverGetLoggedInUser();
+
+  if (!user) {
+    return {
+      status: 'error',
+      message: 'User not found',
+    };
+  }
+  let updatedEmployer: Table<'employees'> | null = null;
+  const candidatePreferences: CandidatePreferences = {
+    location,
+    industry,
+    skills,
+  };
+  try {
+    const { data, error } = await supabaseClient
+      .from('employees')
+      .update({ candidate_preferences: candidatePreferences })
+      .eq('id', user.id)
+      .select()
+      .single();
+  
+    if (error) {
+      return {
+        status: 'error',
+        message: error.message,
+      };
+    }
+
+    if (!data) {
+      return {
+        status: 'error',
+        message: 'No employer found',
+      };
+    }
+
+    updatedEmployer = data;
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.message,
+    };
+  }
+
+  if (!updatedEmployer) {
+    return {
+      status: 'error',
+      message: 'Failed to update employer profile',
+    };
+  }
+
+  if (isOnboardingFlow) {
+    const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
+      onboardingHasSetEmployerPrefs: true,
+    };
+
+    const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
+      data: updateUserMetadataPayload,
+    });
+
+    if (updateUserMetadataResponse.error) {
+      return {
+        status: 'error',
+        message: updateUserMetadataResponse.error.message,
+      };
+    }
+
+    const refreshSessionResponse = await refreshSessionAction();
+    if (refreshSessionResponse.status === 'error') {
+      return refreshSessionResponse;
+    }
+  }
+
+  return {
+    status: 'success',
+    data: updatedEmployer,
+  };
+};

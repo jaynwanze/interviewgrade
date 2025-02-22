@@ -2,10 +2,8 @@
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
-import type { Enum, NormalizedSubscription, SAPayload, Table } from '@/types';
-import { toSiteURL } from '@/utils/helpers';
+import type { Enum, SAPayload, Table } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import { stripe } from '@/utils/stripe';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { revalidatePath } from 'next/cache';
 import { v4 as uuid } from 'uuid';
@@ -182,7 +180,7 @@ export const getLoggedInUserOrganizationRole = async (
     throw new Error('User is not a member of this organization');
   }
 
-  return data.member_role;
+  return data.member_role as Enum<'organization_member_role'>;
 };
 
 export const updateOrganizationTitle = async (

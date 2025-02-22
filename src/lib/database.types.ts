@@ -1,3 +1,4 @@
+import { CandidatePreferences } from '@/types'
 import { CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
@@ -93,21 +94,23 @@ export type Database = {
       employees: {
         Row: {
           id: string
-          default_organization_id: string
           token_id: string
           stripe_customer_id: string
+          default_organization: string
+          candidate_preferences: CandidatePreferences
         }
         Insert: {
-          id: string
-          default_organization_id: string
           token_id: string
           stripe_customer_id: string
+          default_organization: string
+          candidate_preferences?: CandidatePreferences
         }
         Update: {
           id?: string
-          default_organization_id?: string
+          default_organization?: string
           token_id?: string
           stripe_customer_id?: string
+          candidate_preferences?: CandidatePreferences
         }
         Relationships: [
           {
@@ -124,6 +127,13 @@ export type Database = {
             referencedRelation: "tokens"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "employees_default_organization_fkey"
+            columns: ["default_organization"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          }
         ]
       }
       candidates: {
@@ -141,7 +151,6 @@ export type Database = {
 
         }
         Insert: {
-          id: string
           city: string
           country: string
           phone_number: string
@@ -182,13 +191,13 @@ export type Database = {
           created_by: string
         }
         Insert: {
-          id: string
           title: string
-          created_at: string
+          created_at?: string
+          created_by: string
         }
         Update: {
           id?: string
-          name?: string
+          title?: string
           created_at?: string
           created_by?: string
         }
@@ -212,11 +221,10 @@ export type Database = {
           created_at: string
         }
         Insert: {
-          id: string
           organization_id: string
           member_id: string
           member_role: string
-          created_at: string
+          created_at?: string
         }
         Update: {
           id?: string
@@ -304,7 +312,6 @@ export type Database = {
           payment_method: string
         }
         Insert: {
-          id: string
           billing_address: string
           payment_method: string
         }

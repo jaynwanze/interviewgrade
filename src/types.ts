@@ -73,6 +73,13 @@ export interface CandidateRow {
   email: string;
   avatar_url?: string;
 }
+
+export type CandidatePreferences = { 
+  location: string;
+  industry: string;
+  skills: string;
+};
+
 export type CandidateSkillsStats = {
   id: string;
   skill: string;

@@ -4,7 +4,9 @@ export const authUserMetadataSchema = z
   .object({
     onboardingHasAcceptedTerms: z.boolean().default(false),
     onboardingHasCompletedProfile: z.boolean().default(false),
+    onboardingHasCompletedCandidateDetails: z.boolean().default(false),
     onboardingHasCreatedOrganization: z.boolean().default(false),
+    onboardingHasSetEmployerPrefs: z.boolean().default(false),
   })
   .passthrough();
 

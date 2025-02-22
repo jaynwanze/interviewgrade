@@ -155,24 +155,24 @@ export const updateUserProfileNameAndAvatar = async (
       message: error.message,
     };
   }
-  if (isOnboardingFlow && user.user_metadata.userType === 'candidate') {
-    const updatedCandidateProfile = await updateCandidateProfileDetailsAction({
-      currentUser: user,
-      city,
-      country,
-      phone_number: phoneNumber,
-      summary,
-      role,
-      industry,
-    });
+  // if (isOnboardingFlow && user.user_metadata.userType === 'candidate') {
+  //   const updatedCandidateProfile = await updateCandidateProfileDetailsAction({
+  //     currentUser: user,
+  //     city,
+  //     country,
+  //     phone_number: phoneNumber,
+  //     summary,
+  //     role,
+  //     industry,
+  //   });
 
-    if (!updatedCandidateProfile) {
-      return {
-        status: 'error',
-        message: 'Failed to update candidate profile',
-      };
-    }
-  }
+  //   if (!updatedCandidateProfile) {
+  //     return {
+  //       status: 'error',
+  //       message: 'Failed to update candidate profile',
+  //     };
+  //   }
+  // }
 
   if (isOnboardingFlow) {
     const updateUserMetadataPayload: Partial<AuthUserMetadata> = {

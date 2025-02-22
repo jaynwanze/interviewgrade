@@ -11,11 +11,12 @@ ALTER TABLE "public"."organization_members" OWNER TO "postgres";
 --
 
 CREATE TABLE "public"."organizations" (
-  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "title" character varying DEFAULT 'Test Organization'::character varying NOT NULL,
-  "created_by" "uuid" NOT NULL
-);
+  "created_by" "uuid" NOT NULL,
+  "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
+  );
+  
 ALTER TABLE "public"."organizations" OWNER TO "postgres";
 
 --
@@ -82,7 +83,8 @@ CREATE TABLE "public"."employees" (
   "id" "uuid" NOT NULL,
   "default_organization" "uuid",
   "token_id" "uuid" NOT NULL,
-  "stripe_customer_id" character varying
+  "stripe_customer_id" character varying,
+  "candidate_preferences" "jsonb",
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
 
@@ -91,14 +93,13 @@ ALTER TABLE "public"."employees" OWNER TO "postgres";
 -- Name: employee_candidate_unlocks employee_candidates_unlocks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-CREATE TABLE "public"."employeee_candidate_unlocks"
-(
+CREATE TABLE "public"."employee_candidate_unlocks" (
   "employee_id" "uuid" NOT NULL,
   "candidate_id" "uuid" NOT NULL,
-  "created_at " timestamp with time zone DEFAULT "now"() NOT NULL
+  "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
 
-ALTER TABLE "public"."employees" OWNER TO "postgres";
+ALTER TABLE "public"."employee_candidate_unlocks" OWNER TO "postgres";
 --
 -- Name: products; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -554,6 +555,12 @@ ADD CONSTRAINT "employees_default_organization_fkey" FOREIGN KEY ("default_organ
 
 ALTER TABLE ONLY "public"."employees"
 ADD CONSTRAINT "employees_token_id_fkey" FOREIGN KEY ("token_id") REFERENCES "tokens"("id") ON DELETE CASCADE;
+--
+-- Name : employees employee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."employees"
+ADD CONSTRAINT "employee_id_fkey" FOREIGN KEY ("id") REFERENCES "user_profiles"("id") ON DELETE CASCADE;
 --
 -- Name: candidate candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --

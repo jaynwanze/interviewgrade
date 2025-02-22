@@ -21,8 +21,26 @@ const protectedPagePrefixes = [
   `/render/(.*)?`,
   `/dashboard/candidate`,
   `/dashboard/employer`,
+  '/candidate/(/.*)',
+  '/employer/(/.*)',
   onboardingPaths,
 ];
+
+// For candidate routes:
+function isCandidateRoute(pathname: string) {
+  return (
+    pathname.startsWith('/candidate') ||
+    pathname.startsWith('/dashboard/candidate')
+  );
+}
+
+// For employer routes:
+function isEmployerRoute(pathname: string) {
+  return (
+    pathname.startsWith('/employer') ||
+    pathname.startsWith('/dashboard/employer')
+  );
+}
 
 function isProtectedPage(pathname: string) {
   // is exact match or starts with a protected page prefix
@@ -41,17 +59,26 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
     const {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
+      onboardingHasCompletedCandidateDetails,
       onboardingHasCreatedOrganization,
+      onboardingHasSetEmployerPrefs,
     } = userMetadata;
 
     // Check if user is a candidate
     const isCandidate = userMetadata.userType === 'candidate'; // Assuming userType is part of user metadata
-    if (
-      !onboardingHasAcceptedTerms ||
-      !onboardingHasCompletedProfile ||
-      (!isCandidate && !onboardingHasCreatedOrganization) // Skip check for candidates
-    ) {
-      return true;
+    if (isCandidate) {
+      return (
+        !onboardingHasAcceptedTerms ||
+        !onboardingHasCompletedProfile ||
+        !onboardingHasCompletedCandidateDetails
+      );
+    } else if (userMetadata.userType === 'employer') {
+      return (
+        !onboardingHasAcceptedTerms ||
+        !onboardingHasCompletedProfile ||
+        !onboardingHasCreatedOrganization ||
+        !onboardingHasSetEmployerPrefs
+      );
     }
   }
   return false;
@@ -64,20 +91,31 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
-  if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
-    return NextResponse.redirect(toSiteURL('/onboarding'));
-  }
-  if (isProtectedPage(req.nextUrl.pathname) && maybeUser) {
-    // user is possibly logged in, but lets validate session
-    const user = await supabase.auth.getUser();
-    if (user.error) {
-      return NextResponse.redirect(toSiteURL('/candidate/login'));
-    }
-  }
+
+  // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {
     return NextResponse.redirect(toSiteURL('/candidate/login'));
   }
-  return res;
+
+  // If user is present, parse their user type
+  if (maybeUser) {
+    const userMetadata = authUserMetadataSchema.parse(maybeUser.user_metadata);
+    const userType = userMetadata.userType; // 'candidate' or 'employer', etc.
+
+    // If it’s a candidate route but user is employer => redirect
+    if (isCandidateRoute(req.nextUrl.pathname) && userType !== 'candidate') {
+      return NextResponse.redirect(toSiteURL('/employer'));
+    }
+    // If it’s an employer route but user is candidate => redirect
+    if (isEmployerRoute(req.nextUrl.pathname) && userType !== 'employer') {
+      return NextResponse.redirect(toSiteURL('/candidate'));
+    }
+
+    if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
+      return NextResponse.redirect(toSiteURL('/onboarding'));
+    }
+    return res;
+  }
 }
 
 export const config = {

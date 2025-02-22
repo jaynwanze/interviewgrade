@@ -1,5 +1,5 @@
 'use client';
-import { CandidatePreferences } from '@/components/Employee/CandidatePreferences';
+import { EmployerPreferences } from '@/components/Employee/EmployerPreferences';
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +13,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { updateCandidateDetails } from '@/data/user/candidate';
 import { createOrganization } from '@/data/user/organizations';
 // import { createOrganization } from '@/data/user/organizations';
 import {
@@ -168,12 +170,6 @@ export function ProfileUpdate({
 
   return (
     <>
-      {userType === 'candidate' && (
-        <span className="text-muted-foreground">
-          Candidate profile creation
-        </span>
-      )}
-      (
       <Card className="w-full max-w-[400px]">
         <form
           onSubmit={(e) => {
@@ -271,8 +267,174 @@ export function ProfileUpdate({
           </CardFooter>
         </form>
       </Card>
-      )
     </>
+  );
+}
+const candidateDetailsSchema = z.object({
+  phone_number: z.string().min(1, 'Phone is required'),
+  city: z.string().min(1, 'City is required'),
+  country: z.string().min(1, 'Country is required'),
+  role: z.string().min(1, 'Role is required'),
+  industry: z.string().min(1, 'Industry is required'),
+  summary: z.string().optional(),
+});
+
+type CandidateDetailsSchema = z.infer<typeof candidateDetailsSchema>;
+
+export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<CandidateDetailsSchema>({
+    resolver: zodResolver(candidateDetailsSchema),
+    defaultValues: {
+      phone_number: '',
+      city: '',
+      country: '',
+      role: '',
+      industry: '',
+      summary: '',
+    },
+  });
+
+  const { mutate: saveCandidateDetails, isLoading } = useSAToastMutation(
+    async (data: CandidateDetailsSchema) => {
+      // Call your server action with `isOnboardingFlow = true`.
+      return await updateCandidateDetails(
+        {
+          city: data.city,
+          country: data.country,
+          phoneNumber: data.phone_number,
+          summary: data.summary,
+          role: data.role,
+          industry: data.industry,
+        },
+        { isOnboardingFlow: true },
+      );
+    },
+    {
+      successMessage: 'Candidate details updated!',
+      errorMessage: 'Failed to update candidate details',
+      onSuccess: () => {
+        // If the server action is successful, call onSuccess to advance flow
+        onSuccess();
+      },
+    },
+  );
+ 
+  return (
+    <Card className="max-w-xl">
+      <form
+        onSubmit={handleSubmit((formData) => {
+          saveCandidateDetails(formData);
+        })}
+      >
+        <CardHeader>
+          <CardTitle>Candidate Details</CardTitle>
+          <CardDescription>
+            Employers will see this info when viewing your profile
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* city + country */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                placeholder="e.g. New York"
+                {...register('city')}
+              />
+              {errors.city && (
+                <p className="text-xs text-red-600">
+                  {errors.city.message}
+                </p>
+              )}
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                placeholder="e.g. United States"
+                {...register('country')}
+              />
+              {errors.country && (
+                <p className="text-xs text-red-600">
+                  {errors.country.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* phone + role */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                placeholder="(555) 123-4567"
+                {...register('phone_number')}
+              />
+              {errors.phone_number && (
+                <p className="text-xs text-red-600">
+                  {errors.phone_number.message}
+                </p>
+              )}
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="role">Role</Label>
+              <Input
+                id="role"
+                placeholder="e.g. Software Engineer"
+                {...register('role')}
+              />
+              {errors.role && (
+                <p className="text-xs text-red-600">
+                  {errors.role.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* industry + summary */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <Label htmlFor="industry">Industry</Label>
+              <Input
+                id="industry"
+                placeholder="e.g. Tech"
+                {...register('industry')}
+              />
+              {errors.industry && (
+                <p className="text-xs text-red-600">
+                  {errors.industry.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="summary">Summary</Label>
+            <Textarea
+              id="summary"
+              placeholder="Write a short summary about your experience or background..."
+              {...register('summary')}
+            />
+            {errors.summary && (
+              <p className="text-xs text-red-600">
+                {errors.summary.message}
+              </p>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" disabled={!isValid || isLoading}>
+            {isLoading ? 'Saving...' : 'Save'}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }
 
@@ -350,8 +512,9 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
 type FLOW_STATE =
   | 'TERMS'
   | 'PROFILE'
+  | 'CANDIDATE_DETAILS'
   | 'ORGANIZATION'
-  | 'CANDIDATE_PREFS'
+  | 'EMPLOYER_PREFS'
   | 'COMPLETE';
 
 type UserOnboardingFlowProps = {
@@ -368,8 +531,9 @@ function getInitialFlowState(
   const {
     onboardingHasAcceptedTerms,
     onboardingHasCompletedProfile,
+    onboardingHasCompletedCandidateDetails,
     onboardingHasCreatedOrganization,
-    onboardingHasSetCandidatePrefs,
+    onboardingHasSetEmployerPrefs,
   } = onboardingStatus;
 
   if (!onboardingHasAcceptedTerms && flowStates.includes('TERMS')) {
@@ -379,6 +543,12 @@ function getInitialFlowState(
   if (!onboardingHasCompletedProfile && flowStates.includes('PROFILE')) {
     return 'PROFILE';
   }
+  if (
+    !onboardingHasCompletedCandidateDetails &&
+    flowStates.includes('CANDIDATE_DETAILS')
+  ) {
+    return 'CANDIDATE_DETAILS';
+  }
 
   if (
     !onboardingHasCreatedOrganization &&
@@ -386,11 +556,8 @@ function getInitialFlowState(
   ) {
     return 'ORGANIZATION';
   }
-  if (
-    !onboardingHasSetCandidatePrefs &&
-    flowStates.includes('CANDIDATE_PREFS')
-  ) {
-    return 'CANDIDATE_PREFS';
+  if (!onboardingHasSetEmployerPrefs && flowStates.includes('EMPLOYER_PREFS')) {
+    return 'EMPLOYER_PREFS';
   }
   return 'COMPLETE';
 }
@@ -402,8 +569,9 @@ function getAllFlowStates(
   const {
     onboardingHasAcceptedTerms,
     onboardingHasCompletedProfile,
+    onboardingHasCompletedCandidateDetails,
     onboardingHasCreatedOrganization,
-    onboardingHasSetCandidatePrefs,
+    onboardingHasSetEmployerPrefs,
   } = onboardingStatus;
   const flowStates: FLOW_STATE[] = [];
   if (!onboardingHasAcceptedTerms) {
@@ -412,11 +580,14 @@ function getAllFlowStates(
   if (!onboardingHasCompletedProfile) {
     flowStates.push('PROFILE');
   }
+  if (!onboardingHasCompletedCandidateDetails && userType === 'candidate') {
+    flowStates.push('CANDIDATE_DETAILS');
+  }
   if (!onboardingHasCreatedOrganization && userType === 'employer') {
     flowStates.push('ORGANIZATION');
   }
-  if (!onboardingHasSetCandidatePrefs && userType === 'employer') {
-    flowStates.push('CANDIDATE_PREFS');
+  if (!onboardingHasSetEmployerPrefs && userType === 'employer') {
+    flowStates.push('EMPLOYER_PREFS');
   }
   flowStates.push('COMPLETE');
   return flowStates;
@@ -447,6 +618,7 @@ export function UserOnboardingFlow({
   const router = useRouter();
 
   useEffect(() => {
+    console.log('currentStep', currentStep);
     if (currentStep === 'COMPLETE') {
       // Redirect based on user type
       if (userType === 'candidate') {
@@ -468,12 +640,15 @@ export function UserOnboardingFlow({
           onSuccess={nextStep}
         />
       )}
+      {currentStep === 'CANDIDATE_DETAILS' && (
+        <CandidateDetailsForm onSuccess={nextStep} />
+      )}
       {currentStep === 'ORGANIZATION' && (
         <OrganizationCreation onSuccess={nextStep} />
       )}
       {/* NEW STEP */}
-      {currentStep === 'CANDIDATE_PREFS' && (
-        <CandidatePreferences onSuccess={nextStep} />
+      {currentStep === 'EMPLOYER_PREFS' && (
+        <EmployerPreferences onSuccess={nextStep} />
       )}
     </>
   );

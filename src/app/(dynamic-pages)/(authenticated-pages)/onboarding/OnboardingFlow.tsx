@@ -1,5 +1,5 @@
 'use client';
-import { EmployerPreferences } from '@/components/Employee/EmployerPreferences';
+import { EmployerPreferences } from '@/app/(dynamic-pages)/(authenticated-pages)/onboarding/EmployerPreferences';
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,6 +37,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { TutorialPracticeStep } from './TutorialPracticeStep';
 const TermsDetailDialog = dynamic(
   () => import('./TermsDetailDialog').then((mod) => mod.TermsDetailDialog),
   {
@@ -513,6 +514,7 @@ type FLOW_STATE =
   | 'TERMS'
   | 'PROFILE'
   | 'CANDIDATE_DETAILS'
+  | 'CANDIDATE_TUTORIAL_QUESTION'
   | 'ORGANIZATION'
   | 'EMPLOYER_PREFS'
   | 'COMPLETE';
@@ -549,7 +551,12 @@ function getInitialFlowState(
   ) {
     return 'CANDIDATE_DETAILS';
   }
-
+  if (
+    !onboardingStatus.onboardingHasDoneTutorial &&
+    flowStates.includes('CANDIDATE_TUTORIAL_QUESTION')
+  ) {
+    return 'CANDIDATE_TUTORIAL_QUESTION';
+  }
   if (
     !onboardingHasCreatedOrganization &&
     flowStates.includes('ORGANIZATION')
@@ -582,6 +589,9 @@ function getAllFlowStates(
   }
   if (!onboardingHasCompletedCandidateDetails && userType === 'candidate') {
     flowStates.push('CANDIDATE_DETAILS');
+  }
+  if (!onboardingStatus.onboardingHasDoneTutorial && userType === 'candidate') {
+    flowStates.push('CANDIDATE_TUTORIAL_QUESTION');
   }
   if (!onboardingHasCreatedOrganization && userType === 'employer') {
     flowStates.push('ORGANIZATION');
@@ -642,6 +652,9 @@ export function UserOnboardingFlow({
       )}
       {currentStep === 'CANDIDATE_DETAILS' && (
         <CandidateDetailsForm onSuccess={nextStep} />
+      )}
+      {currentStep === 'CANDIDATE_TUTORIAL_QUESTION' && (
+        <TutorialPracticeStep />
       )}
       {currentStep === 'ORGANIZATION' && (
         <OrganizationCreation onSuccess={nextStep} />

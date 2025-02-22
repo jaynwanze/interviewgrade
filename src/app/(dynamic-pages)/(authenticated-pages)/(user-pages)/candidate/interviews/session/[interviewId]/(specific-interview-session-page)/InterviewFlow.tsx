@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotifications } from '@/contexts/NotificationsContext';
+import { markTutorialAsDoneAction } from '@/data/user/candidate';
 import {
   getInterview,
   getInterviewQuestions,
@@ -24,6 +25,7 @@ import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
 import { ChevronLeft } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function InterviewFlow({
@@ -31,6 +33,9 @@ export default function InterviewFlow({
 }: {
   interviewId: string;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tutorialParam = searchParams.get('tutorial'); // "1" if it's a tutorial
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isInterviewComplete, setIsInterviewComplete] = useState(false);
   const [isQuestionsComplete, setIsQuestionsComplete] = useState(false);
@@ -61,6 +66,14 @@ export default function InterviewFlow({
   }>({});
   const [scoreStringColour, setScoreStringColour] = useState('');
   const { addNotification } = useNotifications();
+  const [isTutorialMode, setIsTutorialMode] = useState(false);
+
+  useEffect(() => {
+    // If there's a param "tutorial=1", we know it's a tutorial flow
+    if (tutorialParam === '1') {
+      setIsTutorialMode(true);
+    }
+  }, [tutorialParam]);
 
   const startTimer = () => {
     if (timerRef.current == null) {
@@ -222,12 +235,22 @@ export default function InterviewFlow({
     setIsInterviewComplete(true);
     setIsCameraOn(false);
     stopTimer();
-    // Ensure synchronization between questions and answers
-    if (questions.length !== answers.current.length) {
+
+    // Validate interview data before proceeding
+    if (!interview?.id || !interview?.title) {
+      throw new Error('Interview ID or Title is missing.');
+    }
+
+    // Ensure synchronization between questions and answers IF the interview is not in practice mode
+    if (
+      questions.length !== answers.current.length &&
+      interview.mode !== INTERVIEW_PRACTICE_MODE
+    ) {
       console.error('Mismatch between number of questions and answers.');
       return;
     }
 
+    // Prepare the interview answers details for question answered
     const interviewAnswersDetails: InterviewAnswerDetail[] = questions.map(
       (question, index) => ({
         question: question.text,
@@ -239,15 +262,12 @@ export default function InterviewFlow({
     );
 
     try {
-      // Validate interview data before proceeding
-      if (!interview?.id || !interview?.title) {
-        throw new Error('Interview ID or Title is missing.');
-      }
-
       const feedback: FeedbackData | null = await getInterviewFeedback(
         interview,
         evaluationCriteria,
-        interviewAnswersDetails,
+        interview.mode === 'practice'
+          ? interviewAnswersDetails.splice(currentQuestionIndex + 1)
+          : interviewAnswersDetails,
       );
 
       setInterviewFeedback(feedback);
@@ -258,6 +278,12 @@ export default function InterviewFlow({
           message: 'Your interview feedback is ready. Click to view.',
           link: `/candidate/interview-history/${interview.id}`,
         });
+        if (isTutorialMode) {
+          await markTutorialAsDoneAction().then(() => {
+            router.replace('/candidate');
+          });
+          return;
+        }
       }
     } catch (error) {
       // Handle error better
@@ -293,7 +319,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-          100,
+        100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');
@@ -430,7 +456,7 @@ export default function InterviewFlow({
                         {Math.round(
                           ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
                             maxScorePerQuestion) *
-                            100,
+                          100,
                         )}
                         /100%{' '}
                         {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/
@@ -452,11 +478,19 @@ export default function InterviewFlow({
                     )}
                   </div>
                   <div className="flex items-center justify-center space-x-2">
-                    <Button onClick={handleNextQuestion} className="mt-4">
-                      {currentQuestionIndex === questions.length - 1
-                        ? 'Finish Interview'
-                        : 'Next Question'}
-                    </Button>{' '}
+                    <>
+                      {currentQuestionIndex < questions.length && (
+                        <Button onClick={handleNextQuestion} className="mt-4">
+                          Next Question
+                        </Button>
+                      )}
+                      <Button
+                        onClick={handleInterviewComplete}
+                        className="mt-4"
+                      >
+                        Finish Interview
+                      </Button>
+                    </>
                   </div>
                 </>
               ) : (

@@ -31,14 +31,12 @@ export default function InterviewDetailsDialog({
   interviewMode: InterviewModeType;
 }) {
   const router = useRouter();
-  const refreshTokens = useRefreshTokens();
 
   const feedbackStringPrefix =
     interviewMode === 'practice'
       ? 'You will receive live feedback after each question and then an'
       : 'You will receive an';
 
-  const tokensRequired = interviewMode === 'practice' ? 1 : 3;
 
   // The function that attempts to start the interview
   const { mutate: handleClick } = useToastMutation(
@@ -48,7 +46,6 @@ export default function InterviewDetailsDialog({
         selectedTemplate,
         interviewMode,
       );
-      refreshTokens(); // Refresh token data
       router.push(`/candidate/interviews/session/${interview.id}`);
     },
     {
@@ -103,16 +100,6 @@ export default function InterviewDetailsDialog({
             <p className="text-base">
               {feedbackStringPrefix} overall report on your session after you’ve
               completed all the questions.
-            </p>
-          </div>
-
-          <div className="justify-items-center text-center mt-4">
-            <p className="text-base text-lg">
-              <strong>Note:</strong> This session will use{' '}
-              <Badge color="yellow" className="inline-block">
-                <strong>{tokensRequired}</strong>
-              </Badge>{' '}
-              token{tokensRequired > 1 ? 's' : ''}
             </p>
           </div>
         </DialogDescription>

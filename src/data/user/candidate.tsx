@@ -141,3 +141,28 @@ export const updateCandidateDetails = async (
     data: updatedCandidateProfile,
   };
 };
+
+
+export async function markTutorialAsDoneAction() {
+  const supabase = createSupabaseUserServerActionClient();
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    throw new Error('No user found');
+  }
+
+  // Update the user’s metadata
+  const { error } = await supabase.auth.updateUser({
+    data: { onboardingHasDoneTutorial: true },
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  // Refresh session so the user metadata is up-to-date
+  const refreshResult = await refreshSessionAction();
+  if (refreshResult.status === 'error') {
+    throw new Error(refreshResult.message);
+  }
+
+  return { status: 'success' as const };
+}

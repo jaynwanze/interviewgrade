@@ -145,7 +145,7 @@ export default function CandidatesListPage({
   const [filteredCandidates, setFilteredCandidates] = useState<CandidateRow[]>(
     [],
   );
-  const [mode, setMode] = useState<'interview' | 'practice'>('interview');
+  const [mode, setMode] = useState<'interview' | 'practice'>('practice');
 
   const [searchQuery, setSearchQuery] = useState('');
   // We add skill selection + minScore

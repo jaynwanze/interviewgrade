@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
 import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
-import type { CandidateRow } from '@/types';
+import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import type { CandidateRow } from '@/types';
+import { useEffect, useState } from 'react';
 const mockCandidates: CandidateRow[] = [
   {
     id: 'c1',
@@ -119,7 +119,6 @@ const mockCandidates: CandidateRow[] = [
   },
 ];
 
-
 // If you want a location preference or skill preference from the employer
 const employerPrefs = {
   location: 'United States',
@@ -147,7 +146,7 @@ export default function EmployerDashboard() {
   const [percentiles, setPercentiles] = useState<{ [id: string]: number }>({});
 
   // We'll define a "mode" state: interview | practice
-  const [mode, setMode] = useState<'interview' | 'practice'>('interview');
+  const [mode, setMode] = useState<'interview' | 'practice'>('practice');
 
   // On initial mount, load our mock data
   useEffect(() => {
@@ -205,7 +204,7 @@ export default function EmployerDashboard() {
     // If no matches => skillGap
     if (filtered.length === 0) {
       setSkillGapMessage(
-        `No candidates found for skill: ${employerPrefs.skill} in ${employerPrefs.location} (mode: ${mode}).`
+        `No candidates found for skill: ${employerPrefs.skill} in ${employerPrefs.location} (mode: ${mode}).`,
       );
     } else {
       setSkillGapMessage('');
@@ -275,22 +274,14 @@ export default function EmployerDashboard() {
 
         {/* TABS for "Interview Mode" / "Practice Mode" */}
         <Tabs
-          defaultValue="interview"
-          onValueChange={(value) =>
-            setMode(value as 'interview' | 'practice')
-          }
+          defaultValue="practice"
+          onValueChange={(value) => setMode(value as 'interview' | 'practice')}
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="interview">Interview Mode</TabsTrigger>
             <TabsTrigger value="practice">Practice Mode</TabsTrigger>
+            <TabsTrigger value="interview">Interview Mode</TabsTrigger>
           </TabsList>
-
-          {/* 
-            We could optionally define <TabsContent> for each mode 
-            if we want *distinct* UI in each tab. But if the only difference 
-            is filtering, we can just keep one UI that changes automatically.
-          */}
         </Tabs>
 
         {/* Stats */}

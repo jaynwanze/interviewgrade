@@ -125,7 +125,9 @@ export const getInterviewEvaluationCriteriasByTemplate = async (
   // Filter out items where evaluation_criteria is null and ensure rubrics is valid JSON
   return data
     .filter((item) => item.interview_evaluation_criteria !== null)
-    .flatMap((item) => item.interview_evaluation_criteria) as EvaluationCriteriaType[];
+    .flatMap(
+      (item) => item.interview_evaluation_criteria,
+    ) as EvaluationCriteriaType[];
 };
 
 export const getPracticeEvaluationCriteriasByInterviewEvalCriteria = async (
@@ -205,18 +207,15 @@ export const getPracticeTemplateQuestionByTemplateId = async (
   return data;
 };
 
-
-export const getRandomPracticeTemplate = async () => {
+export async function getRandomPracticeTemplate() {
   const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('templates')
-    .select('*')
-    .neq('skill', null)
-    .order('random()', { foreignTable: undefined }) // or { ascending: true } won't matter
-    .limit(1);
+  const { data, error } = await supabase.from('templates').select('*');
 
-  if (error) {
-    throw error;
+  if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error('No practice templates found');
   }
-  return data?.[0];
-};
+
+  const randomIndex = Math.floor(Math.random() * data.length);
+  return data[randomIndex];
+}

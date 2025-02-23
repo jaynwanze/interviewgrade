@@ -1,12 +1,10 @@
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
 import {
-  Heart,
   Home,
-  MessageCircle,
   MessageCircleMoreIcon,
-  Search,
   Settings,
+  Trophy,
   UserRound
 } from 'lucide-react';
 

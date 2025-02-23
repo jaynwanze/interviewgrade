@@ -1,20 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  ClipboardCheck,
+  Lock,
+  Mail,
+  PhoneCall,
+  Star
+} from 'lucide-react';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileText } from 'lucide-react';
 
-import { ClipboardCheck, Lock, Unlock, Mail, PhoneCall, Star } from 'lucide-react';
+// Optional: If you want to show a small “Recent Attempts” or “Timeline”:
+
+type RecentAttempt = {
+  type: 'practice' | 'interview';
+  date: string;
+  skillFocus: string;
+  score: number;
+  id: string;
+};
 
 type PerformanceStats = {
   interviewsCompleted: number;
@@ -22,7 +39,6 @@ type PerformanceStats = {
   averageScore: number;
 };
 
-// Mock data (example)
 const mockCandidate = {
   id: 'c1',
   full_name: 'Alice Anderson',
@@ -39,23 +55,41 @@ const mockCandidate = {
     highestSkill: 'Problem Solving',
     averageScore: 88,
   } as PerformanceStats,
+  // OPTIONAL: If you have a real CV URL from your storage or external link:
+  resumeUrl: 'https://example.com/mock-cv.pdf', // pretend PDF link for demo
+  recentAttempts: [
+    {
+      id: 'attempt1',
+      type: 'practice',
+      date: '2024-05-02T10:30:00Z',
+      skillFocus: 'Communication',
+      score: 85,
+    },
+    {
+      id: 'attempt2',
+      type: 'interview',
+      date: '2024-04-29T09:00:00Z',
+      skillFocus: 'Problem Solving',
+      score: 92,
+    },
+  ] as RecentAttempt[],
 };
 
 export default function CandidateDetailsPage() {
   const [candidate, setCandidate] = useState(mockCandidate);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
-
   // For demonstration, say the employer has 2 tokens left
   const [tokensLeft, setTokensLeft] = useState(2);
+  // For opening the resume in a dialog
+  const [openResumeDialog, setOpenResumeDialog] = useState(false);
 
   function handleUnlock() {
     if (tokensLeft < 1) {
       setError('You do not have enough tokens to unlock contact info.');
       return;
     }
-    // In real code: call your server action or API to spend tokens
-    // and record an unlock in e.g. employee_candidate_unlocks
+    // Real code: call server action / API to spend token & record unlock
     setTokensLeft((prev) => prev - 1);
     setCandidate((prev) => ({ ...prev, isUnlocked: true }));
     setError('');
@@ -86,12 +120,11 @@ export default function CandidateDetailsPage() {
           </Avatar>
           <div>
             <CardTitle className="text-lg">{candidate.full_name}</CardTitle>
-            <CardDescription className="flex justify-center items-center gap-2 mt-1">
+            <CardDescription className="flex items-center gap-2 mt-1">
               <Badge variant="secondary">{candidate.country}</Badge>
             </CardDescription>
           </div>
         </CardHeader>
-
         <CardContent className="space-y-2">
           <p className="text-sm text-muted-foreground">{candidate.summary}</p>
           <div className="flex gap-2 flex-wrap">
@@ -148,7 +181,7 @@ export default function CandidateDetailsPage() {
           <CardHeader>
             <CardTitle>Performance Overview</CardTitle>
             <CardDescription>
-              Candidate’s interview metrics (AI-based or real interviews)
+              Candidate’s recent interview or practice metrics
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -179,13 +212,93 @@ export default function CandidateDetailsPage() {
         </Card>
       )}
 
+      {/* Optional: Recent Attempts (Practice/Interviews) */}
+      {candidate.recentAttempts && candidate.recentAttempts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Attempts</CardTitle>
+            <CardDescription>
+              A quick glance at this candidate’s latest attempts
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {candidate.recentAttempts.map((attempt) => (
+              <div
+                key={attempt.id}
+                className="flex items-center justify-between bg-muted p-2 rounded"
+              >
+                <div>
+                  <p className="text-sm font-medium capitalize">
+                    {attempt.type} attempt
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(attempt.date).toLocaleString()} &mdash; Focus on{' '}
+                    {attempt.skillFocus}
+                  </p>
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {attempt.score}%
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resume / CV link */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Resume / CV</CardTitle>
+          <CardDescription>
+            If provided, you can view their most recent CV below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {candidate.resumeUrl ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Preview or download candidate’s resume.
+              </p>
+              <Dialog
+                open={openResumeDialog}
+                onOpenChange={setOpenResumeDialog}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <FileText className="mr-2 h-4 w-4" />
+                    View CV
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Candidate’s Resume</DialogTitle>
+                    <DialogDescription>
+                      Here is the CV or PDF the candidate uploaded.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {/* We can embed PDF in an iframe, or do whatever you like */}
+                  <div className="w-full h-[600px] mt-4 overflow-auto bg-muted">
+                    <iframe
+                      src={candidate.resumeUrl}
+                      title="Candidate CV"
+                      className="w-full h-full"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            <p className="text-sm">No resume provided.</p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Employer’s Private Notes */}
       <Card>
         <CardHeader>
           <CardTitle>Your Private Notes</CardTitle>
-          <CardDescription>
-            Only visible to your organization.
-          </CardDescription>
+          <CardDescription>Only visible to your organization.</CardDescription>
         </CardHeader>
         <CardContent>
           <Textarea

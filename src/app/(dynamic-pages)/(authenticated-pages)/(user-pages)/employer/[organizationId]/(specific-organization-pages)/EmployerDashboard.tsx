@@ -128,8 +128,9 @@ const employerPrefs = {
 // The EmployerDashboard
 export default function EmployerDashboard() {
   // Basic stats used in StatisticsView
+  // const tokens = useTokens();
   const [stats] = useState({
-    tokensLeft: 8,
+    tokensLeft: 5,
     incomingPipeline: 2,
     unlockedCandidates: 5,
   });

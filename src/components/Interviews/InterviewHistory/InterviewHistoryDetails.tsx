@@ -425,9 +425,13 @@ export const InterviewHistoryDetails = ({
               className="p-4"
               onValueChange={(value) => setSelectedTab(value)}
             >
-              <TabsList className="grid grid-cols-3 w-full mx-auto">
+              <TabsList
+                className={`grid grid-cols-${interview.mode === 'interview' ? 3 : 2} w-full mx-auto`}
+              >
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="details">Detailed</TabsTrigger>
+                {interview.mode === 'interview' && (
+                  <TabsTrigger value="details">Detailed</TabsTrigger>
+                )}
                 <TabsTrigger value="coach">AI Interview Coach</TabsTrigger>
               </TabsList>
             </Tabs>

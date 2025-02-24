@@ -102,9 +102,6 @@ export function PracticeInterviewFlow({
           current_question_index: currentQuestionIndex + 1,
         });
 
-      } else {
-        // If last question answered
-        finishInterview();
       }
     } catch (error) {
       console.error('Error in handleAnswer for practice mode:', error);

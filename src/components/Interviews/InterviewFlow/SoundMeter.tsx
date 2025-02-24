@@ -1,4 +1,3 @@
-// Meter.tsx
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -31,35 +30,43 @@ export const Meter: React.FC<MeterProps> = ({
   const volumeRefs = useRef<number[]>(new Array(settings.bars).fill(0));
 
   useEffect(() => {
+    // 1. Create an AnalyserNode
     const analyser = audioContext.createAnalyser();
-    const microphone = audioContext.createMediaStreamSource(stream);
-    const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
     analyser.smoothingTimeConstant = 0.4;
     analyser.fftSize = 1024;
 
+    // 2. Connect microphone -> analyser
+    const microphone = audioContext.createMediaStreamSource(stream);
     microphone.connect(analyser);
-    analyser.connect(javascriptNode);
-    javascriptNode.connect(audioContext.destination);
 
-    javascriptNode.onaudioprocess = () => {
-      const array = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(array);
+    // 3. Poll the analyser in a loop
+    let rafId: number;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const updateMeter = () => {
+      analyser.getByteFrequencyData(dataArray);
+
       let values = 0;
-      const length = array.length;
+      const length = dataArray.length;
       for (let i = 0; i < length; i++) {
-        values += array[i];
+        values += dataArray[i];
       }
       volume.current = values / length;
+
+      // update UI in next effect
+      rafId = requestAnimationFrame(updateMeter);
     };
 
+    updateMeter(); // kick off the loop
+
+    // Clean up
     return () => {
       microphone.disconnect();
-      analyser.disconnect();
-      javascriptNode.disconnect();
+      cancelAnimationFrame(rafId);
     };
-  }, [audioContext, stream, settings.bars]);
+  }, [audioContext, stream]);
 
+  // 4. Animate the meter bars (e.g. via setInterval or a separate rAF)
   useEffect(() => {
     const intervalId = setInterval(() => {
       volumeRefs.current.unshift(volume.current);
@@ -67,26 +74,25 @@ export const Meter: React.FC<MeterProps> = ({
       for (let i = 0; i < refs.current.length; i++) {
         const ref = refs.current[i];
         if (ref) {
+          // scale the bar based on average volume
           ref.style.transform = `scaleY(${volumeRefs.current[i] / 100})`;
         }
       }
-    }, 20);
+    }, 50);
 
-    return () => {
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, [settings.bars]);
 
+  // 5. Render the bars
   const createElements = () => {
     const elements: JSX.Element[] = [];
-
     for (let i = 0; i < settings.bars; i++) {
       elements.push(
         <div
+          key={`meter-${i}`}
           ref={(ref) => {
             refs.current[i] = ref;
           }}
-          key={`meter-${i}`}
           style={{
             position: 'absolute',
             background: 'lightblue',
@@ -98,7 +104,7 @@ export const Meter: React.FC<MeterProps> = ({
             transformOrigin: 'bottom',
             transition: 'transform 0.1s ease-out',
           }}
-        />,
+        />
       );
     }
     return elements;

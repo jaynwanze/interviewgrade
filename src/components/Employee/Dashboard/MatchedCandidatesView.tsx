@@ -17,10 +17,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 import type { CandidateRow } from '@/types';
+import { FireIcon } from '@heroicons/react/solid';
+import { TrophyIcon } from 'lucide-react';
 
 export function MatchedCandidatesView({
   skillGapMessage,
@@ -51,8 +53,10 @@ export function MatchedCandidatesView({
       return 0;
     }
     return (
-      interview_skill_stats.reduce((acc, skillObj) => acc + skillObj.avg_score, 0) /
-      interview_skill_stats.length
+      interview_skill_stats.reduce(
+        (acc, skillObj) => acc + skillObj.avg_score,
+        0,
+      ) / interview_skill_stats.length
     );
   }
 
@@ -65,10 +69,15 @@ export function MatchedCandidatesView({
     <>
       {/* Skill Gap */}
       {skillGapMessage && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <Card className="border-red-400 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-red-500">Skill Gaps Detected</CardTitle>
+              <CardTitle className="text-red-500">
+                Skill Gaps Detected
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-red-600">{skillGapMessage}</p>
@@ -77,13 +86,22 @@ export function MatchedCandidatesView({
         </motion.div>
       )}
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+      <div className="grid sm:grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
         {/* Leaderboard (Top 3) */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <Card className="shadow-md border rounded-xl">
             <CardHeader>
-              <CardTitle>🏆 Leaderboard (Top 3)</CardTitle>
-              <CardDescription>Highest interview scores among matched candidates</CardDescription>
+              <CardTitle className="flex items-center">
+                <TrophyIcon className="text-yellow-300 h-6 w-6 mr-2" />{' '}
+                Leaderboard (Top 3)
+              </CardTitle>
+              <CardDescription>
+                Highest interview scores among matched candidates
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {topThree.length === 0 ? (
@@ -101,9 +119,14 @@ export function MatchedCandidatesView({
                         className="flex items-center justify-between bg-muted/50 p-3 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-primary">#{idx + 1}</span>
+                          <span className="text-lg font-bold text-primary">
+                            #{idx + 1}
+                          </span>
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={cand.avatar_url} alt={cand.full_name} />
+                            <AvatarImage
+                              src={cand.avatar_url}
+                              alt={cand.full_name}
+                            />
                             <AvatarFallback>
                               {cand.full_name
                                 .split(' ')
@@ -131,11 +154,19 @@ export function MatchedCandidatesView({
                             )}
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleViewProfile(cand.id)}>
+                        <div className="flex flex-col items-center space-y-2 *:gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewProfile(cand.id)}
+                          >
                             View Profile
                           </Button>
-                          <Button variant="default" size="sm" onClick={() => handleContact(cand.id)}>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleContact(cand.id)}
+                          >
                             Contact
                           </Button>
                         </div>
@@ -150,15 +181,25 @@ export function MatchedCandidatesView({
 
         {/* Top Prospect */}
         {topProspect && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
             <Card className="shadow-md border rounded-xl">
               <CardHeader>
-                <CardTitle>🔥 Top Prospect</CardTitle>
+                <CardTitle className="flex items-center">
+                  <FireIcon className="text-orange-500 h-6 w-6 mr-2" />
+                  Top Prospect
+                </CardTitle>{' '}
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={topProspect.avatar_url} alt={topProspect.full_name} />
+                    <AvatarImage
+                      src={topProspect.avatar_url}
+                      alt={topProspect.full_name}
+                    />
                     <AvatarFallback>
                       {topProspect.full_name
                         .split(' ')
@@ -168,9 +209,12 @@ export function MatchedCandidatesView({
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium text-lg">{topProspect.full_name}</p>
+                    <p className="font-medium text-lg">
+                      {topProspect.full_name}
+                    </p>
                     <Badge variant="secondary">
-                      Score {getCandidateInterviewAvg(topProspect).toFixed(1)}/100
+                      Score {getCandidateInterviewAvg(topProspect).toFixed(1)}
+                      /100
                     </Badge>
                     {percentiles[topProspect.id] && (
                       <span className="text-xs text-muted-foreground ml-2">
@@ -181,10 +225,18 @@ export function MatchedCandidatesView({
                 </div>
               </CardContent>
               <CardFooter className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleViewProfile(topProspect.id)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleViewProfile(topProspect.id)}
+                >
                   View Profile
                 </Button>
-                <Button variant="default" size="sm" onClick={() => handleContact(topProspect.id)}>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => handleContact(topProspect.id)}
+                >
                   Contact
                 </Button>
               </CardFooter>
@@ -193,7 +245,11 @@ export function MatchedCandidatesView({
         )}
 
         {/* Full List Graph */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
           <TopThreeCandidatesBarChart topCandidates={topThreeBarData} />
         </motion.div>
       </div>

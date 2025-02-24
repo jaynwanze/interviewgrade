@@ -285,7 +285,11 @@ export default function EmployerDashboard() {
         </Tabs>
 
         {/* Stats */}
-        <StatisticsView stats={stats} weekDelta={weekDelta} />
+        <StatisticsView
+          stats={stats}
+          weekDelta={weekDelta}
+          employerPrefs={employerPrefs}
+        />
 
         {/* Show Matches */}
         <MatchedCandidatesView

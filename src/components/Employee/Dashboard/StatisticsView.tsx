@@ -14,16 +14,18 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 
 export interface StatsProps {
   tokensLeft: number;
-  incomingPipeline: number;    // Replacing `newCandidatesThisWeek`
-  unlockedCandidates: number; // Replacing `activeSearches` 
+  incomingPipeline: number; // Replacing `newCandidatesThisWeek`
+  unlockedCandidates: number; // Replacing `activeSearches`
 }
 
 export function StatisticsView({
   stats,
   weekDelta,
+  employerPrefs,
 }: {
   stats: StatsProps;
   weekDelta: number;
+  employerPrefs?: { location: string; skill: string };
 }) {
   return (
     <>
@@ -74,9 +76,7 @@ export function StatisticsView({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Unlocked Candidates</CardTitle>
-            <CardDescription>
-              How many you’ve already unlocked
-            </CardDescription>
+            <CardDescription>How many you’ve already unlocked</CardDescription>
           </CardHeader>
           <CardContent>
             <span className="text-xl font-semibold">
@@ -112,6 +112,15 @@ export function StatisticsView({
           )}
         </CardContent>
       </Card>
+      {employerPrefs ? (
+        <p className="text-sm text-gray-600">
+          Showing top matches for location{' '}
+          <strong>{employerPrefs.location}</strong> and skill{' '}
+          <strong>{employerPrefs.skill}</strong>.
+        </p>
+      ) : (
+        <p>Loading your preferences...</p>
+      )}
     </>
   );
 }

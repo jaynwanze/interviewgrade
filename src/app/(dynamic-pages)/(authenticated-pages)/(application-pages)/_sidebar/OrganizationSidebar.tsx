@@ -45,7 +45,7 @@ async function OrganizationSidebarInternal({
             />
             <SidebarLink
               label="Messages"
-              href={`/employer/${organizationId}/messages`}
+              href={`/employer/${organizationId}/m`}
               icon={<MessageCircleMoreIcon className="h-5 w-5" />}
             />
             <SidebarLink

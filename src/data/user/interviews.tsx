@@ -183,8 +183,9 @@ export const createPracticeModeQuestions = async (
   // Fetch practice evaluation criterias linked to this interview evaluation criteria
   for (const criteria of practiceTemplateEvaluationCriterias) {
     if (!criteria.rubrics || criteria.rubrics.length === 0) {
-      console.warn(`Rubrics not found for evaluation criteria ${criteria.id}`);
-      continue;
+      throw new Error(
+        `Rubrics not found for evaluation criteria ${criteria.id}`,
+      );
     }
 
     const tempQuestions =

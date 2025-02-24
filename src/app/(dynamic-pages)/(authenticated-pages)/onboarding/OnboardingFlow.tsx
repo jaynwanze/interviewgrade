@@ -14,7 +14,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { updateCandidateDetails } from '@/data/user/candidate';
+import {
+  updateCandidateDetails,
+  uploadPublicCandidateResume,
+} from '@/data/user/candidate';
 import { createOrganization } from '@/data/user/organizations';
 // import { createOrganization } from '@/data/user/organizations';
 import {
@@ -23,6 +26,13 @@ import {
   uploadPublicUserAvatar,
 } from '@/data/user/user';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import type { Table } from '@/types';
 import { UserType } from '@/types/userTypes';
@@ -30,7 +40,7 @@ import { getUserAvatarUrl } from '@/utils/helpers';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { UserPlus as AddUserIcon } from 'lucide-react';
+import { UserPlus as AddUserIcon, FileText, Trash } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -278,6 +288,7 @@ const candidateDetailsSchema = z.object({
   role: z.string().min(1, 'Role is required'),
   industry: z.string().min(1, 'Industry is required'),
   summary: z.string().optional(),
+  resume_url: z.any().optional(),
 });
 
 type CandidateDetailsSchema = z.infer<typeof candidateDetailsSchema>;
@@ -286,6 +297,8 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm<CandidateDetailsSchema>({
     resolver: zodResolver(candidateDetailsSchema),
@@ -296,49 +309,71 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
       role: '',
       industry: '',
       summary: '',
+      resume_url: '',
     },
   });
 
-  const { mutate: saveCandidateDetails, isLoading } = useSAToastMutation(
-    async (data: CandidateDetailsSchema) => {
-      // Call your server action with `isOnboardingFlow = true`.
-      return await updateCandidateDetails(
-        {
-          city: data.city,
-          country: data.country,
-          phoneNumber: data.phone_number,
-          summary: data.summary,
-          role: data.role,
-          industry: data.industry,
-        },
-        { isOnboardingFlow: true },
-      );
-    },
-    {
-      successMessage: 'Candidate details updated!',
-      errorMessage: 'Failed to update candidate details',
-      onSuccess: () => {
-        // If the server action is successful, call onSuccess to advance flow
-        onSuccess();
-      },
-    },
+  const watchedFile = watch('resume_url');
+  const [uploading, setUploading] = useState(false);
+  const [resumePreview, setResumePreview] = useState<string | null>(null);
+  const [uploadedResumeUrl, setUploadedResumeUrl] = useState<string | null>(
+    null,
   );
- 
+
+  async function handleResumeUpload(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    // Upload resume file
+    const formData = new FormData();
+    formData.append('file', file);
+    const result = await uploadPublicCandidateResume(formData, file.name);
+
+    if (result.status === 'success') {
+      setUploadedResumeUrl(result.data); // Store uploaded file URL
+      setResumePreview(result.data); // Preview it in the UI
+    } else {
+      alert('Failed to upload resume: ' + result.message);
+    }
+
+    setUploading(false);
+  }
+
+  function handleRemoveResume() {
+    setUploadedResumeUrl(null);
+    setResumePreview(null);
+    setValue('resume_url', '');
+  }
+
+  function onSubmit(formData: CandidateDetailsSchema) {
+    updateCandidateDetails(
+      {
+        ...formData,
+        resume_url: uploadedResumeUrl ?? undefined, // Save only if confirmed
+      },
+      {
+        isOnboardingFlow: true,
+      },
+    ).then(() => {
+      onSuccess();
+    });
+  }
+
   return (
     <Card className="max-w-xl">
-      <form
-        onSubmit={handleSubmit((formData) => {
-          saveCandidateDetails(formData);
-        })}
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
           <CardTitle>Candidate Details</CardTitle>
           <CardDescription>
-            Employers will see this info when viewing your profile
+            Employers will see this info on your profile
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* city + country */}
+          {/* City & Country */}
           <div className="flex gap-3">
             <div className="flex-1">
               <Label htmlFor="city">City</Label>
@@ -348,9 +383,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
                 {...register('city')}
               />
               {errors.city && (
-                <p className="text-xs text-red-600">
-                  {errors.city.message}
-                </p>
+                <p className="text-xs text-red-600">{errors.city.message}</p>
               )}
             </div>
             <div className="flex-1">
@@ -361,14 +394,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
                 {...register('country')}
               />
               {errors.country && (
-                <p className="text-xs text-red-600">
-                  {errors.country.message}
-                </p>
+                <p className="text-xs text-red-600">{errors.country.message}</p>
               )}
             </div>
           </div>
 
-          {/* phone + role */}
+          {/* Phone & Role */}
           <div className="flex gap-3">
             <div className="flex-1">
               <Label htmlFor="phoneNumber">Phone Number</Label>
@@ -391,14 +422,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
                 {...register('role')}
               />
               {errors.role && (
-                <p className="text-xs text-red-600">
-                  {errors.role.message}
-                </p>
+                <p className="text-xs text-red-600">{errors.role.message}</p>
               )}
             </div>
           </div>
 
-          {/* industry + summary */}
+          {/* Industry & Summary */}
           <div className="flex gap-3">
             <div className="flex-1">
               <Label htmlFor="industry">Industry</Label>
@@ -414,24 +443,68 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               )}
             </div>
           </div>
-
           <div>
             <Label htmlFor="summary">Summary</Label>
             <Textarea
               id="summary"
-              placeholder="Write a short summary about your experience or background..."
+              placeholder="Write a short summary about yourself..."
               {...register('summary')}
             />
             {errors.summary && (
-              <p className="text-xs text-red-600">
-                {errors.summary.message}
-              </p>
+              <p className="text-xs text-red-600">{errors.summary.message}</p>
             )}
           </div>
+
+          {/* Resume Upload Section */}
+          <div className="mt-2">
+            <Label htmlFor="resumeFile">Resume (PDF)</Label>
+            <Input
+              id="resumeFile"
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={handleResumeUpload}
+            />
+            {uploading && <p className="text-sm text-gray-600">Uploading...</p>}
+          </div>
+
+          {/* Resume Preview & Confirmation */}
+          {resumePreview && (
+            <div className="mt-4">
+              <Label>Resume Preview</Label>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <FileText className="mr-2 h-4 w-4" />
+                    View Resume
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Preview Resume</DialogTitle>
+                  </DialogHeader>
+                  <iframe
+                    src={resumePreview}
+                    title="Resume Preview"
+                    className="w-full h-[400px] border rounded-md"
+                  />
+                </DialogContent>
+              </Dialog>
+
+              <Button
+                variant="destructive"
+                size="sm"
+                className="mt-2"
+                onClick={handleRemoveResume}
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                Remove Resume
+              </Button>
+            </div>
+          )}
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={!isValid || isLoading}>
-            {isLoading ? 'Saving...' : 'Save'}
+          <Button type="submit" disabled={!isValid || uploading}>
+            {uploading ? 'Uploading...' : 'Save'}
           </Button>
         </CardFooter>
       </form>

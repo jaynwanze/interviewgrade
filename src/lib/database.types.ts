@@ -145,6 +145,7 @@ export type Database = {
           summary: string
           role: string
           industry: string
+          resume_url: string
           interview_skill_stats: CandidateSkillsStats[]
           practice_skill_stats: CandidateSkillsStats[]
           created_at: string
@@ -157,6 +158,7 @@ export type Database = {
           summary: string
           role: string
           industry: string
+          resume_url?: string
           interview_skill_stats: CandidateSkillsStats[]
           practice_skill_stats: CandidateSkillsStats[]
           created_at: string
@@ -169,6 +171,7 @@ export type Database = {
           summary?: string
           role?: string
           industry?: string
+          resume_url?: string
           interview_skill_stats?: CandidateSkillsStats[]
           practice_skill_stats?: CandidateSkillsStats[]
           created_at?: string

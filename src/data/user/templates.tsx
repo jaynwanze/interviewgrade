@@ -209,7 +209,10 @@ export const getPracticeTemplateQuestionByTemplateId = async (
 
 export async function getRandomPracticeTemplate() {
   const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase.from('templates').select('*');
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .eq('category', 'Soft Skills');
 
   if (error) throw error;
   if (!data || data.length === 0) {

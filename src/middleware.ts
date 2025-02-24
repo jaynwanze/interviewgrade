@@ -21,8 +21,8 @@ const protectedPagePrefixes = [
   `/render/(.*)?`,
   `/dashboard/candidate`,
   `/dashboard/employer`,
-  '/candidate/(/.*)',
-  '/employer/(/.*)',
+  '/candidate',
+  '/employer',
   onboardingPaths,
 ];
 
@@ -66,19 +66,20 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
 
     // Check if user is a candidate
     const isCandidate = userMetadata.userType === 'candidate'; // Assuming userType is part of user metadata
-    if (isCandidate) {
-      return (
-        !onboardingHasAcceptedTerms ||
+    if (
+      isCandidate &&
+      (!onboardingHasAcceptedTerms ||
         !onboardingHasCompletedProfile ||
-        !onboardingHasCompletedCandidateDetails
-      );
-    } else if (userMetadata.userType === 'employer') {
-      return (
-        !onboardingHasAcceptedTerms ||
-        !onboardingHasCompletedProfile ||
+        !onboardingHasCompletedCandidateDetails)
+    ) {
+      return true;
+    } else if (
+      userMetadata.userType === 'employer' &&
+      (!onboardingHasAcceptedTerms ||
         !onboardingHasCreatedOrganization ||
-        !onboardingHasSetEmployerPrefs
-      );
+        !onboardingHasSetEmployerPrefs)
+    ) {
+      return true;
     }
   }
   return false;
@@ -94,14 +95,16 @@ export async function middleware(req: NextRequest) {
 
   // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {
-    return NextResponse.redirect(toSiteURL('/candidate/login'));
+    return NextResponse.redirect(toSiteURL('/candidate/sign-in'));
   }
 
   // If user is present, parse their user type
   if (maybeUser) {
     const userMetadata = authUserMetadataSchema.parse(maybeUser.user_metadata);
     const userType = userMetadata.userType; // 'candidate' or 'employer', etc.
-
+    if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
+      return NextResponse.redirect(toSiteURL('/onboarding'));
+    }
     // If it’s a candidate route but user is employer => redirect
     if (isCandidateRoute(req.nextUrl.pathname) && userType !== 'candidate') {
       return NextResponse.redirect(toSiteURL('/employer'));
@@ -109,10 +112,6 @@ export async function middleware(req: NextRequest) {
     // If it’s an employer route but user is candidate => redirect
     if (isEmployerRoute(req.nextUrl.pathname) && userType !== 'employer') {
       return NextResponse.redirect(toSiteURL('/candidate'));
-    }
-
-    if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
-      return NextResponse.redirect(toSiteURL('/onboarding'));
     }
     return res;
   }

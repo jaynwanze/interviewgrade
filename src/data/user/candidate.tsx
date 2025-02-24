@@ -1,10 +1,12 @@
 'use server';
 
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
-import type { SAPayload, Table } from '@/types';
+import type { SAPayload, SupabaseFileUploadOptions, Table } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { User } from '@supabase/supabase-js';
+import slugify from 'slugify';
+import urlJoin from 'url-join';
 import { refreshSessionAction } from './session';
 
 export async function updateCandidateProfileDetailsAction({
@@ -15,6 +17,7 @@ export async function updateCandidateProfileDetailsAction({
   summary,
   role,
   industry,
+  resume_url,
 }: {
   currentUser: User;
   city?: string;
@@ -23,6 +26,7 @@ export async function updateCandidateProfileDetailsAction({
   summary?: string;
   role?: string;
   industry?: string;
+  resume_url?: string;
 }) {
   const user = currentUser;
   if (!user) {
@@ -39,6 +43,7 @@ export async function updateCandidateProfileDetailsAction({
       summary,
       role,
       industry,
+      resume_url,
     })
     .eq('id', user.id)
     .select()
@@ -77,6 +82,7 @@ export const updateCandidateDetails = async (
     summary,
     role,
     industry,
+    resume_url,
   }: {
     fullName?: string;
     avatarUrl?: string;
@@ -86,6 +92,7 @@ export const updateCandidateDetails = async (
     summary?: string;
     role?: string;
     industry?: string;
+    resume_url?: string;
   },
   {
     isOnboardingFlow = false,
@@ -105,6 +112,7 @@ export const updateCandidateDetails = async (
     summary,
     role,
     industry,
+    resume_url,
   });
 
   if (!updatedCandidateProfile) {
@@ -142,7 +150,6 @@ export const updateCandidateDetails = async (
   };
 };
 
-
 export async function markTutorialAsDoneAction() {
   const supabase = createSupabaseUserServerActionClient();
   const user = await serverGetLoggedInUser();
@@ -165,4 +172,45 @@ export async function markTutorialAsDoneAction() {
   }
 
   return { status: 'success' as const };
+}
+
+export async function uploadPublicCandidateResume(
+  formData: FormData,
+  fileName: string,
+  fileOptions?: SupabaseFileUploadOptions,
+): Promise<SAPayload<string>> {
+  const file = formData.get('file');
+  if (!file) {
+    return { status: 'error', message: 'No file provided' };
+  }
+
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    return { status: 'error', message: 'User not found' };
+  }
+
+  const supabase = createSupabaseUserServerActionClient();
+
+  // maybe store in the same 'public-user-assets' bucket or create a 'resumes' bucket
+  const slug = slugify(fileName, { lower: true, strict: true });
+  const path = `${user.id}/resume/${slug}`; // path in your bucket
+
+  const { data, error } = await supabase.storage
+    .from('public-user-assets')
+    .upload(path, file, fileOptions);
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  const supabaseFileUrl = urlJoin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    '/storage/v1/object/public/public-user-assets',
+    data.path,
+  );
+
+  return {
+    status: 'success',
+    data: supabaseFileUrl,
+  };
 }

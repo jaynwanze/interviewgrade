@@ -282,7 +282,7 @@ export default function InterviewFlow({
           await markTutorialAsDoneAction().then(() => {
             router.replace('/candidate');
           });
-          return;
+
         }
       }
     } catch (error) {

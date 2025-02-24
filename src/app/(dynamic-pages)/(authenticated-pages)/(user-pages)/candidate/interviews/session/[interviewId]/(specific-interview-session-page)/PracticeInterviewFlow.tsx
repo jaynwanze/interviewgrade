@@ -1,0 +1,336 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+
+import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
+import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
+
+import { useNotifications } from '@/contexts/NotificationsContext';
+import { markTutorialAsDoneAction } from '@/data/user/candidate';
+import { insertInterviewAnswer, updateInterview } from '@/data/user/interviews';
+import type {
+  FeedbackData,
+  Interview,
+  InterviewAnswerDetail,
+  InterviewQuestion,
+  specificFeedbackType,
+} from '@/types';
+import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+
+type PracticeInterviewFlowProps = {
+  interview: Interview;
+  questions: InterviewQuestion[];
+  isTutorialMode: boolean;
+};
+
+export function PracticeInterviewFlow({
+  interview,
+  questions,
+  isTutorialMode,
+}: PracticeInterviewFlowProps) {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
+    interview.current_question_index,
+  );
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [isInterviewComplete, setIsInterviewComplete] = useState(false);
+  const [isFetchingSpecificFeedback, setIsFetchingSpecificFeedback] =
+    useState(false);
+  const [questionFeedback, setQuestionFeedback] = useState<{
+    [key: number]: specificFeedbackType | null;
+  }>({});
+  const answers = useRef<string[]>([]);
+  const { addNotification } = useNotifications();
+  const [scoreStringColour, setScoreStringColour] = useState('');
+
+  const router = useRouter();
+  const maxScorePerQuestion = Math.floor(
+    100 / (interview?.question_count || 1),
+  );
+  // If needed, you can keep a timer for the entire practice session
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    startTimer();
+    // Cleanup on unmount
+    return () => {
+      stopTimer();
+      setIsCameraOn(false);
+    };
+  }, []);
+
+  const startTimer = () => {
+    if (timerRef.current == null) {
+      timerRef.current = window.setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handleAnswer = async (answer: string) => {
+    if (!answer.trim()) {
+      // Possibly show a warning “Empty answer”
+      return;
+    }
+    try {
+      // DB insert
+      await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+      answers.current.push(answer);
+
+      // For practice mode, fetch immediate feedback
+      await fetchSpecificFeedback(answer);
+
+      // Move to the next question or complete
+      if (currentQuestionIndex < questions.length - 1) {
+        // Update DB so we persist question index
+        await updateInterview({
+          id: interview.id,
+          status: 'in_progress',
+          current_question_index: currentQuestionIndex + 1,
+        });
+
+      } else {
+        // If last question answered
+        finishInterview();
+      }
+    } catch (error) {
+      console.error('Error in handleAnswer for practice mode:', error);
+    }
+  };
+
+  const fetchSpecificFeedback = async (answer: string) => {
+    setIsFetchingSpecificFeedback(true);
+    try {
+      const nextQuestionIndex = currentQuestionIndex + 1;
+      const nextQuestion = questions[nextQuestionIndex] || null;
+
+      // Example: if you have an existing getQuestionFeedback helper
+      const feedbackData = await getQuestionFeedback(
+        interview.skill,
+        questions[currentQuestionIndex],
+        answer,
+        nextQuestion,
+        interview.question_count,
+        interview.evaluation_criterias ?? [],
+      );
+
+      setQuestionFeedback((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: feedbackData || null,
+      }));
+    } catch (error) {
+      console.error('Error fetching specific feedback:', error);
+      setQuestionFeedback((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: null,
+      }));
+    } finally {
+      setIsFetchingSpecificFeedback(false);
+    }
+  };
+  useEffect(() => {
+    if (questionFeedback[currentQuestionIndex]) {
+      const score = Math.round(
+        ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
+          maxScorePerQuestion) *
+        100,
+      );
+      if (score >= 80) {
+        setScoreStringColour('text-green-600');
+      } else if (score >= 60) {
+        setScoreStringColour('text-yellow-600');
+      } else if (score >= 40) {
+        setScoreStringColour('text-orange-600');
+      } else {
+        setScoreStringColour('text-red-600');
+      }
+    }
+  }, [questionFeedback[currentQuestionIndex]]);
+
+  const finishInterview = async () => {
+    stopTimer();
+    setIsInterviewComplete(true);
+    setIsCameraOn(false);
+
+    // Mark interview as “completed” in DB
+    await updateInterview({
+      id: interview.id,
+      status: 'completed',
+      current_question_index: currentQuestionIndex + 1,
+      end_time: new Date().toISOString(),
+    });
+
+    const answerDetails: InterviewAnswerDetail[] = questions.map((q, idx) => ({
+      question: q.text,
+      answer: answers.current[idx],
+      mark: questionFeedback[idx]?.mark ?? 0,
+      feedback: questionFeedback[idx]?.summary ?? '',
+      evaluation_criteria_name: q.evaluation_criteria.name,
+    }));
+    try {
+      const feedback: FeedbackData | null = await getInterviewFeedback(
+        interview,
+        interview.evaluation_criterias ?? [],
+        answerDetails.splice(0, currentQuestionIndex + 1),
+      );
+
+      if (feedback) {
+        // Notify the user or redirect
+        addNotification({
+          title: 'Practice Complete',
+          message: 'You have finished the practice interview!',
+          link: `/candidate/interview-history/${interview.id}`,
+        });
+        // If tutorial mode is on, mark it as done and redirect
+        if (isTutorialMode) {
+          await markTutorialAsDoneAction().then(() => {
+            return router.replace('/candidate');
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching overall feedback:', error);
+    }
+  };
+
+  if (isInterviewComplete && isTutorialMode) {
+    return (
+      <div className="flex flex-col items-center min-h-screen">
+        <h1 className="mt-8 text-2xl font-bold">Practice session complete!</h1>
+        <p className="mt-4">
+          We are evaluating your session so please Hold tight!
+        </p>
+      </div>
+    );
+  } else if (isInterviewComplete) {
+    return (
+      <div className="flex flex-col items-center min-h-screen">
+        <h1 className="mt-8 text-2xl font-bold">Practice session complete!</h1>
+        <p className="mt-4">Check your feedback for each question above.</p>
+        <Button onClick={() => router.push('/candidate')}>Return Home</Button>
+      </div>
+    );
+  } else
+    return (
+      <div className="interview-flow-container flex flex-col items-center min-h-screen">
+        {/* Example UI  */}
+        <Button onClick={() => window.history.back()} variant="destructive">
+          Leave Session
+        </Button>
+
+        <div className="flex w-full max-w-4xl">
+          <div className="w-1/2 p-4">
+            {/* Show question */}
+            <AIQuestionSpeaker
+              question={questions[currentQuestionIndex]}
+              currentIndex={currentQuestionIndex}
+              questionsLength={questions.length}
+            />
+          </div>
+          <div className="w-1/2 p-4">
+            {/* Timer, Candidate camera, etc. */}
+            <Card className="p-4 text-center mb-5">
+              <h1 className="text-2xl font-bold">Timer</h1>
+              <p>
+                {Math.floor(recordingTime / 60)}:
+                {('0' + (recordingTime % 60)).slice(-2)}
+              </p>
+            </Card>
+
+            <Card className="max-w-md mx-auto text-center">
+              <CardHeader>
+                <CardTitle>Candidate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UserCamera
+                  answerCallback={handleAnswer}
+                  isCameraOn={isCameraOn}
+                  // In practice mode, we handle the next question manually
+                  onRecordEnd={null}
+                  isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
+                  interviewMode={interview.mode}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Practice feedback UI */}
+        <div className="w-full max-w-4xl p-4">
+          <Card className="mx-auto text-center">
+            <CardHeader>
+              <CardTitle>Practice Feedback</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isFetchingSpecificFeedback ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <p>Fetching feedback...</p>
+                  <LoadingSpinner />
+                </div>
+              ) : questionFeedback[currentQuestionIndex] ? (
+                <>
+                  <div className="text-left text-lg space-y-2">
+                    <div className="text-center">
+                      <strong className="text-center">Score(%):</strong>{' '}
+                      <p
+                        className={`text-3xl text-center font-bold ${scoreStringColour}`}
+                      >
+                        {Math.round(
+                          ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
+                            maxScorePerQuestion) *
+                          100,
+                        )}
+                        /100%{' '}
+                        {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/
+                      {maxScorePerQuestion}) */}
+                      </p>
+                    </div>
+                    {/* Show your feedback / summary */}
+                    <p>
+                      <strong>Summary:</strong>{' '}
+                      {questionFeedback[currentQuestionIndex]?.summary}
+                    </p>
+                    <p>
+                      <strong>Advice for Next Question:</strong>{' '}
+                      {
+                        questionFeedback[currentQuestionIndex]
+                          ?.advice_for_next_question
+                      }
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-center space-x-2 mt-4">
+                    {currentQuestionIndex < questions.length - 1 && (
+                      <Button
+                        onClick={() =>
+                          setCurrentQuestionIndex((prev) => prev + 1)
+                        }
+                      >
+                        Next Question
+                      </Button>
+                    )}
+                    <Button onClick={finishInterview}>Finish Interview</Button>
+                  </div>
+                </>
+              ) : (
+                'After you answer, feedback will be displayed here.'
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+}

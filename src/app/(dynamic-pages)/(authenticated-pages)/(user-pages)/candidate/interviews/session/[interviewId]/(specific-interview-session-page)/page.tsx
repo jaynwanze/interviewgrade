@@ -4,6 +4,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import InterviewFlow from './InterviewFlow';
+import InterviewFlowWrapper from './InterviewFlowWrapper';
 
 const paramsSchema = z.object({
   interviewId: z.string(),
@@ -32,5 +33,5 @@ export default function InterviewSessionPage({
     return <LoadingSpinner />;
   }
 
-  return <InterviewFlow interviewId={interviewId} />;
+  return <InterviewFlowWrapper interviewId={interviewId} />;
 }

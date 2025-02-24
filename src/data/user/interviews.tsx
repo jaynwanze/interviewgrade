@@ -388,22 +388,6 @@ export const updateInterview = async (
   return data as Table<'interviews'>;
 };
 
-export const completeInterview = async (
-  data: InterviewComplete,
-): Promise<Table<'interviews'>> => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { error } = await supabase
-    .from('interviews')
-    .update(data)
-    .eq('id', data.id);
-
-  if (error) {
-    throw error;
-  }
-
-  return data as Table<'interviews'>;
-};
-
 export const getInterviewQuestions = async (
   interviewId: string,
 ): Promise<Table<'interview_questions'>[]> => {

@@ -74,7 +74,7 @@ export interface CandidateRow {
   avatar_url?: string;
 }
 
-export type CandidatePreferences = { 
+export type CandidatePreferences = {
   location: string;
   industry: string;
   skills: string;
@@ -91,7 +91,9 @@ export type CandidateSkillsStats = {
 export type InterviewUpdate = Pick<
   Table<'interviews'>,
   'id' | 'status' | 'current_question_index'
->;
+> & {
+  end_time?: string;
+};
 export type InterviewComplete = Pick<
   Table<'interviews'>,
   'id' | 'end_time' | 'status' | 'current_question_index'

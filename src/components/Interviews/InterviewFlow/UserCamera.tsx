@@ -8,13 +8,12 @@ import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Meter } from './SoundMeter';
-import { set } from 'nprogress';
 
 interface UserCameraProps {
   answerCallback: (answer: string) => void;
   isCameraOn: boolean;
   onRecordEnd: null | (() => void);
-  isFetchingSpecificFeedback: (isFetching: boolean) => void;
+  isFetchingSpecificFeedback?: (isFetching: boolean) => void;
   interviewMode: string | null;
 }
 
@@ -171,7 +170,9 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     if (!isRecording) return;
     setIsRecording(false);
     clearInterval(timerRef.current!);
-    isFetchingSpecificFeedback(true);
+    if (isFetchingSpecificFeedback) {
+      isFetchingSpecificFeedback(true);
+    }
 
     if (mediaRecorderHandlerRef.current) {
       const convertedAudioBlob =
@@ -189,7 +190,10 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         console.error(
           'Audio conversion failed - returning error message to display to user',
         );
-        isFetchingSpecificFeedback(false);
+
+        if (isFetchingSpecificFeedback) {
+          isFetchingSpecificFeedback(false);
+        }
         return;
       }
     } else {

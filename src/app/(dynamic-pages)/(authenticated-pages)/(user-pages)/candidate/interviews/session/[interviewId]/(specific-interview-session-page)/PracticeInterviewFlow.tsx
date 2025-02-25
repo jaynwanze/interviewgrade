@@ -101,7 +101,6 @@ export function PracticeInterviewFlow({
           status: 'in_progress',
           current_question_index: currentQuestionIndex + 1,
         });
-
       }
     } catch (error) {
       console.error('Error in handleAnswer for practice mode:', error);
@@ -319,7 +318,9 @@ export function PracticeInterviewFlow({
                         Next Question
                       </Button>
                     )}
-                    <Button onClick={finishInterview}>Finish Interview</Button>
+                    <Button onClick={finishInterview}>
+                      {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
+                    </Button>
                   </div>
                 </>
               ) : (

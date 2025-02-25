@@ -1,32 +1,24 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InterviewAnalytics } from '@/types';
+import { Card, CardTitle } from '@/components/ui/card';
+import { Interview, InterviewAnalytics } from '@/types';
 import { ClipboardList, Star, Trophy } from 'lucide-react';
-import { InterviewCurrentAverageKeyMetrics } from './InterviewCurrentAverageKeyMetrics';
-import { InterviewInfo } from './InterviewInfo';
+import { InterviewLatestCard } from './InterviewLatestCard';
 
 export const InterviewAverageDetails = ({
   analyticsData,
+  latestInterview,
 }: {
   analyticsData: InterviewAnalytics;
+  latestInterview: Interview;
 }) => {
   return (
     <>
       {/* Key Metrics Grid */}
       <div className="grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-5 items-center">
         {/* Left Column - Interview Info + Overall Score */}
-        <Card className="flex flex-col justify-center h-full items-center shadow-lg rounded-lg p-6 text-center space-y-5">
-          <InterviewInfo
-            title={
-              analyticsData.interview_title || 'Deleted interview template'
-            }
-            description={
-              analyticsData.interview_description || 'No description available.'
-            }
-          />
-        </Card>
+        <InterviewLatestCard latestInterview={latestInterview} />
         {/* Overall Grade + Best Skill Badge */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 ">
           <Trophy className="w-10 h-10 text-yellow-500" />

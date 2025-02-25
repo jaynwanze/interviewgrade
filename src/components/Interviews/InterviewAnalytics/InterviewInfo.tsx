@@ -1,5 +1,6 @@
 'use client';
 
+import { Separator } from '@/components/ui/separator';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 
 export const InterviewInfo = ({
@@ -30,6 +31,7 @@ export const InterviewInfo = ({
       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
         {title || 'Deleted Template'}
       </h3>
+      <Separator className="my-2" />
 
       {/* Description */}
       <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -55,7 +57,7 @@ export const InterviewInfo = ({
           className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition"
         >
           <MagnifyingGlassIcon className="inline w-4 h-4 mr-1" />
-          View session history
+          View latest session history
         </a>
       )}
     </div>

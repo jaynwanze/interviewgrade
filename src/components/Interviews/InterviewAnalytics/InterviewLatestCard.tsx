@@ -1,9 +1,12 @@
 'use client';
 
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Interview } from '@/types';
-import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { InterviewInfo } from './InterviewInfo';
 
 export const InterviewLatestCard = ({
@@ -23,13 +26,6 @@ export const InterviewLatestCard = ({
 
   return (
     <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2">
-      <CardTitle className="text-xl font-semibold">
-        Latest{' '}
-        {latestInterview.mode === INTERVIEW_PRACTICE_MODE
-          ? 'Practice Session'
-          : 'Mock Interview'}
-      </CardTitle>
-      <Separator className="my-2" />
       <CardContent>
         <InterviewInfo
           interviewId={latestInterview.id}

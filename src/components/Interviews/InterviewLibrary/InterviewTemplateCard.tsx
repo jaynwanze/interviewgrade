@@ -52,7 +52,7 @@ export const InterviewCardTemplate = ({
           <div className="flex justify-center items-center space-x-3 text-sm text-gray-700">
             <div className="flex items-center space-x-1">
               <ListOrdered className="w-4 h-4 text-blue-500" />
-              <span>{selectedTemplate.question_count} Questions</span>
+              <span>Max {selectedTemplate.question_count} Questions</span>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4 text-purple-500" />

@@ -32,6 +32,9 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
 import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOverview';
+import { useSearchParams } from 'next/navigation';
+import 'shepherd.js/dist/css/shepherd.css';
+import Shepherd from 'shepherd.js';
 
 export type TemplateAndSwitchModeDetails = {
   current_template_id: string;
@@ -46,6 +49,10 @@ export default function InterviewAnalyticsPage() {
     overview,
     fetchDetailedData,
   } = useAnalyticsData();
+
+  const searchParams = useSearchParams();
+  const isTutorialMode = searchParams.get('tutorial') === '1'; // Detect tutorial mode
+  const [tourStarted, setTourStarted] = useState(false);
 
   const [detailed, setDetailed] = useState<InterviewAnalytics | null>(null);
   const [activeSwitch, setActiveSwitch] = useState<
@@ -174,68 +181,65 @@ export default function InterviewAnalyticsPage() {
     }
   }, [overview]);
 
-  const renderOverview = () => {
-    if (loadingOverview) {
-      return (
-        <div className="flex flex-col items-center">
-          <LoadingSpinner />
-        </div>
-      );
+  useEffect(() => {
+    if (isTutorialMode && !tourStarted) {
+      startTutorialTour();
+      setTourStarted(true);
     }
+  }, [isTutorialMode]);
 
-    if (error) {
-      return <p className="text-center text-red-500">{error}</p>;
-    }
+  const startTutorialTour = () => {
+    const tour = new Shepherd.Tour({
+      useModalOverlay: true,
+      defaultStepOptions: {
+        classes: 'shadow-md bg-white rounded-lg p-4 text-sm',
+        scrollTo: true,
+        cancelIcon: { enabled: true },
+      },
+    });
 
-    return (
-      <>
-        {/* Key Analytics Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-5 justify-center items-center">
-          {/* Latest Interview Summary */}
-          <div className="flex flex-col justify-center items-center h-full md:col-span-1">
-            <InterviewLatestCard latestInterview={overview?.latestInterview} />
-          </div>
-          {/* Overview Graph */}
-          <div className="flex flex-col justify-center items-center h-full md:col-span-2">
-            <InterviewGraphsOverview
-              interviewsCompleted={overview?.completedInterviews || []}
-            />
-          </div>
-          {/* Performance Overview
-          <div className="flex flex-col md:col-span-2 lg:col-span-1">
-            <Card className="flex flex-col justify-center items-center shadow-lg rounded-lg mb-5">
-              <CardHeader className="text-center">
-                <CardTitle>Performance Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col justify-center items-center flex-grow">
-                <p className="text-lg font-medium">Best Skill</p>
-                <p className="text-2xl font-bold text-green-500">
-                  {overview?.bestSkill || 'N/A'}
-                </p>
-                <Separator className="my-2 w-full" />
-                <p className="text-lg font-medium">Needs Improvement</p>
-                <p className="text-2xl font-bold text-red-500">
-                  {overview?.weakestSkill || 'N/A'}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-lg rounded-lg">
-              <CardHeader className="text-center">
-                <CardTitle>Average Interview Score</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col justify-center items-center flex-grow">
-                <p className="text-4xl font-bold text-center">
-                  {overview?.averageScore ?? 'N/A'}%
-                </p>
-                <p className="text-gray-500 text-sm">
-                  Across all completed interviews.
-                </p>
-              </CardContent>
-            </Card>
-          </div> */}
-        </div>
-      </>
-    );
+    tour.addStep({
+      id: 'dashboard-overview',
+      title: 'Welcome to Your Analytics Dashboard',
+      text: 'Here, you can track your interview progress and performance insights.',
+      attachTo: { element: '.dashboard-header', on: 'bottom' },
+      buttons: [{ text: 'Next', action: tour.next }],
+    });
+
+    tour.addStep({
+      id: 'latest-interview',
+      title: 'Latest Interview Summary',
+      text: 'This section shows your most recent interview’s performance and feedback.',
+      attachTo: { element: '.latest-interview-card', on: 'top' },
+      buttons: [
+        { text: 'Back', action: tour.back },
+        { text: 'Next', action: tour.next },
+      ],
+    });
+
+    tour.addStep({
+      id: 'performance-graph',
+      title: 'Performance Over Time',
+      text: 'Analyze how your scores have improved over multiple interviews.',
+      attachTo: { element: '.performance-graph', on: 'right' },
+      buttons: [
+        { text: 'Back', action: tour.back },
+        { text: 'Next', action: tour.next },
+      ],
+    });
+
+    tour.addStep({
+      id: 'insights-section',
+      title: 'Actionable Insights',
+      text: 'View suggestions on what skills to improve based on past interview performance.',
+      attachTo: { element: '.insights-section', on: 'left' },
+      buttons: [
+        { text: 'Back', action: tour.back },
+        { text: 'Finish', action: tour.complete },
+      ],
+    });
+
+    tour.start();
   };
 
   const renderDetailed = () => {
@@ -342,7 +346,10 @@ export default function InterviewAnalyticsPage() {
           selectedTemplateId &&
           filteredCompletedInterviews.length > 0 ? (
           <div>
-            <InterviewAverageDetails analyticsData={detailed} />
+            <InterviewAverageDetails
+              analyticsData={detailed}
+              latestInterview={overview.latestInterview!}
+            />
             <InterviewGraphsDetailed analyticsData={detailed} />
           </div>
         ) : !detailed && selectedTemplateId && activeSwitch ? (
@@ -371,14 +378,7 @@ export default function InterviewAnalyticsPage() {
         View and analyze your interview performance.
       </p>
       <Separator className="my-4" />
-      <Tabs defaultValue="overview">
-        <TabsList className="grid grid-cols-2 w-full mx-auto mb-5">
-          <TabsTrigger value="overview">Dashboard Overview</TabsTrigger>
-          <TabsTrigger value="details">Detailed Analytics</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview">{renderOverview()}</TabsContent>
-        <TabsContent value="details">{renderDetailed()}</TabsContent>
-      </Tabs>
+      {renderDetailed()}
     </div>
   );
 }

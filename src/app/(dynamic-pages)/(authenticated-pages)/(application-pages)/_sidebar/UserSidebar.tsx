@@ -37,20 +37,20 @@ export async function UserSidebar() {
           href="/candidate/interview-analytics"
           icon={<BarChart3Icon className="h-5 w-5" />}
         />
-        {/* <SidebarLink
+         <SidebarLink
           label="Job Tracker"
           href="/candidate/jobtracker"
           icon={<TableProperties className="h-5 w-5" />}
-        /> */}
+        />
+        <SidebarLink
+          label="Skill Development"
+          href="/candidate/skill-development"
+          icon={<Shield className="h-5 w-5" />}
+        />
         <SidebarLink
           label="Account Settings"
           href="/candidate/settings"
           icon={<Settings className="h-5 w-5" />}
-        />
-        <SidebarLink
-          label="Security Settings"
-          href="/candidate/settings/security"
-          icon={<Shield className="h-5 w-5" />}
         />
       </div>
       {/* <div className="flex flex-col gap-1">

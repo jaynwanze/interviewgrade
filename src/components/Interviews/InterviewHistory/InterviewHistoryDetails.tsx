@@ -152,7 +152,7 @@ export const InterviewHistoryDetails = ({
   const renderCoach = (evaluation: InterviewEvaluation) => {
     return (
       <div className="w-full max-w-4xl mx-auto">
-        <ChatInterface interviewId={interviewId} />
+        <ChatInterface interview ={interview} evaluation={evaluation} />
       </div>
     );
   };
@@ -168,64 +168,67 @@ export const InterviewHistoryDetails = ({
 
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
-      <div className="w-full max-w-4xl mx-auto space-y-4">
-        {evaluation.question_answer_feedback.map((qa, index) => (
-          <Card key={index} className="shadow-sm border">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">
-                Question {index + 1}
-              </CardTitle>
-              <p className="text-sm text-gray-500">{qa.question}</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {/* User's Answer */}
-              <div className="text-gray-700">
-                <span className="font-semibold">Your Response:</span>{' '}
-                <span className="text-gray-900">{qa.answer || 'N/A'}</span>
-              </div>
+        <div className="w-full max-w-4xl mx-auto space-y-4">
+          {evaluation.question_answer_feedback.map((qa, index) => (
+            <Card key={index} className="shadow-sm border">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">
+                  Question {index + 1}
+                </CardTitle>
+                <p className="text-sm text-gray-500">{qa.question}</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* User's Answer */}
+                <div className="text-gray-700">
+                  <span className="font-semibold">Your Response:</span>{' '}
+                  <span className="text-gray-900">{qa.answer || 'N/A'}</span>
+                </div>
 
-              {/* Feedback Analysis */}
-              <div>
-                <span className="font-semibold">AI Analysis:</span>
-                <p className="text-sm text-gray-600">{qa.feedback}</p>
-              </div>
+                {/* Feedback Analysis */}
+                <div>
+                  <span className="font-semibold">AI Analysis:</span>
+                  <p className="text-sm text-gray-600">{qa.feedback}</p>
+                </div>
 
-              <Separator className="my-3" />
+                <Separator className="my-3" />
 
-              {/* Score */}
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">Score:</span>
-                <Badge
-                  className={`text-white ${qa.mark >=
-                      80 /
-                      Math.floor(
-                        100 / evaluation.question_answer_feedback.length,
-                      )
-                      ? 'bg-green-600'
-                      : qa.mark >=
-                        60 /
+                {/* Score */}
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">Score:</span>
+                  <Badge
+                    className={`text-white ${qa.mark >=
+                        80 /
                         Math.floor(
                           100 / evaluation.question_answer_feedback.length,
                         )
-                        ? 'bg-yellow-500'
+                        ? 'bg-green-600'
                         : qa.mark >=
-                          40 /
+                          60 /
                           Math.floor(
                             100 /
                             evaluation.question_answer_feedback.length,
                           )
-                          ? 'bg-orange-500'
-                          : 'bg-red-500'
-                    }`}
-                >
-                  {qa.mark}/
-                  {Math.floor(100 / evaluation.question_answer_feedback.length)}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                          ? 'bg-yellow-500'
+                          : qa.mark >=
+                            40 /
+                            Math.floor(
+                              100 /
+                              evaluation.question_answer_feedback.length,
+                            )
+                            ? 'bg-orange-500'
+                            : 'bg-red-500'
+                      }`}
+                  >
+                    {qa.mark}/
+                    {Math.floor(
+                      100 / evaluation.question_answer_feedback.length,
+                    )}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   };

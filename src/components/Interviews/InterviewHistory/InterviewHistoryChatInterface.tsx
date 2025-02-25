@@ -1,13 +1,22 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { Interview, InterviewEvaluation } from '@/types';
+import { getAIResponse } from '@/utils/openai/getAIResponse';
+import { useEffect, useRef, useState } from 'react';
 
-export const ChatInterface = ({ interviewId }) => {
+export const ChatInterface = ({
+  interview,
+  evaluation,
+}: {
+  interview: Interview;
+  evaluation: InterviewEvaluation;
+}) => {
   const [messages, setMessages] = useState<
-    Array<{ sender: string; text: string }>
+    Array<{ sender: 'system' | 'user' | 'assistant'; text: string }>
   >([]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -15,14 +24,57 @@ export const ChatInterface = ({ interviewId }) => {
     // Add user message to the chat
     setMessages((prev) => [...prev, { sender: 'user', text: input }]);
     setInput('');
+    setIsLoading(true);
 
-    // Fetch AI response
-    const response = await fetchAIResponse(interviewId, input);
-    setMessages((prev) => [...prev, { sender: 'ai', text: response }]);
+    try {
+      // Get the last 3 messages for context
+      const lastThreeMessages = messages.slice(-3);
+
+      // Fetch AI response using the server action
+      const response = await getAIResponse(
+        interview,
+        evaluation,
+        input,
+        lastThreeMessages, // Pass the last 3 messages as context
+      );
+
+      // Add AI response to the chat
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'assistant', text: response || 'No response' },
+      ]);
+    } catch (error) {
+      console.error('Error fetching AI response:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'assistant',
+          text: 'Sorry, something went wrong. Please try again.',
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <div className="flex flex-col h-[500px] rounded-lg shadow-lg border overflow-hidden">
+      <div className="p-4 border-b">
+        <h2 className="text-lg font-semibold">AI Interview Coach</h2>
+        <p className="text-sm text-gray-600">
+          Ask any questions about your interview history or evaluation.
+        </p>
+      </div>
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages.map((msg, index) => (
@@ -43,10 +95,22 @@ export const ChatInterface = ({ interviewId }) => {
             </div>
           </div>
         ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200" />
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Chat Input */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex gap-2">
           <input
             type="text"
@@ -58,7 +122,8 @@ export const ChatInterface = ({ interviewId }) => {
           />
           <Button
             onClick={handleSend}
-            className="px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            disabled={isLoading}
+            className="px-4 py-2 focus:outline-none focus:ring- disabled:opacity-50"
             variant="default"
           >
             Send

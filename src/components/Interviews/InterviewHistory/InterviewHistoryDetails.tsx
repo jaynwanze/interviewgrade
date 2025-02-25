@@ -1,4 +1,5 @@
 'use client';
+import { ChatInterface } from '@/components/Interviews/InterviewHistory/InterviewHistoryChatInterface';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +31,6 @@ import autoTable from 'jspdf-autotable';
 import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
-
 export const InterviewHistoryDetails = ({
   interviewId,
 }: {
@@ -151,8 +151,8 @@ export const InterviewHistoryDetails = ({
 
   const renderCoach = (evaluation: InterviewEvaluation) => {
     return (
-      <div className="interview-flow-container flex flex-col items-center">
-        Coach
+      <div className="w-full max-w-4xl mx-auto">
+        <ChatInterface interviewId={interviewId} />
       </div>
     );
   };
@@ -167,6 +167,7 @@ export const InterviewHistoryDetails = ({
     }
 
     return (
+      <div className="shadow-lg mt-5 p-6 rounded-lg border">
       <div className="w-full max-w-4xl mx-auto space-y-4">
         {evaluation.question_answer_feedback.map((qa, index) => (
           <Card key={index} className="shadow-sm border">
@@ -225,6 +226,7 @@ export const InterviewHistoryDetails = ({
           </Card>
         ))}
       </div>
+      </div>
     );
   };
 
@@ -239,106 +241,108 @@ export const InterviewHistoryDetails = ({
             : 'bg-red-500';
     };
     return (
-      <div className="w-full max-w-4xl mx-auto space-y-6">
-        {/* Overall Score */}
-        <div className="flex items-center justify-between space-y-12">
-          <span className="flex flex-col space-y-6">
-            <CardTitle className="text-xl font-semibold ">
-              Overall Score
-            </CardTitle>
-            <span className="space-y-10 text-lg font-semibold">
-              Performance:
+      <div className="shadow-lg mt-5 p-6 rounded-lg border">
+        <div className="w-full max-w-4xl mx-auto space-y-6">
+          {/* Overall Score */}
+          <div className="flex items-center justify-between space-y-12">
+            <span className="flex flex-col space-y-6">
+              <CardTitle className="text-xl font-semibold ">
+                Overall Score
+              </CardTitle>
+              <span className="space-y-10 text-lg font-semibold">
+                Performance:
+              </span>
             </span>
-          </span>
-          <Badge
-            className={`text-white text-lg px-4 py-2 ${getScoreColor(evaluation.overall_grade)}`}
-          >
-            {evaluation.overall_grade}/100
-          </Badge>
-        </div>
-        <Separator />
-        {/* Strengths */}
-        <div className="flex flex-col justify-between space-y-6">
-          <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
-          <span className="text-gray-700">
-            {evaluation.strengths
-              ? evaluation.strengths
-              : 'No strengths identified.'}
-          </span>
-        </div>
-        <Separator />
-        {/* Areas for Improvement */}
-        <div className="flex flex-col justify-between space-y-6">
-          <CardTitle className="text-xl font-semibold">
-            Areas for Improvement
-          </CardTitle>
-          <span className="text-gray-700">
-            {evaluation.areas_for_improvement
-              ? evaluation.areas_for_improvement
-              : 'No areas identified.'}
-          </span>
-        </div>
-        <Separator />
-        {/* Recommendations */}
-        <div className="flex flex-col justify-between space-y-6">
-          <CardTitle className="text-xl font-semibold">
-            Recommendations
-          </CardTitle>
-          <span className="text-gray-700">
-            {evaluation.recommendations
-              ? evaluation.recommendations
-              : 'No recommendations provided.'}
-          </span>
-        </div>
-        <Separator />
-        <div className="flex flex-col justify-between space-y-6">
-          <CardTitle className="text-xl font-semibold">
-            Skill Breakdown
-          </CardTitle>
-          <span>
-            <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
-          </span>
-        </div>
-        <Separator />
-        {/* Evaluation Scores Table */}
-        <div className="flex flex-col justify-between space-y-6">
-          <CardTitle className="text-xl font-semibold">
-            Evaluation Scores
-          </CardTitle>
-          <Table className="w-full border rounded-sm">
-            <TableHeader>
-              <TableRow className="bg-gray-100 dark:bg-gray-900/5 font-bold">
-                <TableHead className="text-left px-4 py-2 border">
-                  Criterion
-                </TableHead>
-                <TableHead className="text-center px-4 py-2 border">
-                  Score
-                </TableHead>
-                <TableHead className="text-left px-4 py-2 border">
-                  Feedback
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {evaluation.evaluation_scores.map((score) => (
-                <TableRow key={score.id} className="border-b">
-                  <TableCell className="px-4 py-2 font-semibold">
-                    {score.name || 'N/A'}
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-center">
-                    <Badge
-                      className={`text-white ${getScoreColor(score.score * 10)}`}
-                    >
-                      {score.score}/10
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-gray-600">
-                    {score.feedback}
-                  </TableCell>
+            <Badge
+              className={`text-white text-lg px-4 py-2 ${getScoreColor(evaluation.overall_grade)}`}
+            >
+              {evaluation.overall_grade}/100
+            </Badge>
+          </div>
+          <Separator />
+          {/* Strengths */}
+          <div className="flex flex-col justify-between space-y-6">
+            <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
+            <span className="text-gray-700">
+              {evaluation.strengths
+                ? evaluation.strengths
+                : 'No strengths identified.'}
+            </span>
+          </div>
+          <Separator />
+          {/* Areas for Improvement */}
+          <div className="flex flex-col justify-between space-y-6">
+            <CardTitle className="text-xl font-semibold">
+              Areas for Improvement
+            </CardTitle>
+            <span className="text-gray-700">
+              {evaluation.areas_for_improvement
+                ? evaluation.areas_for_improvement
+                : 'No areas identified.'}
+            </span>
+          </div>
+          <Separator />
+          {/* Recommendations */}
+          <div className="flex flex-col justify-between space-y-6">
+            <CardTitle className="text-xl font-semibold">
+              Recommendations
+            </CardTitle>
+            <span className="text-gray-700">
+              {evaluation.recommendations
+                ? evaluation.recommendations
+                : 'No recommendations provided.'}
+            </span>
+          </div>
+          <Separator />
+          <div className="flex flex-col justify-between space-y-6">
+            <CardTitle className="text-xl font-semibold">
+              Skill Breakdown
+            </CardTitle>
+            <span>
+              <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
+            </span>
+          </div>
+          <Separator />
+          {/* Evaluation Scores Table */}
+          <div className="flex flex-col justify-between space-y-6">
+            <CardTitle className="text-xl font-semibold">
+              Evaluation Scores
+            </CardTitle>
+            <Table className="w-full border rounded-sm">
+              <TableHeader>
+                <TableRow className="bg-gray-100 dark:bg-gray-900/5 font-bold">
+                  <TableHead className="text-left px-4 py-2 border">
+                    Criterion
+                  </TableHead>
+                  <TableHead className="text-center px-4 py-2 border">
+                    Score
+                  </TableHead>
+                  <TableHead className="text-left px-4 py-2 border">
+                    Feedback
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {evaluation.evaluation_scores.map((score) => (
+                  <TableRow key={score.id} className="border-b">
+                    <TableCell className="px-4 py-2 font-semibold">
+                      {score.name || 'N/A'}
+                    </TableCell>
+                    <TableCell className="px-4 py-2 text-center">
+                      <Badge
+                        className={`text-white ${getScoreColor(score.score * 10)}`}
+                      >
+                        {score.score}/10
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="px-4 py-2 text-gray-600">
+                      {score.feedback}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     );
@@ -439,14 +443,12 @@ export const InterviewHistoryDetails = ({
           <Separator className="my-4" />
 
           {/* Tabs Content */}
-          <div className="shadow-lg mt-5 p-6 rounded-lg border">
-            {/* Tabs Content */}
-            {selectedTab === 'overview' && renderOverview(evaluation)}
-            {selectedTab === 'details' &&
-              interview.mode === 'interview' &&
-              renderDetailed(evaluation)}
-            {selectedTab === 'coach' && renderCoach(evaluation)}
-          </div>
+          {/* Tabs Content */}
+          {selectedTab === 'overview' && renderOverview(evaluation)}
+          {selectedTab === 'details' &&
+            interview.mode === 'interview' &&
+            renderDetailed(evaluation)}
+          {selectedTab === 'coach' && renderCoach(evaluation)}
         </>
       ) : (
         <>

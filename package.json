@@ -128,6 +128,7 @@
     "rooks": "^7.14.1",
     "server-only": "^0.0.1",
     "shadcn-ui": "^0.2.3",
+    "shepherd.js": "^14.5.0",
     "slugify": "^1.6.6",
     "sonner": "^1.5.0",
     "stripe": "11.18.0",

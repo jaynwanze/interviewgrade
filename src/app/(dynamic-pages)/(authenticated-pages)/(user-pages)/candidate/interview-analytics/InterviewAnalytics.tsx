@@ -1,7 +1,6 @@
 'use client';
 
 import { InterviewAverageDetails } from '@/components/Interviews/InterviewAnalytics/InterviewAverageDetails';
-import { InterviewLatestCard } from '@/components/Interviews/InterviewAnalytics/InterviewLatestCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +19,6 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
 import { cn } from '@/lib/utils';
 import { Interview, InterviewAnalytics } from '@/types';
@@ -29,12 +27,11 @@ import {
   INTERVIEW_PRACTICE_MODE,
 } from '@/utils/constants';
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
-import { InterviewGraphsOverview } from './_graphs/_overview/InterviewGraphsOverview';
 import { useSearchParams } from 'next/navigation';
-import 'shepherd.js/dist/css/shepherd.css';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Shepherd from 'shepherd.js';
+import 'shepherd.js/dist/css/shepherd.css';
+import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
 
 export type TemplateAndSwitchModeDetails = {
   current_template_id: string;
@@ -185,6 +182,8 @@ export default function InterviewAnalyticsPage() {
     if (isTutorialMode && !tourStarted) {
       startTutorialTour();
       setTourStarted(true);
+      //endTutorialMode();
+      //replace router.push with endTutorialMode
     }
   }, [isTutorialMode]);
 
@@ -201,7 +200,7 @@ export default function InterviewAnalyticsPage() {
     tour.addStep({
       id: 'dashboard-overview',
       title: 'Welcome to Your Analytics Dashboard',
-      text: 'Here, you can track your interview progress and performance insights.',
+      text: 'This is your personal interview analytics dashboard where you can track your progress and improve.',
       attachTo: { element: '.dashboard-header', on: 'bottom' },
       buttons: [{ text: 'Next', action: tour.next }],
     });
@@ -209,7 +208,7 @@ export default function InterviewAnalyticsPage() {
     tour.addStep({
       id: 'latest-interview',
       title: 'Latest Interview Summary',
-      text: 'This section shows your most recent interview’s performance and feedback.',
+      text: 'This section provides a quick summary of your most recent interview, including your score and feedback.',
       attachTo: { element: '.latest-interview-card', on: 'top' },
       buttons: [
         { text: 'Back', action: tour.back },
@@ -219,8 +218,8 @@ export default function InterviewAnalyticsPage() {
 
     tour.addStep({
       id: 'performance-graph',
-      title: 'Performance Over Time',
-      text: 'Analyze how your scores have improved over multiple interviews.',
+      title: 'Performance Trends',
+      text: 'This graph shows how your interview performance has changed over time.',
       attachTo: { element: '.performance-graph', on: 'right' },
       buttons: [
         { text: 'Back', action: tour.back },
@@ -230,8 +229,8 @@ export default function InterviewAnalyticsPage() {
 
     tour.addStep({
       id: 'insights-section',
-      title: 'Actionable Insights',
-      text: 'View suggestions on what skills to improve based on past interview performance.',
+      title: 'Your Strengths & Weaknesses',
+      text: 'This section provides insights into your best-performing skills and areas that need improvement.',
       attachTo: { element: '.insights-section', on: 'left' },
       buttons: [
         { text: 'Back', action: tour.back },
@@ -345,7 +344,7 @@ export default function InterviewAnalyticsPage() {
         ) : detailed &&
           selectedTemplateId &&
           filteredCompletedInterviews.length > 0 ? (
-          <div>
+          <div className="performance-graph">
             <InterviewAverageDetails
               analyticsData={detailed}
               latestInterview={overview.latestInterview!}
@@ -370,7 +369,7 @@ export default function InterviewAnalyticsPage() {
   };
 
   return (
-    <div className="container mx-auto p-2 w-3/4">
+    <div className="dashboard-overview container mx-auto p-2 w-3/4">
       <h1 className="text-2xl font-bold text-center mb-1">
         Interview Analytics Dashboard
       </h1>

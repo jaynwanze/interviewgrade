@@ -29,6 +29,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
 
 export const InterviewHistoryDetails = ({
   interviewId,
@@ -290,17 +291,15 @@ export const InterviewHistoryDetails = ({
           </span>
         </div>
         <Separator />
-        Radar Chart (To Be Added)
-        <Separator />
-        {/* <div className="flex flex-col justify-between space-y-6">
+        <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">
             Skill Breakdown
           </CardTitle>
           <span>
-            <p className="text-gray-500">[Insert Radial Chart Here]</p>
+            <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
           </span>
         </div>
-        <Separator /> */}
+        <Separator />
         {/* Evaluation Scores Table */}
         <div className="flex flex-col justify-between space-y-6">
           <CardTitle className="text-xl font-semibold">

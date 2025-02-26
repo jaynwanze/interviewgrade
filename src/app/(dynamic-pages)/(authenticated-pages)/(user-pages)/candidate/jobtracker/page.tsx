@@ -37,9 +37,11 @@ import {
 import {
   addJobTrackerApplication,
   fetchJobTrackerApplications,
+  updateJobTrackerApplication,
+  deleteJobTrackerApplication,
 } from '@/data/user/candidate';
 import { JobTracker } from '@/types';
-import { Link2, PlusCircle } from 'lucide-react';
+import { Link2, PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function JobTrackerPage() {
@@ -48,7 +50,9 @@ export default function JobTrackerPage() {
 
   // Form state for new job entry
   const [newJob, setNewJob] = useState<Partial<JobTracker>>({});
-  const [open, setOpen] = useState(false);
+  const [editJob, setEditJob] = useState<Partial<JobTracker>>({});
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
 
   // Fetch job applications from the database
   useEffect(() => {
@@ -71,10 +75,36 @@ export default function JobTrackerPage() {
         const addedJob = await addJobTrackerApplication(newJob);
         setJobs((prev) => [...prev, addedJob]);
         setNewJob({});
-        setOpen(false);
+        setOpenAddDialog(false);
       } catch (error) {
         console.error('Error adding job:', error);
       }
+    }
+  };
+
+  // Edit an existing job
+  const editJobHandler = async () => {
+    if (editJob.job_title && editJob.company && editJob.status) {
+      try {
+        const updatedJob = await updateJobTrackerApplication(editJob);
+        setJobs((prev) =>
+          prev.map((job) => (job.id === updatedJob.id ? updatedJob : job)),
+        );
+        setEditJob({});
+        setOpenEditDialog(false);
+      } catch (error) {
+        console.error('Error updating job:', error);
+      }
+    }
+  };
+
+  // Delete a job
+  const deleteJob = async (id: string) => {
+    try {
+      await deleteJobTrackerApplication(id);
+      setJobs((prev) => prev.filter((job) => job.id !== id));
+    } catch (error) {
+      console.error('Error deleting job:', error);
     }
   };
 
@@ -126,7 +156,7 @@ export default function JobTrackerPage() {
               Track your job applications and stay organized.
             </CardDescription>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
             <DialogTrigger asChild>
               <Button variant="outline" className="mt-4 md:mt-0">
                 <PlusCircle className="mr-2 h-5 w-5" /> Add Job
@@ -199,7 +229,7 @@ export default function JobTrackerPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setOpen(false)}>
+                <Button variant="outline" onClick={() => setOpenAddDialog(false)}>
                   Cancel
                 </Button>
                 <Button onClick={addJob}>Add</Button>
@@ -216,6 +246,7 @@ export default function JobTrackerPage() {
                 <TableHead className="px-4 py-2">Status</TableHead>
                 <TableHead className="px-4 py-2">Applied Date</TableHead>
                 <TableHead className="px-4 py-2">Link</TableHead>
+                <TableHead className="px-4 py-2">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -248,12 +279,110 @@ export default function JobTrackerPage() {
                       </a>
                     )}
                   </TableCell>
+                  <TableCell className="px-4 py-2">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditJob(job);
+                          setOpenEditDialog(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteJob(job.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Job Dialog */}
+      <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Job</DialogTitle>
+            <DialogDescription>
+              Update the job details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-1">
+              <Label htmlFor="edit-job-title">Job Title</Label>
+              <Input
+                id="edit-job-title"
+                placeholder="Frontend Developer"
+                value={editJob.job_title || ''}
+                onChange={(e) =>
+                  setEditJob({ ...editJob, job_title: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-company">Company</Label>
+              <Input
+                id="edit-company"
+                placeholder="Acme Corp"
+                value={editJob.company || ''}
+                onChange={(e) =>
+                  setEditJob({ ...editJob, company: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-link">Job Link</Label>
+              <Input
+                id="edit-link"
+                placeholder="https://example.com/job/..."
+                value={editJob.link || ''}
+                onChange={(e) =>
+                  setEditJob({ ...editJob, link: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-status">Status</Label>
+              <Select
+                value={editJob.status || ''}
+                onValueChange={(value) =>
+                  setEditJob({
+                    ...editJob,
+                    status: value as JobTracker['status'],
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="not_started">Not Started</SelectItem>
+                  <SelectItem value="applied">Applied</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="offered">Offered</SelectItem>
+                  <SelectItem value="hired">Hired</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={editJobHandler}>Save</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

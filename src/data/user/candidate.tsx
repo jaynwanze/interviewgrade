@@ -299,3 +299,56 @@ export async function addJobTrackerApplication(
 
   return data[0];
 }
+
+export async function updateJobTrackerApplication(
+  updatedJob: Partial<JobTracker>,
+): Promise<Table<'job_application_tracker'>> {
+  const user = await serverGetLoggedInUser();
+  const { user_metadata, id } = user;
+  if (user_metadata.userType === 'employee') {
+    throw new Error('This user is not a candidate');
+  }
+
+  if (!updatedJob.id) {
+    throw new Error('No job ID provided');
+  }
+
+  const supabase = createSupabaseUserServerActionClient();
+
+  const { data, error } = await supabase
+    .from('job_application_tracker')
+    .update({
+      ...updatedJob,
+    })
+    .eq('id', updatedJob.id)
+    .eq('candidate_id', id)
+    .select();
+
+  if (error) {
+    throw new Error(`Failed to update job application: ${error.message}`);
+  }
+
+  return data[0];
+}
+
+export async function deleteJobTrackerApplication(
+  jobTrackerId: string,
+): Promise<void> {
+  const user = await serverGetLoggedInUser();
+  const { user_metadata, id } = user;
+  if (user_metadata.userType === 'employee') {
+    throw new Error('This user is not a candidate');
+  }
+
+  const supabase = createSupabaseUserServerActionClient();
+
+  const { error } = await supabase
+    .from('job_application_tracker')
+    .delete()
+    .eq('id', jobTrackerId)
+    .eq('candidate_id', id);
+
+  if (error) {
+    throw new Error(`Failed to delete job application: ${error.message}`);
+  }
+}

@@ -42,11 +42,11 @@ export async function UserSidebar() {
           href="/candidate/jobtracker"
           icon={<TableProperties className="h-5 w-5" />}
         />
-        <SidebarLink
+        {/* <SidebarLink
           label="Skill Development"
           href="/candidate/skill-development"
           icon={<Shield className="h-5 w-5" />}
-        />
+        /> */}
         <SidebarLink
           label="Account Settings"
           href="/candidate/settings"

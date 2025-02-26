@@ -78,6 +78,44 @@ export default function JobTrackerPage() {
     }
   };
 
+  const jobStatusColor = (status: JobTracker['status']) => {
+    switch (status) {
+      case 'not_started':
+        return 'gray';
+      case 'applied':
+        return 'blue';
+      case 'in_progress':
+        return 'yellow';
+      case 'rejected':
+        return 'red';
+      case 'offered':
+        return 'green';
+      case 'hired':
+        return 'green';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getJobStatus = (status: JobTracker['status']) => {
+    switch (status) {
+      case 'not_started':
+        return 'Not Started';
+      case 'applied':
+        return 'Applied';
+      case 'in_progress':
+        return 'In Progress';
+      case 'rejected':
+        return 'Rejected';
+      case 'offered':
+        return 'Offered';
+      case 'hired':
+        return 'Hired';
+      default:
+        return 'Not Started';
+    }
+  };
+
   return (
     <div className="p-4 max-w-5xl mx-auto space-y-6">
       <Card>
@@ -189,17 +227,10 @@ export default function JobTrackerPage() {
                   <TableCell className="px-4 py-2">{job.company}</TableCell>
                   <TableCell className="px-4 py-2">
                     <Badge
-                      variant={
-                        job.status === 'offered'
-                          ? 'secondary'
-                          : job.status === 'in_progress'
-                            ? 'default'
-                            : job.status === 'applied'
-                              ? 'outline'
-                              : 'destructive'
-                      }
+                      className={`bg-${jobStatusColor(job.status)}-100 hover:bg-gray-100 text-${jobStatusColor(job.status)}-800`}
+                      variant={'default'}
                     >
-                      {job.status}
+                      {getJobStatus(job.status)}
                     </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-2">

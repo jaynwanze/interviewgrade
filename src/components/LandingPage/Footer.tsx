@@ -1,5 +1,4 @@
-import darkLogo from '@public/logos/acme-logo-dark.png';
-import lightLogo from '@public/logos/acme-logo-light.png';
+import logo from '@public/logos/InterviewGrade.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import { footerItems, footerSocialItems } from './footer-items';
@@ -14,12 +13,12 @@ export function Footer() {
               <Link href="/">
                 <div className="relative flex gap-2 items-center text-black dark:text-white ">
                   <Image
-                    src={lightLogo}
+                    src={logo}
                     alt="logo"
                     className="dark:block hidden h-8 w-8"
                   />
                   <Image
-                    src={darkLogo}
+                    src={logo}
                     alt="logo"
                     className="block dark:hidden h-8 w-8"
                   />

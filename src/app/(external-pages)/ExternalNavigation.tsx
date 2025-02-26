@@ -2,8 +2,7 @@
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import acmeLightLogo from '@public/logos/acme-logo-dark.png';
-import acmeDarkLogo from '@public/logos/acme-logo-light.png';
+import logo from '@public/logos/InterviewGrade.png';
 import { Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,14 +26,14 @@ export function ExternalNavigation() {
           <Link href="/" className="font-bold text-xl ">
             <div className="relative flex space-x-2 w-10 h-10 md:w-fit items-center justify-center text-foreground dark:-ml-4 -ml-2">
               <Image
-                src={acmeLightLogo}
+                src={logo}
                 width={40}
                 height={40}
                 alt="logo"
                 className="dark:hidden block h-8 w-8"
               />
               <Image
-                src={acmeDarkLogo}
+                src={logo}
                 width={40}
                 height={40}
                 alt="logo"

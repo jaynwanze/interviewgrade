@@ -5,8 +5,7 @@ import { cn } from '@/utils/cn';
 import { useMutation } from '@tanstack/react-query';
 import { Menu, PanelLeftOpen } from 'lucide-react';
 import Image from 'next/image';
-import darkLogo from 'public/logos/nextbase-dark-logo.png';
-import lightLogo from 'public/logos/nextbase-light-logo.png';
+import logo from 'public/logos/InterviewGrade.png';
 import { useContext } from 'react';
 import { toast } from 'sonner';
 
@@ -44,7 +43,7 @@ export function SidebarOpen() {
           </div>
           <Image
             width={32}
-            src={lightLogo}
+            src={logo}
             alt="Logo Login"
             className={cn(
               'rotate-0 transition-all cursor-pointer  dark:-rotate-90 dark:hidden block',
@@ -53,7 +52,7 @@ export function SidebarOpen() {
 
           <Image
             width={32}
-            src={darkLogo}
+            src={logo}
             alt="Logo Login"
             className={cn(
               ' rotate-90 transition-all cursor-pointer  dark:rotate-0 hidden dark:block',

@@ -2,8 +2,7 @@ import { T } from '@/components/ui/Typography';
 import { cn } from '@/utils/cn';
 import Image from 'next/image';
 import Link from 'next/link';
-import darkLogo from 'public/logos/nextbase-dark-logo.png';
-import lightLogo from 'public/logos/nextbase-light-logo.png';
+import logo from 'public/logos/InterviewGrade.png';
 import { SidebarClose } from './SidebarClose';
 
 export function SidebarLogoAndToggle({ userType }: { userType: string }) {
@@ -15,7 +14,7 @@ export function SidebarLogoAndToggle({ userType }: { userType: string }) {
       >
         <Image
           width={36}
-          src={lightLogo}
+          src={logo}
           alt="InterviewGrade Logo"
           className={cn(
             'rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0',
@@ -24,7 +23,7 @@ export function SidebarLogoAndToggle({ userType }: { userType: string }) {
         />
         <Image
           width={36}
-          src={darkLogo}
+          src={logo}
           alt="InterviewGrade Logo"
           className={cn(
             ' absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100',

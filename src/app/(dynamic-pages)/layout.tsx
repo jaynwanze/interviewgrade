@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = {
   icons: {
-    icon: '/images/logo-black-main.ico',
+    icon: '/logos/InterviewGrade.png',
   },
   title: 'InterviewGrade',
   description: 'InterviewGrade',

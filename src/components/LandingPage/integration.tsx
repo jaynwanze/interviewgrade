@@ -1,7 +1,6 @@
 import { GitForkIcon } from 'lucide-react';
 
-import darkLogo from '@public/logos/nextbase-dark-logo.png';
-import lightLogo from '@public/logos/nextbase-light-logo.png';
+import logo from '@public/logos/InterviewGrade.png';
 import Image from 'next/image';
 import Icons from '../icons';
 import OrbitingCircles from '../magicui/orbiting-circles';
@@ -22,14 +21,14 @@ export default function Integration() {
       <div className="relative flex h-[500px] w-full max-w-[32rem] items-center justify-center overflow-hidden ">
         <span className="pointer-events-none">
           <Image
-            src={lightLogo}
+            src={logo}
             width={80}
             height={80}
             alt="logo"
             className="dark:hidden block "
           />
           <Image
-            src={darkLogo}
+            src={logo}
             width={80}
             height={80}
             alt="logo"

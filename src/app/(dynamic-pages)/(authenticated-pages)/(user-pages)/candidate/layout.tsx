@@ -19,7 +19,7 @@ export default async function Layout({
         </InternalNavbar>
         <Suspense>
           <div className="relative flex-1 h-auto min-h-screen mt-6 w-full overflow-auto">
-            <div className="px-6 space-y-6 pb-10">{children}</div>
+            <div className="px-6 space-y-6 min-h-screen pb-10">{children}</div>
           </div>
         </Suspense>
       </div>

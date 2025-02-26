@@ -1,13 +1,19 @@
-// UserCamera.tsx
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { transcribeInterviewAudio } from '@/utils/openai/transcribeInterviewAudio';
-import { MediaRecorderHandler } from '@/utils/webspeech/mediaRecorder';
-import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
-import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Meter } from './SoundMeter';
+import { Button } from "@/components/ui/button";
+import { transcribeInterviewAudio } from "@/utils/openai/transcribeInterviewAudio";
+import { MediaRecorderHandler } from "@/utils/webspeech/mediaRecorder";
+import { useSpeechRecognition } from "@/utils/webspeech/speechRecognition";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Meter } from "./SoundMeter";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface UserCameraProps {
   answerCallback: (answer: string) => void;
@@ -17,47 +23,36 @@ interface UserCameraProps {
   interviewMode: string | null;
 }
 
-// Helper function to get the preferred video device ID
 const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
   try {
-    // Request permission to access video to get device labels
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: false,
     });
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter(
-      (device) => device.kind === 'videoinput',
+      (device) => device.kind === "videoinput"
     );
-
-    // Define exclusion keywords for unwanted devices
     const exclusionKeywords = [
-      'android',
-      'phone',
-      'external',
-      'virtual',
-      'usb',
-      'wireless',
+      "android",
+      "phone",
+      "external",
+      "virtual",
+      "usb",
+      "wireless",
     ];
-
-    // Attempt to find a preferred device
     const preferredDevice = videoDevices.find((device) => {
       const label = device.label.toLowerCase();
-      // Exclude devices that match any of the exclusion keywords
       return !exclusionKeywords.some((keyword) => label.includes(keyword));
     });
-
-    // Stop all tracks to release the temporary stream
     stream.getTracks().forEach((track) => track.stop());
-
     return preferredDevice ? preferredDevice.deviceId : undefined;
   } catch (error) {
-    console.error('Error selecting preferred video device:', error);
+    console.error("Error selecting preferred video device:", error);
     return undefined;
   }
 };
 
-// UserCamera component to handle video and audio recording and display a sound meter
 export const UserCamera: React.FC<UserCameraProps> = ({
   answerCallback,
   isCameraOn,
@@ -66,24 +61,51 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   interviewMode,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [isGettingFeedback, setIsGettingFeedback] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [isMicMuted, setIsMicMuted] = useState(false);
+  const [micPermissionState, setMicPermissionState] = useState<
+    "granted" | "denied" | "prompt" | null
+  >(null);
+  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
-  const timerRef = useRef<number | null>(null); // Ref for timer
-  const whisperFinalTranscript = useRef<string | null>(null); // Ref for final transcript
-  const [isLoadingFFmpeg, setIsLoadingFFmpeg] = useState(false); // Loading state for FFmpeg
+  const timerRef = useRef<number | null>(null);
+  const whisperFinalTranscript = useRef<string | null>(null);
+  const [isLoadingFFmpeg, setIsLoadingFFmpeg] = useState(false);
 
-  // Refs for audio stream and context
   const audioStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Use speech recognition
   const { startRecognition, stopRecognition, finalTranscript } =
     useSpeechRecognition();
-
   const pathname = usePathname();
-  const previousPathname = useRef<string | null>(pathname);
+
+  // Check microphone permission using the Permissions API.
+  useEffect(() => {
+    async function checkMicPermission() {
+      try {
+        const permission = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        setMicPermissionState(permission.state);
+        if (permission.state === "denied") {
+          setShowPermissionDialog(true);
+        }
+        permission.onchange = () => {
+          setMicPermissionState(permission.state);
+          if (permission.state === "denied") {
+            setShowPermissionDialog(true);
+          } else {
+            setShowPermissionDialog(false);
+          }
+        };
+      } catch (error) {
+        console.error("Error checking microphone permission:", error);
+      }
+    }
+    checkMicPermission();
+  }, []);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -92,24 +114,42 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         const constraints: MediaStreamConstraints = {
           video: deviceId
             ? { deviceId: { exact: deviceId } }
-            : { facingMode: 'user' }, // Fallback to 'user' if no deviceId
+            : { facingMode: "user" },
           audio: true,
         };
-        // Get webcam and microphone stream
-        const mediaStream =
-          await navigator.mediaDevices.getUserMedia(constraints);
+        const mediaStream = await navigator.mediaDevices.getUserMedia(
+          constraints
+        );
         audioStreamRef.current = mediaStream;
 
-        // Initialize AudioContext
+        // Initialize AudioContext and resume it if needed.
         audioContextRef.current = new (window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext })
             .webkitAudioContext)();
+        if (audioContextRef.current.state === "suspended") {
+          await audioContextRef.current.resume();
+        }
+
+        // Check and log audio tracks.
+        const audioTracks = mediaStream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          setIsMicMuted(audioTracks[0].muted);
+          audioTracks[0].addEventListener("mute", () => {
+            console.log("Microphone muted");
+            setIsMicMuted(true);
+          });
+          audioTracks[0].addEventListener("unmute", () => {
+            console.log("Microphone unmuted");
+            setIsMicMuted(false);
+          });
+        }
+
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
           await videoRef.current.play();
         }
       } catch (err) {
-        console.error('Error accessing webcam and microphone:', err);
+        console.error("Error accessing webcam and microphone:", err);
       }
     };
 
@@ -118,10 +158,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     }
 
     return () => {
-      // Stop MediaRecorder if it's active
       mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg);
-
-      // Stop all media tracks
       if (audioStreamRef.current) {
         audioStreamRef.current.getTracks().forEach((track) => track.stop());
         if (videoRef.current) {
@@ -129,8 +166,6 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         }
         audioStreamRef.current = null;
       }
-
-      // Close AudioContext unconditionally
       if (audioContextRef.current) {
         audioContextRef.current.close();
         audioContextRef.current = null;
@@ -140,21 +175,28 @@ export const UserCamera: React.FC<UserCameraProps> = ({
 
   const handleAnswer = (answer: string) => {
     answerCallback(answer);
-    whisperFinalTranscript.current = null; // Reset the final transcript
+    whisperFinalTranscript.current = null;
   };
 
   const handleRecord = () => {
+    if (micPermissionState === "denied") {
+      setShowPermissionDialog(true);
+      return;
+    }
     setIsRecording(true);
     setRecordingTime(0);
     if (audioStreamRef.current) {
+      if (audioContextRef.current?.state === "suspended") {
+        audioContextRef.current.resume();
+      }
       const mediaHandler = new MediaRecorderHandler();
       mediaRecorderHandlerRef.current = mediaHandler;
       mediaHandler.start(audioStreamRef.current);
-      console.log('Audio Stream/MediaHandler - Recording started');
+      console.log("Audio Stream/MediaHandler - Recording started");
     } else {
       startRecognition();
-      console.log('Webkit Speech Recognition - Recording started');
-      console.log('Audio stream/MediaHandler not available');
+      console.log("Webkit Speech Recognition - Recording started");
+      console.log("Audio stream/MediaHandler not available");
     }
     timerRef.current = window.setInterval(() => {
       setRecordingTime((prev) => {
@@ -173,24 +215,17 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     if (isFetchingSpecificFeedback) {
       isFetchingSpecificFeedback(true);
     }
-
     if (mediaRecorderHandlerRef.current) {
       const convertedAudioBlob =
         await mediaRecorderHandlerRef.current.stop(setIsLoadingFFmpeg);
-
       if (convertedAudioBlob) {
         const formData = new FormData();
-        formData.append('file', convertedAudioBlob, 'audio.mp3');
-        formData.append('model', 'whisper-1');
+        formData.append("file", convertedAudioBlob, "audio.mp3");
+        formData.append("model", "whisper-1");
         whisperFinalTranscript.current =
           await transcribeInterviewAudio(formData);
       } else {
-        // Handle error when audio conversion fails
-        //create a way for them to retry question if it fails
-        console.error(
-          'Audio conversion failed - returning error message to display to user',
-        );
-
+        console.error("Audio conversion failed");
         if (isFetchingSpecificFeedback) {
           isFetchingSpecificFeedback(false);
         }
@@ -199,14 +234,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     } else {
       stopRecognition();
     }
-
     const webSpeechTranscript = finalTranscript.trim();
     whisperFinalTranscript.current
       ? handleAnswer(whisperFinalTranscript.current)
       : handleAnswer(webSpeechTranscript);
-
     if (onRecordEnd) {
-      onRecordEnd(); // Notify the parent component that recording has ended
+      onRecordEnd();
     }
   }, [
     isRecording,
@@ -233,6 +266,11 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           End Recording
         </Button>
       </div>
+      {isMicMuted && (
+        <p className="text-red-500 text-center mb-4">
+          Your microphone is muted. Please unmute to record audio.
+        </p>
+      )}
       {isRecording && audioStreamRef.current && audioContextRef.current && (
         <div className="mt-5">
           <Meter
@@ -245,6 +283,28 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       {isRecording && (
         <p className="mt-2">Recording for {recordingTime} seconds...</p>
       )}
+
+      {/* Permission Dialog */}
+      <Dialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog}>
+        <DialogTrigger asChild>
+          <Button className="hidden" />
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Microphone Permissions Required</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              It looks like your microphone permissions are denied. Please allow microphone access in your browser settings to record audio.
+            </p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setShowPermissionDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

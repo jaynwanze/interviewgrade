@@ -32,7 +32,16 @@ export class MediaRecorderHandler {
     setLoadingFFmpeg(true); // Set loading state
     if (!this.ffmpeg.loaded) {
       try {
-        await this.ffmpeg.load({});
+        await this.ffmpeg.load({
+          coreURL: await toBlobURL(
+            'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+            'text/javascript',
+          ),
+          wasmURL: await toBlobURL(
+            'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+            'application/wasm',
+          ),
+        });
       } catch (error) {
         console.error(
           'Error loading FFmpeg now using backup audio converter:',

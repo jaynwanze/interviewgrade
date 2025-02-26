@@ -58,6 +58,7 @@ export type EvaluationScores = {
   feedback: string;
 };
 
+export type JobTracker = Table<'job_application_tracker'>;
 export interface CandidateRow {
   id: string;
   city: string;

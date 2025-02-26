@@ -1,17 +1,14 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { CalendarIcon, Link2, PlusCircle } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -27,57 +33,48 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
-interface JobEntry {
-  id: string;
-  title: string;
-  company: string;
-  status: "Applied" | "Interviewing" | "Offer" | "Rejected";
-  link: string;
-  appliedDate: string;
-}
+} from '@/components/ui/table';
+import {
+  addJobTrackerApplication,
+  fetchJobTrackerApplications,
+} from '@/data/user/candidate';
+import { JobTracker } from '@/types';
+import { Link2, PlusCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function JobTrackerPage() {
   // Local state to hold job tracker entries
-  const [jobs, setJobs] = useState<JobEntry[]>([
-    // Example initial data
-    {
-      id: "1",
-      title: "Frontend Developer",
-      company: "Acme Corp",
-      status: "Applied",
-      link: "https://example.com/job/1",
-      appliedDate: new Date().toLocaleDateString(),
-    },
-    {
-      id: "2",
-      title: "UI/UX Designer",
-      company: "Design Studio",
-      status: "Interviewing",
-      link: "https://example.com/job/2",
-      appliedDate: new Date().toLocaleDateString(),
-    },
-  ]);
+  const [jobs, setJobs] = useState<JobTracker[]>([]);
 
   // Form state for new job entry
-  const [newJob, setNewJob] = useState<Partial<JobEntry>>({});
+  const [newJob, setNewJob] = useState<Partial<JobTracker>>({});
   const [open, setOpen] = useState(false);
 
-  const addJob = () => {
-    if (newJob.title && newJob.company && newJob.status && newJob.link) {
-      const job: JobEntry = {
-        id: (jobs.length + 1).toString(),
-        title: newJob.title,
-        company: newJob.company,
-        status: newJob.status as JobEntry["status"],
-        link: newJob.link,
-        appliedDate: new Date().toLocaleDateString(),
-      };
-      setJobs((prev) => [...prev, job]);
-      setNewJob({});
-      setOpen(false);
+  // Fetch job applications from the database
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const data = await fetchJobTrackerApplications();
+        setJobs(data);
+      } catch (error) {
+        console.error('Error fetching job applications:', error);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  // Add a new job to the database
+  const addJob = async () => {
+    if (newJob.job_title && newJob.company && newJob.status) {
+      try {
+        const addedJob = await addJobTrackerApplication(newJob);
+        setJobs((prev) => [...prev, addedJob]);
+        setNewJob({});
+        setOpen(false);
+      } catch (error) {
+        console.error('Error adding job:', error);
+      }
     }
   };
 
@@ -110,9 +107,9 @@ export default function JobTrackerPage() {
                   <Input
                     id="job-title"
                     placeholder="Frontend Developer"
-                    value={newJob.title || ""}
+                    value={newJob.job_title || ''}
                     onChange={(e) =>
-                      setNewJob({ ...newJob, title: e.target.value })
+                      setNewJob({ ...newJob, job_title: e.target.value })
                     }
                   />
                 </div>
@@ -121,7 +118,7 @@ export default function JobTrackerPage() {
                   <Input
                     id="company"
                     placeholder="Acme Corp"
-                    value={newJob.company || ""}
+                    value={newJob.company || ''}
                     onChange={(e) =>
                       setNewJob({ ...newJob, company: e.target.value })
                     }
@@ -132,7 +129,7 @@ export default function JobTrackerPage() {
                   <Input
                     id="link"
                     placeholder="https://example.com/job/..."
-                    value={newJob.link || ""}
+                    value={newJob.link || ''}
                     onChange={(e) =>
                       setNewJob({ ...newJob, link: e.target.value })
                     }
@@ -140,20 +137,27 @@ export default function JobTrackerPage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="status">Status</Label>
-                  <select
-                    id="status"
-                    className="border rounded px-2 py-1"
-                    value={newJob.status || ""}
-                    onChange={(e) =>
-                      setNewJob({ ...newJob, status: e.target.value })
+                  <Select
+                    value={newJob.status || ''}
+                    onValueChange={(value) =>
+                      setNewJob({
+                        ...newJob,
+                        status: value as JobTracker['status'],
+                      })
                     }
                   >
-                    <option value="">Select status</option>
-                    <option value="Applied">Applied</option>
-                    <option value="Interviewing">Interviewing</option>
-                    <option value="Offer">Offer</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_started">Not Started</SelectItem>
+                      <SelectItem value="applied">Applied</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="offered">Offered</SelectItem>
+                      <SelectItem value="hired">Hired</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
@@ -180,34 +184,38 @@ export default function JobTrackerPage() {
               {jobs.map((job) => (
                 <TableRow key={job.id}>
                   <TableCell className="px-4 py-2 font-medium">
-                    {job.title}
+                    {job.job_title}
                   </TableCell>
                   <TableCell className="px-4 py-2">{job.company}</TableCell>
                   <TableCell className="px-4 py-2">
                     <Badge
                       variant={
-                        job.status === "Offer"
-                          ? "secondary"
-                          : job.status === "Interviewing"
-                          ? "success"
-                          : job.status === "Applied"
-                          ? "info"
-                          : "destructive"
+                        job.status === 'offered'
+                          ? 'secondary'
+                          : job.status === 'in_progress'
+                            ? 'default'
+                            : job.status === 'applied'
+                              ? 'outline'
+                              : 'destructive'
                       }
                     >
                       {job.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-4 py-2">{job.appliedDate}</TableCell>
                   <TableCell className="px-4 py-2">
-                    <a
-                      href={job.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-blue-600 hover:underline"
-                    >
-                      <Link2 className="h-4 w-4" /> View
-                    </a>
+                    {new Date(job.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {job.link && (
+                      <a
+                        href={job.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-blue-600 hover:underline"
+                      >
+                        <Link2 className="h-4 w-4" /> View
+                      </a>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

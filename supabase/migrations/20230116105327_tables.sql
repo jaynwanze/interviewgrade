@@ -337,6 +337,7 @@ CREATE TABLE "public"."job_application_tracker" (
   "industry" character varying,
   "location" character varying,
   "job_type" character varying,
+  "link" character varying,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );
 

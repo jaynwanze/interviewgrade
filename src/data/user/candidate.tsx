@@ -1,7 +1,12 @@
 'use server';
 
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
-import type { SAPayload, SupabaseFileUploadOptions, Table } from '@/types';
+import type {
+  JobTracker,
+  SAPayload,
+  SupabaseFileUploadOptions,
+  Table,
+} from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { User } from '@supabase/supabase-js';
@@ -213,4 +218,84 @@ export async function uploadPublicCandidateResume(
     status: 'success',
     data: supabaseFileUrl,
   };
+}
+
+export async function deletePublicCandidateResume(
+  resumeUrl: string,
+): Promise<SAPayload> {
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    return { status: 'error', message: 'User not found' };
+  }
+
+  const supabase = createSupabaseUserServerActionClient();
+
+  const path = new URL(resumeUrl).pathname;
+  const { error } = await supabase.storage
+    .from('public-user-assets')
+    .remove([path]);
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  return { status: 'success' };
+}
+
+export async function fetchJobTrackerApplications(): Promise<
+  Table<'job_application_tracker'>[]
+> {
+  const user = await serverGetLoggedInUser();
+  const { user_metadata, id } = user;
+  if (user_metadata.userType === 'employee') {
+    throw new Error('This user is not a candidate');
+  }
+
+  const supabase = createSupabaseUserServerActionClient();
+  const { data, error } = await supabase
+    .from('job_application_tracker')
+    .select('*')
+    .eq('candidate_id', id);
+
+  if (error) {
+    throw new Error(
+      `Failed to fetch job tracker applications: ${error.message}`,
+    );
+  }
+  if (!data) {
+    return [];
+  }
+
+  return data;
+}
+
+export async function addJobTrackerApplication(
+  newJob: Partial<JobTracker>,
+): Promise<Table<'job_application_tracker'>> {
+  const user = await serverGetLoggedInUser();
+  const { user_metadata, id } = user;
+  if (user_metadata.userType === 'employee') {
+    throw new Error('This user is not a candidate');
+  }
+
+  const supabase = createSupabaseUserServerActionClient();
+
+  const { data, error } = await supabase
+    .from('job_application_tracker')
+    .insert({
+      ...newJob,
+      candidate_id: id,
+      job_title: newJob.job_title || '',
+      status: newJob.status || 'not_started',
+      company: newJob.company || '',
+      created_at: newJob.created_at || new Date().toISOString(),
+    })
+    .eq('candidate_id', id)
+    .select();
+
+  if (error) {
+    throw new Error(`Failed to add job application: ${error.message}`);
+  }
+
+  return data[0];
 }

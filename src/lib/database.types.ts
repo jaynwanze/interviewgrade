@@ -1,5 +1,4 @@
-import { CandidatePreferences } from '@/types'
-import { CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { CandidatePreferences, CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
   | number
@@ -970,6 +969,51 @@ export type Database = {
           },
         ]
       }
+      job_application_tracker: {
+        Row: {
+          id: string
+          candidate_id: string
+          job_title: string
+          status: Database["public"]["Enums"]["job_application_tracker_status"]
+          company: string
+          industry: string
+          location: string
+          job_type: string;
+          link: string
+          created_at: string
+        }
+        Insert: {
+          candidate_id: string
+          job_title: string
+          status: Database["public"]["Enums"]["job_application_tracker_status"]
+          company: string
+          industry?: string
+          location?: string
+          job_type?: string;
+          link?: string
+          created_at: string
+        }
+        Update: {
+          candidate_id?: string
+          job_title?: string
+          status?: Database["public"]["Enums"]["job_application_tracker_status"]
+          company?: string
+          industry?: string
+          location?: string
+          job_type?: string;
+          link?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+          foreignKeyName: "job_application_tracker_candidate_id_fkey"
+          columns: ["candidate_id"]
+          isOneToOne: true
+          referencedRelation: "candidates"
+          referencedColumns: ["id"]
+        },
+        ]
+      },
     }
     Views: {
       [_ in never]: never

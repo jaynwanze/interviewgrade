@@ -109,7 +109,7 @@ ${formatRubrics(criterion.rubrics)}`,
       (detail) => `{
   "question": "${detail.question}",
   "answer": "${detail.answer}",
-  "mark":"${interviewMode === 'interview' ? detail.mark : detail.mark * numberOfQuestions}",
+  "mark":"${interviewMode === 'interview' ? detail.mark : detail.mark / numberOfQuestions}",
   "feedback": "${detail.feedback}"	
 }`,
     )
@@ -129,7 +129,7 @@ ${formattedResponses}
 ### General Instructions
 Your evaluation should include:
 - **Overall Score**: An overall grade on a scale of 1 to 100.
-- **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10.
+- **Evaluation Scores**: Scores for each criterion on a scale of 1 to 10 and provide feedback for each criterion if there is no linked question base it off the other questions.
 - **Strengths and Areas for Improvement**: Specific feedback highlighting areas where the candidate excelled or could improve.
 - **Recommendations**: Suggestions for how the candidate could improve.
 - **Mark**: Within "question_answer_feedback" for each mark for each answer should be marked out of ${maxScorePerQuestion} and ensure that the sum of all marks add up to "overall_grade".
@@ -144,7 +144,7 @@ Provide your evaluation in the following JSON format without any additional text
 
 \`\`\`json
 {
-  "overall_grade": ${interviewMode === 'interview' ? 0 : interviewAnswersDetails.map((detail) => detail.mark).reduce((a, b) => a + b, 0)}",
+  "overall_grade": 0,
   "evaluation_scores": [
     ${evaluationScoresTemplate}
   ],

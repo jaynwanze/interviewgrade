@@ -50,9 +50,7 @@ export function PracticeInterviewFlow({
   const [scoreStringColour, setScoreStringColour] = useState('');
 
   const router = useRouter();
-  const maxScorePerQuestion = Math.floor(
-    100 / (interview?.question_count || 1),
-  );
+  const maxScorePerQuestion = 100;
   // If needed, you can keep a timer for the entire practice session
   const timerRef = useRef<number | null>(null);
 
@@ -140,15 +138,13 @@ export function PracticeInterviewFlow({
   useEffect(() => {
     if (questionFeedback[currentQuestionIndex]) {
       const score = Math.round(
-        ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
-          maxScorePerQuestion) *
-        100,
+        questionFeedback[currentQuestionIndex]?.mark ?? 0,
       );
-      if (score >= 80) {
+      if (score! >= 80) {
         setScoreStringColour('text-green-600');
-      } else if (score >= 60) {
+      } else if (score! >= 60) {
         setScoreStringColour('text-yellow-600');
-      } else if (score >= 40) {
+      } else if (score! >= 40) {
         setScoreStringColour('text-orange-600');
       } else {
         setScoreStringColour('text-red-600');
@@ -285,11 +281,9 @@ export function PracticeInterviewFlow({
                         className={`text-3xl text-center font-bold ${scoreStringColour}`}
                       >
                         {Math.round(
-                          ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
-                            maxScorePerQuestion) *
-                          100,
+                          questionFeedback[currentQuestionIndex]?.mark ?? 0,
                         )}
-                        /100%{' '}
+                        /100%
                         {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/
                       {maxScorePerQuestion}) */}
                       </p>
@@ -299,13 +293,15 @@ export function PracticeInterviewFlow({
                       <strong>Summary:</strong>{' '}
                       {questionFeedback[currentQuestionIndex]?.summary}
                     </p>
-                    <p>
-                      <strong>Advice for Next Question:</strong>{' '}
-                      {
-                        questionFeedback[currentQuestionIndex]
-                          ?.advice_for_next_question
-                      }
-                    </p>
+                    {currentQuestionIndex < questions.length - 1 && (
+                      <p>
+                        <strong>Advice for Next Question:</strong>{' '}
+                        {
+                          questionFeedback[currentQuestionIndex]
+                            ?.advice_for_next_question
+                        }
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-center space-x-2 mt-4">

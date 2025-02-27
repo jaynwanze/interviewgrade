@@ -14,6 +14,7 @@ import { T } from "@/components/ui/Typography";
 import { InterviewQuestion } from "@/types";
 import talkingInterviewer from "public/assets/animations/AnimationSpeakingRings.json";
 import { generateTTS } from "@/utils/openai/textToSpeech";
+import { set } from "nprogress";
 
 const colors = [
   "bg-blue-100",
@@ -55,7 +56,7 @@ export const AIQuestionSpeaker = ({
   const [randomDarkColor, setRandomDarkColor] = useState<string>(
     getRandomDarkColor()
   );
-  const firstSpokenTextRef = useRef<string>("");
+  const prevQuestionIndexRef = useRef<number | null>(null);
   useEffect(() => {
     setRandomColor(getRandomColor());
     setRandomDarkColor(getRandomDarkColor());
@@ -75,6 +76,12 @@ export const AIQuestionSpeaker = ({
 
 
   useEffect(() => {
+    // Only speak when the current question index is different from the previous one.
+    if (prevQuestionIndexRef.current === currentIndex) {
+      return;
+    }
+    prevQuestionIndexRef.current = currentIndex;
+
     const introText =
       "Welcome to the interview session. I will ask you a series of questions. Please answer them to the best of your ability. Let's begin.";
     const questionSpeechText =
@@ -83,15 +90,6 @@ export const AIQuestionSpeaker = ({
       currentIndex === 0
         ? introText + " " + questionSpeechText
         : questionSpeechText;
-
-    // Guard: if speech is already in progress or the text is the same, skip.
-       // If we already have a first spoken text, use it.
-       if (firstSpokenTextRef.current) {
-        console.log("First spoken text already captured:", firstSpokenTextRef.current);
-        return;
-      }
-      firstSpokenTextRef.current = speechText;
-  
 
     const speak = async () => {
       try {
@@ -113,12 +111,10 @@ export const AIQuestionSpeaker = ({
         };
         audio.play();
         setIsSpeaking(true);
-        console.log("Playing audio:", audioUrl);
       } catch (error) {
         console.error("TTS error:", error);
         setIsSpeaking(false);
       }
-      
     };
 
     speak();
@@ -129,6 +125,7 @@ export const AIQuestionSpeaker = ({
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
+      setIsSpeaking(false);
     };
   }, [question, currentIndex]);
 

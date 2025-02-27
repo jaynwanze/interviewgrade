@@ -109,9 +109,9 @@ Provide your evaluation in the following JSON format without any additional text
 
 \`\`\`json
 {
-  "mark": number,",
+  "mark": number,
   "summary": string,
-  "advice_for_next_question": string"
+  "advice_for_next_question": string
 }
 \`\`\`
 

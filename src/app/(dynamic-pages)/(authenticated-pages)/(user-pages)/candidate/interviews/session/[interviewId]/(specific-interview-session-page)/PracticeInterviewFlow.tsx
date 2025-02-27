@@ -22,6 +22,7 @@ import type {
   specificFeedbackType,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { ChevronLeft } from 'lucide-react';
 
 type PracticeInterviewFlowProps = {
   interview: Interview;
@@ -217,116 +218,129 @@ export function PracticeInterviewFlow({
         <Button onClick={() => router.push('/candidate')}>Return Home</Button>
       </div>
     );
-  } else
-    return (
-      <div className="interview-flow-container flex flex-col items-center min-h-screen">
-        {/* Example UI  */}
-        <Button onClick={() => window.history.back()} variant="destructive">
-          Leave Session
-        </Button>
+  }
 
-        <div className="flex w-full max-w-4xl">
-          <div className="w-1/2 p-4">
-            {/* Show question */}
-            <AIQuestionSpeaker
-              question={questions[currentQuestionIndex]}
-              currentIndex={currentQuestionIndex}
-              questionsLength={questions.length}
-            />
-          </div>
-          <div className="w-1/2 p-4">
-            {/* Timer, Candidate camera, etc. */}
-            <Card className="p-4 text-center mb-5">
-              <h1 className="text-2xl font-bold">Timer</h1>
-              <p>
+  // Otherwise, show the main practice flow
+  return (
+    <div className="flex flex-col items-center min-h-screen space-y-6 p-4">
+      <div className="flex flex-col md:flex-row w-full max-w-5xl gap-6">
+        {/* Leave Session Button */}
+        <div className="flex justify-start">
+          <Button variant="destructive" onClick={() => window.history.back()}>
+            <ChevronLeft className="h-4 w-4">Leave Session </ChevronLeft>
+          </Button>
+        </div>
+
+        {/* Left Column: Interviewer (Question) */}
+        <div className="flex-1 space-y-4">
+          <AIQuestionSpeaker
+            question={questions[currentQuestionIndex]}
+            currentIndex={currentQuestionIndex}
+            questionsLength={questions.length}
+          />
+        </div>
+
+        {/* Right Column: Timer & Candidate Camera */}
+        <div className="flex-1 space-y-4">
+          <Card className="shadow-md text-center">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Timer</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold">
                 {Math.floor(recordingTime / 60)}:
                 {('0' + (recordingTime % 60)).slice(-2)}
               </p>
-            </Card>
+            </CardContent>
+          </Card>
 
-            <Card className="max-w-md mx-auto text-center">
-              <CardHeader>
-                <CardTitle>Candidate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <UserCamera
-                  answerCallback={handleAnswer}
-                  isCameraOn={isCameraOn}
-                  // In practice mode, we handle the next question manually
-                  onRecordEnd={null}
-                  isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
-                  interviewMode={interview.mode}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Practice feedback UI */}
-        <div className="w-full max-w-4xl p-4">
-          <Card className="mx-auto text-center">
+          <Card className="shadow-md">
             <CardHeader>
-              <CardTitle>Practice Feedback</CardTitle>
+              <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
             </CardHeader>
             <CardContent>
-              {isFetchingSpecificFeedback ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <p>Fetching feedback...</p>
-                  <LoadingSpinner />
-                </div>
-              ) : questionFeedback[currentQuestionIndex] ? (
-                <>
-                  <div className="text-left text-lg space-y-2">
-                    <div className="text-center">
-                      <strong className="text-center">Score(%):</strong>{' '}
-                      <p
-                        className={`text-3xl text-center font-bold ${scoreStringColour}`}
-                      >
-                        {Math.round(
-                          questionFeedback[currentQuestionIndex]?.mark ?? 0,
-                        )}
-                        /100%
-                        {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/
-                      {maxScorePerQuestion}) */}
-                      </p>
-                    </div>
-                    {/* Show your feedback / summary */}
-                    <p>
-                      <strong>Summary:</strong>{' '}
-                      {questionFeedback[currentQuestionIndex]?.summary}
-                    </p>
-                    {currentQuestionIndex < questions.length - 1 && (
-                      <p>
-                        <strong>Advice for Next Question:</strong>{' '}
-                        {
-                          questionFeedback[currentQuestionIndex]
-                            ?.advice_for_next_question
-                        }
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-center space-x-2 mt-4">
-                    {currentQuestionIndex < questions.length - 1 && (
-                      <Button
-                        onClick={() =>
-                          setCurrentQuestionIndex((prev) => prev + 1)
-                        }
-                      >
-                        Next Question
-                      </Button>
-                    )}
-                    <Button onClick={finishInterview}>
-                      {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                'After you answer, feedback will be displayed here.'
-              )}
+              <UserCamera
+                answerCallback={handleAnswer}
+                isCameraOn={isCameraOn}
+                onRecordEnd={null}
+                isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
+                interviewMode={interview.mode}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
-    );
+
+      {/* Feedback Panel */}
+      <div className="w-full max-w-2xl">
+        <Card className="shadow-md text-center">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">
+              Practice Feedback
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isFetchingSpecificFeedback ? (
+              <div className="flex items-center justify-center space-x-2 mt-4">
+                <p>Fetching feedback...</p>
+                <LoadingSpinner />
+              </div>
+            ) : questionFeedback[currentQuestionIndex] ? (
+              <>
+                <div className="text-left mt-4 space-y-3">
+                  <div className="text-center">
+                    <strong className="block text-base">Score (%):</strong>
+                    <p
+                      className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
+                    >
+                      {Math.round(
+                        questionFeedback[currentQuestionIndex]?.mark ?? 0,
+                      )}
+                      /100%
+                    </p>
+                  </div>
+
+                  <div>
+                    <strong>Summary:</strong>{' '}
+                    {questionFeedback[currentQuestionIndex]?.summary}
+                  </div>
+
+                  {/* Advice only if there's a next question */}
+                  {currentQuestionIndex < questions.length - 1 && (
+                    <div>
+                      <strong>Advice for Next Question:</strong>{' '}
+                      {
+                        questionFeedback[currentQuestionIndex]
+                          ?.advice_for_next_question
+                      }
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center gap-4 mt-6">
+                  {currentQuestionIndex < questions.length - 1 && (
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        setCurrentQuestionIndex((prev) => prev + 1)
+                      }
+                    >
+                      Next Question
+                    </Button>
+                  )}
+                  <Button onClick={finishInterview}>
+                    {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <p className="mt-4 text-sm md:text-base">
+                After you answer, feedback will be displayed here.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }

@@ -77,7 +77,7 @@ ${formatRubrics(criterion.rubrics)}`,
   const numberOfQuestions = interview_question_count || 1;
   const maxTotalScore = 100;
   // round to two decimal places
-  const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
+  const maxScorePerQuestion = maxTotalScore;
 
   return `### Interview Practice Feedback
 

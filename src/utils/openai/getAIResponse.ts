@@ -15,7 +15,10 @@ export const getAIResponse = async (
   interview: Interview,
   evaluation: InterviewEvaluation,
   userQuestion: string,
-  conversationHistory: Array<{ sender: 'system' | 'user' | 'assistant'; text: string }>,
+  conversationHistory: Array<{
+    sender: 'system' | 'user' | 'assistant';
+    text: string;
+  }>,
 ) => {
   try {
     if (!interview || !evaluation) {
@@ -26,7 +29,8 @@ export const getAIResponse = async (
       throw new Error('User question is required');
     }
 
-    const modeDisplayString = interview.mode === 'interview' ? 'mock interview' : 'practice session';
+    const modeDisplayString =
+      interview.mode === 'interview' ? 'mock interview' : 'practice session';
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
@@ -36,9 +40,17 @@ export const getAIResponse = async (
         {
           role: 'system',
           content: `You are an AI interview coach for mock interview AI platform. The user recently completed an ${modeDisplayString} with the following evaluation:
+            - Overall Rating: ${evaluation.overall_grade}
             - Strengths: ${evaluation.strengths}
             - Areas for Improvement: ${evaluation.areas_for_improvement}
-            - Recommendations: ${evaluation.recommendations}`,
+            - Recommendations: ${evaluation.recommendations}
+            - Question Answer Feedback: ${evaluation.question_answer_feedback}
+
+            Provide:
+            --Short concise feedback
+            --Avoid lengthy explanations.
+            --Focus on key points.
+            `,
         },
         ...conversationHistory.map((msg) => ({
           role: msg.sender as 'system' | 'user' | 'assistant',

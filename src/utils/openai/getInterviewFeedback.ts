@@ -53,7 +53,17 @@ const constructPrompt = (
   interviewTitle: string,
   evaluationCriteria: EvaluationCriteriaType[],
   interviewAnswersDetails: InterviewAnswerDetail[],
+  interviewMode: string,
 ): string => {
+  // Determine maximum score per question
+  const numberOfQuestions = interviewAnswersDetails.length || 1;
+  const maxTotalScore = 100;
+  // round to two decimal places
+  const maxScorePerQuestion =
+    interviewMode === 'interview'
+      ? Math.floor(maxTotalScore / numberOfQuestions)
+      : maxTotalScore;
+
   // Helper function to format rubrics
   const formatRubrics = (
     rubrics: { order: number; percentage_range: string; description: string }[],
@@ -99,18 +109,11 @@ ${formatRubrics(criterion.rubrics)}`,
       (detail) => `{
   "question": "${detail.question}",
   "answer": "${detail.answer}",
-  "mark":"${detail.mark}",
+  "mark":"${interviewMode === 'interview' ? detail.mark : detail.mark * numberOfQuestions}",
   "feedback": "${detail.feedback}"	
 }`,
     )
     .join(',\n    ');
-
-  // Determine maximum score per question
-  const numberOfQuestions = interviewAnswersDetails.length || 1;
-  const maxTotalScore = 100;
-  // round to two decimal places
-  const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
-
   // Construct the prompt
   return `### Interview Context
 As an interviewer for an innovative online interview platform, your task is to evaluate candidates based on their responses for a **${interviewTitle}**.
@@ -141,7 +144,7 @@ Provide your evaluation in the following JSON format without any additional text
 
 \`\`\`json
 {
-  "overall_grade": 0,
+  "overall_grade": ${interviewMode === 'interview' ? 0 : interviewAnswersDetails.map((detail) => detail.mark).reduce((a, b) => a + b, 0)}",
   "evaluation_scores": [
     ${evaluationScoresTemplate}
   ],
@@ -306,6 +309,7 @@ export const getInterviewFeedback = async (
     interview.title,
     evaluationCriteria,
     interviewAnswersDetails,
+    interview.mode,
   );
 
   console.log('Prompt:', prompt);

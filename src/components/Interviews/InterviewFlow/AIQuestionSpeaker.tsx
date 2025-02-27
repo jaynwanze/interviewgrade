@@ -1,43 +1,43 @@
-// AIQuestionSpeaker.tsx
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Lottie from "lottie-react";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { T } from '@/components/ui/Typography';
-import { InterviewQuestion } from '@/types';
-import Lottie from 'lottie-react';
-import talkingInteviewer from 'public/assets/animations/AnimationSpeakingRings.json';
-import { useEffect, useRef, useState } from 'react';
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { T } from "@/components/ui/Typography";
+import { InterviewQuestion } from "@/types";
+import talkingInterviewer from "public/assets/animations/AnimationSpeakingRings.json";
+import { generateTTS } from "@/utils/openai/textToSpeech";
 
 const colors = [
-  'bg-blue-100',
-  'bg-red-100',
-  'bg-green-100',
-  'bg-yellow-100',
-  'bg-purple-100',
-  'bg-pink-100',
-  'bg-indigo-100',
+  "bg-blue-100",
+  "bg-red-100",
+  "bg-green-100",
+  "bg-yellow-100",
+  "bg-purple-100",
+  "bg-pink-100",
+  "bg-indigo-100",
 ];
 
 const darkColors = [
-  'bg-blue-700',
-  'bg-red-700',
-  'bg-green-700',
-  'bg-yellow-700',
-  'bg-purple-700',
-  'bg-pink-700',
-  'bg-indigo-700',
+  "bg-blue-700",
+  "bg-red-700",
+  "bg-green-700",
+  "bg-yellow-700",
+  "bg-purple-700",
+  "bg-pink-700",
+  "bg-indigo-700",
 ];
-const getRandomColor = () => {
-  return colors[Math.floor(Math.random() * colors.length)];
-};
-const getRandomDarkColor = () => {
-  return darkColors[Math.floor(Math.random() * darkColors.length)];
-};
+
+const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
+const getRandomDarkColor = () =>
+  darkColors[Math.floor(Math.random() * darkColors.length)];
 
 export const AIQuestionSpeaker = ({
   question,
@@ -48,75 +48,86 @@ export const AIQuestionSpeaker = ({
   currentIndex: number;
   questionsLength: number;
 }) => {
-  const speechRef = useRef<SpeechSynthesis | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [randomColor, setRandomColor] = useState<string>(getRandomColor());
-  const [randomDarkColor, setRandomDarkColour] =
-    useState<string>(getRandomColor());
-
+  const [randomDarkColor, setRandomDarkColor] = useState<string>(
+    getRandomDarkColor()
+  );
+  const firstSpokenTextRef = useRef<string>("");
   useEffect(() => {
     setRandomColor(getRandomColor());
-    setRandomDarkColour(getRandomDarkColor());
+    setRandomDarkColor(getRandomDarkColor());
   }, [question]);
 
-  useEffect(() => {
-    const introText: string =
-      'Welcome to the interview session. I will ask you a series of questions. Please answer them to the best of your ability. Let’s begin.';
-    const questionSpeechText: string =
-      'Question ' + (currentIndex + 1) + ': ' + question.text;
-    const speechText: string =
-      currentIndex === 0
-        ? introText + ' ' + questionSpeechText
-        : questionSpeechText;
-    const utterance = new SpeechSynthesisUtterance(speechText);
-    console.log('Speech Text:', speechText); // Debugging line
-
-    utterance.rate = 0.75; // Set rate (0.1 to 10)
-    utterance.pitch = 1; // Set pitch (0 to 2)
-    utterance.volume = 1; // Set volume (0 to 1)
-
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      if (lottieRef.current) {
-        lottieRef.current.setSpeed(1); // Align animation speed with speech rate
+   // Control Lottie animation based solely on isSpeaking.
+   useEffect(() => {
+    if (lottieRef.current) {
+      if (isSpeaking) {
+        lottieRef.current.setSpeed(1);
         lottieRef.current.play();
-      }
-    };
-
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      if (lottieRef.current) {
+      } else {
         lottieRef.current.stop();
       }
-      console.log('Speech has finished.');
-    };
-
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-      if (lottieRef.current) {
-        lottieRef.current.stop();
-      }
-    };
-
-    // Check for browser support
-    if (window.speechSynthesis) {
-      speechRef.current = window.speechSynthesis;
-      speechRef.current.speak(utterance);
-    } else {
-      console.error('Speech synthesis not supported in this browser.');
     }
+  }, [isSpeaking]);
 
-    // Cleanup function to stop any ongoing speech when the question changes
-    return () => {
-      if (speechRef.current && speechRef.current.speaking) {
-        speechRef.current.cancel(); // Stop any ongoing speech
+
+  useEffect(() => {
+    const introText =
+      "Welcome to the interview session. I will ask you a series of questions. Please answer them to the best of your ability. Let's begin.";
+    const questionSpeechText =
+      "Question " + (currentIndex + 1) + ": " + question.text;
+    const speechText =
+      currentIndex === 0
+        ? introText + " " + questionSpeechText
+        : questionSpeechText;
+
+    // Guard: if speech is already in progress or the text is the same, skip.
+       // If we already have a first spoken text, use it.
+       if (firstSpokenTextRef.current) {
+        console.log("First spoken text already captured:", firstSpokenTextRef.current);
+        return;
       }
-      setIsSpeaking(false);
-      if (lottieRef.current) {
-        lottieRef.current.stop();
+      firstSpokenTextRef.current = speechText;
+  
+
+    const speak = async () => {
+      try {
+        // Stop any previous audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        const audioUrl = await generateTTS(speechText, "tts-1", "alloy");
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        audio.onended = () => {
+          setIsSpeaking(false);
+          console.log("Speech has finished.");
+        };
+        audio.onerror = (error) => {
+          console.error("Audio playback error:", error);
+          setIsSpeaking(false);
+        };
+        audio.play();
+        setIsSpeaking(true);
+        console.log("Playing audio:", audioUrl);
+      } catch (error) {
+        console.error("TTS error:", error);
+        setIsSpeaking(false);
+      }
+      
+    };
+
+    speak();
+
+    // Cleanup: stop any audio when question changes.
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
       }
     };
   }, [question, currentIndex]);
@@ -130,7 +141,7 @@ export const AIQuestionSpeaker = ({
         <CardContent>
           <div className="flex justify-center items-center">
             <Lottie
-              animationData={talkingInteviewer}
+              animationData={talkingInterviewer}
               loop={true}
               autoplay={false}
               lottieRef={lottieRef}
@@ -160,7 +171,7 @@ export const AIQuestionSpeaker = ({
           <Progress
             className="mt-5"
             value={((currentIndex + 1) / questionsLength) * 100}
-          ></Progress>
+          />
         </CardFooter>
       </Card>
     </div>

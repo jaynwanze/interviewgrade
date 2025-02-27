@@ -1,6 +1,12 @@
 'use client';
 
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+} from 'recharts';
 
 import {
   ChartConfig,
@@ -45,10 +51,9 @@ export function RadarChartEvaluationsCriteriaScores({
 }: EvaluationRadarChartProps) {
   // Transform evaluation scores into chart data.
   // Here we use the criterion name directly. The custom tick handles spaces.
-  // We multiply the score by 10 to convert a 0–10 scale into 0–100.
   const chartData = evaluation.evaluation_scores.map((score) => ({
     criterion: score.name || 'N/A',
-    score: score.score * 10,
+    score: score.score,
   }));
 
   const chartConfig = {
@@ -81,6 +86,7 @@ export function RadarChartEvaluationsCriteriaScores({
           tickSize={20}
           tick={<CustomizedTick />}
         />
+        <PolarRadiusAxis domain={[0, 10]} tick={false} axisLine={false} />
         <Radar
           dataKey="score"
           fill="var(--color-score)"

@@ -198,20 +198,20 @@ export const InterviewHistoryDetails = ({
                   <Badge
                     className={`text-white ${qa.mark >=
                         80 /
-                        Math.floor(
+                        Math.round(
                           100 / evaluation.question_answer_feedback.length,
                         )
                         ? 'bg-green-600'
                         : qa.mark >=
                           60 /
-                          Math.floor(
+                          Math.round(
                             100 /
                             evaluation.question_answer_feedback.length,
                           )
                           ? 'bg-yellow-500'
                           : qa.mark >=
                             40 /
-                            Math.floor(
+                            Math.round(
                               100 /
                               evaluation.question_answer_feedback.length,
                             )
@@ -259,7 +259,7 @@ export const InterviewHistoryDetails = ({
             <Badge
               className={`text-white text-lg px-4 py-2 ${getScoreColor(evaluation.overall_grade)}`}
             >
-              {evaluation.overall_grade}/100
+              {Math.round(evaluation.overall_grade)}/100
             </Badge>
           </div>
           <Separator />

@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { transcribeInterviewAudio } from "@/utils/openai/transcribeInterviewAudio";
-import { MediaRecorderHandler } from "@/utils/webspeech/mediaRecorder";
-import { useSpeechRecognition } from "@/utils/webspeech/speechRecognition";
-import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Meter } from "./SoundMeter";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
+import { transcribeInterviewAudio } from '@/utils/openai/transcribeInterviewAudio';
+import { MediaRecorderHandler } from '@/utils/webspeech/mediaRecorder';
+import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Meter } from './SoundMeter';
 
 interface UserCameraProps {
   answerCallback: (answer: string) => void;
@@ -31,15 +31,15 @@ const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
     });
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter(
-      (device) => device.kind === "videoinput"
+      (device) => device.kind === 'videoinput',
     );
     const exclusionKeywords = [
-      "android",
-      "phone",
-      "external",
-      "virtual",
-      "usb",
-      "wireless",
+      'android',
+      'phone',
+      'external',
+      'virtual',
+      'usb',
+      'wireless',
     ];
     const preferredDevice = videoDevices.find((device) => {
       const label = device.label.toLowerCase();
@@ -48,7 +48,7 @@ const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
     stream.getTracks().forEach((track) => track.stop());
     return preferredDevice ? preferredDevice.deviceId : undefined;
   } catch (error) {
-    console.error("Error selecting preferred video device:", error);
+    console.error('Error selecting preferred video device:', error);
     return undefined;
   }
 };
@@ -64,7 +64,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const [recordingTime, setRecordingTime] = useState(0);
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [micPermissionState, setMicPermissionState] = useState<
-    "granted" | "denied" | "prompt" | null
+    'granted' | 'denied' | 'prompt' | null
   >(null);
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
 
@@ -86,22 +86,22 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     async function checkMicPermission() {
       try {
         const permission = await navigator.permissions.query({
-          name: "microphone" as PermissionName,
+          name: 'microphone' as PermissionName,
         });
         setMicPermissionState(permission.state);
-        if (permission.state === "denied") {
+        if (permission.state === 'denied') {
           setShowPermissionDialog(true);
         }
         permission.onchange = () => {
           setMicPermissionState(permission.state);
-          if (permission.state === "denied") {
+          if (permission.state === 'denied') {
             setShowPermissionDialog(true);
           } else {
             setShowPermissionDialog(false);
           }
         };
       } catch (error) {
-        console.error("Error checking microphone permission:", error);
+        console.error('Error checking microphone permission:', error);
       }
     }
     checkMicPermission();
@@ -114,19 +114,18 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         const constraints: MediaStreamConstraints = {
           video: deviceId
             ? { deviceId: { exact: deviceId } }
-            : { facingMode: "user" },
+            : { facingMode: 'user' },
           audio: true,
         };
-        const mediaStream = await navigator.mediaDevices.getUserMedia(
-          constraints
-        );
+        const mediaStream =
+          await navigator.mediaDevices.getUserMedia(constraints);
         audioStreamRef.current = mediaStream;
 
         // Initialize AudioContext and resume it if needed.
         audioContextRef.current = new (window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext })
             .webkitAudioContext)();
-        if (audioContextRef.current.state === "suspended") {
+        if (audioContextRef.current.state === 'suspended') {
           await audioContextRef.current.resume();
         }
 
@@ -134,12 +133,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         const audioTracks = mediaStream.getAudioTracks();
         if (audioTracks.length > 0) {
           setIsMicMuted(audioTracks[0].muted);
-          audioTracks[0].addEventListener("mute", () => {
-            console.log("Microphone muted");
+          audioTracks[0].addEventListener('mute', () => {
+            console.log('Microphone muted');
             setIsMicMuted(true);
           });
-          audioTracks[0].addEventListener("unmute", () => {
-            console.log("Microphone unmuted");
+          audioTracks[0].addEventListener('unmute', () => {
+            console.log('Microphone unmuted');
             setIsMicMuted(false);
           });
         }
@@ -149,7 +148,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           await videoRef.current.play();
         }
       } catch (err) {
-        console.error("Error accessing webcam and microphone:", err);
+        console.error('Error accessing webcam and microphone:', err);
       }
     };
 
@@ -179,24 +178,24 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   };
 
   const handleRecord = () => {
-    if (micPermissionState === "denied") {
+    if (micPermissionState === 'denied') {
       setShowPermissionDialog(true);
       return;
     }
     setIsRecording(true);
     setRecordingTime(0);
     if (audioStreamRef.current) {
-      if (audioContextRef.current?.state === "suspended") {
+      if (audioContextRef.current?.state === 'suspended') {
         audioContextRef.current.resume();
       }
       const mediaHandler = new MediaRecorderHandler();
       mediaRecorderHandlerRef.current = mediaHandler;
       mediaHandler.start(audioStreamRef.current);
-      console.log("Audio Stream/MediaHandler - Recording started");
+      console.log('Audio Stream/MediaHandler - Recording started');
     } else {
       startRecognition();
-      console.log("Webkit Speech Recognition - Recording started");
-      console.log("Audio stream/MediaHandler not available");
+      console.log('Webkit Speech Recognition - Recording started');
+      console.log('Audio stream/MediaHandler not available');
     }
     timerRef.current = window.setInterval(() => {
       setRecordingTime((prev) => {
@@ -220,12 +219,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         await mediaRecorderHandlerRef.current.stop(setIsLoadingFFmpeg);
       if (convertedAudioBlob) {
         const formData = new FormData();
-        formData.append("file", convertedAudioBlob, "audio.mp3");
-        formData.append("model", "whisper-1");
+        formData.append('file', convertedAudioBlob, 'audio.mp3');
+        formData.append('model', 'whisper-1');
         whisperFinalTranscript.current =
           await transcribeInterviewAudio(formData);
       } else {
-        console.error("Audio conversion failed");
+        console.error('Audio conversion failed');
         if (isFetchingSpecificFeedback) {
           isFetchingSpecificFeedback(false);
         }
@@ -272,20 +271,25 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </p>
       )}
       {isRecording && audioStreamRef.current && audioContextRef.current && (
-        <div className="mt-5">
+        <div className="mt-5 flex justify-center items-center">
           <Meter
             audioContext={audioContextRef.current}
             stream={audioStreamRef.current}
-            settings={{ bars: 30, spacing: 2, width: 10, height: 50 }}
+            settings={{ bars: 30, spacing: 2, width: 8, height: 50 }}
           />
         </div>
       )}
       {isRecording && (
-        <p className="mt-2">Recording for {recordingTime} seconds...</p>
+        <p className="mt-2 flex justify-center items-center">
+          Recording for {recordingTime} seconds...
+        </p>
       )}
 
       {/* Permission Dialog */}
-      <Dialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog}>
+      <Dialog
+        open={showPermissionDialog}
+        onOpenChange={setShowPermissionDialog}
+      >
         <DialogTrigger asChild>
           <Button className="hidden" />
         </DialogTrigger>
@@ -295,7 +299,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-gray-600">
-              It looks like your microphone permissions are denied. Please allow microphone access in your browser settings to record audio.
+              It looks like your microphone permissions are denied. Please allow
+              microphone access in your browser settings to record audio.
             </p>
           </div>
           <div className="flex justify-end gap-2">

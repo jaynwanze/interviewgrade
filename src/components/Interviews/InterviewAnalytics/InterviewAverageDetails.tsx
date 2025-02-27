@@ -38,29 +38,38 @@ export const InterviewAverageDetails = ({
           </div>
         </Card>
         {/* Average Mark Per Question */}
-        <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
-          <Star className="w-10 h-10 text-purple-500" />
-          <CardTitle className="mt-2">Average Score Per Question</CardTitle>
-          <div>
-            <p className="text-4xl font-bold text-gray-900">
-              {(
-                analyticsData.avg_overall_grade / analyticsData.question_count
-              ).toFixed(2)}
-              /{Math.floor(100 / analyticsData.question_count)}
-            </p>
-            <p className="text-gray-500">
-              Marks scored per question on average.
-            </p>
-          </div>
-        </Card>
+        {analyticsData.interview_template_id ? (
+          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
+            <Star className="w-10 h-10 text-purple-500" />
+            <CardTitle className="mt-2">Average Score Per Question</CardTitle>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">
+                {(
+                  analyticsData.avg_overall_grade / analyticsData.question_count
+                ).toFixed(2)}
+                /{Math.floor(100 / analyticsData.question_count)}
+              </p>
+              <p className="text-gray-500">
+                Marks scored per question on average.
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
+            {/* Total Sessions Count */}
+              <ClipboardList className="w-10 h-10 text-blue-500" />
+              <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
+              <div>
+                <p className="text-4xl font-bold text-gray-900">
+                  {analyticsData.total_interviews || 0}
+                </p>
+                <p className="text-gray-500">
+                  Total completed interview sessions.
+                </p>
+              </div>
+          </Card>
+        )}
       </div>
-
-      {/* Evaluation Criteria Key Metrics
-      <InterviewCurrentAverageKeyMetrics
-        totalInterviews={analyticsData.total_interviews}
-        avgOverallScore={analyticsData.avg_overall_grade}
-        avgEvaluationCriteria={analyticsData.avg_evaluation_criteria_scores}
-      /> */}
     </>
   );
 };

@@ -34,6 +34,8 @@ export function InterviewGraphsDetailed({
 }: {
   analyticsData: InterviewAnalytics;
 }) {
+  const colSpanNum = analyticsData.interview_template_id ? 3 : 2;
+
   return (
     <motion.div
       className="flex flex-col gap-6"
@@ -41,18 +43,24 @@ export function InterviewGraphsDetailed({
       initial="hidden"
       animate="visible"
     >
-      <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-6 mb-5 items-center">
-        {/* Total Sessions Count */}
-        <Card className="flex flex-col md:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
-          <ClipboardList className="w-10 h-10 text-blue-500" />
-          <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
-          <div>
-            <p className="text-4xl font-bold text-gray-900">
-              {analyticsData.total_interviews || 0}
-            </p>
-            <p className="text-gray-500">Total completed interview sessions.</p>
-          </div>
-        </Card>
+      <div
+        className={`grid md:grid-cols-1 lg:grid-cols-${colSpanNum} gap-6 mb-5 items-center`}
+      >
+        {analyticsData.interview_template_id && (
+          <Card className="flex flex-col md:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
+            {/* Total Sessions Count */}
+            <ClipboardList className="w-10 h-10 text-blue-500" />
+            <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">
+                {analyticsData.total_interviews || 0}
+              </p>
+              <p className="text-gray-500">
+                Total completed interview sessions.
+              </p>
+            </div>
+          </Card>
+        )}
 
         <motion.div
           className="md:col-span-1 lg:col-span-2"

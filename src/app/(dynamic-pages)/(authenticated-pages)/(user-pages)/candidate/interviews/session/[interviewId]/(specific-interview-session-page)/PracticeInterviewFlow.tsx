@@ -211,7 +211,9 @@ export function PracticeInterviewFlow({
     return (
       <div className="flex flex-col items-center min-h-screen">
         <h1 className="mt-8 text-2xl font-bold">Practice session complete!</h1>
-        <p className="mt-4">Check your feedback for each question above.</p>
+        <p className="mt-4 mb-3">
+          Check your session report in the notifiction link.
+        </p>
         <Button onClick={() => router.push('/candidate')}>Return Home</Button>
       </div>
     );

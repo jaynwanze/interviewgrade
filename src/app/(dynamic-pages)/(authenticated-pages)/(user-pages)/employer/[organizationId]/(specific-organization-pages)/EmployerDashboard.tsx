@@ -4,126 +4,42 @@ import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCa
 import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import type { CandidateRow } from '@/types';
+import {
+  mockCandidates,
+  type CandidateRow,
+  type EmployerPreferences,
+} from '@/types';
+import { MultiSelectBox, MultiSelectBoxItem } from '@tremor/react';
 import { useEffect, useState } from 'react';
-const mockCandidates: CandidateRow[] = [
-  {
-    id: 'c1',
-    city: 'New York',
-    country: 'United States',
-    phone_number: '(555) 123-4567',
-    summary: 'Enthusiastic engineer with strong communication skills.',
-    role: 'Software Engineer',
-    industry: 'Tech',
-    practice_skill_stats: [
-      { id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
-      { id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
-      { id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
-    ],
-    interview_skill_stats: [
-      { id: 'p1', skill: 'Behavioural', avg_score: 89, previous_avg: 87 },
-    ],
-    created_at: '2024-04-29T10:00:00Z',
-    full_name: 'Alice Anderson',
-    avatar_url:
-      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'alice@example.com',
-  },
-  {
-    id: 'c2',
-    city: 'San Francisco',
-    country: 'United States',
-    phone_number: '(555) 555-1234',
-    summary: 'Full-stack developer with a focus on back-end optimization.',
-    role: 'Full-Stack Developer',
-    industry: 'Tech',
-    practice_skill_stats: [
-      { id: 'p2', skill: 'Problem Solving', avg_score: 83, previous_avg: 80 },
-      { id: 'p3', skill: 'Communication', avg_score: 81, previous_avg: 76 },
-    ],
-    interview_skill_stats: [
-      { id: '4', skill: 'Behavioural', avg_score: 85, previous_avg: 82 },
-      { id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
-    ],
-    created_at: '2024-04-20T09:30:00Z',
-    full_name: 'Bob Brown',
-    avatar_url:
-      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'bob@example.com',
-  },
-  {
-    id: 'c3',
-    city: 'Toronto',
-    country: 'Canada',
-    phone_number: '(416) 999-0000',
-    summary: 'Skilled data analyst passionate about Decision Making & stats.',
-    role: 'Data Analyst',
-    industry: 'Finance',
-    interview_skill_stats: [
-      { id: '6', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
-      {
-        id: '7',
-        skill: 'Technical',
-        avg_score: 90,
-        previous_avg: 88,
-      },
-    ],
-    practice_skill_stats: [],
-    created_at: '2024-04-22T14:15:00Z',
-    full_name: 'Charlie Davis',
-    avatar_url:
-      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'charlie@example.com',
-  },
-  {
-    id: 'c4',
-    city: 'Remote',
-    country: 'Remote',
-    phone_number: '(555) 999-9999',
-    summary: 'Problem solver with a knack for creative solutions.',
-    role: 'Product Manager',
-    industry: 'Tech',
-    practice_skill_stats: [
-      { id: '8', skill: 'Problem Solving', avg_score: 90, previous_avg: 85 },
-      { id: '9', skill: 'Leadership', avg_score: 87, previous_avg: 86 },
-    ],
-    interview_skill_stats: [
-      { id: 'p4', skill: 'Behavioural', avg_score: 88, previous_avg: 84 },
-    ],
-    created_at: '2024-04-25T11:45:00Z',
-    full_name: 'Diana Evans',
-    avatar_url:
-      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'diana@example.com',
-  },
-  {
-    id: 'c5',
-    city: 'Dublin',
-    country: 'Ireland',
-    phone_number: '+353 12 345 6789',
-    summary: 'Focused on continuous improvement and quick learning.',
-    role: 'Software Engineer',
-    industry: 'Tech',
-    practice_skill_stats: [
-      { id: '10', skill: 'Adaptability', avg_score: 92, previous_avg: 90 },
-      { id: '11', skill: 'Communication', avg_score: 84, previous_avg: 80 },
-    ],
-    interview_skill_stats: [
-      { id: 'p5', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
-    ],
-    created_at: '2024-04-27T07:00:00Z',
-    full_name: 'Erin Green',
-    avatar_url:
-      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
-    email: 'erin@example.com',
-  },
+
+// Example list of employer preferences
+const employerOptions: EmployerPreferences[] = [
+  { location: 'United States', industry: 'Tech', skill: 'Problem Solving' },
+  { location: 'Canada', industry: 'Finance', skill: 'Communication' },
+  { location: 'United Kingdom', industry: 'Marketing', skill: 'Teamwork' },
 ];
 
-// If you want a location preference or skill preference from the employer
-const employerPrefs = {
-  location: 'United States',
-  skill: 'Problem Solving',
-};
+const availableIndustries = [
+  'All Industries',
+  'Tech',
+  'IT',
+  'Finance',
+  'Healthcare',
+  'Education',
+  'Retail',
+  'Real Estate',
+  'Marketing',
+];
+
+const availableSkills = [
+  'All Skills',
+  'Problem Solving',
+  'Communication',
+  'Teamwork',
+  'Leadership',
+  'Adaptability',
+  'Decision Making',
+];
 
 // The EmployerDashboard
 export default function EmployerDashboard() {
@@ -144,10 +60,20 @@ export default function EmployerDashboard() {
   const [topProspect, setTopProspect] = useState<CandidateRow | null>(null);
   const [skillGapMessage, setSkillGapMessage] = useState('');
   const [weekDelta, setWeekDelta] = useState<number>(0);
-  const [percentiles, setPercentiles] = useState<{ [id: string]: number }>({});
+  const [top3Worldwide, setTop3Worldwide] = useState<CandidateRow[]>([]);
 
   // We'll define a "mode" state: interview | practice
   const [mode, setMode] = useState<'interview' | 'practice'>('practice');
+  // Employer preferences from a switcher
+  // Multi-select filters: store as arrays.
+  const [industryFilters, setIndustryFilters] = useState<string[]>([]);
+  const [skillFilters, setSkillFilters] = useState<string[]>([]);
+
+  const [employerPrefs] = useState<EmployerPreferences>({
+    location: 'United States',
+    industry: 'Tech', // We'll use skillFilters for skill selection.
+    skill: 'Problem Solving',
+  });
 
   // On initial mount, load our mock data
   useEffect(() => {
@@ -155,16 +81,18 @@ export default function EmployerDashboard() {
   }, []);
 
   // Helper to get the candidate’s “best average skill” for the current mode
-  function getCandidateAvg(cand: CandidateRow): number {
+  function getCandidateScoreAvgBySkill(
+    candidate: CandidateRow,
+    skill: string,
+  ): number {
+    const { interview_skill_stats, practice_skill_stats } = candidate;
     const stats =
-      mode === 'interview'
-        ? cand.interview_skill_stats
-        : cand.practice_skill_stats;
+      mode === 'interview' ? interview_skill_stats : practice_skill_stats;
     if (!stats || stats.length === 0) {
       return 0;
     }
-    const sum = stats.reduce((acc, s) => acc + s.avg_score, 0);
-    return sum / stats.length;
+    const skillStats = stats.find((s) => s.skill === skill);
+    return skillStats ? skillStats.avg_score : 0;
   }
 
   // Check if candidate has the employer’s preferred skill in the selected mode
@@ -178,8 +106,15 @@ export default function EmployerDashboard() {
 
   // Check if candidate location matches employer’s preference or is “Remote”
   function locationMatches(cand: CandidateRow, location: string) {
-    if (location === 'Remote') return true;
-    return cand.country === location;
+    // Allow candidates whose country includes the preferred location or is Remote.
+    return (
+      cand.country.includes(location) || cand.country.toLowerCase() === 'remote'
+    );
+  }
+
+  //
+  function industryMatches(cand: CandidateRow, industry: string) {
+    return cand.industry.includes(industry);
   }
 
   // The main effect that filters + sorts whenever `mode` or candidates change
@@ -199,13 +134,45 @@ export default function EmployerDashboard() {
     filtered = filtered.filter((cand) => {
       const locMatch = locationMatches(cand, employerPrefs.location);
       const skillMatch = hasPreferredSkill(cand, employerPrefs.skill);
-      return locMatch && skillMatch;
+      const industryMatch = industryMatches(cand, employerPrefs.industry);
+      return locMatch && skillMatch && industryMatch;
     });
+
+    // Industry multi-select: if any industry is selected and not "All Industries"
+    if (
+      industryFilters.length > 0 &&
+      !industryFilters.includes('All Industries')
+    ) {
+      filtered = filtered.filter((cand) =>
+        industryFilters.some((ind) =>
+          cand.industry.toLowerCase().includes(ind.toLowerCase()),
+        ),
+      );
+    }
+
+    // Skill multi-select: if any skill is selected and not "All Skills"
+    if (skillFilters.length > 0 && !skillFilters.includes('All Skills')) {
+      filtered = filtered.filter((cand) =>
+        skillFilters.some((skill) => {
+          return hasPreferredSkill(cand, skill);
+        }),
+      );
+    }
+
+    // For location filtering, using employerPrefs.location.
+    if (employerPrefs.location.trim() !== '') {
+      filtered = filtered.filter((cand) => {
+        return (
+          cand.country.includes(employerPrefs.location) ||
+          cand.country.toLowerCase() === 'remote'
+        );
+      });
+    }
 
     // If no matches => skillGap
     if (filtered.length === 0) {
       setSkillGapMessage(
-        `No candidates found for skill: ${employerPrefs.skill} in ${employerPrefs.location} (mode: ${mode}).`,
+        `No candidates found for skill: ${employerPrefs.skill} in ${employerPrefs.industry}, ${employerPrefs.location} (mode: ${mode}).`,
       );
     } else {
       setSkillGapMessage('');
@@ -213,7 +180,26 @@ export default function EmployerDashboard() {
 
     // 3) Sort by highest average skill
     const sorted = filtered.slice().sort((a, b) => {
-      return getCandidateAvg(b) - getCandidateAvg(a);
+      return (
+        getCandidateScoreAvgBySkill(b, employerPrefs.skill) -
+        getCandidateScoreAvgBySkill(a, employerPrefs.skill)
+      );
+    });
+
+    // Global ranking: sort all candidates who have stats (without location filter)
+    const globalCandidates = candidates.filter((cand) => {
+      const stats =
+        mode === 'interview'
+          ? cand.interview_skill_stats
+          : cand.practice_skill_stats;
+      return stats && stats.length > 0;
+    });
+
+    const globalSorted = globalCandidates.slice().sort((a, b) => {
+      return (
+        getCandidateScoreAvgBySkill(b, employerPrefs.skill) -
+        getCandidateScoreAvgBySkill(a, employerPrefs.skill)
+      );
     });
 
     setMatched(sorted);
@@ -222,25 +208,11 @@ export default function EmployerDashboard() {
     const top3 = sorted.slice(0, 3);
     setTopThree(top3);
 
+    const topWorldwide = globalSorted.slice(0, 3);
+    setTop3Worldwide(topWorldwide);
+
     // 5) topProspect
     setTopProspect(top3.length > 0 ? top3[0] : null);
-
-    // 6) Calculate percentiles
-    if (sorted.length > 0) {
-      const scoresOnly = sorted.map(getCandidateAvg).sort((a, b) => a - b);
-      const pMap: { [id: string]: number } = {};
-
-      sorted.forEach((cand) => {
-        const candidateAvg = getCandidateAvg(cand);
-        const lessOrEqual = scoresOnly.filter((s) => s <= candidateAvg).length;
-        const percentile = (lessOrEqual / sorted.length) * 100;
-        pMap[cand.id] = percentile;
-      });
-
-      setPercentiles(pMap);
-    } else {
-      setPercentiles({});
-    }
 
     // 7) Example: compute overall weekDelta => sum of (avg_score - previous_avg)
     // We'll do it for whichever mode is selected
@@ -266,24 +238,27 @@ export default function EmployerDashboard() {
     } else {
       setWeekDelta(0);
     }
-  }, [mode, candidates]);
+  }, [mode, candidates, industryFilters, skillFilters, employerPrefs]);
+
+  function handleIndustrySelect(value: string) {
+    if (industryFilters.includes(value)) {
+      setIndustryFilters(industryFilters.filter((v) => v !== value));
+    } else {
+      setIndustryFilters([...industryFilters, value]);
+    }
+  }
+  function handleSkillSelect(value: string) {
+    if (skillFilters.includes(value)) {
+      setSkillFilters(skillFilters.filter((v) => v !== value));
+    } else {
+      setSkillFilters([...skillFilters, value]);
+    }
+  }
 
   return (
     <TooltipProvider>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Employer Dashboard</h1>
-
-        {/* TABS for "Interview Mode" / "Practice Mode" */}
-        <Tabs
-          defaultValue="practice"
-          onValueChange={(value) => setMode(value as 'interview' | 'practice')}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="practice">Practice Mode</TabsTrigger>
-            <TabsTrigger value="interview">Interview Mode</TabsTrigger>
-          </TabsList>
-        </Tabs>
 
         {/* Stats */}
         <StatisticsView
@@ -291,6 +266,85 @@ export default function EmployerDashboard() {
           weekDelta={weekDelta}
           employerPrefs={employerPrefs}
         />
+        <div className="space-y-6">
+          {/* Industry MultiSelect */}
+          <div className="mb-4 mt-8 text-centertext-sm text-slate-500">
+            <label className="text-sm text-muted-foreground mb-1">
+              Industry
+            </label>
+            <MultiSelectBox
+              value={industryFilters}
+              onValueChange={(values) => setIndustryFilters(values)}
+              placeholder="Select industries"
+            >
+              {availableIndustries.map((industry) => (
+                <MultiSelectBoxItem key={industry} value={industry}>
+                  {industry}
+                </MultiSelectBoxItem>
+              ))}
+            </MultiSelectBox>
+          </div>
+
+          {/* Skill MultiSelect */}
+          <div className="mb-4 mt-8 text text-sm text-slate-500">
+            <label className="text-sm text-muted-foreground mb-1">Skill</label>
+            <MultiSelectBox
+              value={skillFilters}
+              onValueChange={(values) => setSkillFilters(values)}
+              placeholder="Select skills"
+            >
+              {availableSkills.map((skill) => (
+                <MultiSelectBoxItem key={skill} value={skill}>
+                  {skill}
+                </MultiSelectBoxItem>
+              ))}
+            </MultiSelectBox>
+          </div>
+          <div className="mb-4 mt-8 text-center text-sm text-slate-500">
+            <label className="text-sm text-muted-foreground mb-1">
+              Location
+            </label>
+            <MultiSelectBox
+              value={skillFilters}
+              onValueChange={(values) => setSkillFilters(values)}
+              placeholder="Select skills"
+            >
+              {availableSkills.map((skill) => (
+                <MultiSelectBoxItem key={skill} value={skill}>
+                  {skill}
+                </MultiSelectBoxItem>
+              ))}
+            </MultiSelectBox>
+          </div>
+
+          {/* Example submit button (or you might trigger filtering onChange)
+          <Button
+            type="button"
+            onClick={() =>
+              console.log({
+                searchQuery,
+                selectedIndustries,
+                selectedSkills,
+                minScore,
+              })
+            }
+          >
+            Apply Filters
+          </Button> */}
+        </div>
+
+        {/* TABS for "Interview Mode" / "Practice Mode" */}
+        <h1 className="text-2xl font-bold">Candidate Statistics</h1>
+        <Tabs
+          defaultValue="practice"
+          onValueChange={(value) => setMode(value as 'interview' | 'practice')}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="practice">Practice Statistics</TabsTrigger>
+            <TabsTrigger value="interview">Interview Statistics</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {/* Show Matches */}
         <MatchedCandidatesView
@@ -298,7 +352,9 @@ export default function EmployerDashboard() {
           topThree={topThree}
           topProspect={topProspect}
           matched={matched}
-          percentiles={percentiles}
+          top3Worldwide={top3Worldwide}
+          mode={mode}
+          employersPrefs={employerPrefs}
         />
       </div>
     </TooltipProvider>

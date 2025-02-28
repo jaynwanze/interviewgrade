@@ -22,21 +22,21 @@ import { useRouter } from 'next/navigation';
 
 import type { CandidateRow, EmployerPreferences } from '@/types';
 import { FireIcon } from '@heroicons/react/solid';
-import { TrophyIcon } from 'lucide-react';
+import { PlaneTakeoffIcon, TrophyIcon } from 'lucide-react';
 
 export function MatchedCandidatesView({
   skillGapMessage,
   topThree,
-  percentiles,
   topProspect,
+  top3Worldwide,
   matched,
   mode,
   employersPrefs,
 }: {
   skillGapMessage: string;
-  topThree: CandidateRow[];
-  percentiles: { [id: string]: number };
+  topThree: CandidateRow[] | null;
   topProspect: CandidateRow | null;
+  top3Worldwide: CandidateRow[] | null;
   matched: CandidateRow[];
   mode: string;
   employersPrefs: EmployerPreferences;
@@ -65,13 +65,84 @@ export function MatchedCandidatesView({
     return skillStats ? skillStats.avg_score : 0;
   }
 
-  const topThreeBarData = topThree.map((cand) => ({
+  const topThreeBarData = topThree?.map((cand) => ({
     name: cand.full_name,
     score: getCandidateScoreAvgBySkill(cand, employersPrefs.skill),
   }));
 
   return (
     <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="shadow-md border rounded-xl ">
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle className=" flex items-center gap-2">
+              <PlaneTakeoffIcon className="h-6 w-6" /> Top Candidates Worldwide
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!top3Worldwide || top3Worldwide.length ===0 ? (
+              <p>No matches found.</p>
+            ) : (
+              <>
+                <div className="flex justify-around items-center">
+                  {top3Worldwide.map((cand, idx) => {
+                    const candidateAvg = getCandidateScoreAvgBySkill(
+                      cand,
+                      employersPrefs.skill,
+                    );
+                    return (
+                      <motion.div
+                        key={cand.id}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.15 }}
+                        className="flex flex-col items-center space-y-2"
+                      >
+                        <div className="relative">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage
+                              src={cand.avatar_url}
+                              alt={cand.full_name}
+                            />
+                            <AvatarFallback>
+                              {cand.full_name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <Badge
+                            variant="secondary"
+                            className="absolute -bottom-1 -right-1 text-xs rounded-full px-2 py-0.5"
+                          >
+                            {candidateAvg.toFixed(0)}
+                          </Badge>
+                        </div>
+                        <p className="text-sm font-semibold">
+                          {cand.full_name.split(' ')[0]}
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/candidate/${cand.id}`)}
+                        >
+                          View
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Skill Gap */}
       {skillGapMessage && (
         <motion.div
@@ -90,7 +161,6 @@ export function MatchedCandidatesView({
           </Card>
         </motion.div>
       )}
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {/* Leaderboard (Top 3) */}
         <motion.div
@@ -109,7 +179,7 @@ export function MatchedCandidatesView({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {topThree.length === 0 ? (
+              {!topThree || topThree.length === 0 ? (
                 <p>No matches found.</p>
               ) : (
                 <div className="space-y-3">
@@ -158,11 +228,6 @@ export function MatchedCandidatesView({
                                 </p>
                               </TooltipContent>
                             </Tooltip>
-                            {percentiles[cand.id] && (
-                              <span className="text-xs text-muted-foreground ml-2">
-                                ({percentiles[cand.id].toFixed(1)}%ile)
-                              </span>
-                            )}
                           </div>
                         </div>
                         <div className="flex flex-col items-center space-y-2 *:gap-1">
@@ -191,73 +256,77 @@ export function MatchedCandidatesView({
         </motion.div>
 
         {/* Top Prospect */}
-        {topProspect && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="shadow-md border rounded-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FireIcon className="text-orange-500 h-6 w-6 mr-2" />
-                  Top Prospect
-                </CardTitle>{' '}
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage
-                      src={topProspect.avatar_url}
-                      alt={topProspect.full_name}
-                    />
-                    <AvatarFallback>
-                      {topProspect.full_name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-lg">
-                      {topProspect.full_name}
-                    </p>
-                    <Badge variant="secondary">
-                      Score{' '}
-                      {getCandidateScoreAvgBySkill(
-                        topProspect,
-                        employersPrefs.skill,
-                      ).toFixed(1)}
-                      /100
-                    </Badge>
-                    {percentiles[topProspect.id] && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        ({percentiles[topProspect.id].toFixed(1)}%ile)
-                      </span>
-                    )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="shadow-md border rounded-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FireIcon className="text-orange-500 h-6 w-6 mr-2" />
+                Top Prospect
+              </CardTitle>{' '}
+            </CardHeader>
+            {!topProspect ? (
+              <div className="p-4">
+                <p>No matches found.</p>
+              </div>
+            ) : (
+              <>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage
+                        src={topProspect.avatar_url}
+                        alt={topProspect.full_name}
+                      />
+                      <AvatarFallback>
+                        {topProspect.full_name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-lg">
+                        {topProspect.full_name}
+                      </p>
+                      <Badge variant="secondary">
+                        Score{' '}
+                        {getCandidateScoreAvgBySkill(
+                          topProspect,
+                          employersPrefs.skill,
+                        ).toFixed(1)}
+                        /100
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewProfile(topProspect.id)}
-                >
-                  View Profile
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => handleContact(topProspect.id)}
-                >
-                  Contact
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        )}
+                  <p className="text-sm text-gray-600 mt-2">
+                    {topProspect.summary}
+                  </p>
+                </CardContent>
+                <CardFooter className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewProfile(topProspect.id)}
+                  >
+                    View Profile
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleContact(topProspect.id)}
+                  >
+                    Contact
+                  </Button>
+                </CardFooter>
+              </>
+            )}
+          </Card>
+        </motion.div>
 
         {/* Full List Graph */}
         <motion.div

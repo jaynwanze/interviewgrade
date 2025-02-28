@@ -58,7 +58,7 @@ export function StatisticsView({
           )}
         </Card>
 
-        {/* 2) Incoming Pipeline */}
+        {/* 2) Incoming Pipeline
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Incoming Pipeline</CardTitle>
@@ -85,34 +85,36 @@ export function StatisticsView({
             </span>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Trend Over Time */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Score Trend vs. Last Week</CardTitle>
-          <CardDescription>How your candidate average changed</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {weekDelta > 0 ? (
-            <div className="flex items-center gap-2">
-              <ArrowUp className="h-4 w-4 text-green-600" />
-              <span className="text-green-600 font-semibold">
-                +{weekDelta.toFixed(1)} points
-              </span>
-            </div>
-          ) : weekDelta < 0 ? (
-            <div className="flex items-center gap-2">
-              <ArrowDown className="h-4 w-4 text-red-600" />
-              <span className="text-red-600 font-semibold">
-                {weekDelta.toFixed(1)} points
-              </span>
-            </div>
-          ) : (
-            <span>No change from last week</span>
-          )}
-        </CardContent>
-      </Card>
+        {/* Trend Over Time */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Score Trend vs. Last Week</CardTitle>
+            <CardDescription>
+              How your candidate average changed
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {weekDelta > 0 ? (
+              <div className="flex items-center gap-2">
+                <ArrowUp className="h-4 w-4 text-green-600" />
+                <span className="text-green-600 font-semibold">
+                  +{weekDelta.toFixed(1)} points
+                </span>
+              </div>
+            ) : weekDelta < 0 ? (
+              <div className="flex items-center gap-2">
+                <ArrowDown className="h-4 w-4 text-red-600" />
+                <span className="text-red-600 font-semibold">
+                  {weekDelta.toFixed(1)} points
+                </span>
+              </div>
+            ) : (
+              <span>No change from last week</span>
+            )}
+          </CardContent>
+        </Card>
+      </div>
       {employerPrefs ? (
         <p className="text-sm text-gray-600">
           Showing top matches within industry{' '}

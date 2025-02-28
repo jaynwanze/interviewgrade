@@ -309,3 +309,116 @@ export type SAErrorPayload = {
   status: 'error';
   message: string;
 };
+
+export const mockCandidates: CandidateRow[] = [
+  {
+    id: 'c1',
+    city: 'New York',
+    country: 'United States',
+    phone_number: '(555) 123-4567',
+    summary: 'Enthusiastic engineer with strong communication skills.',
+    role: 'Software Engineer',
+    industry: 'Tech',
+    practice_skill_stats: [
+      { id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
+      { id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
+      { id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
+    ],
+    interview_skill_stats: [
+      { id: 'p1', skill: 'Behavioural', avg_score: 89, previous_avg: 87 },
+    ],
+    created_at: '2024-04-29T10:00:00Z',
+    full_name: 'Alice Anderson',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'alice@example.com',
+  },
+  {
+    id: 'c2',
+    city: 'San Francisco',
+    country: 'United States',
+    phone_number: '(555) 555-1234',
+    summary: 'Full-stack developer with a focus on back-end optimization.',
+    role: 'Full-Stack Developer',
+    industry: 'Tech',
+    practice_skill_stats: [
+      { id: 'p2', skill: 'Problem Solving', avg_score: 83, previous_avg: 80 },
+      { id: 'p3', skill: 'Communication', avg_score: 81, previous_avg: 76 },
+    ],
+    interview_skill_stats: [
+      { id: '4', skill: 'Behavioural', avg_score: 85, previous_avg: 82 },
+      { id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
+    ],
+    created_at: '2024-04-20T09:30:00Z',
+    full_name: 'Bob Brown',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'bob@example.com',
+  },
+  {
+    id: 'c3',
+    city: 'Toronto',
+    country: 'United States',
+    phone_number: '(416) 999-0000',
+    summary: 'Skilled data analyst passionate about Decision Making & stats.',
+    role: 'Data Analyst',
+    industry: 'Tech',
+    practice_skill_stats: [],
+    interview_skill_stats: [
+      { id: '6', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
+      {
+        id: '7',
+        skill: 'Technical',
+        avg_score: 90,
+        previous_avg: 88,
+      },
+    ],
+    created_at: '2024-04-22T14:15:00Z',
+    full_name: 'Charlie Davis',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'charlie@example.com',
+  },
+  {
+    id: 'c4',
+    city: 'Remote',
+    country: 'Remote',
+    phone_number: '(555) 999-9999',
+    summary: 'Problem solver with a knack for creative solutions.',
+    role: 'Product Manager',
+    industry: 'Tech',
+    practice_skill_stats: [
+      { id: '8', skill: 'Problem Solving', avg_score: 90, previous_avg: 85 },
+      { id: '9', skill: 'Leadership', avg_score: 87, previous_avg: 86 },
+    ],
+    interview_skill_stats: [
+      { id: 'p4', skill: 'Behavioural', avg_score: 88, previous_avg: 84 },
+    ],
+    created_at: '2024-04-25T11:45:00Z',
+    full_name: 'Diana Evans',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'diana@example.com',
+  },
+  {
+    id: 'c5',
+    city: 'Dublin',
+    country: 'Ireland',
+    phone_number: '+353 12 345 6789',
+    summary: 'Focused on continuous improvement and quick learning.',
+    role: 'Software Engineer',
+    industry: 'Tech',
+    practice_skill_stats: [
+      { id: '10', skill: 'Adaptability', avg_score: 92, previous_avg: 90 },
+      { id: '11', skill: 'Communication', avg_score: 84, previous_avg: 80 },
+    ],
+    interview_skill_stats: [
+      { id: 'p5', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
+    ],
+    created_at: '2024-04-27T07:00:00Z',
+    full_name: 'Erin Green',
+    avatar_url:
+      'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    email: 'erin@example.com',
+  },
+];

@@ -7,10 +7,13 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -19,20 +22,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-
-import { CandidateSkillsStats } from '@/types';
 import {
-  ClipboardCheck,
-  FileText,
-  Lock,
-  Mail,
-  PhoneCall,
-  Star,
-} from 'lucide-react';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { CandidateSkillsStats } from '@/types';
+import { FileText, Lock, Mail, Star } from 'lucide-react';
 
 type RecentAttempt = {
   id: string;
@@ -99,7 +98,6 @@ const mockCandidate: CandidateDetailsView = {
     },
   ],
 };
-
 export default function CandidateDetailsPage() {
   const [candidate, setCandidate] =
     useState<CandidateDetailsView>(mockCandidate);
@@ -116,6 +114,18 @@ export default function CandidateDetailsPage() {
   // For viewing the CV in a dialog
   const [openResumeDialog, setOpenResumeDialog] = useState(false);
 
+  function handleEmailCandidate() {
+    // Instead of showing the email directly, we open the user's email client.
+    window.open(`mailto:${candidate?.email}`, '_blank');
+  }
+  // Helper function to determine badge color based on score.
+  const getBadgeColor = (score: number): string => {
+    if (score >= 80) return 'bg-green-500 text-white';
+    if (score >= 60) return 'bg-yellow-500 text-black';
+    if (score >= 40) return 'bg-orange-500 text-white';
+    return 'bg-red-500 text-white';
+  };
+
   function handleUnlock() {
     if (tokensLeft < 1) {
       setError('You do not have enough tokens to unlock contact info.');
@@ -125,14 +135,6 @@ export default function CandidateDetailsPage() {
     setTokensLeft((prev) => prev - 1);
     setCandidate((prev) => ({ ...prev, isUnlocked: true }));
     setError('');
-  }
-
-  function handleMessage() {
-    alert(`Inviting ${candidate.full_name} to an message... (mock)`);
-  }
-
-  function handleRequestMoreInfo() {
-    alert(`Requesting more info from ${candidate.full_name}... (mock)`);
   }
 
   // Compute best skill among either interview_skill_stats or practice_skill_stats
@@ -146,13 +148,15 @@ export default function CandidateDetailsPage() {
         : cand.practice_skill_stats;
     if (!stats || stats.length === 0) return { skill: 'N/A', avg_score: 0 };
 
-    return stats.reduce((best, s) => {
-      return s.avg_score > best.avg_score ? s : best;
-    });
+    // Find the skill with the highest average score
+    const bestSkill = stats.reduce((best, s) =>
+      s.avg_score > best.avg_score ? s : best,
+    );
+    return bestSkill;
   }
 
   // Compute "average" across whichever skill array
-  function getAverageScore(
+  function getOverallSkillsAverageScore(
     cand: CandidateDetailsView,
     mode: 'interview' | 'practice',
   ) {
@@ -164,9 +168,6 @@ export default function CandidateDetailsPage() {
     const sum = stats.reduce((acc, s) => acc + s.avg_score, 0);
     return Math.round(sum / stats.length);
   }
-
-  const bestSkillObj = getBestSkill(candidate, performanceMode);
-  const averageScore = getAverageScore(candidate, performanceMode);
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto py-6">
@@ -184,28 +185,36 @@ export default function CandidateDetailsPage() {
             </AvatarFallback>
           </Avatar>
           <div>
-            <CardTitle className="flex justify-center items-center text-lg">{candidate.full_name}</CardTitle>
+            <CardTitle className="flex justify-center items-center text-lg">
+              {candidate.full_name}
+            </CardTitle>
             <span className="flex justify-center items-center gap-2 mt-1">
               <Badge variant="secondary">{candidate.country}</Badge>
             </span>
             <div className="flex gap-4 mt-2">
               <div>
-              <p className="text-sm text-muted-foreground">
-                <strong>Top Practice Skill</strong>
-              </p>
-              <Badge variant="outline" className="flex items-center gap-1 mt-1">
-                <Star className="h-4 w-4 text-yellow-500" />
-                {getBestSkill(candidate, 'practice').skill}
-              </Badge>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Top Practice Skill</strong>
+                </p>
+                <Badge
+                  variant="outline"
+                  className="flex items-center gap-1 mt-1"
+                >
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  {getBestSkill(candidate, 'practice').skill}
+                </Badge>
               </div>
               <div>
-              <p className="text-sm text-muted-foreground">
-                <strong>Top Interview Skill</strong>
-              </p>
-              <Badge variant="outline" className="flex items-center gap-1 mt-1">
-                <Star className="h-4 w-4 text-yellow-500" />
-                {getBestSkill(candidate, 'interview').skill}
-              </Badge>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Top Interview Skill</strong>
+                </p>
+                <Badge
+                  variant="outline"
+                  className="flex items-center gap-1 mt-1"
+                >
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  {getBestSkill(candidate, 'interview').skill}
+                </Badge>
               </div>
             </div>
           </div>
@@ -220,210 +229,75 @@ export default function CandidateDetailsPage() {
       </Card>
 
       {/* Contact / Details Card */}
-      {!candidate.isUnlocked && (
+      {!candidate.isUnlocked ? (
         <Card>
           <CardHeader>
             <CardTitle>Contact Details</CardTitle>
             <CardDescription>
-              Spend 1 token to unlock contact info + analytics
+              Spend 1 token to unlock deeper info and access to this contact
+              candidate.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <>
-              {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
-              <p className="text-sm text-muted-foreground">
-                <Lock className="inline-block w-4 h-4 mr-1 text-muted-foreground" />
-                This candidate’s deeper info is hidden.
-              </p>
-              <div className="flex items-center justify-center mt-4">
-                <Button onClick={handleUnlock} variant="default">
-                  <Lock className="mr-2 h-4 w-4" />
-                  Unlock Candidate (Tokens left: {tokensLeft})
-                </Button>
-              </div>
-              {/* Blurred preview demonstration */}
-              <div className="relative mt-4">
-                <motion.div
-                  initial={{ filter: 'blur(6px)', opacity: 0.7 }}
-                  animate={{ filter: 'blur(6px)', opacity: 0.7 }}
-                  transition={{ duration: 0.5 }}
-                  className="p-3 bg-muted rounded"
-                >
-                  <p className="text-sm mt-2">
-                    <strong>Email:</strong> hidden@***.com
+            {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
+            <p className="text-sm text-muted-foreground">
+              <Lock className="inline-block w-4 h-4 mr-1" />
+              Unlock access to potential hire to get in touch.
+            </p>
+            <div className="flex items-center justify-center mt-4">
+              <Button onClick={handleUnlock} variant="default">
+                <Lock className="mr-2 h-4 w-4" />
+                Unlock Candidate (Tokens left: {tokensLeft})
+              </Button>
+            </div>
+            <div className="relative mt-4">
+              <motion.div
+                initial={{ filter: 'blur(6px)', opacity: 0.7 }}
+                animate={{ filter: 'blur(6px)', opacity: 0.7 }}
+                transition={{ duration: 0.5 }}
+                className="p-3 bg-muted rounded"
+              >
+                <p className="text-sm mt-2">
+                  <strong>Email:</strong> hidden@***.com
+                </p>
+                <p className="text-sm mt-1">
+                  <strong>Phone:</strong> ***-***-****
+                </p>
+                <div className="mt-2">
+                  <p className="text-sm">
+                    <strong>Interviews Completed:</strong> ??
                   </p>
-                  <p className="text-sm mt-1">
-                    <strong>Phone:</strong> ***-***-****
+                  <p className="text-sm">
+                    <strong>Highest Skill:</strong> ??
                   </p>
-                  <div className="mt-2">
-                    <p className="text-sm">
-                      <strong>Interviews Completed:</strong> ??
-                    </p>
-                    <p className="text-sm">
-                      <strong>Highest Skill:</strong> ??
-                    </p>
-                    <p className="text-sm">
-                      <strong>Avg Score:</strong> ??
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
-            </>
+                  <p className="text-sm">
+                    <strong>Avg Score:</strong> ??
+                  </p>
+                </div>
+              </motion.div>
+            </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* If unlocked, show more analytics & CV */}
-      {candidate.isUnlocked && (
+      ) : (
         <>
-          <div className="grid grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Details</CardTitle>
-                <CardDescription>
-                  You have unlocked this candidate’s contact info and stats.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
-
-                <div className="gridspace-y-2">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{candidate.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <PhoneCall className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{candidate.phone_number}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* CTA Buttons */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  What would you like to do next?
-                </p>
-              </CardContent>
-              <CardContent className="flex gap-2 flex-wrap">
-                <Button onClick={handleMessage}>Message</Button>
-                <Button variant="outline" onClick={handleRequestMoreInfo}>
-                  Request More Info
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-          {/* Performance Stats */}
           <Card>
             <CardHeader>
-              <CardTitle>Performance Overview</CardTitle>
+              <CardTitle>Contact Candidate</CardTitle>
               <CardDescription>
-                Toggle between “Interview” or “Practice” mode stats.
+                Directly email the candidate to get in touch.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Tabs for interview vs. practice */}
-              <Tabs
-                defaultValue="interview"
-                onValueChange={(val) =>
-                  setPerformanceMode(val as 'interview' | 'practice')
-                }
-              >
-                <TabsList className="grid grid-cols-2 w-full mb-3">
-                  <TabsTrigger value="interview">Interview Stats</TabsTrigger>
-                  <TabsTrigger value="practice">Practice Stats</TabsTrigger>
-                </TabsList>
-                <TabsContent value="interview">
-                  <div className="flex gap-6">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Best Skill</strong>
-                      </p>
-                      <Badge
-                        variant="outline"
-                        className="flex items-center gap-1 mt-1"
-                      >
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        {getBestSkill(candidate, 'interview').skill}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Avg Score Across All Skills</strong>
-                      </p>
-                      <span className="text-xl font-bold">
-                        {getAverageScore(candidate, 'interview')}%
-                      </span>
-                    </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="practice">
-                  <div className="flex gap-6">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Best Skill</strong>
-                      </p>
-                      <Badge
-                        variant="outline"
-                        className="flex items-center gap-1 mt-1"
-                      >
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        {getBestSkill(candidate, 'practice').skill}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Avg Score Across All Skills</strong>
-                      </p>
-                      <span className="text-xl font-bold">
-                        {getBestSkill(candidate, 'practice').avg_score}%
-                      </span>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
+              <div className="flex items-center justify-center">
+                <Button onClick={handleEmailCandidate} variant="default">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Email Candidate
+                </Button>
+              </div>
             </CardContent>
           </Card>
-
-          {/* Recent Attempts (optional)
-          {candidate.recentAttempts && candidate.recentAttempts.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Attempts</CardTitle>
-                <CardDescription>
-                  Candidate’s latest practice or interviews
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {candidate.recentAttempts.map((attempt) => (
-                  <div
-                    key={attempt.id}
-                    className="flex items-center justify-between bg-muted p-2 rounded"
-                  >
-                    <div>
-                      <p className="text-sm font-medium capitalize">
-                        {attempt.type} attempt
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(attempt.date).toLocaleString()} — Focus on{' '}
-                        {attempt.skillFocus}
-                      </p>
-                    </div>
-                    <div className="text-sm font-semibold text-foreground">
-                      {attempt.score}%
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )} */}
-
           {/* Resume / CV link */}
+
           <Card>
             <CardHeader>
               <CardTitle>Resume / CV</CardTitle>
@@ -468,8 +342,117 @@ export default function CandidateDetailsPage() {
         </>
       )}
 
-      {/* Employer’s Private Notes */}
+      {/* Performance Stats */}
       <Card>
+        <CardHeader>
+          <CardTitle>Performance Overview</CardTitle>
+          <CardDescription>
+            Toggle between “Interview” or “Practice” mode stats.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Tabs for interview vs. practice */}
+          <Tabs
+            defaultValue="practice"
+            onValueChange={(val) =>
+              setPerformanceMode(val as 'interview' | 'practice')
+            }
+          >
+            <TabsList className="grid grid-cols-2 w-full mb-3">
+              <TabsTrigger value="practice">Practice Statistics</TabsTrigger>
+              <TabsTrigger value="interview">Interview Statistics</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="flex gap-6">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                <strong>Best Skill</strong>
+              </p>
+              <Badge variant="outline" className="flex items-center gap-1 mt-1">
+                <Star className="h-4 w-4 text-yellow-500" />
+                {getBestSkill(candidate, performanceMode).skill}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                <strong>Current Avg Score</strong>
+              </p>
+              <span className="text-xl font-bold">
+                {getBestSkill(candidate, performanceMode).avg_score}%
+              </span>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                <strong>Current Avg Score Across All Skills</strong>
+              </p>
+              <span className="text-xl font-bold">
+                {getOverallSkillsAverageScore(candidate, performanceMode)}%
+              </span>
+            </div>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Skill</TableHead>
+                <TableHead>Average Score</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(performanceMode === 'interview'
+                ? candidate.interview_skill_stats
+                : candidate.practice_skill_stats
+              ).map((stat) => (
+                <TableRow key={stat.id}>
+                  <TableCell>{stat.skill}</TableCell>
+                  <Badge
+                    className={`px-4 py-2 m-2 text-md ${getBadgeColor(stat.avg_score)}`}
+                  >
+                    {stat.avg_score}%
+                  </Badge>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Recent Attempts (optional) */}
+          {candidate.recentAttempts && candidate.recentAttempts.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Attempts</CardTitle>
+                <CardDescription>
+                  Candidate’s latest practice or interviews
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {candidate.recentAttempts.map((attempt) => (
+                  <div
+                    key={attempt.id}
+                    className="flex items-center justify-between bg-muted p-2 rounded"
+                  >
+                    <div>
+                      <p className="text-sm font-medium capitalize">
+                        {attempt.type} attempt
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(attempt.date).toLocaleString()} — Focus on{' '}
+                        {attempt.skillFocus}
+                      </p>
+                    </div>
+                    <div className="text-sm font-semibold text-foreground">
+                      {attempt.score}%
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+      {/* Employer’s Private Notes */}
+      {/* <Card>
         <CardHeader>
           <CardTitle>Your Private Notes</CardTitle>
           <CardDescription>Only visible to your organization.</CardDescription>
@@ -487,7 +470,7 @@ export default function CandidateDetailsPage() {
             Save Notes
           </Button>
         </CardFooter>
-      </Card>
+      </Card> */}
     </div>
   );
 }

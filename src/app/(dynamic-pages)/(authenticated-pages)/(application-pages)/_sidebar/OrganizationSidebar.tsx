@@ -43,11 +43,11 @@ async function OrganizationSidebarInternal({
               href={`/employer/${organizationId}/c`}
               icon={<UserRound className="h-5 w-5" />}
             />
-            <SidebarLink
+            {/* <SidebarLink
               label="Messages"
               href={`/employer/${organizationId}/m`}
               icon={<MessageCircleMoreIcon className="h-5 w-5" />}
-            />
+            /> */}
             <SidebarLink
               label="Settings"
               href={`/employer/${organizationId}/settings`}

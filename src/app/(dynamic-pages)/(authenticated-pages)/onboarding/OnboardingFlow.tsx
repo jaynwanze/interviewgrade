@@ -443,17 +443,6 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               )}
             </div>
           </div>
-          <div>
-            <Label htmlFor="summary">Summary</Label>
-            <Textarea
-              id="summary"
-              placeholder="Write a short summary about yourself..."
-              {...register('summary')}
-            />
-            {errors.summary && (
-              <p className="text-xs text-red-600">{errors.summary.message}</p>
-            )}
-          </div>
 
           {/* Resume Upload Section */}
           <div className="mt-2">

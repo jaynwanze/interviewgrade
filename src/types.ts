@@ -58,6 +58,20 @@ export type EvaluationScores = {
   feedback: string;
 };
 
+export type EmployerPreferences = {
+  location: string;
+  industry: string;
+  skill: string;
+};
+
+export type RecentAttempt = {
+  id: string;
+  type: "practice" | "interview";
+  date: string;
+  skillFocus: string;
+  score: number;
+};
+
 export type JobTracker = Table<'job_application_tracker'>;
 export interface CandidateRow {
   id: string;

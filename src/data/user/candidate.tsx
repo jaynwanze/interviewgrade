@@ -288,6 +288,7 @@ export async function addJobTrackerApplication(
       job_title: newJob.job_title || '',
       status: newJob.status || 'not_started',
       company: newJob.company || '',
+      deadline: newJob.deadline || '',
       created_at: newJob.created_at || new Date().toISOString(),
     })
     .eq('candidate_id', id)
@@ -319,6 +320,7 @@ export async function updateJobTrackerApplication(
     .from('job_application_tracker')
     .update({
       ...updatedJob,
+      deadline: updatedJob.deadline || '',
     })
     .eq('id', updatedJob.id)
     .eq('candidate_id', id)

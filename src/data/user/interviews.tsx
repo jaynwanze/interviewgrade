@@ -19,6 +19,7 @@ import type {
   InterviewTemplate,
   InterviewUpdate,
   PracticeTemplate,
+  RecentAttempt,
   SAPayload,
   Table,
 } from '@/types';
@@ -666,6 +667,86 @@ export const getInterviewAnalytics = async (
     };
   }
 };
+
+
+export const getCandidateRecentAttempts = async (
+  candidateId: string,
+  currentTemplateId: string,
+  interviewMode: string, // e.g. "Practice Mode" or "Interview Mode"
+  limit = 5,
+): Promise<RecentAttempt[] | null> => {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  if (!candidateId) {
+    console.warn("Candidate ID not provided.");
+    return null;
+  }
+  if (!currentTemplateId) {
+    console.warn("Template ID not provided.");
+    return null;
+  }
+
+  // Determine the template column based on interviewMode.
+  const templateColumn =
+    interviewMode === "Practice Mode" ? "template_id" : "interview_template_id";
+
+  // Fetch completed interviews for the candidate with the given template ID.
+  const { data: interviews, error: interviewError } = await supabase
+    .from("interviews")
+    .select("*")
+    .eq("candidate_id", candidateId)
+    .eq(templateColumn, currentTemplateId)
+    .eq("status", "completed")
+    .order("created_at", { ascending: false });
+
+  if (interviewError) {
+    console.warn("Error fetching interviews:", interviewError.message);
+    return null;
+  }
+  if (!interviews || interviews.length === 0) {
+    return null;
+  }
+
+  // Get the IDs of these interviews.
+  const interviewIds = interviews.map((interview) => interview.id);
+
+  // Fetch corresponding evaluations.
+  const { data: evaluations, error: evalError } = await supabase
+    .from("interview_evaluations")
+    .select("*")
+    .in("interview_id", interviewIds)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (evalError) {
+    console.warn("Error fetching evaluations:", evalError.message);
+    return null;
+  }
+  if (!evaluations || evaluations.length === 0) {
+    return null;
+  }
+
+  // Transform evaluations into RecentAttempt objects.
+  // For skillFocus, we use the first evaluation score's name if available,
+  // otherwise we fallback to the evaluation's strengths field or a default string.
+  const recentAttempts: RecentAttempt[] = evaluations.map((evalItem) => {
+    const skillFocus =
+      evalItem.evaluation_scores && evalItem.evaluation_scores.length > 0
+        ? evalItem.evaluation_scores[0].name
+        : evalItem.strengths || "General Performance";
+
+    return {
+      id: evalItem.id,
+      type: interviewMode === "Practice Mode" ? "practice" : "interview",
+      date: evalItem.created_at,
+      skillFocus,
+      score: evalItem.overall_grade,
+    };
+  });
+
+  return recentAttempts;
+};
+
 
 export const getInterviewHistory = async (
   candidateId: string,

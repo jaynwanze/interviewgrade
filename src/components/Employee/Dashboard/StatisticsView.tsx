@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { EmployerPreferences } from '@/types';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 
 export interface StatsProps {
@@ -25,7 +26,7 @@ export function StatisticsView({
 }: {
   stats: StatsProps;
   weekDelta: number;
-  employerPrefs?: { location: string; skill: string };
+  employerPrefs?: EmployerPreferences;
 }) {
   return (
     <>
@@ -114,8 +115,9 @@ export function StatisticsView({
       </Card>
       {employerPrefs ? (
         <p className="text-sm text-gray-600">
-          Showing top matches for location{' '}
-          <strong>{employerPrefs.location}</strong> and skill{' '}
+          Showing top matches within industry{' '}
+          <strong>{employerPrefs.industry}</strong> located in{' '}
+          <strong>{employerPrefs.location}</strong> for skill{' '}
           <strong>{employerPrefs.skill}</strong>.
         </p>
       ) : (

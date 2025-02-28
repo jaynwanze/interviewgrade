@@ -13,7 +13,11 @@ import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
 
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { markTutorialAsDoneAction } from '@/data/user/candidate';
-import { insertInterviewAnswer, updateInterview } from '@/data/user/interviews';
+import {
+  getInterviewAnalytics,
+  insertInterviewAnswer,
+  updateInterview,
+} from '@/data/user/interviews';
 import type {
   FeedbackData,
   Interview,
@@ -173,6 +177,21 @@ export function PracticeInterviewFlow({
       feedback: questionFeedback[idx]?.summary ?? '',
       evaluation_criteria_name: q.evaluation_criteria.name,
     }));
+
+    // const candidateProfile = await candidateProfile(interview.candidate_id);
+
+    const interviewAnalytics = await getInterviewAnalytics(
+      interview.candidate_id,
+      interview.template_id,
+      'practice',
+    );
+
+    // if (interviewAnalytics.current avg > candidateProfile.practice_skill_avg) {
+    //   candidateProfile._prev_avg = candidateProfile.practice_skill_avg 
+    // update candidateProfile.practice_skill_avg = interviewAnalytics.current avg
+  
+
+
     try {
       const feedback: FeedbackData | null = await getInterviewFeedback(
         interview,

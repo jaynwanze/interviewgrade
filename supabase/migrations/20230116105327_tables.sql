@@ -73,6 +73,7 @@ CREATE TABLE "public"."candidates" (
   "resume_url" character varying,
   "interview_skill_stats" "jsonb",
   "practice_skill_stats" "jsonb",
+  "summary" text,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";

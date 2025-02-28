@@ -20,7 +20,7 @@ import {
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
-import type { CandidateRow } from '@/types';
+import type { CandidateRow, EmployerPreferences } from '@/types';
 import { FireIcon } from '@heroicons/react/solid';
 import { TrophyIcon } from 'lucide-react';
 
@@ -30,12 +30,16 @@ export function MatchedCandidatesView({
   percentiles,
   topProspect,
   matched,
+  mode,
+  employersPrefs,
 }: {
   skillGapMessage: string;
   topThree: CandidateRow[];
   percentiles: { [id: string]: number };
   topProspect: CandidateRow | null;
   matched: CandidateRow[];
+  mode: string;
+  employersPrefs: EmployerPreferences;
 }) {
   const router = useRouter();
 
@@ -47,22 +51,23 @@ export function MatchedCandidatesView({
     router.push(`/messages?candidateId=${candidateId}`);
   }
 
-  function getCandidateInterviewAvg(candidate: CandidateRow): number {
-    const { interview_skill_stats } = candidate;
-    if (!interview_skill_stats || interview_skill_stats.length === 0) {
+  function getCandidateScoreAvgBySkill(
+    candidate: CandidateRow,
+    skill: string,
+  ): number {
+    const { interview_skill_stats, practice_skill_stats } = candidate;
+    const stats =
+      mode === 'interview' ? interview_skill_stats : practice_skill_stats;
+    if (!stats || stats.length === 0) {
       return 0;
     }
-    return (
-      interview_skill_stats.reduce(
-        (acc, skillObj) => acc + skillObj.avg_score,
-        0,
-      ) / interview_skill_stats.length
-    );
+    const skillStats = stats.find((s) => s.skill === skill);
+    return skillStats ? skillStats.avg_score : 0;
   }
 
   const topThreeBarData = topThree.map((cand) => ({
     name: cand.full_name,
-    score: getCandidateInterviewAvg(cand),
+    score: getCandidateScoreAvgBySkill(cand, employersPrefs.skill),
   }));
 
   return (
@@ -86,7 +91,7 @@ export function MatchedCandidatesView({
         </motion.div>
       )}
 
-      <div className="grid sm:grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {/* Leaderboard (Top 3) */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -97,10 +102,10 @@ export function MatchedCandidatesView({
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrophyIcon className="text-yellow-300 h-6 w-6 mr-2" />{' '}
-                Leaderboard (Top 3)
+                Leaderboard
               </CardTitle>
               <CardDescription>
-                Highest interview scores among matched candidates
+                Highest current average scores among matched candidates
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -109,7 +114,10 @@ export function MatchedCandidatesView({
               ) : (
                 <div className="space-y-3">
                   {topThree.map((cand, idx) => {
-                    const candidateAvg = getCandidateInterviewAvg(cand);
+                    const candidateAvg = getCandidateScoreAvgBySkill(
+                      cand,
+                      employersPrefs.skill,
+                    );
                     return (
                       <motion.div
                         key={cand.id}
@@ -144,7 +152,10 @@ export function MatchedCandidatesView({
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Aggregated interview score.</p>
+                                <p>
+                                  Aggregated current score based off employer
+                                  preferences.
+                                </p>
                               </TooltipContent>
                             </Tooltip>
                             {percentiles[cand.id] && (
@@ -184,7 +195,7 @@ export function MatchedCandidatesView({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
           >
             <Card className="shadow-md border rounded-xl">
               <CardHeader>
@@ -213,7 +224,11 @@ export function MatchedCandidatesView({
                       {topProspect.full_name}
                     </p>
                     <Badge variant="secondary">
-                      Score {getCandidateInterviewAvg(topProspect).toFixed(1)}
+                      Score{' '}
+                      {getCandidateScoreAvgBySkill(
+                        topProspect,
+                        employersPrefs.skill,
+                      ).toFixed(1)}
                       /100
                     </Badge>
                     {percentiles[topProspect.id] && (
@@ -249,6 +264,7 @@ export function MatchedCandidatesView({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
+          className="md:col-span-3 lg:col-span-1"
         >
           <TopThreeCandidatesBarChart topCandidates={topThreeBarData} />
         </motion.div>

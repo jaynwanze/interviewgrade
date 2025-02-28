@@ -41,7 +41,7 @@ import {
   deleteJobTrackerApplication,
 } from '@/data/user/candidate';
 import { JobTracker } from '@/types';
-import { Link2, PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { Link2, PlusCircle, Pencil, Trash2, Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function JobTrackerPage() {
@@ -106,6 +106,15 @@ export default function JobTrackerPage() {
     } catch (error) {
       console.error('Error deleting job:', error);
     }
+  };
+
+  // Check if a reminder is due soon or overdue
+  const isReminderDue = (date: string) => {
+    const reminderDate = new Date(date);
+    const today = new Date();
+    const timeDiff = reminderDate.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return daysDiff <= 3; // Reminder is due in 3 days or less
   };
 
   const jobStatusColor = (status: JobTracker['status']) => {
@@ -227,6 +236,17 @@ export default function JobTrackerPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1">
+                  <Label htmlFor="deadline">Deadline</Label>
+                  <Input
+                    id="deadline"
+                    type="date"
+                    value={newJob.deadline || ''}
+                    onChange={(e) =>
+                      setNewJob({ ...newJob, deadline: e.target.value })
+                    }
+                  />
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setOpenAddDialog(false)}>
@@ -244,7 +264,7 @@ export default function JobTrackerPage() {
                 <TableHead className="px-4 py-2">Job Title</TableHead>
                 <TableHead className="px-4 py-2">Company</TableHead>
                 <TableHead className="px-4 py-2">Status</TableHead>
-                <TableHead className="px-4 py-2">Applied Date</TableHead>
+                <TableHead className="px-4 py-2">Deadline</TableHead>
                 <TableHead className="px-4 py-2">Link</TableHead>
                 <TableHead className="px-4 py-2">Actions</TableHead>
               </TableRow>
@@ -265,7 +285,14 @@ export default function JobTrackerPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-2">
-                    {new Date(job.created_at).toLocaleDateString()}
+                    {job.deadline && (
+                      <div className="flex items-center gap-1">
+                        {new Date(job.deadline).toLocaleDateString()}
+                        {isReminderDue(job.deadline) && (
+                          <Bell className="h-4 w-4 text-yellow-500" />
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="px-4 py-2">
                     {job.link && (
@@ -373,6 +400,17 @@ export default function JobTrackerPage() {
                   <SelectItem value="hired">Hired</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-deadline">Deadline</Label>
+              <Input
+                id="edit-deadline"
+                type="date"
+                value={editJob.deadline || ''}
+                onChange={(e) =>
+                  setEditJob({ ...editJob, deadline: e.target.value })
+                }
+              />
             </div>
           </div>
           <div className="flex justify-end gap-2">

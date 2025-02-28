@@ -978,7 +978,7 @@ export type Database = {
           company: string
           industry: string
           location: string
-          job_type: string;
+          deadline: string
           link: string
           created_at: string
         }
@@ -989,7 +989,7 @@ export type Database = {
           company: string
           industry?: string
           location?: string
-          job_type?: string;
+          deadline: string
           link?: string
           created_at: string
         }
@@ -1000,7 +1000,7 @@ export type Database = {
           company?: string
           industry?: string
           location?: string
-          job_type?: string;
+          deadline: string
           link?: string
           created_at?: string
         }

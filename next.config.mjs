@@ -46,21 +46,27 @@ export default {
   async headers() {
     return [
       {
-        source: '/:path*',
+        // Here we match any route that starts with `/onboarding`
+        // e.g. /onboarding, /onboarding/foo, etc.
+        source: '/onboarding/:path*',
         headers: [
           {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
+            key: 'Access-Control-Allow-Origin',
+            value: 'https://www.interviewgrade.io', // or '*'
           },
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Requested-With',
           },
         ],
       },
     ];
   },
-
+  
   webpack: (config) => {
     if (typeof nextRuntime === 'undefined') {
       config.resolve.fallback = {

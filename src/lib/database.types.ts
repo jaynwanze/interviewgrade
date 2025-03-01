@@ -255,17 +255,8 @@ export type Database = {
 
       organization_join_invitations: {
         Row: {
-          Id: string
-          invited_user_id: string
-          status: PublicSchema["Enums"]["organization_join_invitation_status"]
-          invitee_user_email: string
-          invitee_organization_role: PublicSchema["Enums"]["organization_member_role"]
-          invitee_user_id: string
-          organization_id: string
-          created_at: string
-        }
-        Insert: {
-          invited_user_id: string
+          id: string
+          inviter_user_id: string
           status: PublicSchema["Enums"]["organization_join_invitation_link_status"]
           invitee_user_email: string
           invitee_organization_role: PublicSchema["Enums"]["organization_member_role"]
@@ -273,9 +264,18 @@ export type Database = {
           organization_id: string
           created_at: string
         }
+        Insert: {
+          inviter_user_id: string
+          status: PublicSchema["Enums"]["organization_join_invitation_link_status"]
+          invitee_user_email: string
+          invitee_organization_role: PublicSchema["Enums"]["organization_member_role"]
+          invitee_user_id: string
+          organization_id: string
+          created_at?: string
+        }
         Update: {
-          invited_user_id?: string
-          status?: PublicSchema["Enums"]["organization_join_invitation_status"]
+          inviter_user_id?: string
+          status?: PublicSchema["Enums"]["organization_join_invitation_link_status"]
           invitee_user_email?: string
           invitee_organization_role?: PublicSchema["Enums"]["organization_member_role"]
           invitee_user_id?: string

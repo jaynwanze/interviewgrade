@@ -57,16 +57,16 @@ export const InterviewAverageDetails = ({
         ) : (
           <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
             {/* Total Sessions Count */}
-              <ClipboardList className="w-10 h-10 text-blue-500" />
-              <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
-              <div>
-                <p className="text-4xl font-bold text-gray-900">
-                  {analyticsData.total_interviews || 0}
-                </p>
-                <p className="text-gray-500">
-                  Total completed interview sessions.
-                </p>
-              </div>
+            <ClipboardList className="w-10 h-10 text-blue-500" />
+            <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">
+                {analyticsData.total_interviews || 0}
+              </p>
+              <p className="text-gray-500">
+                Total completed interview sessions.
+              </p>
+            </div>
           </Card>
         )}
       </div>

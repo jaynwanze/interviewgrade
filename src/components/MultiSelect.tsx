@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
+} from '@/components/ui/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils"; // utility for conditional classes
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils'; // utility for conditional classes
 
 type MultiSelectProps = {
   options: string[];
@@ -28,7 +28,7 @@ export function MultiSelect({
   options,
   selected,
   onChange,
-  placeholder = "Select options",
+  placeholder = 'Select options',
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -45,7 +45,7 @@ export function MultiSelect({
       <PopoverTrigger asChild>
         <Button variant="outline" className="w-full justify-between">
           <span className="truncate">
-            {selected.length > 0 ? selected.join(", ") : placeholder}
+            {selected.length > 0 ? selected.join(', ') : placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -64,8 +64,8 @@ export function MultiSelect({
               >
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
-                    selected.includes(option) ? "opacity-100" : "opacity-0"
+                    'mr-2 h-4 w-4',
+                    selected.includes(option) ? 'opacity-100' : 'opacity-0',
                   )}
                 />
                 {option}

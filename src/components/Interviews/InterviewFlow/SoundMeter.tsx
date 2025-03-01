@@ -104,7 +104,7 @@ export const Meter: React.FC<MeterProps> = ({
             transformOrigin: 'bottom',
             transition: 'transform 0.1s ease-out',
           }}
-        />
+        />,
       );
     }
     return elements;

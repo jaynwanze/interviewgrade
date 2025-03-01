@@ -84,7 +84,7 @@ export function MatchedCandidatesView({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {!top3Worldwide || top3Worldwide.length ===0 ? (
+            {!top3Worldwide || top3Worldwide.length === 0 ? (
               <p>No matches found.</p>
             ) : (
               <>

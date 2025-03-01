@@ -419,37 +419,37 @@ export default function CandidateDetailsPage() {
       </Card>
 
       {/* Recent Attempts (optional) */}
-          {candidate.recentAttempts && candidate.recentAttempts.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Attempts</CardTitle>
-                <CardDescription>
-                  Candidate’s latest practice or interviews
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {candidate.recentAttempts.map((attempt) => (
-                  <div
-                    key={attempt.id}
-                    className="flex items-center justify-between bg-muted p-2 rounded"
-                  >
-                    <div>
-                      <p className="text-sm font-medium capitalize">
-                        {attempt.type} attempt
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(attempt.date).toLocaleString()} — Focus on{' '}
-                        {attempt.skillFocus}
-                      </p>
-                    </div>
-                    <div className="text-sm font-semibold text-foreground">
-                      {attempt.score}%
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+      {candidate.recentAttempts && candidate.recentAttempts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Attempts</CardTitle>
+            <CardDescription>
+              Candidate’s latest practice or interviews
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {candidate.recentAttempts.map((attempt) => (
+              <div
+                key={attempt.id}
+                className="flex items-center justify-between bg-muted p-2 rounded"
+              >
+                <div>
+                  <p className="text-sm font-medium capitalize">
+                    {attempt.type} attempt
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(attempt.date).toLocaleString()} — Focus on{' '}
+                    {attempt.skillFocus}
+                  </p>
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {attempt.score}%
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Employer’s Private Notes */}
       {/* <Card>

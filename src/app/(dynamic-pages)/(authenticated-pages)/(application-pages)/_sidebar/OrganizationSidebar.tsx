@@ -5,7 +5,7 @@ import {
   MessageCircleMoreIcon,
   Settings,
   Trophy,
-  UserRound
+  UserRound,
 } from 'lucide-react';
 
 import { Suspense } from 'react';

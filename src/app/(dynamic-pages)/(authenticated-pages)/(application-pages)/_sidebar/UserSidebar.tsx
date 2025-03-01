@@ -20,7 +20,7 @@ export async function UserSidebar() {
     >
       <div>
         <div className="flex justify-between items-center">
-        <SidebarLogoAndToggle userType="candidate" />
+          <SidebarLogoAndToggle userType="candidate" />
         </div>
         <SidebarLink
           label="Mock Interviews"
@@ -37,7 +37,7 @@ export async function UserSidebar() {
           href="/candidate/interview-analytics"
           icon={<BarChart3Icon className="h-5 w-5" />}
         />
-         <SidebarLink
+        <SidebarLink
           label="Job Tracker"
           href="/candidate/jobtracker"
           icon={<TableProperties className="h-5 w-5" />}

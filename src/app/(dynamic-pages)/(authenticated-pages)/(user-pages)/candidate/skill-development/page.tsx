@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { CalendarIcon, PlusCircle, Award, Info } from "lucide-react";
+import { useState } from 'react';
+import { CalendarIcon, PlusCircle, Award, Info } from 'lucide-react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -26,9 +26,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 
 interface TargetSetting {
   id: string;
@@ -46,51 +46,51 @@ interface TrainingCourse {
   recommendedScore: number;
   duration: string;
   provider: string;
-  resourceType: "video" | "article" | "exercise";
+  resourceType: 'video' | 'article' | 'exercise';
 }
 
 export default function CareerDevelopmentDashboard() {
   // Targets
   const [targets, setTargets] = useState<TargetSetting[]>([
     {
-      id: "1",
-      skill: "Communication",
+      id: '1',
+      skill: 'Communication',
       targetScore: 85,
       currentScore: 70,
-      deadline: "2024-06-30",
-      targetRole: "Team Lead",
+      deadline: '2024-06-30',
+      targetRole: 'Team Lead',
     },
     {
-      id: "2",
-      skill: "Leadership",
+      id: '2',
+      skill: 'Leadership',
       targetScore: 90,
       currentScore: 75,
-      deadline: "2024-09-15",
-      targetRole: "Manager",
+      deadline: '2024-09-15',
+      targetRole: 'Manager',
     },
   ]);
 
   // Recommendations (could be filtered based on targets in a real app)
   const [trainingCourses] = useState<TrainingCourse[]>([
     {
-      id: "c1",
-      title: "Advanced Communication Skills",
+      id: 'c1',
+      title: 'Advanced Communication Skills',
       description:
-        "Enhance your public speaking with interactive exercises and expert feedback.",
+        'Enhance your public speaking with interactive exercises and expert feedback.',
       recommendedScore: 80,
-      duration: "6 weeks",
-      provider: "Coursera",
-      resourceType: "video",
+      duration: '6 weeks',
+      provider: 'Coursera',
+      resourceType: 'video',
     },
     {
-      id: "c2",
-      title: "Leadership Fundamentals",
+      id: 'c2',
+      title: 'Leadership Fundamentals',
       description:
-        "Develop leadership qualities through case studies and team-building exercises.",
+        'Develop leadership qualities through case studies and team-building exercises.',
       recommendedScore: 85,
-      duration: "8 weeks",
-      provider: "LinkedIn Learning",
-      resourceType: "article",
+      duration: '8 weeks',
+      provider: 'LinkedIn Learning',
+      resourceType: 'article',
     },
   ]);
 
@@ -100,7 +100,9 @@ export default function CareerDevelopmentDashboard() {
 
   // Course details modal state
   const [openCourseDialog, setOpenCourseDialog] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<TrainingCourse | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<TrainingCourse | null>(
+    null,
+  );
 
   const addTarget = () => {
     if (newTarget.skill && newTarget.targetScore) {
@@ -110,7 +112,7 @@ export default function CareerDevelopmentDashboard() {
         targetScore: newTarget.targetScore,
         currentScore: newTarget.currentScore || 0,
         deadline: newTarget.deadline,
-        targetRole: newTarget.targetRole || "",
+        targetRole: newTarget.targetRole || '',
       };
       setTargets((prev) => [...prev, target]);
       setNewTarget({});
@@ -135,8 +137,8 @@ export default function CareerDevelopmentDashboard() {
         </CardHeader>
         <CardContent>
           <p className="text-gray-700">
-            Track your skill targets, view personalized resource recommendations,
-            and monitor your progress.
+            Track your skill targets, view personalized resource
+            recommendations, and monitor your progress.
           </p>
         </CardContent>
       </Card>
@@ -154,7 +156,9 @@ export default function CareerDevelopmentDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead className="px-4 py-2">Skill</TableHead>
-                <TableHead className="px-4 py-2">Current / Target Score</TableHead>
+                <TableHead className="px-4 py-2">
+                  Current / Target Score
+                </TableHead>
                 <TableHead className="px-4 py-2">Deadline</TableHead>
                 <TableHead className="px-4 py-2">Target Role</TableHead>
               </TableRow>
@@ -168,12 +172,17 @@ export default function CareerDevelopmentDashboard() {
                       <span>
                         {target.currentScore || 0} / {target.targetScore}
                       </span>
-                      <Progress value={target.currentScore || 0} max={target.targetScore} />
+                      <Progress
+                        value={target.currentScore || 0}
+                        max={target.targetScore}
+                      />
                     </div>
                   </TableCell>
-                  <TableCell className="px-4 py-2">{target.deadline || "N/A"}</TableCell>
                   <TableCell className="px-4 py-2">
-                    {target.targetRole || "N/A"}
+                    {target.deadline || 'N/A'}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {target.targetRole || 'N/A'}
                   </TableCell>
                 </TableRow>
               ))}
@@ -243,7 +252,7 @@ export default function CareerDevelopmentDashboard() {
               <Input
                 id="skill"
                 placeholder="e.g. Communication"
-                value={newTarget.skill || ""}
+                value={newTarget.skill || ''}
                 onChange={(e) =>
                   setNewTarget({ ...newTarget, skill: e.target.value })
                 }
@@ -255,7 +264,7 @@ export default function CareerDevelopmentDashboard() {
                 id="targetScore"
                 type="number"
                 placeholder="e.g. 85"
-                value={newTarget.targetScore?.toString() || ""}
+                value={newTarget.targetScore?.toString() || ''}
                 onChange={(e) =>
                   setNewTarget({
                     ...newTarget,
@@ -270,7 +279,7 @@ export default function CareerDevelopmentDashboard() {
                 id="currentScore"
                 type="number"
                 placeholder="e.g. 70"
-                value={newTarget.currentScore?.toString() || ""}
+                value={newTarget.currentScore?.toString() || ''}
                 onChange={(e) =>
                   setNewTarget({
                     ...newTarget,
@@ -284,7 +293,7 @@ export default function CareerDevelopmentDashboard() {
               <Input
                 id="deadline"
                 type="date"
-                value={newTarget.deadline || ""}
+                value={newTarget.deadline || ''}
                 onChange={(e) =>
                   setNewTarget({ ...newTarget, deadline: e.target.value })
                 }
@@ -295,7 +304,7 @@ export default function CareerDevelopmentDashboard() {
               <Input
                 id="targetRole"
                 placeholder="e.g. Team Lead"
-                value={newTarget.targetRole || ""}
+                value={newTarget.targetRole || ''}
                 onChange={(e) =>
                   setNewTarget({ ...newTarget, targetRole: e.target.value })
                 }
@@ -303,7 +312,10 @@ export default function CareerDevelopmentDashboard() {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpenTargetDialog(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setOpenTargetDialog(false)}
+            >
               Cancel
             </Button>
             <Button onClick={addTarget}>Save Target</Button>
@@ -319,12 +331,12 @@ export default function CareerDevelopmentDashboard() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {selectedCourse?.title || "Course Details"}
+              {selectedCourse?.title || 'Course Details'}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4 space-y-2">
             <p className="text-sm text-gray-600">
-              {selectedCourse?.description || "No description available."}
+              {selectedCourse?.description || 'No description available.'}
             </p>
             <p className="text-sm">
               <strong>Duration:</strong> {selectedCourse?.duration}
@@ -333,7 +345,7 @@ export default function CareerDevelopmentDashboard() {
               <strong>Provider:</strong> {selectedCourse?.provider}
             </p>
             <p className="text-sm">
-              <strong>Recommended Score:</strong>{" "}
+              <strong>Recommended Score:</strong>{' '}
               {selectedCourse?.recommendedScore}/100
             </p>
           </div>

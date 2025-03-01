@@ -249,7 +249,10 @@ export default function JobTrackerPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setOpenAddDialog(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setOpenAddDialog(false)}
+                >
                   Cancel
                 </Button>
                 <Button onClick={addJob}>Add</Button>
@@ -339,9 +342,7 @@ export default function JobTrackerPage() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Job</DialogTitle>
-            <DialogDescription>
-              Update the job details below.
-            </DialogDescription>
+            <DialogDescription>Update the job details below.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-1">

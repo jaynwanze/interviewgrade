@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { createCandidateCheckoutSessionAction } from '@/data/user/user';
+import { createEmployeeSessionAction } from '@/data/user/employee';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { Product } from '@/types';
 import { getStripe } from '@/utils/stripe-client';
@@ -10,7 +10,7 @@ import { ShoppingCartIcon } from '@heroicons/react/solid';
 export function CreateTokenPurchaseButton({ product }: { product: Product }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCandidateCheckoutSessionAction({
+      return await createEmployeeSessionAction({
         product: product,
         isTrial: false,
         isTokenBundlePurchase: true,

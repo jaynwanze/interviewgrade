@@ -282,7 +282,6 @@ export default function InterviewFlow({
           await markTutorialAsDoneAction().then(() => {
             router.replace('/candidate');
           });
-
         }
       }
     } catch (error) {
@@ -319,7 +318,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-        100,
+          100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');
@@ -456,7 +455,7 @@ export default function InterviewFlow({
                         {Math.round(
                           ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
                             maxScorePerQuestion) *
-                          100,
+                            100,
                         )}
                         /100%{' '}
                         {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/

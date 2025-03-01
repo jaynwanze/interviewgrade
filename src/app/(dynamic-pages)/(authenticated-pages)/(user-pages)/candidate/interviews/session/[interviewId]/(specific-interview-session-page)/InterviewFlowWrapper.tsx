@@ -11,14 +11,20 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import type { Interview, InterviewQuestion } from '@/types';
 
 // This wrapper decides which flow to show based on interview mode
-export default function InterviewFlowWrapper({ interviewId }: { interviewId: string }) {
+export default function InterviewFlowWrapper({
+  interviewId,
+}: {
+  interviewId: string;
+}) {
   const searchParams = useSearchParams();
   const tutorialParam = searchParams.get('tutorial'); // "1" if it's a tutorial
 
   const [interview, setInterview] = useState<Interview | null>(null);
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [completionMessage, setCompletionMessage] = useState<string | null>(null);
+  const [completionMessage, setCompletionMessage] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchData();
@@ -37,7 +43,7 @@ export default function InterviewFlowWrapper({ interviewId }: { interviewId: str
       // If the interview is already completed
       if (fetchedInterview.status === 'completed') {
         setCompletionMessage(
-          'This interview has already been completed. Please go back to view your interview history.'
+          'This interview has already been completed. Please go back to view your interview history.',
         );
         setInterview(null);
         setIsLoading(false);
@@ -88,11 +94,6 @@ export default function InterviewFlowWrapper({ interviewId }: { interviewId: str
       />
     );
   } else {
-    return (
-      <MockInterviewFlow
-        interview={interview}
-        questions={questions}
-      />
-    );
+    return <MockInterviewFlow interview={interview} questions={questions} />;
   }
 }

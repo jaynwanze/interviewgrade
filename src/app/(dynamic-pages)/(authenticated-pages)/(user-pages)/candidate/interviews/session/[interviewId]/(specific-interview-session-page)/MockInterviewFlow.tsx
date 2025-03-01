@@ -168,7 +168,7 @@ export function MockInterviewFlow({
                 isCameraOn={true}
                 // In live mode, maybe automatically proceed after recording
                 onRecordEnd={() => {
-                  questions[currentQuestionIndex + 1]
+                  questions[currentQuestionIndex + 1];
                 }}
                 // Not needed for live mode
                 isFetchingSpecificFeedback={() => null}

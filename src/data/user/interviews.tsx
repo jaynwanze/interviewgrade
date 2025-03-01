@@ -668,7 +668,6 @@ export const getInterviewAnalytics = async (
   }
 };
 
-
 export const getCandidateRecentAttempts = async (
   candidateId: string,
   currentTemplateId: string,
@@ -678,29 +677,29 @@ export const getCandidateRecentAttempts = async (
   const supabase = createSupabaseUserServerComponentClient();
 
   if (!candidateId) {
-    console.warn("Candidate ID not provided.");
+    console.warn('Candidate ID not provided.');
     return null;
   }
   if (!currentTemplateId) {
-    console.warn("Template ID not provided.");
+    console.warn('Template ID not provided.');
     return null;
   }
 
   // Determine the template column based on interviewMode.
   const templateColumn =
-    interviewMode === "Practice Mode" ? "template_id" : "interview_template_id";
+    interviewMode === 'Practice Mode' ? 'template_id' : 'interview_template_id';
 
   // Fetch completed interviews for the candidate with the given template ID.
   const { data: interviews, error: interviewError } = await supabase
-    .from("interviews")
-    .select("*")
-    .eq("candidate_id", candidateId)
+    .from('interviews')
+    .select('*')
+    .eq('candidate_id', candidateId)
     .eq(templateColumn, currentTemplateId)
-    .eq("status", "completed")
-    .order("created_at", { ascending: false });
+    .eq('status', 'completed')
+    .order('created_at', { ascending: false });
 
   if (interviewError) {
-    console.warn("Error fetching interviews:", interviewError.message);
+    console.warn('Error fetching interviews:', interviewError.message);
     return null;
   }
   if (!interviews || interviews.length === 0) {
@@ -712,14 +711,14 @@ export const getCandidateRecentAttempts = async (
 
   // Fetch corresponding evaluations.
   const { data: evaluations, error: evalError } = await supabase
-    .from("interview_evaluations")
-    .select("*")
-    .in("interview_id", interviewIds)
-    .order("created_at", { ascending: false })
+    .from('interview_evaluations')
+    .select('*')
+    .in('interview_id', interviewIds)
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (evalError) {
-    console.warn("Error fetching evaluations:", evalError.message);
+    console.warn('Error fetching evaluations:', evalError.message);
     return null;
   }
   if (!evaluations || evaluations.length === 0) {
@@ -733,11 +732,11 @@ export const getCandidateRecentAttempts = async (
     const skillFocus =
       evalItem.evaluation_scores && evalItem.evaluation_scores.length > 0
         ? evalItem.evaluation_scores[0].name
-        : evalItem.strengths || "General Performance";
+        : evalItem.strengths || 'General Performance';
 
     return {
       id: evalItem.id,
-      type: interviewMode === "Practice Mode" ? "practice" : "interview",
+      type: interviewMode === 'Practice Mode' ? 'practice' : 'interview',
       date: evalItem.created_at,
       skillFocus,
       score: evalItem.overall_grade,
@@ -746,7 +745,6 @@ export const getCandidateRecentAttempts = async (
 
   return recentAttempts;
 };
-
 
 export const getInterviewHistory = async (
   candidateId: string,

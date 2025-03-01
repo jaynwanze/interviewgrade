@@ -1,39 +1,39 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import Lottie from "lottie-react";
+import { useEffect, useRef, useState } from 'react';
+import Lottie from 'lottie-react';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { T } from "@/components/ui/Typography";
-import { InterviewQuestion } from "@/types";
-import talkingInterviewer from "public/assets/animations/AnimationSpeakingRings.json";
-import { generateTTS } from "@/utils/openai/textToSpeech";
-import { set } from "nprogress";
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { T } from '@/components/ui/Typography';
+import { InterviewQuestion } from '@/types';
+import talkingInterviewer from 'public/assets/animations/AnimationSpeakingRings.json';
+import { generateTTS } from '@/utils/openai/textToSpeech';
+import { set } from 'nprogress';
 
 const colors = [
-  "bg-blue-100",
-  "bg-red-100",
-  "bg-green-100",
-  "bg-yellow-100",
-  "bg-purple-100",
-  "bg-pink-100",
-  "bg-indigo-100",
+  'bg-blue-100',
+  'bg-red-100',
+  'bg-green-100',
+  'bg-yellow-100',
+  'bg-purple-100',
+  'bg-pink-100',
+  'bg-indigo-100',
 ];
 
 const darkColors = [
-  "bg-blue-700",
-  "bg-red-700",
-  "bg-green-700",
-  "bg-yellow-700",
-  "bg-purple-700",
-  "bg-pink-700",
-  "bg-indigo-700",
+  'bg-blue-700',
+  'bg-red-700',
+  'bg-green-700',
+  'bg-yellow-700',
+  'bg-purple-700',
+  'bg-pink-700',
+  'bg-indigo-700',
 ];
 
 const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
@@ -53,17 +53,16 @@ export const AIQuestionSpeaker = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [randomColor, setRandomColor] = useState<string>(getRandomColor());
-  const [randomDarkColor, setRandomDarkColor] = useState<string>(
-    getRandomDarkColor()
-  );
+  const [randomDarkColor, setRandomDarkColor] =
+    useState<string>(getRandomDarkColor());
   const prevQuestionIndexRef = useRef<number | null>(null);
   useEffect(() => {
     setRandomColor(getRandomColor());
     setRandomDarkColor(getRandomDarkColor());
   }, [question]);
 
-   // Control Lottie animation based solely on isSpeaking.
-   useEffect(() => {
+  // Control Lottie animation based solely on isSpeaking.
+  useEffect(() => {
     if (lottieRef.current) {
       if (isSpeaking) {
         lottieRef.current.setSpeed(1);
@@ -73,7 +72,6 @@ export const AIQuestionSpeaker = ({
       }
     }
   }, [isSpeaking]);
-
 
   useEffect(() => {
     // Only speak when the current question index is different from the previous one.
@@ -85,10 +83,10 @@ export const AIQuestionSpeaker = ({
     const introText =
       "Welcome to the interview session. I will ask you a series of questions. Please answer them to the best of your ability. Let's begin.";
     const questionSpeechText =
-      "Question " + (currentIndex + 1) + ": " + question.text;
+      'Question ' + (currentIndex + 1) + ': ' + question.text;
     const speechText =
       currentIndex === 0
-        ? introText + " " + questionSpeechText
+        ? introText + ' ' + questionSpeechText
         : questionSpeechText;
 
     const speak = async () => {
@@ -98,21 +96,21 @@ export const AIQuestionSpeaker = ({
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
-        const audioUrl = await generateTTS(speechText, "tts-1", "alloy");
+        const audioUrl = await generateTTS(speechText, 'tts-1', 'alloy');
         const audio = new Audio(audioUrl);
         audioRef.current = audio;
         audio.onended = () => {
           setIsSpeaking(false);
-          console.log("Speech has finished.");
+          console.log('Speech has finished.');
         };
         audio.onerror = (error) => {
-          console.error("Audio playback error:", error);
+          console.error('Audio playback error:', error);
           setIsSpeaking(false);
         };
         audio.play();
         setIsSpeaking(true);
       } catch (error) {
-        console.error("TTS error:", error);
+        console.error('TTS error:', error);
         setIsSpeaking(false);
       }
     };

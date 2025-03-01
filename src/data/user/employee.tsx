@@ -169,7 +169,7 @@ export const getActiveProductsByType = async (
   return data || [];
 };
 
-export async function createCandidateCheckoutSessionAction({
+export async function createEmployeeSessionAction({
   product,
   isTrial = false,
   isTokenBundlePurchase = false,
@@ -357,7 +357,7 @@ export const saveEmployerPreferences = async (
       .eq('id', user.id)
       .select()
       .single();
-  
+
     if (error) {
       return {
         status: 'error',

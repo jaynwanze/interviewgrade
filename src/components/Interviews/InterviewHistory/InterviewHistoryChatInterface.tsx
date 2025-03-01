@@ -21,13 +21,13 @@ export const ChatInterface = ({
   // Generic sample prompts, randomized once on mount.
   const samplePrompts = useMemo(() => {
     const prompts = [
-      "How can I improve my interview performance?",
-      "What are common interview mistakes?",
-      "What tips do you have for handling tough questions?",
-      "How can I better showcase my skills?",
-      "What are some common interview questions for this topic?",
-      "How can I prepare better?",
-      "What should I do to stand out?",
+      'How can I improve my interview performance?',
+      'What are common interview mistakes?',
+      'What tips do you have for handling tough questions?',
+      'How can I better showcase my skills?',
+      'What are some common interview questions for this topic?',
+      'How can I prepare better?',
+      'What should I do to stand out?',
     ];
     // Randomize the array order.
     return prompts.sort(() => Math.random() - 0.5).slice(0, 3);
@@ -97,14 +97,16 @@ export const ChatInterface = ({
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+            className={`flex ${
+              msg.sender === 'user' ? 'justify-end' : 'justify-start'
+            }`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${msg.sender === 'user'
+              className={`max-w-[80%] p-3 rounded-lg ${
+                msg.sender === 'user'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                }`}
+              }`}
             >
               {msg.text}
             </div>
@@ -123,7 +125,7 @@ export const ChatInterface = ({
         )}
         <div ref={messagesEndRef} />
       </div>
-    
+
       {/* Horizontal scrollable sample prompts */}
       <div className="px-4 py-2 border-t border-b border-gray-200 dark:border-gray-700 overflow-x-auto whitespace-nowrap">
         {samplePrompts.map((prompt, index) => (

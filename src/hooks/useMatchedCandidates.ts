@@ -1,7 +1,7 @@
 // hooks/useMatchedCandidates.ts
 
-import { useEffect, useState } from "react";
-import type { CandidateRow } from "@/types";
+import { useEffect, useState } from 'react';
+import type { CandidateRow } from '@/types';
 
 // Example shape of "employerPrefs"
 type EmployerPrefs = {
@@ -13,18 +13,18 @@ type EmployerPrefs = {
 export function useMatchedCandidates(
   candidates: CandidateRow[],
   prefs: EmployerPrefs,
-  mode: "interview" | "practice"
+  mode: 'interview' | 'practice',
 ) {
   const [matched, setMatched] = useState<CandidateRow[]>([]);
   const [topThree, setTopThree] = useState<CandidateRow[]>([]);
   const [topProspect, setTopProspect] = useState<CandidateRow | null>(null);
-  const [skillGapMessage, setSkillGapMessage] = useState("");
+  const [skillGapMessage, setSkillGapMessage] = useState('');
   const [percentiles, setPercentiles] = useState<{ [id: string]: number }>({});
 
   // Helper to compute average interview/practice skill
   function getAvg(cand: CandidateRow) {
     const stats =
-      mode === "interview"
+      mode === 'interview'
         ? cand.interview_skill_stats
         : cand.practice_skill_stats;
     if (!stats || stats.length === 0) return 0;
@@ -35,7 +35,7 @@ export function useMatchedCandidates(
   // Check if candidate has the desired skill in the correct stats array
   function hasDesiredSkill(cand: CandidateRow, skill: string) {
     const stats =
-      mode === "interview"
+      mode === 'interview'
         ? cand.interview_skill_stats
         : cand.practice_skill_stats;
     return stats.some((s) => s.skill === skill);
@@ -43,7 +43,7 @@ export function useMatchedCandidates(
 
   // Check if candidate’s location matches
   function locationMatches(cand: CandidateRow, location: string) {
-    if (location === "Remote") return true;
+    if (location === 'Remote') return true;
     return cand.country === location;
   }
 
@@ -62,10 +62,10 @@ export function useMatchedCandidates(
         `No candidates found for ${mode} skill: ${prefs.skill} in ${
           prefs.location
         }.
-         You may broaden your search or consider remote options.`
+         You may broaden your search or consider remote options.`,
       );
     } else {
-      setSkillGapMessage("");
+      setSkillGapMessage('');
     }
 
     // 3) Sort by highest average skill
@@ -79,7 +79,9 @@ export function useMatchedCandidates(
 
     // 5) optional: compute percentiles
     if (sorted.length > 0) {
-      const scoresOnly = sorted.map((cand) => getAvg(cand)).sort((a, b) => a - b);
+      const scoresOnly = sorted
+        .map((cand) => getAvg(cand))
+        .sort((a, b) => a - b);
       const pMap: { [id: string]: number } = {};
       sorted.forEach((cand) => {
         const candidateAvg = getAvg(cand);

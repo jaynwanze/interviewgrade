@@ -152,7 +152,7 @@ export const InterviewHistoryDetails = ({
   const renderCoach = (evaluation: InterviewEvaluation) => {
     return (
       <div className="w-full max-w-4xl mx-auto">
-        <ChatInterface interview ={interview} evaluation={evaluation} />
+        <ChatInterface interview={interview} evaluation={evaluation} />
       </div>
     );
   };
@@ -196,28 +196,29 @@ export const InterviewHistoryDetails = ({
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Score:</span>
                   <Badge
-                    className={`text-white ${qa.mark >=
-                        80 /
+                    className={`text-white ${
+                      qa.mark >=
+                      80 /
                         Math.round(
                           100 / evaluation.question_answer_feedback.length,
                         )
                         ? 'bg-green-600'
                         : qa.mark >=
-                          60 /
-                          Math.round(
-                            100 /
-                            evaluation.question_answer_feedback.length,
-                          )
+                            60 /
+                              Math.round(
+                                100 /
+                                  evaluation.question_answer_feedback.length,
+                              )
                           ? 'bg-yellow-500'
                           : qa.mark >=
-                            40 /
-                            Math.round(
-                              100 /
-                              evaluation.question_answer_feedback.length,
-                            )
+                              40 /
+                                Math.round(
+                                  100 /
+                                    evaluation.question_answer_feedback.length,
+                                )
                             ? 'bg-orange-500'
                             : 'bg-red-500'
-                      }`}
+                    }`}
                   >
                     {qa.mark}/
                     {Math.floor(

@@ -187,10 +187,8 @@ export function PracticeInterviewFlow({
     );
 
     // if (interviewAnalytics.current avg > candidateProfile.practice_skill_avg) {
-    //   candidateProfile._prev_avg = candidateProfile.practice_skill_avg 
+    //   candidateProfile._prev_avg = candidateProfile.practice_skill_avg
     // update candidateProfile.practice_skill_avg = interviewAnalytics.current avg
-  
-
 
     try {
       const feedback: FeedbackData | null = await getInterviewFeedback(

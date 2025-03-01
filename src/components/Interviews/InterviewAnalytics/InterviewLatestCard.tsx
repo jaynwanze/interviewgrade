@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  Card,
-  CardContent,
-  CardDescription
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Interview } from '@/types';
 import { InterviewInfo } from './InterviewInfo';

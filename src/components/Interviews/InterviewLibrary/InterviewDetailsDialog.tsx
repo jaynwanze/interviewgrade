@@ -37,7 +37,6 @@ export default function InterviewDetailsDialog({
       ? 'You will receive live feedback after each question and then an'
       : 'You will receive an';
 
-
   // The function that attempts to start the interview
   const { mutate: handleClick } = useToastMutation(
     async () => {

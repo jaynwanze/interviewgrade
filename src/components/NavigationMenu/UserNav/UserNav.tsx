@@ -8,7 +8,7 @@ import { UserNavDropDownMenu } from './UserNavDropDownMenu';
 
 export async function UserNav() {
   const user = await serverGetLoggedInUser();
-  const { email} = user;
+  const { email } = user;
   if (!email) {
     // unreachable
     throw new Error('User email not found');

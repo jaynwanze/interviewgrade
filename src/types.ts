@@ -66,7 +66,7 @@ export type EmployerPreferences = {
 
 export type RecentAttempt = {
   id: string;
-  type: "practice" | "interview";
+  type: 'practice' | 'interview';
   date: string;
   skillFocus: string;
   score: number;

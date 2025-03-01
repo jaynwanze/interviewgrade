@@ -43,29 +43,29 @@ export default {
       },
     ],
   },
-  async headers() {
-    return [
-      {
-        // Here we match any route that starts with `/onboarding`
-        // e.g. /onboarding, /onboarding/foo, etc.
-        source: '/onboarding/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://www.interviewgrade.io', // or '*'
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With',
-          },
-        ],
-      },
-    ];
-  },
+  // async headers() {
+  //   return [
+  //     {
+  //       // Here we match any route that starts with `/onboarding`
+  //       // e.g. /onboarding, /onboarding/foo, etc.
+  //       source: '/onboarding/:path*',
+  //       headers: [
+  //         {
+  //           key: 'Access-Control-Allow-Origin',
+  //           value: 'https://www.interviewgrade.io', // or '*'
+  //         },
+  //         {
+  //           key: 'Access-Control-Allow-Methods',
+  //           value: 'GET, POST, OPTIONS',
+  //         },
+  //         {
+  //           key: 'Access-Control-Allow-Headers',
+  //           value: 'Content-Type, Authorization, X-Requested-With',
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
   
   webpack: (config) => {
     if (typeof nextRuntime === 'undefined') {

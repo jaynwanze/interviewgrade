@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const action = (
   schema: z.ZodSchema,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handler: (data: any) => Promise<any>,
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

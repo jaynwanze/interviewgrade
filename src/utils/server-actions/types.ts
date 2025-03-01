@@ -4,6 +4,7 @@ export type SuccessServerActionState<T> = {
   status: 'success';
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type ErrorServerActionState<T> = {
   message: string;
   status: 'error';

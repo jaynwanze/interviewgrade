@@ -207,8 +207,9 @@ export default function MessagesPage() {
             <button
               key={conv.conversationId}
               onClick={() => setActiveConv(conv.conversationId)}
-              className={`w-full text-left px-2 py-2 hover:bg-secondary rounded ${activeConv === conv.conversationId ? 'bg-secondary' : ''
-                }`}
+              className={`w-full text-left px-2 py-2 hover:bg-secondary rounded ${
+                activeConv === conv.conversationId ? 'bg-secondary' : ''
+              }`}
             >
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
@@ -285,14 +286,16 @@ export default function MessagesPage() {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex flex-col ${isYou ? 'items-end' : 'items-start'
-                      }`}
+                    className={`flex flex-col ${
+                      isYou ? 'items-end' : 'items-start'
+                    }`}
                   >
                     <div
-                      className={`px-3 py-2 rounded-md max-w-[70%] text-sm ${isYou
+                      className={`px-3 py-2 rounded-md max-w-[70%] text-sm ${
+                        isYou
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-secondary text-secondary-foreground'
-                        }`}
+                      }`}
                     >
                       {msg.body}
                     </div>

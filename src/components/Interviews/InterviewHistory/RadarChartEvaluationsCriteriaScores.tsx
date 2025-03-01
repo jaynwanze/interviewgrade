@@ -32,7 +32,7 @@ interface EvaluationRadarChartProps {
 }
 
 // Custom tick renderer that splits labels into multiple lines
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomizedTick = (props: any) => {
   const { payload, x, y, textAnchor, stroke } = props;
   const words = payload.value.split(' ');

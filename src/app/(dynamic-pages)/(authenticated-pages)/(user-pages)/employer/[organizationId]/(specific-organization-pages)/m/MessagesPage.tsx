@@ -1,19 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { SearchIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // Mock “conversations” data
 const mockConversations = [
@@ -90,6 +89,7 @@ export default function MessagesPage() {
   const [activeConv, setActiveConv] = useState<string | null>(null);
 
   // This is the conversation the user currently sees on the right side
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [activeConversation, setActiveConversation] = useState<any>(null);
 
   // The message text in the composer
@@ -207,9 +207,8 @@ export default function MessagesPage() {
             <button
               key={conv.conversationId}
               onClick={() => setActiveConv(conv.conversationId)}
-              className={`w-full text-left px-2 py-2 hover:bg-secondary rounded ${
-                activeConv === conv.conversationId ? 'bg-secondary' : ''
-              }`}
+              className={`w-full text-left px-2 py-2 hover:bg-secondary rounded ${activeConv === conv.conversationId ? 'bg-secondary' : ''
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
@@ -278,6 +277,7 @@ export default function MessagesPage() {
               <CardTitle>{activeConversation.candidateName}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 overflow-auto space-y-2 border-t pt-2">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
               {activeConversation.messages.map((msg: any) => {
                 const isYou = msg.sender_id === 'emp123';
                 const timeStr = new Date(msg.created_at).toLocaleTimeString();
@@ -285,16 +285,14 @@ export default function MessagesPage() {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex flex-col ${
-                      isYou ? 'items-end' : 'items-start'
-                    }`}
+                    className={`flex flex-col ${isYou ? 'items-end' : 'items-start'
+                      }`}
                   >
                     <div
-                      className={`px-3 py-2 rounded-md max-w-[70%] text-sm ${
-                        isYou
+                      className={`px-3 py-2 rounded-md max-w-[70%] text-sm ${isYou
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-secondary text-secondary-foreground'
-                      }`}
+                        }`}
                     >
                       {msg.body}
                     </div>

@@ -98,7 +98,11 @@ const mockCandidate: CandidateDetailsView = {
     },
   ],
 };
-export default function CandidateDetailsPage() {
+export default function CandidateDetailsPage({
+  candidateId,
+}: {
+  candidateId: string;
+}) {
   const [candidate, setCandidate] =
     useState<CandidateDetailsView>(mockCandidate);
   const [notes, setNotes] = useState('');

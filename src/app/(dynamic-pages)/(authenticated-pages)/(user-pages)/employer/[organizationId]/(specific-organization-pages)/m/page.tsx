@@ -10,5 +10,5 @@ const paramsSchema = z.object({
 export default function MessagesRoutePage({ params }: { params: unknown }) {
   const parsedParams = paramsSchema.parse(params);
   const { conversationId } = parsedParams;
-  return <MessagesPage conversationId={'1'} />;
+  return <MessagesPage conversationId={conversationId} />;
 }

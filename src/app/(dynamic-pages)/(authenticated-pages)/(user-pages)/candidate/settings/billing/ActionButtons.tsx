@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 // import {
 //   createCheckoutSessionAction
 // } from '@/data/user/organizations';
-import { createCustomerCandidatePortalLinkAction } from '@/data/user/user';
+import { createCustomerEmployeePortalLinkAction } from '@/data/user/employee';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { getStripe } from '@/utils/stripe-client';
+import { url } from 'inspector';
 import { ExternalLink } from 'lucide-react';
 
 export function CreateSubscriptionButton({
@@ -90,14 +91,14 @@ export function StartFreeTrialButton({
 export function ManageSubscriptionButton() {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCustomerCandidatePortalLinkAction('TO:DO');
+      return await createCustomerEmployeePortalLinkAction('TO:DO');
     },
     {
       loadingMessage: 'Please wait...',
       errorMessage: 'Failed to get customer portal link',
       successMessage: 'Redirecting...',
-      onSuccess: (url) => {
-        window.location.assign(url);
+      onSuccess: (portalLink) => {
+        window.location.assign(portalLink);
       },
     },
   );

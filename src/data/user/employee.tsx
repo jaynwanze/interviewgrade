@@ -135,7 +135,7 @@ export const getCurrentEmployeeTokens =
 //   }
 // };
 
-export async function createCustomerCandidatePortalLinkAction(
+export async function createCustomerEmployeePortalLinkAction(
   candidateId: string,
 ) {
   const employee = await getEmployeeUserProfile(candidateId);

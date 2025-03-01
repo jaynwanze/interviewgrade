@@ -11,5 +11,5 @@ const paramsSchema = z.object({
 export default function SpecificCandidatePage({ params }: { params: unknown }) {
   const parsedParams = paramsSchema.parse(params);
   const { candidateId } = parsedParams;
-  return <CandidateDetailsPage params={{ candidateId }} />;
+  return <CandidateDetailsPage candidateId={candidateId} />;
 }

@@ -40,7 +40,7 @@ export function GraphContainer({
         </div>
         {badgeValue && (
           <BadgeDelta
-            deltaType={getDeltaType(badgeValue)}
+            datatype={getDeltaType(badgeValue)}
             size="xs"
             className="h-fit"
           >

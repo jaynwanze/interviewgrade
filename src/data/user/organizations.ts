@@ -21,7 +21,7 @@ export const createOrganization = async (
   const { error } = await supabaseClient.from('organizations').insert({
     title: name,
     id: organizationId,
-    created_by: user.id,
+    made_by: user.id,
   });
 
   if (error) {

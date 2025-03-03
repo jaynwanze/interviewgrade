@@ -91,7 +91,7 @@ $$;
 
 
 CREATE FUNCTION "public"."handle_create_organization_for_auth_user"() RETURNS "trigger" LANGUAGE "plpgsql" SECURITY DEFINER AS $$BEGIN
-INSERT INTO public.organizations (created_by)
+INSERT INTO public.organizations (made_by)
 VALUES (NEW.id);
 RETURN NEW;
 END;
@@ -100,7 +100,7 @@ $$;
 
 CREATE FUNCTION "public"."handle_create_owner_on_organization_creation"() RETURNS "trigger" LANGUAGE "plpgsql" SECURITY DEFINER AS $$BEGIN
 INSERT INTO public.organization_members(organization_id, member_id, member_role)
-VALUES(NEW.id, NEW.created_by, 'owner');
+VALUES(NEW.id, NEW.made_by, 'owner');
 RETURN NEW;
 END $$;
 

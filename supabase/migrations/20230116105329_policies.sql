@@ -620,7 +620,7 @@ INSERT TO "authenticated";
 CREATE POLICY "All organization members can read organizations" ON "public"."organizations" FOR
 SELECT TO "authenticated" USING (
     (
-      ("auth"."uid"() = "created_by")
+      ("auth"."uid"() = "made_by")
       OR (
         "auth"."uid"() IN (
           SELECT "public"."get_organization_member_ids"("organizations"."id") AS "get_organization_member_ids"

@@ -26,7 +26,7 @@ SELECT TO authenticated USING (TRUE);
 CREATE policy "All team members can read organizations" ON "public"."organizations" AS permissive FOR
 SELECT TO authenticated USING (
     (
-      (auth.uid() = created_by)
+      (auth.uid() = made_by)
       OR (
         auth.uid() IN (
           SELECT get_organization_member_ids(organizations.id) AS get_organization_member_ids

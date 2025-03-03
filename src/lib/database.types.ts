@@ -190,23 +190,23 @@ export type Database = {
           id: string
           title: string
           created_at: string
-          created_by: string
+          made_by: string
         }
         Insert: {
           title: string
           created_at?: string
-          created_by: string
+          made_by: string
         }
         Update: {
           id?: string
           title?: string
           created_at?: string
-          created_by?: string
+          made_by?: string
         }
         Relationships: [
           {
-            foreignKeyName: "organizations_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "organizations_made_by_fkey"
+            columns: ["made_by"]
             isOneToOne: true
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
@@ -1006,12 +1006,12 @@ export type Database = {
         }
         Relationships: [
           {
-          foreignKeyName: "job_application_tracker_candidate_id_fkey"
-          columns: ["candidate_id"]
-          isOneToOne: true
-          referencedRelation: "candidates"
-          referencedColumns: ["id"]
-        },
+            foreignKeyName: "job_application_tracker_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
         ]
       },
     }

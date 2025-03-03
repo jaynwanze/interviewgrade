@@ -18,9 +18,9 @@ export default function HomePage() {
     if (session?.user) {
       setLoadingState('logged-in');
       if (session.user.user_metadata.userType === 'candidate') {
-        router.push('/dashboard/candidate');
+        router.push('/candidate');
       } else if (session.user.user_metadata.userType === 'employer') {
-        router.push('/dashboard/employer');
+        router.push('/employer');
       }
     } else {
       setLoadingState('logged-out');

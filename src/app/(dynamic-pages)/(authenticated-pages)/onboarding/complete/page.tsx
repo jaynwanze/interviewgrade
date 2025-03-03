@@ -7,8 +7,8 @@ export default async function OnboardingCompletePage() {
   const userType = await getUserType(user.id);
 
   if (userType === 'candidate') {
-    redirect('/dashboard/candidate');
+    redirect('/candidate');
   } else {
-    redirect('/dashboard/employer');
+    redirect('/employer');
   }
 }

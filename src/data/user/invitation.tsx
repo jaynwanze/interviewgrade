@@ -254,7 +254,7 @@ export async function declineInvitationAction(invitationId: string) {
     throw invitationResponse.error;
   }
   revalidatePath('/');
-  redirect('/dashboard/employer');
+  redirect('/employer');
 }
 
 export async function getPendingInvitationsOfUser() {

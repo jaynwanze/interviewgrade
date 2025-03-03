@@ -266,9 +266,9 @@ export default function EmployerDashboard() {
           weekDelta={weekDelta}
           employerPrefs={employerPrefs}
         />
-        <div className="space-y-6">
+        <div className="flex justify-start text-center  items-center gap-6 space-y-6">
           {/* Industry MultiSelect */}
-          <div className="mb-4 mt-8 text-centertext-sm text-slate-500">
+          <div className="mb-4 mt-8  text-sm text-slate-500 w-full">
             <label className="text-sm text-muted-foreground mb-1">
               Industry
             </label>
@@ -286,7 +286,7 @@ export default function EmployerDashboard() {
           </div>
 
           {/* Skill MultiSelect */}
-          <div className="mb-4 mt-8 text text-sm text-slate-500">
+          <div className="mb-4 mt-8 text-sm text-slate-500 w-full">
             <label className="text-sm text-muted-foreground mb-1">Skill</label>
             <MultiSelectBox
               value={skillFilters}
@@ -300,7 +300,7 @@ export default function EmployerDashboard() {
               ))}
             </MultiSelectBox>
           </div>
-          <div className="mb-4 mt-8 text-center text-sm text-slate-500">
+          <div className="mb-4 mt-8 text-center text-sm text-slate-500 w-full ">
             <label className="text-sm text-muted-foreground mb-1">
               Location
             </label>

@@ -1,6 +1,9 @@
 'use server';
 
-import { insertInterviewEvaluation } from '@/data/user/interviews';
+import {
+  insertInterviewEvaluation,
+  updateInterviewAnalyticsCurrentAvgPractice,
+} from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
   FeedbackData,
@@ -324,10 +327,14 @@ export const getInterviewFeedback = async (
     return null;
   }
   const feedbackData = parseAIResponse(aiResponse);
-  const interviewEvaluation = await insertInterviewEvaluation(
-    interview.id,
-    feedbackData,
-  );
+  await insertInterviewEvaluation(interview.id, feedbackData);
+
+  if (interview.mode === 'practice') {
+    await updateInterviewAnalyticsCurrentAvgPractice(
+      interview.candidate_id,
+      interview.template_id,
+    );
+  }
   console.log('Feedback Data:', feedbackData);
 
   return feedbackData;

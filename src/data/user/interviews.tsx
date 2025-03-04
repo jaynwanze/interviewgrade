@@ -9,10 +9,11 @@ import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
   AvgEvaluationScores,
+  Candidate,
+  CandidateSkillsStats,
   EvaluationCriteriaType,
   FeedbackData,
   InterviewAnalytics,
-  InterviewComplete,
   InterviewEvaluationCriteriaType,
   InterviewModeType,
   InterviewQuestion,
@@ -744,6 +745,79 @@ export const getCandidateRecentAttempts = async (
   });
 
   return recentAttempts;
+};
+
+export const updateInterviewAnalyticsCurrentAvgPractice = async (
+  candidateId: string,
+  currentTemplateId: string,
+): Promise<boolean> => {
+  const templateColumn = 'template_id';
+  const { data: interviewIds, error: interviewIdsError } =
+    await createSupabaseUserServerComponentClient()
+      .from('interviews')
+      .select('id')
+      .eq('candidate_id', candidateId)
+      .eq('status', 'completed')
+      .eq(templateColumn, currentTemplateId)
+      .order('created_at', { ascending: false });
+
+  if (interviewIdsError) {
+    console.warn('Error fetching interview IDs:', interviewIdsError.message);
+    return false;
+  }
+
+  const interviewIdsArray = interviewIds.map((interview) => interview.id);
+
+  const { data: evaluations, error: evaluationsError } =
+    await createSupabaseUserServerComponentClient()
+      .from('interview_evaluations')
+      .select('*')
+      .in('interview_id', interviewIdsArray);
+
+  if (evaluationsError) {
+    console.warn('Error fetching evaluations:', evaluationsError.message);
+    return false;
+  }
+
+  const currentOverallGrade =
+    evaluations.reduce((acc, evalItem) => acc + evalItem.overall_grade, 0) /
+    evaluations.length;
+
+  const candidateProfile = (await getCandidateUserProfile(
+    candidateId,
+  )) as Candidate;
+  if (!candidateProfile) {
+    console.warn('Error fetching candidate profile:');
+    return false;
+  }
+
+  const new_skills_stats = candidateProfile.practice_skill_stats.map(
+    (skill: CandidateSkillsStats) => {
+      if (skill.template_id === currentTemplateId) {
+        return {
+          ...skill,
+          previous_avg: skill.avg_score,
+          current_avg: currentOverallGrade,
+        };
+      }
+      return skill;
+    },
+  );
+
+  const { data: candidate, error: candidateError } =
+    await createSupabaseUserServerComponentClient()
+      .from('candidates')
+      .update({
+        practice_skill_stats: new_skills_stats,
+      })
+      .eq('id', candidateId);
+
+  if (candidateError) {
+    console.warn('Error updating candidate:', candidateError.message);
+    return false;
+  }
+
+  return true;
 };
 
 export const getInterviewHistory = async (

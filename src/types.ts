@@ -95,8 +95,10 @@ export type CandidatePreferences = {
   skills: string;
 };
 
+export type Candidate = Table<'candidates'>;
+
 export type CandidateSkillsStats = {
-  id: string;
+  template_id: string;
   skill: string;
   avg_score: number;
   updated_at?: string;
@@ -316,7 +318,8 @@ export const mockCandidates: CandidateRow[] = [
     city: 'New York',
     country: 'United States',
     phone_number: '(555) 123-4567',
-    summary: 'Highly motivated and skilled software engineer with a passion for developing innovative solutions. Alice excels in problem-solving and has a keen eye for detail and her strong communication skills enable her to collaborate seamlessly with cross-functional teams, making her an invaluable asset to any organization. Alice is always eager to learn and adapt to new technologies, continuously improving her skill set to stay ahead in the ever-evolving tech industry.',
+    summary:
+      'Highly motivated and skilled software engineer with a passion for developing innovative solutions. Alice excels in problem-solving and has a keen eye for detail and her strong communication skills enable her to collaborate seamlessly with cross-functional teams, making her an invaluable asset to any organization. Alice is always eager to learn and adapt to new technologies, continuously improving her skill set to stay ahead in the ever-evolving tech industry.',
     role: 'Software Engineer',
     industry: 'Tech',
     practice_skill_stats: [
@@ -329,8 +332,7 @@ export const mockCandidates: CandidateRow[] = [
     ],
     created_at: '2024-04-29T10:00:00Z',
     full_name: 'Alice Anderson',
-    avatar_url:
-      '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
+    avatar_url: '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
     email: 'alice@example.com',
   },
   {
@@ -351,8 +353,7 @@ export const mockCandidates: CandidateRow[] = [
     ],
     created_at: '2024-04-20T09:30:00Z',
     full_name: 'Bob Brown',
-    avatar_url:
-      '/images/candidates/irene-strong-v2aKnjMbP_k-unsplash.ico',
+    avatar_url: '/images/candidates/irene-strong-v2aKnjMbP_k-unsplash.ico',
     email: 'bob@example.com',
   },
   {
@@ -375,8 +376,7 @@ export const mockCandidates: CandidateRow[] = [
     ],
     created_at: '2024-04-22T14:15:00Z',
     full_name: 'Charlie Davis',
-    avatar_url:
-      '/images/candidates/charles-deluvio-7lXJ7Vqch9Y-unsplash.ico',
+    avatar_url: '/images/candidates/charles-deluvio-7lXJ7Vqch9Y-unsplash.ico',
     email: 'charlie@example.com',
   },
   {
@@ -417,8 +417,7 @@ export const mockCandidates: CandidateRow[] = [
     ],
     created_at: '2024-04-27T07:00:00Z',
     full_name: 'Erin Green',
-    avatar_url:
-      '/images/candidates/microsoft-365-7mBictB_urk-unsplash.jpg',
+    avatar_url: '/images/candidates/microsoft-365-7mBictB_urk-unsplash.jpg',
     email: 'erin@example.com',
   },
 ];

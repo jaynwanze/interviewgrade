@@ -422,7 +422,7 @@ export default function CandidateDetailsPage({
                 ? candidate.interview_skill_stats
                 : candidate.practice_skill_stats
               ).map((stat) => (
-                <TableRow key={stat.id}>
+                <TableRow key={stat.template_id}>
                   <TableCell>{stat.skill}</TableCell>
                   <Badge
                     className={`px-4 py-2 m-2 text-md ${getBadgeColor(stat.avg_score)}`}

@@ -25,7 +25,7 @@ export const InterviewAverageDetails = ({
           <CardTitle className="mt-2">Current Average Grade</CardTitle>
           <div>
             <p className="text-4xl font-bold text-gray-900">
-              {analyticsData.avg_overall_grade.toFixed(0)}%
+              {analyticsData.avg_overall_grade.toFixed(1)}%
             </p>
             <Badge variant="outline" className="mt-2 text-sm">
               {analyticsData.best_evaluation_crieria

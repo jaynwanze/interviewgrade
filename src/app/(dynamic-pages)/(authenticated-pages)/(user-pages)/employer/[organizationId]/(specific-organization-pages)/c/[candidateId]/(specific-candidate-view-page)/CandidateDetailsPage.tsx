@@ -292,7 +292,7 @@ export default function CandidateDetailsPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center">
+              <div className="flex">
                 <Button onClick={handleEmailCandidate} variant="default">
                   <Mail className="mr-2 h-4 w-4" />
                   Email Candidate

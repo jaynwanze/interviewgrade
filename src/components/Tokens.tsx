@@ -92,7 +92,7 @@ export const Tokens: React.FC = () => {
         <Separator className="my-2" />
         <DropdownMenuItem
           onSelect={handleClick}
-          className="cursor-pointer flex items-center justify-center px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-all"
+          className="cursor-pointer flex items-center justify-center px-3 py-2 bg-primary dark:bg-secondary text-white rounded-lg hover:bg-primary/80 dark:hover:bg-secondary/80 transition-all"
         >
           <ShoppingCartIcon className="h-5 w-5 mr-2" />
           Buy More Tokens

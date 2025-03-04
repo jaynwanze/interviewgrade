@@ -1,6 +1,13 @@
 'use client';
 
-import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Rectangle,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 import {
   Card,
@@ -73,6 +80,7 @@ export function TopThreeCandidatesBarChart({
                   chartConfig[value as keyof typeof chartConfig]?.label || value
                 }
               />
+              <YAxis domain={[0, 100]} axisLine={false} />
 
               {/* Show tooltip on hover */}
               <ChartTooltip

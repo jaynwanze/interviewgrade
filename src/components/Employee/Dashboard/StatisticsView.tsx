@@ -30,9 +30,9 @@ export function StatisticsView({
 }) {
   return (
     <>
-      <div className="grid grid-cols-3 gap-4">
+      {/* <div className="grid grid-cols-3 gap-4"> */}
         {/* 1) Tokens */}
-        <Card>
+        {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Your Tokens</CardTitle>
             <CardDescription>
@@ -56,7 +56,7 @@ export function StatisticsView({
               </Button>
             </CardFooter>
           )}
-        </Card>
+        </Card> */}
 
         {/* 2) Incoming Pipeline
         <Card>
@@ -74,8 +74,8 @@ export function StatisticsView({
         </Card>
 
         {/* 3) Unlocked Candidates */}
-        <Card>
-          <CardHeader className="pb-2">
+        {/* <Card> */}
+          {/* <CardHeader className="pb-2">
             <CardTitle className="text-sm">Unlocked Candidates</CardTitle>
             <CardDescription>How many you’ve already unlocked</CardDescription>
           </CardHeader>
@@ -84,10 +84,10 @@ export function StatisticsView({
               {stats.unlockedCandidates}
             </span>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Trend Over Time */}
-        <Card>
+        {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Score Trend vs. Last Week</CardTitle>
             <CardDescription>
@@ -113,8 +113,8 @@ export function StatisticsView({
               <span>No change from last week</span>
             )}
           </CardContent>
-        </Card>
-      </div>
+        </Card> */}
+      {/* </div> */}
       {employerPrefs ? (
         <p className="text-sm text-gray-600">
           Showing top matches within industry{' '}

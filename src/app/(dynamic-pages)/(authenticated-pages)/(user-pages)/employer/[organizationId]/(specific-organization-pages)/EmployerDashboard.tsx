@@ -257,18 +257,16 @@ export default function EmployerDashboard() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold">Employer Dashboard</h1>
-
-        {/* Stats */}
         <StatisticsView
           stats={stats}
           weekDelta={weekDelta}
           employerPrefs={employerPrefs}
         />
-        <div className="flex justify-start text-center  items-center gap-6 space-y-6">
+        <div className="flex justify-start text-center items-center gap-6">
           {/* Industry MultiSelect */}
-          <div className="mb-4 mt-8  text-sm text-slate-500 w-full">
+          <div className="text-sm text-slate-500 w-full">
             <label className="text-sm text-muted-foreground mb-1">
               Industry
             </label>
@@ -284,9 +282,8 @@ export default function EmployerDashboard() {
               ))}
             </MultiSelectBox>
           </div>
-
           {/* Skill MultiSelect */}
-          <div className="mb-4 mt-8 text-sm text-slate-500 w-full">
+          <div className="text-sm text-slate-500 w-full">
             <label className="text-sm text-muted-foreground mb-1">Skill</label>
             <MultiSelectBox
               value={skillFilters}
@@ -300,7 +297,7 @@ export default function EmployerDashboard() {
               ))}
             </MultiSelectBox>
           </div>
-          <div className="mb-4 mt-8 text-center text-sm text-slate-500 w-full ">
+          <div className="text-center text-sm text-slate-500 w-full ">
             <label className="text-sm text-muted-foreground mb-1">
               Location
             </label>

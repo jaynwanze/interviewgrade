@@ -72,7 +72,7 @@ export function MatchedCandidatesView({
 
   return (
     <>
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -141,7 +141,7 @@ export function MatchedCandidatesView({
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </motion.div> */}
 
       {/* Skill Gap */}
       {skillGapMessage && (
@@ -161,7 +161,7 @@ export function MatchedCandidatesView({
           </Card>
         </motion.div>
       )}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+      <div className="grid lg:grid-cols-2 gap-6 mt-4">
         {/* Leaderboard (Top 3) */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -261,12 +261,15 @@ export function MatchedCandidatesView({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="shadow-md border rounded-xl">
+            <Card className="shadow-md border rounded-xl h-full ">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <FireIcon className="text-orange-500 h-6 w-6 mr-2" />
                 Top Prospect
               </CardTitle>{' '}
+              <CardDescription>
+                Top candidate based on your preferences
+              </CardDescription>
             </CardHeader>
             {!topProspect ? (
               <div className="p-4">
@@ -275,7 +278,7 @@ export function MatchedCandidatesView({
             ) : (
               <>
                 <CardContent>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-col justify-center">
                     <Avatar className="h-12 w-12">
                       <AvatarImage
                         src={topProspect.avatar_url}
@@ -333,7 +336,7 @@ export function MatchedCandidatesView({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="md:col-span-3 lg:col-span-1"
+          className="md:col-span-2 lg:col-span-2"
         >
           <TopThreeCandidatesBarChart topCandidates={topThreeBarData} />
         </motion.div>

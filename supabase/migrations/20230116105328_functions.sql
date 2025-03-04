@@ -28,10 +28,11 @@ DECLARE
 BEGIN
     -- Extract userType from raw metadata
     user_type_value := (NEW.raw_user_meta_data->>'userType')::public.user_types;
+    email := NEW.email;
 
     -- Insert into user_profiles
-    INSERT INTO public.user_profiles (id, user_type)
-    VALUES (NEW.id, user_type_value);
+    INSERT INTO public.user_profiles (id, user_type, email)
+    VALUES (NEW.id, user_type_value, email);
     
     -- Handle based on user_type
     IF user_type_value = 'candidate' THEN

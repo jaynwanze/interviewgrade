@@ -272,13 +272,14 @@ export default function CandidatesListPage({
                   <TableHead>Location</TableHead>
                   <TableHead>Industry</TableHead>
                   <TableHead>Top Skill</TableHead>
-                  <TableHead>Cost (Tokens)</TableHead>
+                  {/* <TableHead>Cost (Tokens)</TableHead> */}
                   <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCandidates.map((candidate) => {
-                  const cost = getUnlockCost(candidate);
+                  // const cost = getUnlockCost(candidate);
+                  const bestSkill = getBestSkillObject(candidate);
                   return (
                     <TableRow key={candidate.id}>
                       <TableCell>
@@ -304,42 +305,32 @@ export default function CandidatesListPage({
                         {candidate.city}, {candidate.country}
                       </TableCell>
                       <TableCell>{candidate.industry}</TableCell>
-                      <TableCell>
-                        <TableCell className="flex justify-center items-center">
-                          {(() => {
-                            const bestSkill = getBestSkillObject(candidate);
-                            if (!bestSkill) {
-                              return (
-                                <span className="text-sm text-muted-foreground"></span>
-                              );
-                            }
-
-                            return (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="gap-1">
-                                  <Star className="h-4 w-4 text-yellow-500" />
-                                  {bestSkill.skill}
-                                </Badge>
-                                {/* <span className="text-sm text-foreground">({bestSkill.avg_score})</span> */}
-                              </div>
-                            );
-                          })()}
-                        </TableCell>
+                      <TableCell className="justify-center ">
+                        {bestSkill ? (
+                          <>
+                            <Badge variant="outline" className="gap-1">
+                              <Star className="h-4 w-4 text-yellow-500" />
+                              {bestSkill.skill}
+                            </Badge>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
+                        )}
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <Badge variant="outline">
                           {cost} {cost > 1 ? 'tokens' : 'token'}
                         </Badge>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button
+                          {/* <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleUnlockCandidate(candidate)}
                           >
                             Unlock
-                          </Button>
+                          </Button> */}
                           <Button
                             variant="default"
                             size="sm"

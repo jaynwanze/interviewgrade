@@ -63,6 +63,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           full_name: string | null
+          email: string
           id: string
           user_type: Database["public"]["Enums"]["user_types"]
         }
@@ -70,6 +71,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
+          email: string
           id: string
           user_type?: Database["public"]["Enums"]["user_types"]
         }
@@ -77,6 +79,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
+          email?: string
           id?: string
           user_type?: Database["public"]["Enums"]["user_types"]
         }

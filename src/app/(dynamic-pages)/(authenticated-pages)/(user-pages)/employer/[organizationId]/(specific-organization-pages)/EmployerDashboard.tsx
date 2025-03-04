@@ -7,13 +7,13 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   mockCandidates,
   type CandidateRow,
-  type EmployerPreferences,
+  type EmployerCandidatePreferences,
 } from '@/types';
 import { MultiSelectBox, MultiSelectBoxItem } from '@tremor/react';
 import { useEffect, useState } from 'react';
 
 // Example list of employer preferences
-const employerOptions: EmployerPreferences[] = [
+const employerOptions: EmployerCandidatePreferences[] = [
   { location: 'United States', industry: 'Tech', skill: 'Problem Solving' },
   { location: 'Canada', industry: 'Finance', skill: 'Communication' },
   { location: 'United Kingdom', industry: 'Marketing', skill: 'Teamwork' },
@@ -69,7 +69,7 @@ export default function EmployerDashboard() {
   const [industryFilters, setIndustryFilters] = useState<string[]>([]);
   const [skillFilters, setSkillFilters] = useState<string[]>([]);
 
-  const [employerPrefs] = useState<EmployerPreferences>({
+  const [employerPrefs] = useState<EmployerCandidatePreferences>({
     location: 'United States',
     industry: 'Tech', // We'll use skillFilters for skill selection.
     skill: 'Problem Solving',

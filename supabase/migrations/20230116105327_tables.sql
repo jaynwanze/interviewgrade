@@ -53,6 +53,7 @@ CREATE TABLE "public"."user_profiles" (
   "id" "uuid" NOT NULL,
   "full_name" character varying,
   "avatar_url" character varying,
+  "email" character varying NOT NULL,
   "user_type" "public"."user_types" DEFAULT 'candidate'::user_types NOT NULL,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
 );

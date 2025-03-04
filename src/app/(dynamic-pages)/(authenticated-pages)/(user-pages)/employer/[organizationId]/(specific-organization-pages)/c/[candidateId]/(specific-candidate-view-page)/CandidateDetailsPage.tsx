@@ -78,7 +78,7 @@ const mockCandidate: CandidateDetailsView = {
   created_at: '2024-04-29T10:00:00Z',
   full_name: 'Alice Anderson',
   avatar_url:
-    'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp',
+    '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
   email: 'alice@example.com',
   resumeUrl: 'https://example.com/mock-cv.pdf', // Simulated CV link
   recentAttempts: [

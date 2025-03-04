@@ -3,6 +3,8 @@ import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/cr
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
   CandidatePreferences,
+  CandidateRow,
+  EmployerCandidatePreferences,
   Product,
   SAPayload,
   StripeCheckoutSessionDetails,
@@ -26,6 +28,71 @@ export async function unlockCandidateAction(
   // 4) insert into employee_candidate_unlocks
   // 5) return success
 }
+
+export async function fetchCandidates(): Promise<CandidateRow[]> {
+  const { data: candidates, error: candidatesError } =
+    await createSupabaseUserServerComponentClient()
+      .from('candidates')
+      .select('*');
+
+  if (!candidates) {
+    return [];
+  }
+
+  if (candidatesError) {
+    console.error('Error fetching candidates:', candidatesError);
+    return [];
+  }
+
+  const candidateIds = candidates?.map((candidate) => candidate.id) || [];
+  const { data: userProfiles, error: userErrors } =
+    await createSupabaseUserServerComponentClient()
+      .from('user_profiles')
+      .select('id,full_name, avatar_url,email')
+      .in('id', candidateIds);
+
+  if (userErrors) {
+    console.error('Error fetching candidate user profiles:', userErrors);
+    return [];
+  }
+
+  if (!userProfiles) {
+    return [];
+  }
+
+  return candidates.map((candidate) => {
+    const userProfile = userProfiles.find(
+      (profile) => profile.id === candidate.id,
+    );
+
+    return {
+      ...candidate,
+      full_name: userProfile?.full_name ?? '',
+      avatar_url: userProfile?.avatar_url ?? '',
+      email: userProfile?.email ?? '',
+    };
+  });
+}
+
+// export async function fetchEmployerPreferences(): Promise<
+//   EmployerCandidatePreferences | null
+// > {
+//   const { data, error } = await createSupabaseUserServerComponentClient()
+//     .from('employees')
+//     .select('candidate_preferences');
+
+//   if (error) {
+//     console.error('Error fetching employer preferences:', error);
+//     return null;
+//   }
+
+//   if (!data || data.length === 0) {
+//     return null;
+//   }
+
+//   const preferences = data[0].candidate_preferences as EmployerCandidatePreferences;
+//   return preferences;
+// }
 
 export const getCurrentEmployeeTokens =
   async (): Promise<Table<'tokens'> | null> => {

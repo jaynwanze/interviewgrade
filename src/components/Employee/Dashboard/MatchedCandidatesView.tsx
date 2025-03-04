@@ -20,7 +20,7 @@ import {
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
-import type { CandidateRow, EmployerPreferences } from '@/types';
+import type { CandidateRow, EmployerCandidatePreferences } from '@/types';
 import { FireIcon } from '@heroicons/react/solid';
 import { PlaneTakeoffIcon, TrophyIcon } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export function MatchedCandidatesView({
   top3Worldwide: CandidateRow[] | null;
   matched: CandidateRow[];
   mode: string;
-  employersPrefs: EmployerPreferences;
+  employersPrefs: EmployerCandidatePreferences;
 }) {
   const router = useRouter();
 

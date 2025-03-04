@@ -58,7 +58,7 @@ export type EvaluationScores = {
   feedback: string;
 };
 
-export type EmployerPreferences = {
+export type EmployerCandidatePreferences = {
   location: string;
   industry: string;
   skill: string;

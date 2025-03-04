@@ -68,17 +68,31 @@ const mockCandidate: CandidateDetailsView = {
   role: 'Software Engineer',
   industry: 'Tech',
   practice_skill_stats: [
-    { id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
-    { id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
-    { id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
+    {
+      template_id: '1',
+      skill: 'Problem Solving',
+      avg_score: 92,
+      previous_avg: 90,
+    },
+    {
+      template_id: '2',
+      skill: 'Communication',
+      avg_score: 88,
+      previous_avg: 85,
+    },
+    { template_id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
   ],
   interview_skill_stats: [
-    { id: 'p1', skill: 'Behavioural', avg_score: 89, previous_avg: 87 },
+    {
+      template_id: 'p1',
+      skill: 'Behavioural',
+      avg_score: 89,
+      previous_avg: 87,
+    },
   ],
   created_at: '2024-04-29T10:00:00Z',
   full_name: 'Alice Anderson',
-  avatar_url:
-    '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
+  avatar_url: '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
   email: 'alice@example.com',
   resumeUrl: 'https://example.com/mock-cv.pdf', // Simulated CV link
   recentAttempts: [

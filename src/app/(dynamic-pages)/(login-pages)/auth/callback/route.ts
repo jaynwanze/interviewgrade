@@ -46,12 +46,5 @@ export async function GET(request: Request) {
     redirectTo = new URL(decodedNext, requestUrl.origin);
   }
 
-  // Instead of redirecting, return a JSON response with the redirect URL
-  return new Response(JSON.stringify({ redirectTo: redirectTo.toString() }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
+  return NextResponse.redirect(redirectTo);
 }

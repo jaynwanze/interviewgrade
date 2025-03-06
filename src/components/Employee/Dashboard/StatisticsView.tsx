@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { CandidatePreferences } from '@/types';
+import { EmployerCandidatePreferences } from '@/types';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 
 export interface StatsProps {
@@ -26,7 +26,7 @@ export function StatisticsView({
 }: {
   stats: StatsProps;
   weekDelta: number;
-  employerPrefs?: CandidatePreferences;
+  employerPrefs?: EmployerCandidatePreferences;
 }) {
   return (
     <>

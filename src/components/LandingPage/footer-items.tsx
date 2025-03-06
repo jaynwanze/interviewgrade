@@ -7,10 +7,10 @@ type FooterItem = {
 };
 
 export const footerItems: FooterItem[] = [
-  {
-    title: 'Resources',
-    items: [],
-  },
+  // {
+  //   title: 'Resources',
+  //   items: [],
+  // },
   {
     title: 'Follow Us',
     items: [

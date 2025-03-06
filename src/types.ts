@@ -89,12 +89,6 @@ export interface CandidateRow {
   avatar_url?: string;
 }
 
-export type CandidatePreferences = {
-  location: string;
-  industry: string;
-  skills: string;
-};
-
 export type Candidate = Table<'candidates'>;
 
 export type CandidateSkillsStats = {

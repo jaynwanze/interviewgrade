@@ -14,9 +14,9 @@ import { useEffect, useState } from 'react';
 
 // Example list of employer preferences
 const employerOptions: EmployerCandidatePreferences[] = [
-  { location: 'United States', industry: 'Tech', skill: 'Problem Solving' },
-  { location: 'Canada', industry: 'Finance', skill: 'Communication' },
-  { location: 'United Kingdom', industry: 'Marketing', skill: 'Teamwork' },
+  { location: 'United States', industry: 'Tech', skills: 'Problem Solving' },
+  { location: 'Canada', industry: 'Finance', skills: 'Communication' },
+  { location: 'United Kingdom', industry: 'Marketing', skills: 'Teamwork' },
 ];
 
 const availableIndustries = [
@@ -72,7 +72,7 @@ export default function EmployerDashboard() {
   const [employerPrefs] = useState<EmployerCandidatePreferences>({
     location: 'United States',
     industry: 'Tech', // We'll use skillFilters for skill selection.
-    skill: 'Problem Solving',
+    skills: 'Problem Solving',
   });
 
   // On initial mount, load our mock data
@@ -133,7 +133,7 @@ export default function EmployerDashboard() {
     // 2) If we want to filter by location + skill preference:
     filtered = filtered.filter((cand) => {
       const locMatch = locationMatches(cand, employerPrefs.location);
-      const skillMatch = hasPreferredSkill(cand, employerPrefs.skill);
+      const skillMatch = hasPreferredSkill(cand, employerPrefs.skills);
       const industryMatch = industryMatches(cand, employerPrefs.industry);
       return locMatch && skillMatch && industryMatch;
     });
@@ -172,7 +172,7 @@ export default function EmployerDashboard() {
     // If no matches => skillGap
     if (filtered.length === 0) {
       setSkillGapMessage(
-        `No candidates found for skill: ${employerPrefs.skill} in ${employerPrefs.industry}, ${employerPrefs.location} (mode: ${mode}).`,
+        `No candidates found for skill: ${employerPrefs.skills} in ${employerPrefs.industry}, ${employerPrefs.location} (mode: ${mode}).`,
       );
     } else {
       setSkillGapMessage('');
@@ -181,8 +181,8 @@ export default function EmployerDashboard() {
     // 3) Sort by highest average skill
     const sorted = filtered.slice().sort((a, b) => {
       return (
-        getCandidateScoreAvgBySkill(b, employerPrefs.skill) -
-        getCandidateScoreAvgBySkill(a, employerPrefs.skill)
+        getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
+        getCandidateScoreAvgBySkill(a, employerPrefs.skills)
       );
     });
 
@@ -197,8 +197,8 @@ export default function EmployerDashboard() {
 
     const globalSorted = globalCandidates.slice().sort((a, b) => {
       return (
-        getCandidateScoreAvgBySkill(b, employerPrefs.skill) -
-        getCandidateScoreAvgBySkill(a, employerPrefs.skill)
+        getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
+        getCandidateScoreAvgBySkill(a, employerPrefs.skills)
       );
     });
 

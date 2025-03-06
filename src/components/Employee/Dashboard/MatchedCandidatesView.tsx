@@ -67,7 +67,7 @@ export function MatchedCandidatesView({
 
   const topThreeBarData = topThree?.map((cand) => ({
     name: cand.full_name,
-    score: getCandidateScoreAvgBySkill(cand, employersPrefs.skill),
+    score: getCandidateScoreAvgBySkill(cand, employersPrefs.skills),
   }));
 
   return (
@@ -186,7 +186,7 @@ export function MatchedCandidatesView({
                   {topThree.map((cand, idx) => {
                     const candidateAvg = getCandidateScoreAvgBySkill(
                       cand,
-                      employersPrefs.skill,
+                      employersPrefs.skills,
                     );
                     return (
                       <motion.div
@@ -300,7 +300,7 @@ export function MatchedCandidatesView({
                         Score{' '}
                         {getCandidateScoreAvgBySkill(
                           topProspect,
-                          employersPrefs.skill,
+                          employersPrefs.skills,
                         ).toFixed(1)}
                         /100
                       </Badge>

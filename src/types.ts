@@ -61,7 +61,7 @@ export type EvaluationScores = {
 export type EmployerCandidatePreferences = {
   location: string;
   industry: string;
-  skill: string;
+  skills: string;
 };
 
 export type RecentAttempt = {

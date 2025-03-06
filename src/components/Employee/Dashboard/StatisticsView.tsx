@@ -120,7 +120,7 @@ export function StatisticsView({
           Showing top matches within industry{' '}
           <strong>{employerPrefs.industry}</strong> located in{' '}
           <strong>{employerPrefs.location}</strong> for skill{' '}
-          <strong>{employerPrefs.skill}</strong>.
+          <strong>{employerPrefs.skills}</strong>.
         </p>
       ) : (
         <p>Loading your preferences...</p>

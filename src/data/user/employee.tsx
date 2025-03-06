@@ -2,7 +2,6 @@
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
-  CandidatePreferences,
   CandidateRow,
   EmployerCandidatePreferences,
   Product,
@@ -412,7 +411,7 @@ export const saveEmployerPreferences = async (
     };
   }
   let updatedEmployer: Table<'employees'> | null = null;
-  const candidatePreferences: CandidatePreferences = {
+  const candidatePreferences: EmployerCandidatePreferences = {
     location,
     industry,
     skills,

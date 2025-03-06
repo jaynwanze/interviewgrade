@@ -1,4 +1,4 @@
-import { CandidatePreferences, CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { EmployerCandidatePreferences, CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 export type Json =
   | string
   | number
@@ -99,20 +99,20 @@ export type Database = {
           token_id: string
           stripe_customer_id: string
           default_organization: string
-          candidate_preferences: CandidatePreferences
+          candidate_preferences: EmployerCandidatePreferences
         }
         Insert: {
           token_id: string
           stripe_customer_id: string
           default_organization: string
-          candidate_preferences?: CandidatePreferences
+          candidate_preferences?: EmployerCandidatePreferences
         }
         Update: {
           id?: string
           default_organization?: string
           token_id?: string
           stripe_customer_id?: string
-          candidate_preferences?: CandidatePreferences
+          candidate_preferences?: EmployerCandidatePreferences
         }
         Relationships: [
           {

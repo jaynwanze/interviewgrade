@@ -1,4 +1,5 @@
 'use client';
+
 import { ChatInterface } from '@/components/Interviews/InterviewHistory/InterviewHistoryChatInterface';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,44 @@ import autoTable from 'jspdf-autotable';
 import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
+
+// --- NEW: Sentiment Meter Component ---
+const SentimentMeter = ({ score }: { score: number }) => {
+  // For example, we define color ranges:
+  let meterColor = 'bg-red-500';
+  if (score >= 75) {
+    meterColor = 'bg-green-600';
+  } else if (score >= 50) {
+    meterColor = 'bg-yellow-500';
+  }
+  return (
+    <div className="mb-4">
+      <p className="text-sm text-gray-600">
+        Overall Sentiment: {score.toFixed(0)}%
+      </p>
+      <div className="w-full h-3 bg-gray-300 rounded-full">
+        <div
+          className={`h-full ${meterColor} rounded-full`}
+          style={{ width: `${score}%` }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// --- Utility: Fetch sentiment score from our API ---
+async function fetchSentiment(text: string): Promise<number> {
+  const res = await fetch('/api/sentiment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+  const data = await res.json();
+  // Assuming the API returns a result array with a "score" field between 0 and 1.
+  // Convert to percentage.
+  return data.result[0].score * 100;
+}
+
 export const InterviewHistoryDetails = ({
   interviewId,
 }: {
@@ -40,6 +79,7 @@ export const InterviewHistoryDetails = ({
   const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(
     null,
   );
+  const [sentimentScore, setSentimentScore] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('overview');
@@ -48,7 +88,6 @@ export const InterviewHistoryDetails = ({
 
   const retryFeedbackFetch = async (interview: Interview) => {
     setIsFetchingFeedback(true);
-    // Ensure synchronization between questions and answers
     const questions = await getInterviewQuestions(interviewId);
     const answers = await getInterviewAnswers(
       questions.map((question) => question.id),
@@ -114,6 +153,21 @@ export const InterviewHistoryDetails = ({
     }
   };
 
+  // Once interview details are loaded, run sentiment analysis
+  useEffect(() => {
+    if (interview && evaluation) {
+      // For example, we concatenate the interview title, description and overall feedback.
+      const aggregateText = `${interview.title}. ${interview.description || ''}. Overall feedback: ${evaluation.strengths} ${evaluation.areas_for_improvement} ${evaluation.recommendations}`;
+      console.log(aggregateText);
+      fetchSentiment(aggregateText)
+        .then(setSentimentScore)
+        .catch((err) => {
+          console.error('Sentiment analysis error:', err);
+          setSentimentScore(null);
+        });
+    }
+  }, [interview, evaluation]);
+
   useEffect(() => {
     if (interviewId) {
       fetchInterviewDetails();
@@ -142,7 +196,7 @@ export const InterviewHistoryDetails = ({
   }
 
   if (!interview) {
-    return <div className="text-center p-4">No session is data available.</div>;
+    return <div className="text-center p-4">No session data available.</div>;
   }
 
   if (interview.status === 'not_started') {
@@ -165,7 +219,6 @@ export const InterviewHistoryDetails = ({
         </div>
       );
     }
-
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
         <div className="w-full max-w-4xl mx-auto space-y-4">
@@ -178,48 +231,18 @@ export const InterviewHistoryDetails = ({
                 <p className="text-sm text-gray-500">{qa.question}</p>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* User's Answer */}
                 <div className="text-gray-700">
                   <span className="font-semibold">Your Response:</span>{' '}
                   <span className="text-gray-900">{qa.answer || 'N/A'}</span>
                 </div>
-
-                {/* Feedback Analysis */}
                 <div>
                   <span className="font-semibold">AI Analysis:</span>
                   <p className="text-sm text-gray-600">{qa.feedback}</p>
                 </div>
-
                 <Separator className="my-3" />
-
-                {/* Score */}
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Score:</span>
-                  <Badge
-                    className={`text-white ${
-                      qa.mark >=
-                      80 /
-                        Math.round(
-                          100 / evaluation.question_answer_feedback.length,
-                        )
-                        ? 'bg-green-600'
-                        : qa.mark >=
-                            60 /
-                              Math.round(
-                                100 /
-                                  evaluation.question_answer_feedback.length,
-                              )
-                          ? 'bg-yellow-500'
-                          : qa.mark >=
-                              40 /
-                                Math.round(
-                                  100 /
-                                    evaluation.question_answer_feedback.length,
-                                )
-                            ? 'bg-orange-500'
-                            : 'bg-red-500'
-                    }`}
-                  >
+                  <Badge className="text-white bg-green-600">
                     {qa.mark}/
                     {Math.floor(
                       100 / evaluation.question_answer_feedback.length,
@@ -236,21 +259,19 @@ export const InterviewHistoryDetails = ({
 
   const renderOverview = (evaluation: InterviewEvaluation) => {
     const getScoreColor = (score: number) => {
-      return score >= 80
-        ? 'bg-green-600'
-        : score >= 60
-          ? 'bg-orange-500'
-          : score >= 40
-            ? 'bg-yellow-500'
-            : 'bg-red-500';
+      if (score >= 80) return 'bg-green-600';
+      if (score >= 60) return 'bg-orange-500';
+      if (score >= 40) return 'bg-yellow-500';
+      return 'bg-red-500';
     };
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
+        {/* Optionally display the sentiment meter at the top */}
+        {sentimentScore !== null && <SentimentMeter score={sentimentScore} />}
         <div className="w-full max-w-4xl mx-auto space-y-6">
-          {/* Overall Score */}
           <div className="flex items-center justify-between space-y-12">
             <span className="flex flex-col space-y-6">
-              <CardTitle className="text-xl font-semibold ">
+              <CardTitle className="text-xl font-semibold">
                 Overall Score
               </CardTitle>
               <span className="space-y-10 text-lg font-semibold">
@@ -264,37 +285,28 @@ export const InterviewHistoryDetails = ({
             </Badge>
           </div>
           <Separator />
-          {/* Strengths */}
           <div className="flex flex-col justify-between space-y-6">
             <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
             <span className="text-gray-700">
-              {evaluation.strengths
-                ? evaluation.strengths
-                : 'No strengths identified.'}
+              {evaluation.strengths || 'No strengths identified.'}
             </span>
           </div>
           <Separator />
-          {/* Areas for Improvement */}
           <div className="flex flex-col justify-between space-y-6">
             <CardTitle className="text-xl font-semibold">
               Areas for Improvement
             </CardTitle>
             <span className="text-gray-700">
-              {evaluation.areas_for_improvement
-                ? evaluation.areas_for_improvement
-                : 'No areas identified.'}
+              {evaluation.areas_for_improvement || 'No areas identified.'}
             </span>
           </div>
           <Separator />
-          {/* Recommendations */}
           <div className="flex flex-col justify-between space-y-6">
             <CardTitle className="text-xl font-semibold">
               Recommendations
             </CardTitle>
             <span className="text-gray-700">
-              {evaluation.recommendations
-                ? evaluation.recommendations
-                : 'No recommendations provided.'}
+              {evaluation.recommendations || 'No recommendations provided.'}
             </span>
           </div>
           <Separator />
@@ -307,7 +319,6 @@ export const InterviewHistoryDetails = ({
             </span>
           </div>
           <Separator />
-          {/* Evaluation Scores Table */}
           <div className="flex flex-col justify-between space-y-6">
             <CardTitle className="text-xl font-semibold">
               Evaluation Scores
@@ -354,7 +365,6 @@ export const InterviewHistoryDetails = ({
 
   const generatePDF = () => {
     if (!interview || !evaluation) return;
-
     const doc = new jsPDF();
     doc.setFontSize(18);
     doc.text('Interview Report', 14, 22);
@@ -366,7 +376,6 @@ export const InterviewHistoryDetails = ({
       42,
     );
     doc.text(`Duration: ${interview.duration} mins`, 14, 52);
-
     autoTable(doc, {
       startY: 62,
       body: evaluation.evaluation_scores.map((score) => [
@@ -375,7 +384,6 @@ export const InterviewHistoryDetails = ({
         score.feedback,
       ]),
     });
-
     doc.save('interview_report.pdf');
   };
 
@@ -383,17 +391,13 @@ export const InterviewHistoryDetails = ({
     <div className="p-2 max-w-5xl mx-auto">
       {interview.status === 'completed' && evaluation ? (
         <>
-          {/* Header Section */}
           <div className="flex flex-col md:flex-row items-start justify-between gap-4 w-full">
-            {/* Back Button */}
             <button
               className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
               onClick={() => window.history.back()}
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
-
-            {/* Interview Details */}
             <div className="flex-1 text-left space-y-2">
               <div className="flex items-center space-x-2">
                 <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
@@ -407,8 +411,6 @@ export const InterviewHistoryDetails = ({
                 </h1>
               </div>
               <p className="text-gray-600">{interview.title}</p>
-
-              {/* Meta Info Row */}
               <div className="flex items-center space-x-4 text-gray-500">
                 <div className="flex items-center space-x-1">
                   <CalendarIcon className="h-5 w-5" />
@@ -420,13 +422,6 @@ export const InterviewHistoryDetails = ({
                 </div>
               </div>
             </div>
-            {/* <button
-                  className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
-                  onClick={generatePDF}
-                >
-                  <PrinterIcon className="h-6 w-6" />
-                </button> */}
-            {/* Tabs Section */}
             <Tabs
               defaultValue="overview"
               className="p-4"
@@ -443,11 +438,7 @@ export const InterviewHistoryDetails = ({
               </TabsList>
             </Tabs>
           </div>
-
           <Separator className="my-4" />
-
-          {/* Tabs Content */}
-          {/* Tabs Content */}
           {selectedTab === 'overview' && renderOverview(evaluation)}
           {selectedTab === 'details' &&
             interview.mode === 'interview' &&
@@ -462,7 +453,6 @@ export const InterviewHistoryDetails = ({
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
-
           <div className="text-center p-4">
             No interview feedback available yet.
           </div>

@@ -5,6 +5,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 const allowedOrigins = [
   `http://localhost:${DEV_PORT}`,
   `https://localhost:${DEV_PORT}`,
+  'https://interviewgrade.io',
+  'https://www.interviewgrade.io',
 ];
 
 export const enableCors = (req: NextApiRequest, res: NextApiResponse) => {

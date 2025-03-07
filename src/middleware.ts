@@ -117,7 +117,7 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
 
   // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {
-    return NextResponse.redirect(toSiteURL('/candidate/sign-in'));
+    return NextResponse.redirect(toSiteURL('/candidate/login'));
   }
 
   // If user is present, parse their user type

@@ -82,12 +82,16 @@ export default {
     ];
   },
 
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     if (typeof nextRuntime === 'undefined') {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
       };
+    }
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push('onnxruntime-node');
     }
     return config;
   },

@@ -13,7 +13,9 @@ import type {
   CandidateSkillsStats,
   EvaluationCriteriaType,
   FeedbackData,
+  Interview,
   InterviewAnalytics,
+  InterviewEvaluation,
   InterviewEvaluationCriteriaType,
   InterviewModeType,
   InterviewQuestion,
@@ -750,73 +752,106 @@ export const getCandidateRecentAttempts = async (
 export const updateInterviewAnalyticsCurrentAvgPractice = async (
   candidateId: string,
   currentTemplateId: string,
+  skill: string,
 ): Promise<boolean> => {
-  const templateColumn = 'template_id';
-  const { data: interviewIds, error: interviewIdsError } =
-    await createSupabaseUserServerComponentClient()
-      .from('interviews')
-      .select('id')
-      .eq('candidate_id', candidateId)
-      .eq('status', 'completed')
-      .eq(templateColumn, currentTemplateId)
-      .order('created_at', { ascending: false });
+  const supabase = createSupabaseUserServerComponentClient();
+
+  // 1. Fetch completed interviews for this candidate and template.
+  const { data: interviewIds, error: interviewIdsError } = await supabase
+    .from('interviews')
+    .select('id')
+    .eq('candidate_id', candidateId)
+    .eq('status', 'completed')
+    .eq('template_id', currentTemplateId)
+    .order('created_at', { ascending: false });
 
   if (interviewIdsError) {
     console.warn('Error fetching interview IDs:', interviewIdsError.message);
     return false;
   }
+  if (!interviewIds || interviewIds.length === 0) {
+    console.warn('No interviews found for candidate:', candidateId);
+    return false;
+  }
 
-  const interviewIdsArray = interviewIds.map((interview) => interview.id);
+  const interviewIdsArray = interviewIds.map(
+    (interview: Interview) => interview.id,
+  );
 
-  const { data: evaluations, error: evaluationsError } =
-    await createSupabaseUserServerComponentClient()
-      .from('interview_evaluations')
-      .select('*')
-      .in('interview_id', interviewIdsArray);
+  // 2. Fetch evaluations for these interviews.
+  const { data: evaluations, error: evaluationsError } = await supabase
+    .from('interview_evaluations')
+    .select('*')
+    .in('interview_id', interviewIdsArray);
 
   if (evaluationsError) {
     console.warn('Error fetching evaluations:', evaluationsError.message);
     return false;
   }
+  if (!evaluations || evaluations.length === 0) {
+    console.warn('No evaluations found for candidate:', candidateId);
+    return false;
+  }
 
+  // 3. Calculate the current overall grade (average) from evaluations.
   const currentOverallGrade =
-    evaluations.reduce((acc, evalItem) => acc + evalItem.overall_grade, 0) /
-    evaluations.length;
+    evaluations.reduce(
+      (acc: number, evalItem: InterviewEvaluation) =>
+        acc + evalItem.overall_grade,
+      0,
+    ) / evaluations.length;
 
+  // 4. Fetch the candidate profile.
   const candidateProfile = (await getCandidateUserProfile(
     candidateId,
   )) as Candidate;
   if (!candidateProfile) {
-    console.warn('Error fetching candidate profile:');
+    console.warn('Error fetching candidate profile:', candidateId);
     return false;
   }
 
-  const new_skills_stats = candidateProfile.practice_skill_stats.map(
-    (skill: CandidateSkillsStats) => {
+  // 5. Update practice_skill_stats: for entries matching currentTemplateId,
+  // set previous_avg to current avg_score, and current_avg to the new overall grade.
+  let exists = false;
+
+  if (!candidateProfile.practice_skill_stats) {
+    candidateProfile.practice_skill_stats = [];
+  }
+
+  const new_skills_stats: CandidateSkillsStats[] =
+    candidateProfile.practice_skill_stats.map((skill: CandidateSkillsStats) => {
       if (skill.template_id === currentTemplateId) {
+        exists = true;
         return {
           ...skill,
           previous_avg: skill.avg_score,
-          current_avg: currentOverallGrade,
+          avg_score: currentOverallGrade,
         };
       }
       return skill;
-    },
-  );
+    });
 
-  const { data: candidate, error: candidateError } =
-    await createSupabaseUserServerComponentClient()
-      .from('candidates')
-      .update({
-        practice_skill_stats: new_skills_stats,
-      })
-      .eq('id', candidateId);
+  if (!exists) {
+    new_skills_stats.push({
+      template_id: currentTemplateId,
+      skill: skill,
+      previous_avg: 0,
+      avg_score: currentOverallGrade,
+    });
+  }
 
-  if (candidateError) {
-    console.warn('Error updating candidate:', candidateError.message);
+  // 6. Update the candidate profile in the database.
+  const { error: updateError } = await supabase
+    .from('candidates')
+    .update({ practice_skill_stats: new_skills_stats })
+    .eq('id', candidateId);
+
+  if (updateError) {
+    console.warn('Error updating candidate profile:', updateError.message);
     return false;
   }
 
+  console.log(`Candidate ${candidateId} practice stats updated successfully.`);
   return true;
 };
 

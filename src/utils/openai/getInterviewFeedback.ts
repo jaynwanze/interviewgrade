@@ -327,12 +327,23 @@ export const getInterviewFeedback = async (
     return null;
   }
   const feedbackData = parseAIResponse(aiResponse);
+  // Update the feedback data with the actual marks from the original practice session
+  if (interview.mode === 'practice') {
+    interviewAnswersDetails.forEach((answer) => {
+      feedbackData.question_answer_feedback.forEach((feedback) => {
+        if (feedback.question === answer.question) {
+          feedback.mark = answer.mark;
+        }
+      });
+    });
+  }
   await insertInterviewEvaluation(interview.id, feedbackData);
 
   if (interview.mode === 'practice') {
     await updateInterviewAnalyticsCurrentAvgPractice(
       interview.candidate_id,
       interview.template_id,
+      interview.title,
     );
   }
   console.log('Feedback Data:', feedbackData);

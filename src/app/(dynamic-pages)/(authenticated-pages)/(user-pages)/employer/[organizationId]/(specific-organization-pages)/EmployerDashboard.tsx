@@ -268,6 +268,23 @@ export default function EmployerDashboard() {
           {/* Industry MultiSelect */}
           <div className="text-sm text-slate-500 w-full">
             <label className="text-sm text-muted-foreground mb-1">
+              Job
+            </label>
+            <MultiSelectBox
+              value={industryFilters}
+              onValueChange={(values) => setIndustryFilters(values)}
+              placeholder="Select industries"
+            >
+              {availableIndustries.map((industry) => (
+                <MultiSelectBoxItem key={industry} value={industry}>
+                  {industry}
+                </MultiSelectBoxItem>
+              ))}
+            </MultiSelectBox>
+          </div>
+          {/* Industry MultiSelect */}
+          <div className="text-sm text-slate-500 w-full">
+            <label className="text-sm text-muted-foreground mb-1">
               Industry
             </label>
             <MultiSelectBox

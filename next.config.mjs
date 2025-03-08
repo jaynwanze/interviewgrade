@@ -89,10 +89,13 @@ export default {
         fs: false,
       };
     }
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push('onnxruntime-node');
-    }
+    // if (isServer) {
+    //   config.resolve.alias = {
+    //     ...config.resolve.alias,
+    //     "sharp$": false,
+    //     "onnxruntime-node$": false,
+    //   };
+    // }
     return config;
   },
 };

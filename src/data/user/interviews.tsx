@@ -11,6 +11,7 @@ import type {
   AvgEvaluationScores,
   Candidate,
   CandidateSkillsStats,
+  EmployerCandidatePreferences,
   EvaluationCriteriaType,
   FeedbackData,
   Interview,

@@ -27,10 +27,10 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  mockCandidates,
-  type CandidateRow,
-  type CandidateSkillsStats,
-} from '@/types';
+  getCandidates,
+  getEmployerCandidatePreferences,
+} from '@/data/user/employee';
+import { mockCandidates, type CandidateRow, type CandidateSkillsStats } from '@/types';
 
 interface CandidatesListPageProps {
   organizationId: string;
@@ -50,11 +50,27 @@ export default function CandidatesListPage({
   const [skillFilter, setSkillFilter] = useState('');
   const [industryFilter, setIndustryFilter] = useState('');
   const [minScore, setMinScore] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const router = useRouter();
   // On mount, load the candidates
   useEffect(() => {
-    setCandidates(mockCandidates);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+      
+        const candData = await getCandidates();
+        setCandidates(candData.concat(mockCandidates));
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   // Helper: Returns the candidate’s skill score for the selected mode

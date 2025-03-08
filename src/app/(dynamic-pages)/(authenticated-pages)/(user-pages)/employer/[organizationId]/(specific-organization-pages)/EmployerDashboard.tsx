@@ -2,8 +2,13 @@
 
 import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
 import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import {
+  getCandidates,
+  getEmployerCandidatePreferences,
+} from '@/data/user/employee';
 import {
   mockCandidates,
   type CandidateRow,
@@ -11,13 +16,6 @@ import {
 } from '@/types';
 import { MultiSelectBox, MultiSelectBoxItem } from '@tremor/react';
 import { useEffect, useState } from 'react';
-
-// Example list of employer preferences
-const employerOptions: EmployerCandidatePreferences[] = [
-  { location: 'United States', industry: 'Tech', skills: 'Problem Solving' },
-  { location: 'Canada', industry: 'Finance', skills: 'Communication' },
-  { location: 'United Kingdom', industry: 'Marketing', skills: 'Teamwork' },
-];
 
 const availableIndustries = [
   'All Industries',
@@ -61,6 +59,11 @@ export default function EmployerDashboard() {
   const [skillGapMessage, setSkillGapMessage] = useState('');
   const [weekDelta, setWeekDelta] = useState<number>(0);
   const [top3Worldwide, setTop3Worldwide] = useState<CandidateRow[]>([]);
+  const [employerPrefs, setEmployerPrefs] =
+    useState<EmployerCandidatePreferences | null>(null);
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // We'll define a "mode" state: interview | practice
   const [mode, setMode] = useState<'interview' | 'practice'>('practice');
@@ -69,15 +72,25 @@ export default function EmployerDashboard() {
   const [industryFilters, setIndustryFilters] = useState<string[]>([]);
   const [skillFilters, setSkillFilters] = useState<string[]>([]);
 
-  const [employerPrefs] = useState<EmployerCandidatePreferences>({
-    location: 'United States',
-    industry: 'Tech', // We'll use skillFilters for skill selection.
-    skills: 'Problem Solving',
-  });
-
   // On initial mount, load our mock data
   useEffect(() => {
-    setCandidates(mockCandidates);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await getEmployerCandidatePreferences();
+        setEmployerPrefs(data);
+
+        const candidates = await getCandidates();
+        setCandidates(candidates.concat(mockCandidates));
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   // Helper to get the candidate’s “best average skill” for the current mode
@@ -132,6 +145,9 @@ export default function EmployerDashboard() {
 
     // 2) If we want to filter by location + skill preference:
     filtered = filtered.filter((cand) => {
+      if (!employerPrefs) {
+        return false;
+      }
       const locMatch = locationMatches(cand, employerPrefs.location);
       const skillMatch = hasPreferredSkill(cand, employerPrefs.skills);
       const industryMatch = industryMatches(cand, employerPrefs.industry);
@@ -159,117 +175,121 @@ export default function EmployerDashboard() {
       );
     }
 
-    // For location filtering, using employerPrefs.location.
-    if (employerPrefs.location.trim() !== '') {
-      filtered = filtered.filter((cand) => {
+    if (employerPrefs) {
+      // For location filtering, using employerPrefs.location.
+      if (employerPrefs.location.trim() !== '') {
+        filtered = filtered.filter((cand) => {
+          return (
+            cand.country.includes(employerPrefs.location) ||
+            cand.country.toLowerCase() === 'remote'
+          );
+        });
+      }
+
+      // If no matches => skillGap
+      if (filtered.length === 0) {
+        setSkillGapMessage(
+          `No candidates found for skill: ${employerPrefs.skills} in ${employerPrefs.industry}, ${employerPrefs.location} (mode: ${mode}).`,
+        );
+      } else {
+        setSkillGapMessage('');
+      }
+
+      // 3) Sort by highest average skill
+      const sorted = filtered.slice().sort((a, b) => {
         return (
-          cand.country.includes(employerPrefs.location) ||
-          cand.country.toLowerCase() === 'remote'
+          getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
+          getCandidateScoreAvgBySkill(a, employerPrefs.skills)
         );
       });
-    }
 
-    // If no matches => skillGap
-    if (filtered.length === 0) {
-      setSkillGapMessage(
-        `No candidates found for skill: ${employerPrefs.skills} in ${employerPrefs.industry}, ${employerPrefs.location} (mode: ${mode}).`,
-      );
-    } else {
-      setSkillGapMessage('');
-    }
-
-    // 3) Sort by highest average skill
-    const sorted = filtered.slice().sort((a, b) => {
-      return (
-        getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
-        getCandidateScoreAvgBySkill(a, employerPrefs.skills)
-      );
-    });
-
-    // Global ranking: sort all candidates who have stats (without location filter)
-    const globalCandidates = candidates.filter((cand) => {
-      const stats =
-        mode === 'interview'
-          ? cand.interview_skill_stats
-          : cand.practice_skill_stats;
-      return stats && stats.length > 0;
-    });
-
-    const globalSorted = globalCandidates.slice().sort((a, b) => {
-      return (
-        getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
-        getCandidateScoreAvgBySkill(a, employerPrefs.skills)
-      );
-    });
-
-    setMatched(sorted);
-
-    // 4) topThree
-    const top3 = sorted.slice(0, 3);
-    setTopThree(top3);
-
-    const topWorldwide = globalSorted.slice(0, 3);
-    setTop3Worldwide(topWorldwide);
-
-    // 5) topProspect
-    setTopProspect(top3.length > 0 ? top3[0] : null);
-
-    // 7) Example: compute overall weekDelta => sum of (avg_score - previous_avg)
-    // We'll do it for whichever mode is selected
-    let totalDelta = 0;
-    let deltaCount = 0;
-
-    candidates.forEach((cand) => {
-      const stats =
-        mode === 'interview'
-          ? cand.interview_skill_stats
-          : cand.practice_skill_stats;
-
-      stats.forEach((skill) => {
-        if (skill.previous_avg != null) {
-          totalDelta += skill.avg_score - skill.previous_avg;
-          deltaCount += 1;
-        }
+      // Global ranking: sort all candidates who have stats (without location filter)
+      const globalCandidates = candidates.filter((cand) => {
+        const stats =
+          mode === 'interview'
+            ? cand.interview_skill_stats
+            : cand.practice_skill_stats;
+        return stats && stats.length > 0;
       });
-    });
 
-    if (deltaCount > 0) {
-      setWeekDelta(totalDelta / deltaCount);
-    } else {
-      setWeekDelta(0);
+      const globalSorted = globalCandidates.slice().sort((a, b) => {
+        return (
+          getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
+          getCandidateScoreAvgBySkill(a, employerPrefs.skills)
+        );
+      });
+
+      setMatched(sorted);
+
+      // 4) topThree
+      const top3 = sorted.slice(0, 3);
+      setTopThree(top3);
+
+      const topWorldwide = globalSorted.slice(0, 3);
+      setTop3Worldwide(topWorldwide);
+
+      // 5) topProspect
+      setTopProspect(top3.length > 0 ? top3[0] : null);
+
+      // 7) Example: compute overall weekDelta => sum of (avg_score - previous_avg)
+      // We'll do it for whichever mode is selected
+      let totalDelta = 0;
+      let deltaCount = 0;
+
+      candidates.forEach((cand) => {
+        const stats =
+          mode === 'interview'
+            ? cand.interview_skill_stats
+            : cand.practice_skill_stats;
+
+        stats.forEach((skill) => {
+          if (skill.previous_avg != null) {
+            totalDelta += skill.avg_score - skill.previous_avg;
+            deltaCount += 1;
+          }
+        });
+      });
+
+      if (deltaCount > 0) {
+        setWeekDelta(totalDelta / deltaCount);
+      } else {
+        setWeekDelta(0);
+      }
     }
   }, [mode, candidates, industryFilters, skillFilters, employerPrefs]);
 
-  function handleIndustrySelect(value: string) {
-    if (industryFilters.includes(value)) {
-      setIndustryFilters(industryFilters.filter((v) => v !== value));
-    } else {
-      setIndustryFilters([...industryFilters, value]);
-    }
+  if (loading) {
+    return (
+      <div className="space-y-6 max-w-5xl mx-auto min-h-screen">
+        <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+        <LoadingSpinner />
+      </div>
+    );
+  } else if (error) {
+    return (
+      <div className="space-y-6 max-w-5xl mx-auto min-h-screen  ">
+        <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
   }
-  function handleSkillSelect(value: string) {
-    if (skillFilters.includes(value)) {
-      setSkillFilters(skillFilters.filter((v) => v !== value));
-    } else {
-      setSkillFilters([...skillFilters, value]);
-    }
-  }
-
+  else
   return (
     <TooltipProvider>
       <div className="space-y-6 max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold">Employer Dashboard</h1>
-        <StatisticsView
-          stats={stats}
-          weekDelta={weekDelta}
-          employerPrefs={employerPrefs}
-        />
+
+        {employerPrefs && (
+          <StatisticsView
+            stats={stats}
+            weekDelta={weekDelta}
+            employerPrefs={employerPrefs}
+          />
+        )}
         <div className="flex justify-start text-center items-center gap-6">
           {/* Industry MultiSelect */}
           <div className="text-sm text-slate-500 w-full">
-            <label className="text-sm text-muted-foreground mb-1">
-              Job
-            </label>
+            <label className="text-sm text-muted-foreground mb-1">Job</label>
             <MultiSelectBox
               value={industryFilters}
               onValueChange={(values) => setIndustryFilters(values)}
@@ -361,15 +381,17 @@ export default function EmployerDashboard() {
         </Tabs>
 
         {/* Show Matches */}
-        <MatchedCandidatesView
-          skillGapMessage={skillGapMessage}
-          topThree={topThree}
-          topProspect={topProspect}
-          matched={matched}
-          top3Worldwide={top3Worldwide}
-          mode={mode}
-          employersPrefs={employerPrefs}
-        />
+        {employerPrefs && (
+          <MatchedCandidatesView
+            skillGapMessage={skillGapMessage}
+            topThree={topThree}
+            topProspect={topProspect}
+            matched={matched}
+            top3Worldwide={top3Worldwide}
+            mode={mode}
+            employersPrefs={employerPrefs}
+          />
+        )}
       </div>
     </TooltipProvider>
   );

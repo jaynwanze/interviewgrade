@@ -2,6 +2,7 @@
 
 import { ChatInterface } from '@/components/Interviews/InterviewHistory/InterviewHistoryChatInterface';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import SentimentDisplay from '@/components/SentimentDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -30,45 +31,51 @@ import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
 
-// --- NEW: Sentiment Meter Component ---
-const SentimentMeter = ({ score }: { score: number }) => {
-  // For example, we define color ranges:
-  let meterColor = 'bg-red-500';
-  if (score >= 75) {
-    meterColor = 'bg-green-600';
-  } else if (score >= 50) {
-    meterColor = 'bg-yellow-500';
-  }
-  return (
-    <div className="mb-4">
-      <p className="text-sm text-gray-600">
-        Overall Sentiment: {score.toFixed(0)}%
-      </p>
-      <div className="w-full h-3 bg-gray-300 rounded-full">
-        <div
-          className={`h-full ${meterColor} rounded-full`}
-          style={{ width: `${score}%` }}
-        />
-      </div>
-    </div>
-  );
+export type SentimentScore = {
+  label: string;
+  score: number;
 };
 
 // --- Utility: Fetch sentiment score from our API ---
-async function fetchSentiment(text: string): Promise<number> {
-  const res = await fetch('/api/sentiment', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
-  });
-  const data = await res.json();
-  // Assuming the API returns a result array with a "score" field between 0 and 1.
-  // Convert to percentage.
-  return data.result[0].score * 100;
+export async function fetchSentiment(text: string) {
+  try {
+    const res = await fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
+    const data = await res.json();
+    console.log('Sentiment API response:', data);
+
+    // Extract highest scoring sentiment
+    const { label, score } = data;
+    const confidenceThreshold = 50; // ✅ Min confidence level
+    const fallbackLabel = 'neutral'; // ✅ If no high confidence
+
+    return {
+      label: score >= confidenceThreshold ? label : fallbackLabel,
+      score,
+    };
+  } catch (error) {
+    console.error('Error fetching sentiment:', error);
+    return null;
+  }
 }
+
+//   // Extract the highest sentiment score
+//   const highestSentiment = data.result[0].reduce(
+//     (prev: any, current: any) => (current.score > prev.score ? current : prev),
+//     { score: 0 }
+//   );
+
+//   return highestSentiment.score * 100; // Convert to percentage
+// }
 
 export const InterviewHistoryDetails = ({
   interviewId,
@@ -79,7 +86,12 @@ export const InterviewHistoryDetails = ({
   const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(
     null,
   );
-  const [sentimentScore, setSentimentScore] = useState<number | null>(null);
+  const [sentimentScores, setSentimentScores] = useState<
+    SentimentScore[] | null
+  >(null);
+  const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('overview');
@@ -127,45 +139,49 @@ export const InterviewHistoryDetails = ({
     }
   };
 
-  const fetchInterviewDetails = async () => {
-    if (hasFetched.current) return;
+  const fetchInterviewDetails = useCallback(async () => {
+    if (hasFetched.current || !interviewId) return;
     hasFetched.current = true;
     setLoading(true);
     setError(null);
+
     try {
-      const interview = await getInterviewById(interviewId);
+      const [interview, interviewEvaluation] = await Promise.all([
+        getInterviewById(interviewId),
+        getInterviewEvaluation(interviewId),
+      ]);
+
       if (!interview) {
         setError('Session not found');
         return;
       }
+
       setInterview(interview);
-      const interviewEvaluation = await getInterviewEvaluation(interviewId);
       if (interviewEvaluation) {
         setEvaluation(interviewEvaluation);
       } else {
         retryFeedbackFetch(interview);
       }
     } catch (error) {
-      console.error('Error fetching session details:', error);
-      setError('Failed to fetch session details');
+      console.error('Error fetching interview:', error);
+      setError('Failed to fetch interview details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [interviewId]);
 
   // Once interview details are loaded, run sentiment analysis
   useEffect(() => {
-    if (interview && evaluation) {
-      // For example, we concatenate the interview title, description and overall feedback.
-      const aggregateText = `${interview.title}. ${interview.description || ''}. Overall feedback: ${evaluation.strengths} ${evaluation.areas_for_improvement} ${evaluation.recommendations}`;
-      console.log(aggregateText);
-      fetchSentiment(aggregateText)
-        .then(setSentimentScore)
-        .catch((err) => {
-          console.error('Sentiment analysis error:', err);
-          setSentimentScore(null);
-        });
-    }
+    if (!interview || !evaluation) return;
+
+    const aggregateText = `${interview.title}. ${interview.description || ''}. Overall feedback: ${evaluation.strengths} ${evaluation.areas_for_improvement} ${evaluation.recommendations}`;
+
+    fetchSentiment(aggregateText)
+      .then((score) => setSentimentScore(score))
+      .catch((err) => {
+        console.error('Sentiment analysis error:', err);
+        setSentimentScores(null);
+      });
   }, [interview, evaluation]);
 
   useEffect(() => {
@@ -267,7 +283,13 @@ export const InterviewHistoryDetails = ({
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
         {/* Optionally display the sentiment meter at the top */}
-        {sentimentScore !== null && <SentimentMeter score={sentimentScore} />}
+        {sentimentScore !== null && (
+          <SentimentDisplay
+            label={sentimentScore.label}
+            score={sentimentScore.score}
+          />
+        )}
+
         <div className="w-full max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between space-y-12">
             <span className="flex flex-col space-y-6">

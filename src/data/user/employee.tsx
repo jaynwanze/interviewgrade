@@ -28,18 +28,18 @@ export async function unlockCandidateAction(
   // 5) return success
 }
 
-export async function fetchCandidates(): Promise<CandidateRow[]> {
+export async function getCandidates(): Promise<CandidateRow[]> {
   const { data: candidates, error: candidatesError } =
     await createSupabaseUserServerComponentClient()
       .from('candidates')
       .select('*');
-
-  if (!candidates) {
-    return [];
-  }
+      
 
   if (candidatesError) {
-    console.error('Error fetching candidates:', candidatesError);
+    throw new Error('Error fetching candidates');
+  }
+
+  if (!candidates) {
     return [];
   }
 
@@ -51,13 +51,15 @@ export async function fetchCandidates(): Promise<CandidateRow[]> {
       .in('id', candidateIds);
 
   if (userErrors) {
-    console.error('Error fetching candidate user profiles:', userErrors);
-    return [];
+    throw new Error('Error fetching  candidates details');
   }
 
   if (!userProfiles) {
     return [];
   }
+
+  console.log('candidates', candidates);
+  console.log('userProfiles', userProfiles);
 
   return candidates.map((candidate) => {
     const userProfile = userProfiles.find(
@@ -480,3 +482,38 @@ export const saveEmployerPreferences = async (
     data: updatedEmployer,
   };
 };
+
+export const getEmployerCandidatePreferences =
+  async (): Promise<EmployerCandidatePreferences | null> => {
+    const supabase = createSupabaseUserServerComponentClient();
+
+    const user = await serverGetLoggedInUser();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const { user_metadata, id } = user;
+
+    if (user_metadata.userType !== 'employer') {
+      throw new Error('User is not an employer');
+    }
+
+    const employerId = id;
+
+    const { data, error } = await supabase
+      .from('employees')
+      .select('candidate_preferences')
+      .eq('id', employerId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error('Error fetching employer preferences');
+    }
+
+    if (!data) {
+      console.warn('No employer candidate preferences found for:', employerId);
+      return null;
+    }
+
+    return data.candidate_preferences;
+  };

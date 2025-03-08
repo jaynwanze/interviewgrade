@@ -21,7 +21,7 @@ export const verifySession = cache(async () => {
   }
 
   if (!session?.user) {
-    redirect('/candidate/login');
+    redirect('/c/login');
   }
 
   return session.user;

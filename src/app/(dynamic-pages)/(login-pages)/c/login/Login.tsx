@@ -13,14 +13,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   signInWithMagicLink,
+  signInWithPassword,
   signInWithProvider,
-  signUp,
 } from '@/data/auth/auth';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
+import { supabaseUserClientComponentClient } from '@/supabase-clients/user/supabaseUserClientComponentClient';
 import type { AuthProvider } from '@/types';
 import { UserType } from '@/types/userTypes';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-export function SignUp({
+
+export function Login({
   next,
   nextActionType,
   userType,
@@ -30,31 +34,20 @@ export function SignUp({
   userType: UserType;
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [resendData, setResendData] = useState<{
-    email: string;
-    password: string;
-  } | null>(null);
 
-  const resendMutation = useSAToastMutation(
-    async () => {
-      if (!resendData) {
-        throw new Error('No resend data');
-      }
-      return await signUp(resendData.email, resendData.password, userType);
-    },
-    {
-      onSuccess: () => {
-        setSuccessMessage('A confirmation link has been sent to your email!');
-      },
-      loadingMessage: 'Resending confirmation link...',
-      errorMessage: 'Failed to resend confirmation link',
-      successMessage: 'Confirmation link sent!',
-    },
-  );
+  const router = useRouter();
 
+  function redirectToDashboard() {
+    router.refresh();
+    if (next) {
+      router.push(`/auth/callback?next=${next}`);
+    } else {
+      router.push('/auth/callback');
+    }
+  }
   const magicLinkMutation = useSAToastMutation(
     async (email: string) => {
-      return await signInWithMagicLink(email, userType, next); // Added userType
+      return await signInWithMagicLink(email, userType, next);
     },
     {
       loadingMessage: 'Sending magic link...',
@@ -69,41 +62,35 @@ export function SignUp({
           return 'Send magic link failed ';
         }
       },
-      successMessage: 'A magic link has been sent to your email!',
       onSuccess: () => {
         setSuccessMessage('A magic link has been sent to your email!');
       },
+      successMessage: 'A magic link has been sent to your email!',
     },
   );
   const passwordMutation = useSAToastMutation(
     async ({ email, password }: { email: string; password: string }) => {
-      setResendData({ email, password });
-      return await signUp(email, password, userType);
+      return await signInWithPassword(email, password);
     },
     {
-      onSuccess: () => {
-        setSuccessMessage('A confirmation link has been sent to your email!');
-      },
-      loadingMessage: 'Creating account...',
+      onSuccess: redirectToDashboard,
+      loadingMessage: 'Logging in...',
       errorMessage(error) {
         try {
           if (error instanceof Error) {
             return String(error.message);
           }
-          return `Create account failed ${String(error)}`;
+          return `Sign in account failed ${String(error)}`;
         } catch (_err) {
           console.warn(_err);
-          return 'Create account failed ';
+          return 'Sign in account failed';
         }
       },
-      successMessage: 'Account created!',
+      successMessage: 'Logged in!',
     },
   );
   const providerMutation = useSAToastMutation(
     async (provider: AuthProvider) => {
-      // since we can't use the onSuccess callback here to redirect from here
-      // we pass on the `next` to the signInWithProvider function
-      // the user gets redirected from the provider redirect callback
       return signInWithProvider(provider, next);
     },
     {
@@ -116,6 +103,24 @@ export function SignUp({
     },
   );
 
+  const { data: isLoggedIn } = useQuery(
+    ['isLoggedInHome'],
+    async () => {
+      const response = await supabaseUserClientComponentClient.auth.getUser();
+      return Boolean(response.data.user?.id);
+    },
+    {
+      initialData: false,
+      refetchOnMount: true,
+      refetchInterval: false,
+      refetchOnWindowFocus: true,
+      refetchIntervalInBackground: false,
+      cacheTime: 0,
+      staleTime: 0,
+    },
+  );
+
+  (isLoggedIn || next) && redirectToDashboard();
   return (
     <div
       data-success={successMessage}
@@ -123,13 +128,10 @@ export function SignUp({
     >
       {successMessage ? (
         <ConfirmationPendingCard
-          type={'sign-up'}
+          type={'login'}
           heading={`Confirmation Link Sent`}
           message={successMessage}
           resetSuccessMessage={setSuccessMessage}
-          resendEmail={() => {
-            resendMutation.mutate();
-          }}
         />
       ) : (
         <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
@@ -138,41 +140,41 @@ export function SignUp({
               <TabsTrigger value="password">Password</TabsTrigger>
               <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
             </TabsList>
-
             <TabsContent value="password">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to InterviewGrade</CardTitle>
+                  <CardTitle>Login to InterviewGrade</CardTitle>
                   <CardDescription>
-                    Create an account with your email and password
+                    Login with the account you used to signup.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">
                   <EmailAndPassword
                     isLoading={passwordMutation.isLoading}
-                    signUpUrl="/candidate/sign-up"
-                    loginUrl="/candidate/login"
+                    signUpUrl="/c/sign-up"
+                    loginUrl="/c/login"
                     onSubmit={(data) => {
                       passwordMutation.mutate(data);
                     }}
-                    view="sign-up"
+                    view="sign-in"
                   />
                 </CardContent>
               </Card>
             </TabsContent>
+
             <TabsContent value="magic-link">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to InterviewGrade</CardTitle>
+                  <CardTitle>Login to InterviewGrade</CardTitle>
                   <CardDescription>
-                    Create an account with magic link we will send to your email
+                    Login with magic link we will send to your email.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">
                   <Email
                     onSubmit={(email) => magicLinkMutation.mutate(email)}
                     isLoading={magicLinkMutation.isLoading}
-                    view="sign-up"
+                    view="sign-in"
                   />
                 </CardContent>
               </Card>
@@ -180,9 +182,9 @@ export function SignUp({
             <TabsContent value="social-login">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to InterviewGrade</CardTitle>
+                  <CardTitle>Login to InterviewGrade</CardTitle>
                   <CardDescription>
-                    Register with your social account
+                    Login with your social account.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">

@@ -283,13 +283,14 @@ export const InterviewHistoryDetails = ({
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
         {/* Optionally display the sentiment meter at the top */}
-        {sentimentScore !== null && (
-          <SentimentDisplay
-            label={sentimentScore.label}
-            score={sentimentScore.score}
-          />
-        )}
-
+        <span className="flex justify-center items-center mb-3">
+          {sentimentScore !== null && (
+            <SentimentDisplay
+              label={sentimentScore.label}
+              score={sentimentScore.score}
+            />
+          )}
+        </span>
         <div className="w-full max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between space-y-12">
             <span className="flex flex-col space-y-6">

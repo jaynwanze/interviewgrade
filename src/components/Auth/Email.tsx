@@ -68,7 +68,7 @@ export const Email = ({
           {view === 'forgot-password' ? (
             <div className="text-sm">
               <Link
-                href="/employer/login"
+                href="/e/login"
                 className="font-medium text-muted-foreground hover:underline hover:text-foreground"
               >
                 Log in instead?

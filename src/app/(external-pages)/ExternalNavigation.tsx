@@ -49,7 +49,7 @@ export function ExternalNavigation() {
           <ThemeToggle />
           {isHome && (
             <div className="ml-6 hidden lg:block space-x-2">
-              {/* <Link href="/candidate/login">
+              {/* <Link href="/c/login">
                 <Button variant="default" size="default" className="group">
                   Log In
                   <svg
@@ -81,7 +81,7 @@ export function ExternalNavigation() {
             <div className="w-full flex justify-center p-4">
               {/* Updated width to match Log In button */}
             </div>
-            {/* <Link href="/candidate/login" className="px-4 w-full">
+            {/* <Link href="/c/login" className="px-4 w-full">
               <Button variant="default" size="default" className="group w-full">
                 Log In
                 <svg

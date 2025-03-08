@@ -48,8 +48,8 @@ export default function ConfirmationPendingCard({
               resetSuccessMessage(null);
               router.push(
                 type === 'login' || type === 'reset-password'
-                  ? '/employer/login'
-                  : '/employer/sign-up',
+                  ? '/e/login'
+                  : '/e/sign-up',
               );
             }}
           >

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+'use client';
+
 import { motion } from 'framer-motion';
 
-// ✅ Updated Sentiment Mapping (Removed "Surprise")
 const SENTIMENT_DETAILS: Record<
   string,
   { icon: string; description: string; color: string }
@@ -12,12 +12,18 @@ const SENTIMENT_DETAILS: Record<
   pride: { icon: '🏆', description: 'A sense of accomplishment.', color: 'bg-orange-400' },
   gratitude: { icon: '🙏', description: 'Thankful response.', color: 'bg-yellow-600' },
   realization: { icon: '💡', description: 'A moment of clarity.', color: 'bg-blue-600' },
-  curiosity: { icon: '🔍', description: 'Indicates interest.', color: 'bg-blue-400' },
+
+  // Moderate sentiment (neutral but slightly leaning)
+  curiosity: { icon: '🔍', description: 'Showing interest.', color: 'bg-blue-400' },
+  confusion: { icon: '🤔', description: 'Needs further clarity.', color: 'bg-gray-500' },
+
+  // Negative sentiment
   annoyance: { icon: '😤', description: 'Mild dissatisfaction.', color: 'bg-orange-500' },
   disappointment: { icon: '😞', description: 'Did not meet expectations.', color: 'bg-gray-600' },
-  confusion: { icon: '🤔', description: 'Shows uncertainty.', color: 'bg-gray-500' },
-  sadness: { icon: '😢', description: 'Feeling down or discouraged.', color: 'bg-gray-700' },
-  neutral: { icon: '😐', description: 'Balanced response.', color: 'bg-gray-400' }, // ✅ Fallback sentiment
+  sadness: { icon: '😢', description: 'Feeling down.', color: 'bg-gray-700' },
+
+  // Default fallback (neutral sentiment)
+  neutral: { icon: '😐', description: 'Balanced feedback.', color: 'bg-gray-400' },
 };
 
 const SentimentDisplay = ({
@@ -27,18 +33,12 @@ const SentimentDisplay = ({
   label: string;
   score: number;
 }) => {
-  const [animationKey, setAnimationKey] = useState(0);
-
-  useEffect(() => {
-    setAnimationKey((prev) => prev + 1); // Forces re-animation on sentiment change
-  }, [label, score]);
-
-  const sentiment = SENTIMENT_DETAILS[label] || SENTIMENT_DETAILS['neutral']; // ✅ Default to "neutral" if unknown
+  const sentiment = SENTIMENT_DETAILS[label] || SENTIMENT_DETAILS['neutral']; // Default to neutral if unknown
 
   return (
     <div className="w-full max-w-md p-4 bg-white dark:bg-gray-900 shadow-lg rounded-lg border border-gray-200 dark:border-gray-800">
       <div className="flex items-center space-x-3">
-        <span className="text-4xl">{sentiment.icon}</span>
+        <span className="text-3xl">{sentiment.icon}</span>
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
             {label.toUpperCase()}
@@ -50,13 +50,12 @@ const SentimentDisplay = ({
       </div>
 
       {/* Animated Progress Bar */}
-      <div className="mt-4 h-3 w-full bg-gray-300 rounded-full overflow-hidden">
+      <div className="mt-4 h-3 w-full bg-gray-300 rounded-full">
         <motion.div
-          key={animationKey}
           initial={{ width: '0%' }}
           animate={{ width: `${score}%` }}
           transition={{ duration: 1 }}
-          className={`h-full ${sentiment.color}`}
+          className={`h-full ${sentiment.color} rounded-full`}
         />
       </div>
 

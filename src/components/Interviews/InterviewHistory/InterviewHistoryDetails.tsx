@@ -53,18 +53,17 @@ export async function fetchSentiment(text: string) {
     const data = await res.json();
     console.log('Sentiment API response:', data);
 
-    // Extract highest scoring sentiment
-    const { label, score } = data;
-    const confidenceThreshold = 50; // ✅ Min confidence level
-    const fallbackLabel = 'neutral'; // ✅ If no high confidence
+    // ✅ Handle fallback if confidence is low
+    const confidenceThreshold = 50; // Min confidence to display label
+    const fallbackLabel = 'neutral';
 
     return {
-      label: score >= confidenceThreshold ? label : fallbackLabel,
-      score,
+      label: data.score >= confidenceThreshold ? data.label : fallbackLabel,
+      score: data.score,
     };
   } catch (error) {
     console.error('Error fetching sentiment:', error);
-    return null;
+    return { label: 'neutral', score: 50 };
   }
 }
 
@@ -174,7 +173,11 @@ export const InterviewHistoryDetails = ({
   useEffect(() => {
     if (!interview || !evaluation) return;
 
-    const aggregateText = `${interview.title}. ${interview.description || ''}. Overall feedback: ${evaluation.strengths} ${evaluation.areas_for_improvement} ${evaluation.recommendations}`;
+    const aggregateText = `${evaluation.question_answer_feedback
+      .map((qa) => qa.feedback)
+      .join(' ')
+      .trim()
+    }`;
 
     fetchSentiment(aggregateText)
       .then((score) => setSentimentScore(score))

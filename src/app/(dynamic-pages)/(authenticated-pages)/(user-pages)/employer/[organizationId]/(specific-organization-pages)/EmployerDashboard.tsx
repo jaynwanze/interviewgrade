@@ -86,6 +86,7 @@ export default function EmployerDashboard() {
   const [top3Worldwide, setTop3Worldwide] = useState<CandidateRow[]>([]);
   const [employerPrefs, setEmployerPrefs] =
     useState<EmployerCandidatePreferences | null>(null);
+  const [didSetFilters, setDidSetFilters] = useState<boolean>(false);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -108,6 +109,13 @@ export default function EmployerDashboard() {
         setLoading(true);
         const data = await getEmployerCandidatePreferences();
         setEmployerPrefs(data);
+
+        if (data && !didSetFilters) {
+          setIndustryFilter(data.industry || 'All Industries');
+          setSkillFilter(data.skills || 'All Skills');
+          setLocationFilter(data.location || 'All Locations');
+          setDidSetFilters(true);
+        }
 
         const candidates = await getCandidates();
         setCandidates(candidates.concat(mockCandidates));
@@ -136,151 +144,117 @@ export default function EmployerDashboard() {
     const skillStats = stats.find((s) => s.skill === skill);
     return skillStats ? skillStats.avg_score : 0;
   }
-
-  // Check if candidate has the employer’s preferred skill in the selected mode
-  function hasPreferredSkill(cand: CandidateRow, skill: string): boolean {
-    const stats =
-      mode === 'interview'
-        ? cand.interview_skill_stats
-        : cand.practice_skill_stats;
-    return stats.some((s) => s.skill === skill);
-  }
-
-  // Check if candidate location matches employer’s preference or is “Remote”
-  function locationMatches(cand: CandidateRow, location: string) {
-    // Allow candidates whose country includes the preferred location or is Remote.
-    return (
-      cand.country.includes(location) || cand.country.toLowerCase() === 'remote'
-    );
-  }
-
-  //
-  function industryMatches(cand: CandidateRow, industry: string) {
-    return cand.industry.includes(industry);
-  }
-
   // The main effect that filters + sorts whenever `mode` or candidates change
   useEffect(() => {
-    // 1) Filter out any candidate who doesn’t have stats for the selected mode
+    // 1) Filter out candidates without stats in the selected mode
     let filtered = candidates.filter((cand) => {
-      if (mode === 'interview' && cand.interview_skill_stats == null) {
-        return false;
-      }
-      if (mode === 'practice' && cand.practice_skill_stats == null) {
-        return false;
-      }
+      if (mode === 'interview' && !cand.interview_skill_stats) return false;
+      if (mode === 'practice' && !cand.practice_skill_stats) return false;
       return true;
     });
 
-    // 2) If we want to filter by location + skill preference:
-    filtered = filtered.filter((cand) => {
-      if (!employerPrefs) {
-        return false;
-      }
-      const locMatch = locationMatches(cand, employerPrefs.location);
-      const skillMatch = hasPreferredSkill(cand, employerPrefs.skills);
-      const industryMatch = industryMatches(cand, employerPrefs.industry);
-      return locMatch && skillMatch && industryMatch;
+    // 2) Filter by industry if user picked something other than "All Industries"
+    if (industryFilter !== 'All Industries') {
+      filtered = filtered.filter((cand) =>
+        cand.industry.includes(industryFilter),
+      );
+    }
+
+    // 3) Filter by skill if user picked something other than "All Skills"
+    if (skillFilter !== 'All Skills') {
+      filtered = filtered.filter((cand) => {
+        const stats =
+          mode === 'interview'
+            ? cand.interview_skill_stats
+            : cand.practice_skill_stats;
+        return stats?.some((s) => s.skill === skillFilter);
+      });
+    }
+
+    // 4) Filter by location if user picked something other than "All Locations"
+    if (locationFilter !== 'All Locations') {
+      filtered = filtered.filter((cand) => {
+        // Example: match location or 'remote'
+        return (
+          cand.country.includes(locationFilter) ||
+          cand.country.toLowerCase() === 'remote'
+        );
+      });
+    }
+
+    // 5) If no matches => set skill gap message (or clear it otherwise)
+    if (filtered.length === 0) {
+      setSkillGapMessage(
+        `No candidates found for your selected filters -
+         Industry: ${industryFilter}, 
+         Skill: ${skillFilter}, 
+         Location: ${locationFilter}.`,
+      );
+    } else {
+      setSkillGapMessage('');
+    }
+
+    // 6) Sort the filtered results — typically by skillFilter
+    //    If "All Skills", you can default to employerPrefs?.skills or skip sorting
+    let skillToSortBy = skillFilter;
+    if (!skillToSortBy || skillToSortBy === 'All Skills') {
+      skillToSortBy = employerPrefs?.skills || '';
+    }
+
+    const sorted = filtered.slice().sort((a, b) => {
+      return (
+        getCandidateScoreAvgBySkill(b, skillToSortBy) -
+        getCandidateScoreAvgBySkill(a, skillToSortBy)
+      );
     });
 
-    // Industry multi-select: if any industry is selected and not "All Industries"
-    if (industryFilter && !industryFilter.match('All Industries')) {
-      filtered = filtered.filter((cand) => {
-        return industryMatches(cand, industryFilter);
-      });
-    }
+    // 7) Set matched, topThree, topProspect, etc.
+    setMatched(sorted);
+    setTopThree(sorted.slice(0, 3));
+    setTopProspect(sorted.length > 0 ? sorted[0] : null);
 
-    // Skill multi-select: if any skill is selected and not "All Skills"
-    if (skillFilter && !skillFilter.match('All Skills')) {
-      filtered = filtered.filter((cand) => {
-        return hasPreferredSkill(cand, skillFilter);
-      });
-    }
+    // 8) Global ranking for "top3Worldwide" (optional)
+    const globalCandidates = candidates.filter((cand) => {
+      const stats =
+        mode === 'interview'
+          ? cand.interview_skill_stats
+          : cand.practice_skill_stats;
+      return stats && stats.length > 0;
+    });
+    const globalSorted = globalCandidates.slice().sort((a, b) => {
+      return (
+        getCandidateScoreAvgBySkill(b, skillToSortBy) -
+        getCandidateScoreAvgBySkill(a, skillToSortBy)
+      );
+    });
+    setTop3Worldwide(globalSorted.slice(0, 3));
 
-    if (employerPrefs) {
-      // For location filtering, using employerPrefs.location.
-      if (employerPrefs.location.trim() !== '') {
-        filtered = filtered.filter((cand) => {
-          return (
-            cand.country.includes(employerPrefs.location) ||
-            cand.country.toLowerCase() === 'remote'
-          );
+    // 9) Example: compute your weekDelta
+    let totalDelta = 0;
+    let deltaCount = 0;
+    candidates.forEach((cand) => {
+      const stats =
+        mode === 'interview'
+          ? cand.interview_skill_stats
+          : cand.practice_skill_stats;
+      if (stats) {
+        stats.forEach((skill) => {
+          if (skill.previous_avg != null) {
+            totalDelta += skill.avg_score - skill.previous_avg;
+            deltaCount += 1;
+          }
         });
       }
-
-      // If no matches => skillGap
-      if (filtered.length === 0) {
-        setSkillGapMessage(
-          `No candidates found for skill: ${employerPrefs.skills} in ${employerPrefs.industry}, located in ${employerPrefs.location}.`,
-        );
-      } else {
-        setSkillGapMessage('');
-      }
-
-      // 3) Sort by highest average skill
-      const sorted = filtered.slice().sort((a, b) => {
-        return (
-          getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
-          getCandidateScoreAvgBySkill(a, employerPrefs.skills)
-        );
-      });
-
-      // Global ranking: sort all candidates who have stats (without location filter)
-      const globalCandidates = candidates.filter((cand) => {
-        const stats =
-          mode === 'interview'
-            ? cand.interview_skill_stats
-            : cand.practice_skill_stats;
-        return stats && stats.length > 0;
-      });
-
-      const globalSorted = globalCandidates.slice().sort((a, b) => {
-        return (
-          getCandidateScoreAvgBySkill(b, employerPrefs.skills) -
-          getCandidateScoreAvgBySkill(a, employerPrefs.skills)
-        );
-      });
-
-      setMatched(sorted);
-
-      // 4) topThree
-      const top3 = sorted.slice(0, 3);
-      setTopThree(top3);
-
-      const topWorldwide = globalSorted.slice(0, 3);
-      setTop3Worldwide(topWorldwide);
-
-      // 5) topProspect
-      setTopProspect(top3.length > 0 ? top3[0] : null);
-
-      // 7) Example: compute overall weekDelta => sum of (avg_score - previous_avg)
-      // We'll do it for whichever mode is selected
-      let totalDelta = 0;
-      let deltaCount = 0;
-
-      candidates.forEach((cand) => {
-        const stats =
-          mode === 'interview'
-            ? cand.interview_skill_stats
-            : cand.practice_skill_stats;
-
-        if (stats) {
-          stats.forEach((skill) => {
-            if (skill.previous_avg != null) {
-              totalDelta += skill.avg_score - skill.previous_avg;
-              deltaCount += 1;
-            }
-          });
-        }
-      });
-
-      if (deltaCount > 0) {
-        setWeekDelta(totalDelta / deltaCount);
-      } else {
-        setWeekDelta(0);
-      }
-    }
-  }, [mode, candidates, industryFilter, skillFilter, employerPrefs]);
+    });
+    setWeekDelta(deltaCount > 0 ? totalDelta / deltaCount : 0);
+  }, [
+    mode,
+    candidates,
+    industryFilter,
+    skillFilter,
+    locationFilter,
+    employerPrefs,
+  ]);
 
   if (loading) {
     return (
@@ -309,9 +283,9 @@ export default function EmployerDashboard() {
               employerPrefs={employerPrefs}
             />
           )}
-          <div className="flex justify-start text-center items-center gap-6">
+          <div className="flex flex-wrap justify-start gap-2">
             {/* Industry MultiSelect */}
-            <div className="text-sm w-full text-slate-500">
+            <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
               <label className="text-sm text-muted-foreground mb-1">
                 Industry
               </label>
@@ -322,16 +296,18 @@ export default function EmployerDashboard() {
                     role="combobox"
                     aria-expanded={industryOpen}
                     aria-haspopup="listbox"
-                    className="w-[200px] justify-between"
+                    className="w-full justify-between"
                   >
-                    {industryFilter ? industryFilter : 'All Industries...'}
+                    <span className="truncate">
+                      {industryFilter || 'All Industries...'}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full min-w-[200px] max-w-[300px] p-0 z-40 mt-2">
                   <Command>
                     <CommandInput placeholder="Search industry..." />
-                    <CommandList className="">
+                    <CommandList>
                       <CommandEmpty>No results found.</CommandEmpty>
                       <CommandGroup heading="Industries">
                         {availableIndustries.map((industry) => (
@@ -339,7 +315,16 @@ export default function EmployerDashboard() {
                             key={industry}
                             value={industry}
                             onSelect={(value) => {
-                              setIndustryFilter(industry);
+                              setIndustryFilter(value);
+                              setEmployerPrefs((prev) =>
+                                prev
+                                  ? { ...prev, industry }
+                                  : {
+                                    industry: value,
+                                    location: '',
+                                    skills: '',
+                                  },
+                              );
                               setIndustryOpen(false);
                             }}
                           >
@@ -352,8 +337,9 @@ export default function EmployerDashboard() {
                 </PopoverContent>
               </Popover>
             </div>
+
             {/* Skill MultiSelect */}
-            <div className="text-sm text-slate-500 w-full">
+            <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
               <label className="text-sm text-muted-foreground mb-1">
                 Skill
               </label>
@@ -364,9 +350,11 @@ export default function EmployerDashboard() {
                     role="combobox"
                     aria-expanded={skillOpen}
                     aria-haspopup="listbox"
-                    className="w-[200px] justify-between"
+                    className="w-full justify-between"
                   >
-                    {skillFilter ? skillFilter : 'All Skills...'}
+                    <span className="truncate">
+                      {skillFilter || 'All Skills...'}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -382,6 +370,15 @@ export default function EmployerDashboard() {
                             value={skill}
                             onSelect={(value) => {
                               setSkillFilter(skill);
+                              setEmployerPrefs((prev) =>
+                                prev
+                                  ? { ...prev, skills: skill }
+                                  : {
+                                    industry: '',
+                                    location: '',
+                                    skills: skill,
+                                  },
+                              );
                               setSkillOpen(false);
                             }}
                           >
@@ -394,7 +391,9 @@ export default function EmployerDashboard() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="text-center text-sm text-slate-500 w-full ">
+
+            {/* Location MultiSelect */}
+            <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
               <label className="text-sm text-muted-foreground mb-1">
                 Location
               </label>
@@ -405,9 +404,11 @@ export default function EmployerDashboard() {
                     role="combobox"
                     aria-expanded={locationOpen}
                     aria-haspopup="listbox"
-                    className="w-[200px] justify-between"
+                    className="w-full justify-between"
                   >
-                    {locationFilter ? locationFilter : 'All Locations...'}
+                    <span className="truncate">
+                      {locationFilter || 'All Locations...'}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -416,13 +417,18 @@ export default function EmployerDashboard() {
                     <CommandInput placeholder="Search location..." />
                     <CommandList className="w-full h-full">
                       <CommandEmpty>No results found.</CommandEmpty>
-                      <CommandGroup heading="Skills">
+                      <CommandGroup heading="Locations">
                         {availableLocations.map((loc) => (
                           <CommandItem
                             key={loc}
                             value={loc}
                             onSelect={(value) => {
                               setLocationFilter(loc);
+                              setEmployerPrefs((prev) =>
+                                prev
+                                  ? { ...prev, location: loc }
+                                  : { industry: '', location: loc, skills: '' },
+                              );
                               setLocationOpen(false);
                             }}
                           >

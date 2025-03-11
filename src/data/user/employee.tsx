@@ -58,9 +58,6 @@ export async function getCandidates(): Promise<CandidateRow[]> {
     return [];
   }
 
-  console.log('candidates', candidates);
-  console.log('userProfiles', userProfiles);
-
   return candidates.map((candidate) => {
     const userProfile = userProfiles.find(
       (profile) => profile.id === candidate.id,

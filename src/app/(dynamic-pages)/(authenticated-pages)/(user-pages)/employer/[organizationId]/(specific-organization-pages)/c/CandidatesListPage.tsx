@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -18,19 +17,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { CandidateFilters } from '@/components/Employee/Dashboard/Search/CandidateFilters';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getCandidates } from '@/data/user/employee';
 import {
-  getCandidates,
-  getEmployerCandidatePreferences,
-} from '@/data/user/employee';
-import { mockCandidates, type CandidateRow, type CandidateSkillsStats } from '@/types';
+  mockCandidates,
+  type CandidateRow,
+  type CandidateSkillsStats,
+} from '@/types';
 
 interface CandidatesListPageProps {
   organizationId: string;
@@ -44,14 +38,17 @@ export default function CandidatesListPage({
     [],
   );
   const [mode, setMode] = useState<'interview' | 'practice'>('practice');
-
-  const [searchQuery, setSearchQuery] = useState('');
-  // We add skill selection + minScore
-  const [skillFilter, setSkillFilter] = useState('');
-  const [industryFilter, setIndustryFilter] = useState('');
-  const [minScore, setMinScore] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // State to store selected filters
+  const [filters, setFilters] = useState({
+    industry: 'All Industries',
+    skill: 'All Skills',
+    location: 'All Locations',
+    minScore: 0,
+    searchQuery: '',
+  });
 
   const router = useRouter();
   // On mount, load the candidates
@@ -59,7 +56,7 @@ export default function CandidatesListPage({
     const fetchData = async () => {
       try {
         setLoading(true);
-      
+
         const candData = await getCandidates();
         setCandidates(candData.concat(mockCandidates));
 
@@ -82,64 +79,66 @@ export default function CandidatesListPage({
       mode === 'interview'
         ? cand.interview_skill_stats
         : cand.practice_skill_stats;
+    if (!stats || stats.length === 0) return null;
     const found = stats.find((s) => s.skill === skill);
     return found ? found.avg_score : null;
   }
 
-  // Helper: Compute candidate's best skill average from the selected mode stats
-  function getBestSkillAvg(cand: CandidateRow): number {
-    const stats =
-      mode === 'interview'
-        ? cand.interview_skill_stats
-        : cand.practice_skill_stats;
-    if (!stats || stats.length === 0) return 0;
-    return stats.reduce((max, s) => Math.max(max, s.avg_score), 0);
-  }
+  // // Helper: Compute candidate's best skill average from the selected mode stats
+  // function getBestSkillAvg(cand: CandidateRow): number {
+  //   const stats =
+  //     mode === 'interview'
+  //       ? cand.interview_skill_stats
+  //       : cand.practice_skill_stats;
+  //   if (!stats || stats.length === 0) return 0;
+  //   return stats.reduce((max, s) => Math.max(max, s.avg_score), 0);
+  // }
 
-  // Calculate unlock cost based on best skill average.
-  function getUnlockCost(cand: CandidateRow): number {
-    const bestAvg = getBestSkillAvg(cand);
-    if (bestAvg >= 90) return 3;
-    if (bestAvg >= 80) return 2;
-    return 1;
-  }
   useEffect(() => {
     // 1) Filter out candidates that don’t have any stats for the selected mode.
     let filtered = candidates.filter((cand) => {
-      if (mode === 'interview' && cand.interview_skill_stats.length === 0)
-        return false;
-      if (mode === 'practice' && cand.practice_skill_stats.length === 0)
-        return false;
+      if (mode === 'interview' && !cand.interview_skill_stats) return false;
+      if (mode === 'practice' && !cand.practice_skill_stats) return false;
       return true;
     });
 
     // 2) Basic text search on name, role, or industry.
-    if (searchQuery.trim() !== '') {
+    if (filters.searchQuery.trim()) {
       filtered = filtered.filter((c) => {
         const fullStr = c.full_name + c.role + c.industry;
-        return fullStr.toLowerCase().includes(searchQuery.toLowerCase());
+        return fullStr
+          .toLowerCase()
+          .includes(filters.searchQuery.toLowerCase());
       });
     }
 
     // Filter by industry only if a specific industry is chosen.
-    if (industryFilter.trim() !== '' && industryFilter !== 'All Industries') {
-      filtered = filtered.filter((cand) => {
-        return cand.industry
-          .toLowerCase()
-          .includes(industryFilter.toLowerCase());
-      });
+    if (filters.industry !== 'All Industries') {
+      filtered = filtered.filter((cand) =>
+        cand.industry.includes(filters.industry),
+      );
     }
 
-    // Filter by skill and minimum score only if a specific skill is chosen.
-    if (skillFilter.trim() !== '' && skillFilter !== 'All Skills') {
+    if (filters.skill !== 'All Skills') {
+      // Filter by skill and minimum score only if a specific skill is chosen.
       filtered = filtered.filter((cand) => {
-        const score = getCandidateSkillScore(cand, skillFilter);
-        return score !== null && score >= minScore;
+        const score = getCandidateSkillScore(cand, filters.skill);
+        return score !== null && score >= filters.minScore;
       });
+    }
+    
+    // Filter by location
+    if (filters.location !== 'All Locations') {
+      // e.g. match or 'remote'
+      filtered = filtered.filter(
+        (cand) =>
+          cand.country.includes(filters.location) ||
+          cand.country.toLowerCase() === 'remote',
+      );
     }
 
     setFilteredCandidates(filtered);
-  }, [searchQuery, skillFilter, minScore, candidates, mode, industryFilter]);
+  }, [filters, candidates, mode]);
 
   function handleViewCandidate(candidateId: string) {
     router.push(`/employer/${organizationId}/c/${candidateId}`);
@@ -151,7 +150,7 @@ export default function CandidatesListPage({
       mode === 'interview'
         ? cand.interview_skill_stats
         : cand.practice_skill_stats;
-    if (stats.length === 0) return null;
+    if (stats === null) return null;
     let best = stats[0];
     for (const s of stats) {
       if (s.avg_score > best.avg_score) {
@@ -159,15 +158,6 @@ export default function CandidatesListPage({
       }
     }
     return best;
-  }
-
-  // Example of "Unlock" flow
-  function handleUnlockCandidate(candidate: CandidateRow) {
-    const cost = getUnlockCost(candidate);
-    // In real code: call server action to spend tokens
-    alert(
-      `Unlocking ${candidate.full_name} for cost of ${cost} tokens (mock)!`,
-    );
   }
 
   return (
@@ -183,90 +173,23 @@ export default function CandidatesListPage({
         </TabsList>
       </Tabs>
       {/* Header / Nav / Filter */}
-      <div className="flex items-center h-full justify-between  gap-4 space-x-4">
-        <button
-          onClick={() => window.history.back()}
-          className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 p-1"
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <Input
-          placeholder="Search name, role, industry..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
-        {/* Skill + Min Score Filter Row */}
-        <div className="flex flex-col">
-          <label className="text-sm text-muted-foreground mb-1">
-            Industry Filter
-          </label>
-          <Select
-            value={industryFilter}
-            onValueChange={(e) => setIndustryFilter(e)}
+      <div className="flex items-center h-full w-full justify-between gap-4 space-x-4">
+        <div className="flex flex-wrap gap-4 ">
+          <button
+            onClick={() => window.history.back()}
+            className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 p-1"
           >
-            <SelectTrigger className="w-full border border-gray-300 bg-white dark:bg-gray-800 rounded-md px-3 py-2 focus:outline-none text-sm">
-              <SelectValue placeholder="All Industries" />
-            </SelectTrigger>
-            <SelectContent>
-              {[
-                'All Industries',
-                'Tech',
-                'IT',
-                'Finance',
-                'Healthcare',
-                'Education',
-                'Retail',
-                'Real Estate',
-                'Marketing',
-              ].map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Skill + Min Score Filter Row */}
-        <div className="flex flex-col">
-          <label className="text-sm text-muted-foreground mb-1">
-            Skill Filter
-          </label>
-          <Select value={skillFilter} onValueChange={(e) => setSkillFilter(e)}>
-            <SelectTrigger className="w-full border border-gray-300 bg-white dark:bg-gray-800 rounded-md px-3 py-2 focus:outline-none text-sm">
-              <SelectValue placeholder="All Skills" />
-            </SelectTrigger>
-            <SelectContent>
-              {[
-                'All Skills',
-                'Problem Solving',
-                'Communication',
-                'Teamwork',
-                'Leadership',
-                'Adaptability',
-                'Decision Making',
-              ].map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-            {/* Add any other skill in your dataset */}
-          </Select>
-        </div>
-
-        <div className="flex flex-col">
-          <label className="text-sm text-muted-foreground mb-1">
-            Min. Average Score
-          </label>
-          <Input
-            type="number"
-            min={0}
-            max={100}
-            value={minScore}
-            onChange={(e) => setMinScore(Number(e.target.value))}
-            className="max-w-[100px]"
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          {/* Reusable Filter Bar */}
+          <CandidateFilters
+            // If you have saved prefs, pass them here as initial or override
+            industryValue={'All Industries'}
+            skillValue={'All Skills'}
+            locationValue={'All Locations'}
+            minScoreValue={0}
+            searchQueryValue={''}
+            onChange={(updated) => setFilters(updated)}
           />
         </div>
       </div>
@@ -288,13 +211,11 @@ export default function CandidatesListPage({
                   <TableHead>Location</TableHead>
                   <TableHead>Industry</TableHead>
                   <TableHead>Top Skill</TableHead>
-                  {/* <TableHead>Cost (Tokens)</TableHead> */}
                   <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCandidates.map((candidate) => {
-                  // const cost = getUnlockCost(candidate);
                   const bestSkill = getBestSkillObject(candidate);
                   return (
                     <TableRow key={candidate.id}>

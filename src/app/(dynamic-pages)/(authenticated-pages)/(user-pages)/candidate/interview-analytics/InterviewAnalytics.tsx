@@ -270,7 +270,7 @@ export default function InterviewAnalyticsPage() {
             <PopoverContent className="w-[600px] p-0 z-40 mt-2">
               <Command>
                 <CommandInput placeholder="Search Template..." />
-                <CommandList className="w-full H-full">
+                <CommandList className="w-full h-full">
                   <CommandEmpty>No template found.</CommandEmpty>
                   <CommandGroup>
                     {uniqueFilteredTemplateInterviews &&

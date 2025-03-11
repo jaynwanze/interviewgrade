@@ -3,6 +3,20 @@
 import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
 import { StatisticsView } from '@/components/Employee/Dashboard/StatisticsView';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
@@ -14,7 +28,7 @@ import {
   type CandidateRow,
   type EmployerCandidatePreferences,
 } from '@/types';
-import { MultiSelectBox, MultiSelectBoxItem } from '@tremor/react';
+import { ChevronsUpDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const availableIndustries = [
@@ -37,6 +51,17 @@ const availableSkills = [
   'Leadership',
   'Adaptability',
   'Decision Making',
+];
+
+const availableLocations = [
+  'All Locations',
+  'United States',
+  'Canada',
+  'United Kingdom',
+  'Australia',
+  'Germany',
+  'India',
+  'Remote',
 ];
 
 // The EmployerDashboard
@@ -69,9 +94,13 @@ export default function EmployerDashboard() {
   const [mode, setMode] = useState<'interview' | 'practice'>('practice');
   // Employer preferences from a switcher
   // Multi-select filters: store as arrays.
-  const [industryFilters, setIndustryFilters] = useState<string[]>([]);
-  const [skillFilters, setSkillFilters] = useState<string[]>([]);
-
+  const [industryFilter, setIndustryFilter] =
+    useState<string>('All Industries');
+  const [skillFilter, setSkillFilter] = useState<string>('All Skills');
+  const [locationFilter, setLocationFilter] = useState<string>('All Locations');
+  const [industryOpen, setIndustryOpen] = useState(false);
+  const [skillOpen, setSkillOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
   // On initial mount, load our mock data
   useEffect(() => {
     const fetchData = async () => {
@@ -134,10 +163,10 @@ export default function EmployerDashboard() {
   useEffect(() => {
     // 1) Filter out any candidate who doesn’t have stats for the selected mode
     let filtered = candidates.filter((cand) => {
-      if (mode === 'interview' && cand.interview_skill_stats.length === 0) {
+      if (mode === 'interview' && cand.interview_skill_stats == null) {
         return false;
       }
-      if (mode === 'practice' && cand.practice_skill_stats.length === 0) {
+      if (mode === 'practice' && cand.practice_skill_stats == null) {
         return false;
       }
       return true;
@@ -155,24 +184,17 @@ export default function EmployerDashboard() {
     });
 
     // Industry multi-select: if any industry is selected and not "All Industries"
-    if (
-      industryFilters.length > 0 &&
-      !industryFilters.includes('All Industries')
-    ) {
-      filtered = filtered.filter((cand) =>
-        industryFilters.some((ind) =>
-          cand.industry.toLowerCase().includes(ind.toLowerCase()),
-        ),
-      );
+    if (industryFilter && !industryFilter.match('All Industries')) {
+      filtered = filtered.filter((cand) => {
+        return industryMatches(cand, industryFilter);
+      });
     }
 
     // Skill multi-select: if any skill is selected and not "All Skills"
-    if (skillFilters.length > 0 && !skillFilters.includes('All Skills')) {
-      filtered = filtered.filter((cand) =>
-        skillFilters.some((skill) => {
-          return hasPreferredSkill(cand, skill);
-        }),
-      );
+    if (skillFilter && !skillFilter.match('All Skills')) {
+      filtered = filtered.filter((cand) => {
+        return hasPreferredSkill(cand, skillFilter);
+      });
     }
 
     if (employerPrefs) {
@@ -189,7 +211,7 @@ export default function EmployerDashboard() {
       // If no matches => skillGap
       if (filtered.length === 0) {
         setSkillGapMessage(
-          `No candidates found for skill: ${employerPrefs.skills} in ${employerPrefs.industry}, ${employerPrefs.location} (mode: ${mode}).`,
+          `No candidates found for skill: ${employerPrefs.skills} in ${employerPrefs.industry}, located in ${employerPrefs.location}.`,
         );
       } else {
         setSkillGapMessage('');
@@ -242,12 +264,14 @@ export default function EmployerDashboard() {
             ? cand.interview_skill_stats
             : cand.practice_skill_stats;
 
-        stats.forEach((skill) => {
-          if (skill.previous_avg != null) {
-            totalDelta += skill.avg_score - skill.previous_avg;
-            deltaCount += 1;
-          }
-        });
+        if (stats) {
+          stats.forEach((skill) => {
+            if (skill.previous_avg != null) {
+              totalDelta += skill.avg_score - skill.previous_avg;
+              deltaCount += 1;
+            }
+          });
+        }
       });
 
       if (deltaCount > 0) {
@@ -256,7 +280,7 @@ export default function EmployerDashboard() {
         setWeekDelta(0);
       }
     }
-  }, [mode, candidates, industryFilters, skillFilters, employerPrefs]);
+  }, [mode, candidates, industryFilter, skillFilter, employerPrefs]);
 
   if (loading) {
     return (
@@ -272,86 +296,147 @@ export default function EmployerDashboard() {
         <p className="text-red-500">{error}</p>
       </div>
     );
-  }
-  else
-  return (
-    <TooltipProvider>
-      <div className="space-y-6 max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+  } else
+    return (
+      <TooltipProvider>
+        <div className="space-y-6 max-w-5xl mx-auto">
+          <h1 className="text-2xl font-bold">Employer Dashboard</h1>
 
-        {employerPrefs && (
-          <StatisticsView
-            stats={stats}
-            weekDelta={weekDelta}
-            employerPrefs={employerPrefs}
-          />
-        )}
-        <div className="flex justify-start text-center items-center gap-6">
-          {/* Industry MultiSelect */}
-          <div className="text-sm text-slate-500 w-full">
-            <label className="text-sm text-muted-foreground mb-1">Job</label>
-            <MultiSelectBox
-              value={industryFilters}
-              onValueChange={(values) => setIndustryFilters(values)}
-              placeholder="Select industries"
-            >
-              {availableIndustries.map((industry) => (
-                <MultiSelectBoxItem key={industry} value={industry}>
-                  {industry}
-                </MultiSelectBoxItem>
-              ))}
-            </MultiSelectBox>
-          </div>
-          {/* Industry MultiSelect */}
-          <div className="text-sm text-slate-500 w-full">
-            <label className="text-sm text-muted-foreground mb-1">
-              Industry
-            </label>
-            <MultiSelectBox
-              value={industryFilters}
-              onValueChange={(values) => setIndustryFilters(values)}
-              placeholder="Select industries"
-            >
-              {availableIndustries.map((industry) => (
-                <MultiSelectBoxItem key={industry} value={industry}>
-                  {industry}
-                </MultiSelectBoxItem>
-              ))}
-            </MultiSelectBox>
-          </div>
-          {/* Skill MultiSelect */}
-          <div className="text-sm text-slate-500 w-full">
-            <label className="text-sm text-muted-foreground mb-1">Skill</label>
-            <MultiSelectBox
-              value={skillFilters}
-              onValueChange={(values) => setSkillFilters(values)}
-              placeholder="Select skills"
-            >
-              {availableSkills.map((skill) => (
-                <MultiSelectBoxItem key={skill} value={skill}>
-                  {skill}
-                </MultiSelectBoxItem>
-              ))}
-            </MultiSelectBox>
-          </div>
-          <div className="text-center text-sm text-slate-500 w-full ">
-            <label className="text-sm text-muted-foreground mb-1">
-              Location
-            </label>
-            <MultiSelectBox
-              value={skillFilters}
-              onValueChange={(values) => setSkillFilters(values)}
-              placeholder="Select skills"
-            >
-              {availableSkills.map((skill) => (
-                <MultiSelectBoxItem key={skill} value={skill}>
-                  {skill}
-                </MultiSelectBoxItem>
-              ))}
-            </MultiSelectBox>
-          </div>
+          {employerPrefs && (
+            <StatisticsView
+              stats={stats}
+              weekDelta={weekDelta}
+              employerPrefs={employerPrefs}
+            />
+          )}
+          <div className="flex justify-start text-center items-center gap-6">
+            {/* Industry MultiSelect */}
+            <div className="text-sm w-full text-slate-500">
+              <label className="text-sm text-muted-foreground mb-1">
+                Industry
+              </label>
+              <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={industryOpen}
+                    aria-haspopup="listbox"
+                    className="w-[200px] justify-between"
+                  >
+                    {industryFilter ? industryFilter : 'All Industries...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full min-w-[200px] max-w-[300px] p-0 z-40 mt-2">
+                  <Command>
+                    <CommandInput placeholder="Search industry..." />
+                    <CommandList className="">
+                      <CommandEmpty>No results found.</CommandEmpty>
+                      <CommandGroup heading="Industries">
+                        {availableIndustries.map((industry) => (
+                          <CommandItem
+                            key={industry}
+                            value={industry}
+                            onSelect={(value) => {
+                              setIndustryFilter(industry);
+                              setIndustryOpen(false);
+                            }}
+                          >
+                            {industry}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            {/* Skill MultiSelect */}
+            <div className="text-sm text-slate-500 w-full">
+              <label className="text-sm text-muted-foreground mb-1">
+                Skill
+              </label>
+              <Popover open={skillOpen} onOpenChange={setSkillOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={skillOpen}
+                    aria-haspopup="listbox"
+                    className="w-[200px] justify-between"
+                  >
+                    {skillFilter ? skillFilter : 'All Skills...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full min-w-[100px] max-w-[300px] p-0 z-40 mt-2">
+                  <Command>
+                    <CommandInput placeholder="Search skill..." />
+                    <CommandList className="w-full h-full">
+                      <CommandEmpty>No results found.</CommandEmpty>
+                      <CommandGroup heading="Skills">
+                        {availableSkills.map((skill) => (
+                          <CommandItem
+                            key={skill}
+                            value={skill}
+                            onSelect={(value) => {
+                              setSkillFilter(skill);
+                              setSkillOpen(false);
+                            }}
+                          >
+                            {skill}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="text-center text-sm text-slate-500 w-full ">
+              <label className="text-sm text-muted-foreground mb-1">
+                Location
+              </label>
+              <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={locationOpen}
+                    aria-haspopup="listbox"
+                    className="w-[200px] justify-between"
+                  >
+                    {locationFilter ? locationFilter : 'All Locations...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full min-w-[100px] max-w-[300px] p-0 z-40 mt-2">
+                  <Command>
+                    <CommandInput placeholder="Search location..." />
+                    <CommandList className="w-full h-full">
+                      <CommandEmpty>No results found.</CommandEmpty>
+                      <CommandGroup heading="Skills">
+                        {availableLocations.map((loc) => (
+                          <CommandItem
+                            key={loc}
+                            value={loc}
+                            onSelect={(value) => {
+                              setLocationFilter(loc);
+                              setLocationOpen(false);
+                            }}
+                          >
+                            {loc}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
 
-          {/* Example submit button (or you might trigger filtering onChange)
+            {/* Example submit button (or you might trigger filtering onChange)
           <Button
             type="button"
             onClick={() =>
@@ -365,34 +450,36 @@ export default function EmployerDashboard() {
           >
             Apply Filters
           </Button> */}
+          </div>
+
+          {/* TABS for "Interview Mode" / "Practice Mode" */}
+          <h1 className="text-2xl font-bold">Candidate Statistics</h1>
+          <Tabs
+            defaultValue="practice"
+            onValueChange={(value) =>
+              setMode(value as 'interview' | 'practice')
+            }
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="practice">Practice Statistics</TabsTrigger>
+              <TabsTrigger value="interview">Interview Statistics</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {/* Show Matches */}
+          {employerPrefs && (
+            <MatchedCandidatesView
+              skillGapMessage={skillGapMessage}
+              topThree={topThree}
+              topProspect={topProspect}
+              matched={matched}
+              top3Worldwide={top3Worldwide}
+              mode={mode}
+              employersPrefs={employerPrefs}
+            />
+          )}
         </div>
-
-        {/* TABS for "Interview Mode" / "Practice Mode" */}
-        <h1 className="text-2xl font-bold">Candidate Statistics</h1>
-        <Tabs
-          defaultValue="practice"
-          onValueChange={(value) => setMode(value as 'interview' | 'practice')}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="practice">Practice Statistics</TabsTrigger>
-            <TabsTrigger value="interview">Interview Statistics</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        {/* Show Matches */}
-        {employerPrefs && (
-          <MatchedCandidatesView
-            skillGapMessage={skillGapMessage}
-            topThree={topThree}
-            topProspect={topProspect}
-            matched={matched}
-            top3Worldwide={top3Worldwide}
-            mode={mode}
-            employersPrefs={employerPrefs}
-          />
-        )}
-      </div>
-    </TooltipProvider>
-  );
+      </TooltipProvider>
+    );
 }

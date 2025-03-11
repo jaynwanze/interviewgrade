@@ -12,7 +12,6 @@ import { renderAsync } from '@react-email/render';
 import slugify from 'slugify';
 import urlJoin from 'url-join';
 import ConfirmAccountDeletionEmail from '../../../emails/account-deletion-request';
-import { updateCandidateProfileDetailsAction } from './candidate';
 import { refreshSessionAction } from './session';
 
 export async function getIsAppAdmin(): Promise<boolean> {
@@ -299,6 +298,10 @@ export const getUserType = async (userId: string): Promise<UserType> => {
 export const getCandidateUserProfile = async (
   userId: string,
 ): Promise<Table<'candidates'>> => {
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('candidates')

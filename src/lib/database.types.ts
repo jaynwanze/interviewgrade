@@ -188,6 +188,40 @@ export type Database = {
           },
         ]
       }
+
+      employee_candidate_unlocks: {
+        Row: {
+          employee_id: string
+          candidate_id: string
+          created_at: string
+        }
+        Insert: {
+          employee_id: string
+          candidate_id: string
+          created_at: string
+        }
+        Update: {
+          employee_id?: string
+          candidate_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_candidate_unlocks_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_candidate_unlocks_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: true
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           id: string

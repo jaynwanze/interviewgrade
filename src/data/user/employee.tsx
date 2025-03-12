@@ -2,9 +2,11 @@
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type {
+  CandidateDetailsView,
   CandidateRow,
   EmployerCandidatePreferences,
   Product,
+  RecentAttempt,
   SAPayload,
   StripeCheckoutSessionDetails,
   Table,
@@ -18,14 +20,65 @@ import { refreshSessionAction } from './session';
 import { getEmployeeUserProfile } from './user';
 
 export async function unlockCandidateAction(
-  employerId: string,
   candidateId: string,
-) {
+): Promise<SAPayload<boolean>> {
+
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    throw new Error('User not found');
+  }
+  const employerId = user.id;
   // 1) fetch tokens for employer
+  const tokens = await getCurrentEmployeeTokens();
+  if (!tokens) {
+    throw new Error('No tokens found for employer');
+  }
   // 2) if tokens < 1 => throw error
+  if (tokens.tokens_available < 2) {
+    throw new Error('No tokens available');
+  }
   // 3) decrement token
+  const updatedTokens = await createSupabaseUserServerActionClient()
+    .from('tokens')
+    .update({ tokens_available: tokens.tokens_available - 2 })
+    .eq('id', tokens.id)
+    .single();
+  if (!updatedTokens) {
+    throw new Error('Error updating tokens');
+  }
+
   // 4) insert into employee_candidate_unlocks
+  const { error: unlockError } = await createSupabaseUserServerActionClient()
+    .from('employee_candidate_unlocks')
+    .insert([
+      {
+        employee_id: employerId,
+        candidate_id: candidateId,
+        created_at: new Date().toISOString(),
+      },
+    ])
+    .single();
+  if (unlockError) {
+    // rollback token
+    await createSupabaseUserServerActionClient()
+      .from('tokens')
+      .update({ tokens_available: tokens.tokens_available })
+      .eq('id', tokens.id)
+      .single();
+
+    return {
+      status: 'error',
+      message:
+        unlockError.message ||
+        'Error unlocking candidate but your tokens have not been deducted. Please try again',
+    };
+  }
+
   // 5) return success
+  return {
+    status: 'success',
+    data: true,
+  };
 }
 
 export async function getCandidates(): Promise<CandidateRow[]> {
@@ -33,7 +86,6 @@ export async function getCandidates(): Promise<CandidateRow[]> {
     await createSupabaseUserServerComponentClient()
       .from('candidates')
       .select('*');
-      
 
   if (candidatesError) {
     throw new Error('Error fetching candidates');
@@ -70,6 +122,144 @@ export async function getCandidates(): Promise<CandidateRow[]> {
       email: userProfile?.email ?? '',
     };
   });
+}
+
+export async function getRecentAttempts(
+  candidateId: string,
+): Promise<RecentAttempt[]> {
+  if (!candidateId) {
+    throw new Error('Candidate ID is required to fetch recent attempts');
+  }
+
+  const { data: interviews, error: interviewsError } =
+    await createSupabaseUserServerComponentClient()
+      .from('interviews')
+      .select('*');
+
+  if (interviewsError) {
+    console.error('Error fetching recent attempts:', interviewsError.message);
+    throw new Error('Error fetching recent attempts');
+  }
+
+  if (!interviews || interviews.length === 0) {
+    console.warn('No recent attempts found for candidateId:', candidateId);
+    return [];
+  }
+
+  console.log('Fetched interviews:', interviews);
+
+  const interviewIds = interviews.map((interview) => interview.id);
+
+  const { data: evals, error: evalErrors } =
+    await createSupabaseUserServerComponentClient()
+      .from('interview_evaluations')
+      .select('*')
+      .in('interview_id', interviewIds);
+
+  if (evalErrors) {
+    console.error(
+      'Error fetching recent attempts evaluations:',
+      evalErrors.message,
+    );
+    throw new Error('Error fetching recent attempts evaluations');
+  }
+
+  if (!evals || evals.length === 0) {
+    console.warn('No evaluations found for interviewIds:', interviewIds);
+    return [];
+  }
+
+  console.log('Fetched evaluations:', evals);
+
+  return interviews.map((interview) => {
+    const evaluation = evals.find((ev) => ev.interview_id === interview.id);
+
+    return {
+      interview_id: interview.id,
+      interview_mode: interview.mode,
+      date: interview.end_time,
+      skillFocus: interview.title, // replace with actual value
+      score: evaluation?.overall_grade ?? 0,
+    } as RecentAttempt;
+  });
+}
+export async function getCandidateById(
+  candidateId: string,
+): Promise<CandidateDetailsView | null> {
+  const { data: candidate, error: candidateError } =
+    await createSupabaseUserServerComponentClient()
+      .from('candidates')
+      .select('*')
+      .eq('id', candidateId)
+      .single();
+
+  if (candidateError) {
+    throw new Error('Error fetching candidate');
+  }
+
+  if (!candidate) {
+    return null;
+  }
+
+  const { data: userProfile, error: userError } =
+    await createSupabaseUserServerComponentClient()
+      .from('user_profiles')
+      .select('id,full_name, avatar_url,email')
+      .eq('id', candidateId)
+      .single();
+
+  if (userError) {
+    throw new Error('Error fetching candidate details');
+  }
+
+  if (!userProfile) {
+    return null;
+  }
+
+  const recentAttempts = await getRecentAttempts(candidateId);
+
+  const user = await serverGetLoggedInUser();
+  if (!user) {
+    throw new Error('User not found');
+  }
+  const employerId = user.id;
+  const isUnlocked = await checkIsCandidateUnlocked(candidateId, employerId);
+  if (!isUnlocked) {
+    candidate.resume_url = '';
+    userProfile.email = '';
+  }
+
+  return {
+    ...candidate,
+    full_name: userProfile.full_name ?? '',
+    avatar_url: userProfile.avatar_url ?? '',
+    email: userProfile.email ?? '',
+    recentAttempts,
+    isUnlocked,
+  };
+}
+
+export async function checkIsCandidateUnlocked(
+  candidateId: string,
+  employerId: string,
+): Promise<boolean> {
+  const { data, error } = await createSupabaseUserServerComponentClient()
+    .from('employee_candidate_unlocks')
+    .select('*')
+    .eq('candidate_id', candidateId)
+    .eq('employee_id', employerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking if candidate is unlocked:', error.message);
+    throw new Error('Error checking if candidate is unlocked');
+  }
+
+  if (!data) {
+    return false;
+  }
+
+  return !!data;
 }
 
 // export async function fetchEmployerPreferences(): Promise<

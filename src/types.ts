@@ -65,8 +65,8 @@ export type EmployerCandidatePreferences = {
 };
 
 export type RecentAttempt = {
-  id: string;
-  type: 'practice' | 'interview';
+  interview_id: string;
+  interview_mode: 'practice' | 'interview';
   date: string;
   skillFocus: string;
   score: number;
@@ -91,6 +91,25 @@ export interface CandidateRow {
 
 export type Candidate = Table<'candidates'>;
 
+
+export type CandidateDetailsView = {
+  id: string;
+  city: string;
+  country: string;
+  phone_number: string;
+  summary: string;
+  role: string;
+  industry: string;
+  practice_skill_stats: CandidateSkillsStats[];
+  interview_skill_stats: CandidateSkillsStats[];
+  created_at: string;
+  full_name: string;
+  avatar_url?: string;
+  email: string;
+  resumeUrl?: string;
+  recentAttempts?: RecentAttempt[];
+  isUnlocked?: boolean;
+};
 export type CandidateSkillsStats = {
   template_id: string;
   skill: string;

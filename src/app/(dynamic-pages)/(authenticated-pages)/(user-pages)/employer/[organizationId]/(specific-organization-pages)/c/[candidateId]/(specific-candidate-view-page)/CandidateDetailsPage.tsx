@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
   Dialog,
   DialogContent,
@@ -30,35 +31,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { CandidateSkillsStats } from '@/types';
+import { getCandidateById, unlockCandidateAction } from '@/data/user/employee';
+import { useTokens } from '@/hooks/useTokens';
+import { CandidateDetailsView } from '@/types';
 import { FileText, Lock, Mail, Star } from 'lucide-react';
 
-type RecentAttempt = {
-  id: string;
-  type: 'practice' | 'interview';
-  date: string;
-  skillFocus: string;
-  score: number;
-};
-
-type CandidateDetailsView = {
-  id: string;
-  city: string;
-  country: string;
-  phone_number: string;
-  summary: string;
-  role: string;
-  industry: string;
-  practice_skill_stats: CandidateSkillsStats[];
-  interview_skill_stats: CandidateSkillsStats[];
-  created_at: string;
-  full_name: string;
-  avatar_url?: string;
-  email: string;
-  resumeUrl?: string;
-  recentAttempts?: RecentAttempt[];
-  isUnlocked?: boolean;
-};
 const mockCandidate: CandidateDetailsView = {
   id: 'c1',
   city: 'New York',
@@ -97,40 +74,62 @@ const mockCandidate: CandidateDetailsView = {
   resumeUrl: 'https://example.com/mock-cv.pdf', // Simulated CV link
   recentAttempts: [
     {
-      id: 'attempt1',
-      type: 'practice',
+      interview_id: 'attempt1',
+      interview_mode: 'practice',
       date: '2024-05-02T10:30:00Z',
       skillFocus: 'Communication',
       score: 85,
     },
     {
-      id: 'attempt2',
-      type: 'interview',
+      interview_id: 'attempt2',
+      interview_mode: 'interview',
       date: '2024-04-29T09:00:00Z',
       skillFocus: 'Problem Solving',
       score: 92,
     },
   ],
+  isUnlocked: false,
 };
 export default function CandidateDetailsPage({
   candidateId,
 }: {
   candidateId: string;
 }) {
-  const [candidate, setCandidate] =
-    useState<CandidateDetailsView>(mockCandidate);
-  const [notes, setNotes] = useState('');
+  const [candidate, setCandidate] = useState<CandidateDetailsView | null>(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // e.g., the employer has 2 tokens left
-  const [tokensLeft, setTokensLeft] = useState(2);
   // Example performance toggle for "Interview" vs. "Practice"
   const [performanceMode, setPerformanceMode] = useState<
     'interview' | 'practice'
-  >('interview');
+  >('practice');
 
   // For viewing the CV in a dialog
   const [openResumeDialog, setOpenResumeDialog] = useState(false);
+
+  const { data: tokens, isLoading, isError } = useTokens();
+
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      setLoading(true);
+      try {
+        const data = await getCandidateById(candidateId);
+        if (!data) {
+          setError('Candidate not found.');
+          return;
+        }
+        setCandidate(data);
+      } catch (error) {
+        setError('Failed to fetch candidate details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (candidateId) {
+      fetchCandidate();
+    }
+  }, [candidateId]);
 
   function handleEmailCandidate() {
     // Instead of showing the email directly, we open the user's email client.
@@ -144,14 +143,25 @@ export default function CandidateDetailsPage({
     return 'bg-red-500 text-white';
   };
 
-  function handleUnlock() {
-    if (tokensLeft < 1) {
-      setError('You do not have enough tokens to unlock contact info.');
+  async function handleUnlock() {
+    if ((tokens?.tokens_available ?? 0) < 2) {
+      // Not enough tokens to unlock
+      // show dialog to buy more tokens
       return;
     }
     // Real code: call server action or API to spend a token & mark as unlocked
-    setTokensLeft((prev) => prev - 1);
-    setCandidate((prev) => ({ ...prev, isUnlocked: true }));
+    const data = await unlockCandidateAction(candidateId);
+
+    if (!data) {
+      setError('Failed to unlock candidate. Refresh and try again.');
+      return;
+    }
+
+    if ('success' in data && data.success) {
+      //refresh hook
+      //Refresh page to show unlocked content 
+      window.location.reload();
+    }
     setError('');
   }
 
@@ -187,6 +197,22 @@ export default function CandidateDetailsPage({
     return Math.round(sum / stats.length);
   }
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64 min-h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!candidate) {
+    return (
+      <div className="flex justify-center items-center h-64 min-h-screen">
+        <p className="text-lg text-muted-foreground">Candidate not found.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto py-6">
       {/* Basic candidate info */}
@@ -210,30 +236,34 @@ export default function CandidateDetailsPage({
               <Badge variant="secondary">{candidate.country}</Badge>
             </span>
             <div className="flex gap-4 mt-2">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Top Practice Skill</strong>
-                </p>
-                <Badge
-                  variant="outline"
-                  className="flex items-center gap-1 mt-1"
-                >
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  {getBestSkill(candidate, 'practice').skill}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Top Interview Skill</strong>
-                </p>
-                <Badge
-                  variant="outline"
-                  className="flex items-center gap-1 mt-1"
-                >
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  {getBestSkill(candidate, 'interview').skill}
-                </Badge>
-              </div>
+              {getBestSkill(candidate, 'practice').skill !== 'N/A' && (
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Top Practice Skill</strong>
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 mt-1"
+                  >
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    {getBestSkill(candidate, 'practice').skill}
+                  </Badge>
+                </div>
+              )}
+              {getBestSkill(candidate, 'interview').skill !== 'N/A' && (
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Top Interview Skill</strong>
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 mt-1"
+                  >
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    {getBestSkill(candidate, 'interview').skill}
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -252,12 +282,11 @@ export default function CandidateDetailsPage({
           <CardHeader>
             <CardTitle>Contact Details</CardTitle>
             <CardDescription>
-              Spend 1 token to unlock deeper info and access to this contact
+              Spend 2 tokens to unlock deeper info and access to this contact
               candidate.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
             <p className="text-sm text-muted-foreground">
               <Lock className="inline-block w-4 h-4 mr-1" />
               Unlock access to potential hire to get in touch.
@@ -265,7 +294,7 @@ export default function CandidateDetailsPage({
             <div className="flex items-center justify-center mt-4">
               <Button onClick={handleUnlock} variant="default">
                 <Lock className="mr-2 h-4 w-4" />
-                Unlock Candidate (Tokens left: {tokensLeft})
+                Unlock Candidate (Tokens left: {tokens?.tokens_available ?? 0})
               </Button>
             </div>
             <div className="relative mt-4">
@@ -397,7 +426,7 @@ export default function CandidateDetailsPage({
                 <strong>Current Avg Score</strong>
               </p>
               <span className="text-xl font-bold">
-                {getBestSkill(candidate, performanceMode).avg_score}%
+                {getBestSkill(candidate, performanceMode).avg_score.toFixed(1)}%
               </span>
             </div>
             <div>
@@ -405,7 +434,11 @@ export default function CandidateDetailsPage({
                 <strong>Current Avg Score Across All Skills</strong>
               </p>
               <span className="text-xl font-bold">
-                {getOverallSkillsAverageScore(candidate, performanceMode)}%
+                {getOverallSkillsAverageScore(
+                  candidate,
+                  performanceMode,
+                ).toFixed(1)}
+                %
               </span>
             </div>
           </div>
@@ -420,54 +453,72 @@ export default function CandidateDetailsPage({
             <TableBody>
               {(performanceMode === 'interview'
                 ? candidate.interview_skill_stats
-                : candidate.practice_skill_stats
-              ).map((stat) => (
-                <TableRow key={stat.template_id}>
-                  <TableCell>{stat.skill}</TableCell>
-                  <Badge
-                    className={`px-4 py-2 m-2 text-md ${getBadgeColor(stat.avg_score)}`}
-                  >
-                    {stat.avg_score}%
-                  </Badge>
+                : candidate.practice_skill_stats) !== null ? (
+                (performanceMode === 'interview'
+                  ? candidate.interview_skill_stats
+                  : candidate.practice_skill_stats
+                ).map((stat) => (
+                  <TableRow key={stat.template_id}>
+                    <TableCell>{stat.skill}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={`px-4 py-2 m-2 text-md ${getBadgeColor(stat.avg_score)}`}
+                      >
+                        {stat.avg_score.toFixed(1)}%
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center">
+                    No data available
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
       {/* Recent Attempts (optional) */}
-      {candidate.recentAttempts && candidate.recentAttempts.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Attempts</CardTitle>
-            <CardDescription>
-              Candidate’s latest practice or interviews
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {candidate.recentAttempts.map((attempt) => (
-              <div
-                key={attempt.id}
-                className="flex items-center justify-between bg-muted p-2 rounded"
-              >
-                <div>
-                  <p className="text-sm font-medium capitalize">
-                    {attempt.type} attempt
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(attempt.date).toLocaleString()} — Focus on{' '}
-                    {attempt.skillFocus}
-                  </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Attempts</CardTitle>
+          <CardDescription>
+            Candidate’s latest practice or interviews
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {candidate.recentAttempts && candidate.recentAttempts.length > 0 ? (
+            <>
+              {candidate.recentAttempts.map((attempt) => (
+                <div
+                  key={attempt.interview_id}
+                  className="flex items-center justify-between bg-muted p-2 rounded"
+                >
+                  <div>
+                    <p className="text-sm font-medium capitalize">
+                      {attempt.interview_mode} attempt
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(attempt.date).toLocaleString()} — Focus on{' '}
+                      {attempt.skillFocus}
+                    </p>
+                  </div>
+                  <div className="text-sm font-semibold text-foreground">
+                    {attempt.score}%
+                  </div>
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {attempt.score}%
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+              ))}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No recent attempts found.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Employer’s Private Notes */}
       {/* <Card>
@@ -492,3 +543,4 @@ export default function CandidateDetailsPage({
     </div>
   );
 }
+

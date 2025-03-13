@@ -2,38 +2,44 @@
 
 import { motion } from 'framer-motion';
 
-const SENTIMENT_DETAILS: Record<
-  string,
-  { icon: string; description: string; color: string }
-> = {
-  admiration: { icon: '🌟', description: 'Great performance!', color: 'bg-blue-500' },
-  approval: { icon: '👍', description: 'Positive affirmation!', color: 'bg-green-600' },
-  optimism: { icon: '🌈', description: 'Hopeful and positive!', color: 'bg-blue-300' },
-  pride: { icon: '🏆', description: 'A sense of accomplishment.', color: 'bg-orange-400' },
-  gratitude: { icon: '🙏', description: 'Thankful response.', color: 'bg-yellow-600' },
-  realization: { icon: '💡', description: 'A moment of clarity.', color: 'bg-blue-600' },
-
-  // Moderate sentiment (neutral but slightly leaning)
-  curiosity: { icon: '🔍', description: 'Showing interest.', color: 'bg-blue-400' },
-  confusion: { icon: '🤔', description: 'Needs further clarity.', color: 'bg-gray-500' },
-
-  // Negative sentiment
-  annoyance: { icon: '😤', description: 'Mild dissatisfaction.', color: 'bg-orange-500' },
-  disappointment: { icon: '😞', description: 'Did not meet expectations.', color: 'bg-gray-600' },
-  sadness: { icon: '😢', description: 'Feeling down.', color: 'bg-gray-700' },
-
-  // Default fallback (neutral sentiment)
-  neutral: { icon: '😐', description: 'Balanced feedback.', color: 'bg-gray-400' },
+// Types
+type SentimentType = 'positive' | 'neutral' | 'negative';
+export type SentimentDetails= {
+  icon: string;
+  color: string;
 };
 
-const SentimentDisplay = ({
-  label,
-  score,
-}: {
-  label: string;
-  score: number;
-}) => {
-  const sentiment = SENTIMENT_DETAILS[label] || SENTIMENT_DETAILS['neutral']; // Default to neutral if unknown
+// Base details for each sentiment type
+export const SENTIMENT_DETAILS = {
+  positive: { icon: '👍', color: 'bg-green-600' },
+  neutral: { icon: '😐', color: 'bg-gray-400' },
+  negative: { icon: '👎', color: 'bg-red-600' },
+};
+
+// Function to compute a dynamic description based on label and confidence score.
+export const getDynamicDescription = (label: string, score: number) => {
+  if (label === 'positive') {
+    if (score < 70) return 'Positive performance, but still needs improvement.';
+    else if (score < 90) return 'Very good performance!';
+    else return 'Excellent work!';
+  } else if (label === 'neutral') {
+    if (score < 70) return 'Balanced feedback with room for growth.';
+    else if (score < 90)
+      return 'Consistent performance; consider areas for enhancement.';
+    else return 'Solid performance overall!';
+  } else if (label === 'negative') {
+    if (score < 70) return 'Minor issues noted; improvements are possible.';
+    else if (score < 90)
+      return 'Clear areas for improvement; attention needed.';
+    else return 'Significant concerns; major improvements required.';
+  } else {
+    return 'Sentiment analsyis not avaiable.';
+  }
+};
+
+const SentimentDisplay = ({ label, score }) => {
+  const sentiment = SENTIMENT_DETAILS[label] || SENTIMENT_DETAILS['neutral'];
+  const dynamicDescription = getDynamicDescription(label, score);
 
   return (
     <div className="w-full max-w-md p-4 bg-white dark:bg-gray-900 shadow-lg rounded-lg border border-gray-200 dark:border-gray-800">
@@ -44,12 +50,10 @@ const SentimentDisplay = ({
             {label.toUpperCase()}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {sentiment.description}
+            {dynamicDescription}
           </p>
         </div>
       </div>
-
-      {/* Animated Progress Bar */}
       <div className="mt-4 h-3 w-full bg-gray-300 rounded-full">
         <motion.div
           initial={{ width: '0%' }}
@@ -58,7 +62,6 @@ const SentimentDisplay = ({
           className={`h-full ${sentiment.color} rounded-full`}
         />
       </div>
-
       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
         Confidence: <span className="font-bold">{score.toFixed(0)}%</span>
       </p>

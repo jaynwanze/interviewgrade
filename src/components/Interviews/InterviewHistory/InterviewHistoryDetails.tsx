@@ -2,7 +2,11 @@
 
 import { ChatInterface } from '@/components/Interviews/InterviewHistory/InterviewHistoryChatInterface';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import SentimentDisplay from '@/components/SentimentDisplay';
+import {
+  SENTIMENT_DETAILS,
+  SentimentDetails,
+  getDynamicDescription,
+} from '@/components/SentimentDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -28,6 +32,7 @@ import {
   InterviewEvaluation,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
@@ -37,44 +42,27 @@ import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCrit
 export type SentimentScore = {
   label: string;
   score: number;
+  aggregated_scores?: Record<string, number>;
 };
 
-// --- Utility: Fetch sentiment score from our API ---
-export async function fetchSentiment(text: string) {
+export async function fetchSentiment(
+  feedbacks: string[],
+): Promise<SentimentScore> {
   try {
     const res = await fetch('http://localhost:5000/predict', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ feedbacks }),
     });
-
     if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-
     const data = await res.json();
     console.log('Sentiment API response:', data);
-
-    // ✅ Handle fallback if confidence is low
-    const confidenceThreshold = 50; // Min confidence to display label
-    const fallbackLabel = 'neutral';
-
-    return {
-      label: data.score >= confidenceThreshold ? data.label : fallbackLabel,
-      score: data.score,
-    };
+    return data;
   } catch (error) {
     console.error('Error fetching sentiment:', error);
-    return { label: 'neutral', score: 50 };
+    return { label: 'neutral', score: 50, aggregated_scores: {} };
   }
 }
-
-//   // Extract the highest sentiment score
-//   const highestSentiment = data.result[0].reduce(
-//     (prev: any, current: any) => (current.score > prev.score ? current : prev),
-//     { score: 0 }
-//   );
-
-//   return highestSentiment.score * 100; // Convert to percentage
-// }
 
 export const InterviewHistoryDetails = ({
   interviewId,
@@ -85,9 +73,11 @@ export const InterviewHistoryDetails = ({
   const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(
     null,
   );
-  const [sentimentScores, setSentimentScores] = useState<
-    SentimentScore[] | null
-  >(null);
+  const [sentimentDetails, setSentimentDetails] =
+    useState<SentimentDetails | null>(null);
+  const [dynamicDescription, setDynamicDescription] = useState<string | null>(
+    null,
+  );
   const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(
     null,
   );
@@ -171,21 +161,31 @@ export const InterviewHistoryDetails = ({
 
   // Once interview details are loaded, run sentiment analysis
   useEffect(() => {
-    if (!interview || !evaluation) return;
-
-    const aggregateText = `${evaluation.question_answer_feedback
-      .map((qa) => qa.feedback)
-      .join(' ')
-      .trim()
-    }`;
-
-    fetchSentiment(aggregateText)
-      .then((score) => setSentimentScore(score))
-      .catch((err) => {
-        console.error('Sentiment analysis error:', err);
-        setSentimentScores(null);
+    if (evaluation && evaluation.question_answer_feedback) {
+      // Extract feedback strings from evaluation (adjust property names as needed)
+      const feedbacks = evaluation.evaluation_scores.map(
+        (score) => score.feedback,
+      );
+      fetchSentiment(feedbacks).then((data) => {
+        return setSentimentScore(data);
       });
-  }, [interview, evaluation]);
+    }
+  }, [evaluation]);
+
+  useEffect(() => {
+    if (sentimentScore) {
+      const sentiment =
+        SENTIMENT_DETAILS[sentimentScore?.label] ||
+        SENTIMENT_DETAILS['neutral'];
+      setSentimentDetails(sentiment);
+
+      const dynamicDescription = getDynamicDescription(
+        sentimentScore?.label,
+        sentimentScore?.score,
+      );
+      setDynamicDescription(dynamicDescription);
+    }
+  }, [sentimentScore]);
 
   useEffect(() => {
     if (interviewId) {
@@ -285,15 +285,6 @@ export const InterviewHistoryDetails = ({
     };
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
-        {/* Optionally display the sentiment meter at the top */}
-        <span className="flex justify-center items-center mb-3">
-          {sentimentScore !== null && (
-            <SentimentDisplay
-              label={sentimentScore.label}
-              score={sentimentScore.score}
-            />
-          )}
-        </span>
         <div className="w-full max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between space-y-12">
             <span className="flex flex-col space-y-6">
@@ -311,13 +302,52 @@ export const InterviewHistoryDetails = ({
             </Badge>
           </div>
           <Separator />
-          <div className="flex flex-col justify-between space-y-6">
-            <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
-            <span className="text-gray-700">
-              {evaluation.strengths || 'No strengths identified.'}
-            </span>
-          </div>
-          <Separator />
+          {sentimentScore && dynamicDescription && sentimentDetails && (
+            <>
+              <div className="flex flex-col justify-between space-y-6">
+                <CardTitle className="text-xl font-semibold">
+                  Sentiment Analysis
+                </CardTitle>
+                <span className="text-gray-700">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-3xl">{sentimentDetails.icon}</span>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {sentimentScore.label.toUpperCase()}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {dynamicDescription}
+                      </p>
+                    </div>
+                  </div>
+                </span>
+                <div className="mt-4 h-3 w-full bg-gray-300 rounded-full">
+                  <motion.div
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${sentimentScore.score}%` }}
+                    transition={{ duration: 1 }}
+                    className={`h-full ${sentimentDetails.color} rounded-full`}
+                  />
+                </div>
+                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                  Confidence:{' '}
+                  <span className="font-bold">
+                    {sentimentScore.score.toFixed(0)}%
+                  </span>
+                </p>
+              </div>
+              <Separator />
+              <div className="flex flex-col justify-between space-y-6">
+                <CardTitle className="text-xl font-semibold">
+                  Strengths
+                </CardTitle>
+                <span className="text-gray-700">
+                  {evaluation.strengths || 'No strengths identified.'}
+                </span>
+              </div>
+              <Separator />
+            </>
+          )}
           <div className="flex flex-col justify-between space-y-6">
             <CardTitle className="text-xl font-semibold">
               Areas for Improvement

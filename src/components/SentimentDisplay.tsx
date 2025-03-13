@@ -1,10 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Card, CardTitle } from './ui/card';
+import { Separator } from './ui/separator';
 
 // Types
 type SentimentType = 'positive' | 'neutral' | 'negative';
-export type SentimentDetails= {
+export type SentimentDetails = {
   icon: string;
   color: string;
 };
@@ -42,30 +44,37 @@ const SentimentDisplay = ({ label, score }) => {
   const dynamicDescription = getDynamicDescription(label, score);
 
   return (
-    <div className="w-full max-w-md p-4 bg-white dark:bg-gray-900 shadow-lg rounded-lg border border-gray-200 dark:border-gray-800">
-      <div className="flex items-center space-x-3">
-        <span className="text-3xl">{sentiment.icon}</span>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            {label.toUpperCase()}
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {dynamicDescription}
-          </p>
+    <>
+      <Card className="p-4 h-full flex flex-col justify-center">
+        <CardTitle className="text-center">
+          Feedback Sentiment Analysis
+        </CardTitle>
+        <Separator className="my-2" />
+
+        <div className="flex items-center space-x-3">
+          <span className="text-3xl">{sentiment.icon}</span>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              {label.toUpperCase()}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {dynamicDescription}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="mt-4 h-3 w-full bg-gray-300 rounded-full">
-        <motion.div
-          initial={{ width: '0%' }}
-          animate={{ width: `${score}%` }}
-          transition={{ duration: 1 }}
-          className={`h-full ${sentiment.color} rounded-full`}
-        />
-      </div>
-      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-        Confidence: <span className="font-bold">{score.toFixed(0)}%</span>
-      </p>
-    </div>
+        <div className="mt-4 h-3 w-full bg-gray-300 rounded-full">
+          <motion.div
+            initial={{ width: '0%' }}
+            animate={{ width: `${score}%` }}
+            transition={{ duration: 1 }}
+            className={`h-full ${sentiment.color} rounded-full`}
+          />
+        </div>
+        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+          Confidence: <span className="font-bold">{score.toFixed(0)}%</span>
+        </p>
+      </Card>
+    </>
   );
 };
 

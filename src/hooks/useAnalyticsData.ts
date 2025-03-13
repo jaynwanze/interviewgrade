@@ -1,4 +1,8 @@
 import {
+  SentimentScore,
+  fetchSentiment,
+} from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
+import {
   getInterviewAnalytics,
   getLatestInterviewCompleted,
   getTotalCompletedInterviews,
@@ -18,6 +22,7 @@ export const useAnalyticsData = () => {
     completedInterviews: [],
     latestInterview: null,
   });
+  const [currentSentimentDetailed, setCurrentSentimentDetailed] = useState<SentimentScore | null>(null);
 
   // Fetch Overview Data
   const fetchOverviewData = async () => {
@@ -74,6 +79,14 @@ export const useAnalyticsData = () => {
         setLoadingDetailed(false);
         return null;
       }
+
+      const allFeedbacks = analytics.completed_interview_evaluations.flatMap(
+        (evaluation) =>
+          evaluation.evaluation_scores.map((score) => score.feedback),
+      );
+
+      const sentiment = await fetchSentiment(allFeedbacks);
+      setCurrentSentimentDetailed(sentiment);
       setLoadingDetailed(false);
       return analytics;
     } catch (err) {
@@ -95,5 +108,6 @@ export const useAnalyticsData = () => {
     overview,
     fetchOverviewData,
     fetchDetailedData,
+    currentSentimentDetailed,
   };
 };

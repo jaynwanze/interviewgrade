@@ -45,6 +45,7 @@ export default function InterviewAnalyticsPage() {
     error,
     overview,
     fetchDetailedData,
+    currentSentimentDetailed,
   } = useAnalyticsData();
 
   const searchParams = useSearchParams();
@@ -348,8 +349,11 @@ export default function InterviewAnalyticsPage() {
             <InterviewAverageDetails
               analyticsData={detailed}
               latestInterview={overview.latestInterview!}
+              sentimentAnalysis={currentSentimentDetailed || null}
             />
-            <InterviewGraphsDetailed analyticsData={detailed} />
+            <InterviewGraphsDetailed
+              analyticsData={detailed}
+            />
           </div>
         ) : !detailed && selectedTemplateId && activeSwitch ? (
           <p className="mt-5 text-center text-gray-500">

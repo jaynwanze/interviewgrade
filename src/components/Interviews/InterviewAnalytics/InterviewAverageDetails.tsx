@@ -1,22 +1,26 @@
 'use client';
 
+import SentimentDisplay from '@/components/SentimentDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Interview, InterviewAnalytics } from '@/types';
 import { ClipboardList, Star, Trophy } from 'lucide-react';
+import { SentimentScore } from '../InterviewHistory/InterviewHistoryDetails';
 import { InterviewLatestCard } from './InterviewLatestCard';
 
 export const InterviewAverageDetails = ({
   analyticsData,
   latestInterview,
+  sentimentAnalysis,
 }: {
   analyticsData: InterviewAnalytics;
   latestInterview: Interview;
+  sentimentAnalysis: SentimentScore | null;
 }) => {
   return (
     <>
       {/* Key Metrics Grid */}
-      <div className="grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-5 items-center">
+      <div className="grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-5 items-center">
         {/* Left Column - Interview Info + Overall Score */}
         <InterviewLatestCard latestInterview={latestInterview} />
         {/* Overall Grade + Best Skill Badge */}
@@ -68,6 +72,14 @@ export const InterviewAverageDetails = ({
               </p>
             </div>
           </Card>
+        )}
+
+        {/* Sentiment Analysis */}
+        {sentimentAnalysis && (
+          <SentimentDisplay
+            label={sentimentAnalysis.label}
+            score={sentimentAnalysis.score}
+          />
         )}
       </div>
     </>

@@ -61,7 +61,6 @@ export function InterviewGraphsDetailed({
             </div>
           </Card>
         )}
-
         <motion.div
           className="md:col-span-1 lg:col-span-2"
           variants={itemVariants}

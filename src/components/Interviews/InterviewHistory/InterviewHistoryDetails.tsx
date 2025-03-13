@@ -56,7 +56,6 @@ export async function fetchSentiment(
     });
     if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
     const data = await res.json();
-    console.log('Sentiment API response:', data);
     return data;
   } catch (error) {
     console.error('Error fetching sentiment:', error);

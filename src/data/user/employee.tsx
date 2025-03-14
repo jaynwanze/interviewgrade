@@ -22,7 +22,6 @@ import { getEmployeeUserProfile } from './user';
 export async function unlockCandidateAction(
   candidateId: string,
 ): Promise<SAPayload<boolean>> {
-
   const user = await serverGetLoggedInUser();
   if (!user) {
     throw new Error('User not found');
@@ -40,7 +39,7 @@ export async function unlockCandidateAction(
   // 3) decrement token
   const updatedTokens = await createSupabaseUserServerActionClient()
     .from('tokens')
-    .update({ tokens_available: tokens.tokens_available - 2 })
+    .update({ tokens_available: tokens.tokens_available - 1 })
     .eq('id', tokens.id)
     .single();
   if (!updatedTokens) {

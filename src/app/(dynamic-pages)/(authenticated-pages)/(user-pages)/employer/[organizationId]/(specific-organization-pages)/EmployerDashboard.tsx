@@ -314,13 +314,13 @@ export default function EmployerDashboard() {
                           <CommandItem
                             key={industry}
                             value={industry}
-                            onSelect={(value) => {
-                              setIndustryFilter(value);
+                            onSelect={() => {
+                              setIndustryFilter(industry);
                               setEmployerPrefs((prev) =>
                                 prev
-                                  ? { ...prev, industry }
+                                  ? { ...prev, industry: industry }
                                   : {
-                                    industry: value,
+                                    industry: industry,
                                     location: '',
                                     skills: '',
                                   },
@@ -368,7 +368,7 @@ export default function EmployerDashboard() {
                           <CommandItem
                             key={skill}
                             value={skill}
-                            onSelect={(value) => {
+                            onSelect={() => {
                               setSkillFilter(skill);
                               setEmployerPrefs((prev) =>
                                 prev
@@ -422,7 +422,7 @@ export default function EmployerDashboard() {
                           <CommandItem
                             key={loc}
                             value={loc}
-                            onSelect={(value) => {
+                            onSelect={() => {
                               setLocationFilter(loc);
                               setEmployerPrefs((prev) =>
                                 prev

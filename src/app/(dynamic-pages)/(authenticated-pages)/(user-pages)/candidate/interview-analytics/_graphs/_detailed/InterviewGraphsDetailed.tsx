@@ -47,7 +47,7 @@ export function InterviewGraphsDetailed({
         className={`grid md:grid-cols-1 lg:grid-cols-${colSpanNum} gap-6 mb-5 items-center`}
       >
         {analyticsData.interview_template_id && (
-          <Card className="flex flex-col md:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
+          <Card className="flex flex-col md:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
             {/* Total Sessions Count */}
             <ClipboardList className="w-10 h-10 text-blue-500" />
             <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
@@ -62,7 +62,7 @@ export function InterviewGraphsDetailed({
           </Card>
         )}
         <motion.div
-          className="md:col-span-1 lg:col-span-2"
+          className="md:col-span-1 lg:col-span-2 "
           variants={itemVariants}
         >
           <RadialChartEvaluationsScoreAverages

@@ -170,7 +170,7 @@ export function BarChartInteractiveEvaluationScores({
     chartConfig[activeChart]?.label?.toLowerCase();
 
   return (
-    <Card>
+    <Card className="transform transition hover:scale-105">
       <CardHeader className="flex flex-col items-center  space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6 overflow-auto">
           <CardTitle>Overall Skills Trend</CardTitle>

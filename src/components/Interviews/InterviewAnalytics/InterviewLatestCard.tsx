@@ -12,7 +12,7 @@ export const InterviewLatestCard = ({
 }) => {
   if (!latestInterview) {
     return (
-      <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2 text-center">
+      <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2 text-center transform transition hover:scale-105">
         <p className="text-gray-500 text-lg">
           No latest interview data available.
         </p>
@@ -21,7 +21,7 @@ export const InterviewLatestCard = ({
   }
 
   return (
-    <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2">
+    <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2 transform transition hover:scale-105">
       <CardContent>
         <InterviewInfo
           interviewId={latestInterview.id}

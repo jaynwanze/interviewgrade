@@ -24,7 +24,7 @@ export const InterviewAverageDetails = ({
         {/* Left Column - Interview Info + Overall Score */}
         <InterviewLatestCard latestInterview={latestInterview} />
         {/* Overall Grade + Best Skill Badge */}
-        <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 ">
+        <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
           <Trophy className="w-10 h-10 text-yellow-500" />
           <CardTitle className="mt-2">Current Average Grade</CardTitle>
           <div>
@@ -43,7 +43,7 @@ export const InterviewAverageDetails = ({
         </Card>
         {/* Average Mark Per Question */}
         {analyticsData.interview_template_id ? (
-          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
+          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
             <Star className="w-10 h-10 text-purple-500" />
             <CardTitle className="mt-2">Average Score Per Question</CardTitle>
             <div>
@@ -59,7 +59,7 @@ export const InterviewAverageDetails = ({
             </div>
           </Card>
         ) : (
-          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6">
+          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
             {/* Total Sessions Count */}
             <ClipboardList className="w-10 h-10 text-blue-500" />
             <CardTitle className="mt-2">Total Completed Sessions</CardTitle>

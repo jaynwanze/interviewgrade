@@ -22,7 +22,8 @@ export const useAnalyticsData = () => {
     completedInterviews: [],
     latestInterview: null,
   });
-  const [currentSentimentDetailed, setCurrentSentimentDetailed] = useState<SentimentScore | null>(null);
+  const [currentSentimentDetailed, setCurrentSentimentDetailed] =
+    useState<SentimentScore | null>(null);
 
   // Fetch Overview Data
   const fetchOverviewData = async () => {
@@ -80,12 +81,14 @@ export const useAnalyticsData = () => {
         return null;
       }
 
-      const allFeedbacks = analytics.completed_interview_evaluations.flatMap(
+      const allAnswers = analytics.completed_interview_evaluations.flatMap(
         (evaluation) =>
-          evaluation.evaluation_scores.map((score) => score.feedback),
+          evaluation.question_answer_feedback.map(
+            (question) => question.answer,
+          ),
       );
 
-      const sentiment = await fetchSentiment(allFeedbacks);
+      const sentiment = await fetchSentiment(allAnswers);
       setCurrentSentimentDetailed(sentiment);
       setLoadingDetailed(false);
       return analytics;

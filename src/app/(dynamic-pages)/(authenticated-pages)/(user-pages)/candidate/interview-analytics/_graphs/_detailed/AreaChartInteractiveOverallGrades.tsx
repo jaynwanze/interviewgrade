@@ -130,7 +130,7 @@ export function AreaChartInteractiveOverallGrades({
   }
 
   return (
-    <Card>
+    <Card className="transform transition hover:scale-105">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>Overall Grade Trend</CardTitle>

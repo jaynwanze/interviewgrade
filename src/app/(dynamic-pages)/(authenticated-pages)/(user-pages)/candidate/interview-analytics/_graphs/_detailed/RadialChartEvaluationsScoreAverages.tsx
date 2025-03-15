@@ -71,7 +71,7 @@ export function RadialChartEvaluationsScoreAverages({
   }, [avgEvaluationCriteriaScores, config]);
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col transform transition hover:scale-105">
       <CardHeader className="items-center pb-0">
         <CardTitle>Current Average Skills</CardTitle>
         <CardDescription>Scores out of 10</CardDescription>

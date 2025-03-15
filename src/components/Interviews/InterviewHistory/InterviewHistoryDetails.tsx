@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
   SENTIMENT_DETAILS,
   SentimentDetails,
+  getCommunicationStyle,
   getDynamicDescription,
 } from '@/components/SentimentDisplay';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +76,9 @@ export const InterviewHistoryDetails = ({
   const [sentimentDetails, setSentimentDetails] =
     useState<SentimentDetails | null>(null);
   const [dynamicDescription, setDynamicDescription] = useState<string | null>(
+    null,
+  );
+  const [communicationStyle, setCommunicationStyle] = useState<string | null>(
     null,
   );
   const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(
@@ -162,10 +166,11 @@ export const InterviewHistoryDetails = ({
   useEffect(() => {
     if (evaluation && evaluation.question_answer_feedback) {
       // Extract feedback strings from evaluation (adjust property names as needed)
-      const feedbacks = evaluation.evaluation_scores.map(
-        (score) => score.feedback,
+      // Extract candidate answers from evaluation
+      const candidateAnswers = evaluation.question_answer_feedback.map(
+        (qa) => qa.answer,
       );
-      fetchSentiment(feedbacks).then((data) => {
+      fetchSentiment(candidateAnswers).then((data) => {
         return setSentimentScore(data);
       });
     }
@@ -183,6 +188,12 @@ export const InterviewHistoryDetails = ({
         sentimentScore?.score,
       );
       setDynamicDescription(dynamicDescription);
+      const communicationStyle = getCommunicationStyle(
+        sentimentScore.label,
+        sentimentScore.score,
+      );
+
+      setCommunicationStyle(communicationStyle);
     }
   }, [sentimentScore]);
 
@@ -305,7 +316,7 @@ export const InterviewHistoryDetails = ({
             <>
               <div className="flex flex-col justify-between space-y-6">
                 <CardTitle className="text-xl font-semibold">
-                  Sentiment Analysis
+                  Tone & Communcation Style Analysis
                 </CardTitle>
                 <span className="text-gray-700">
                   <div className="flex items-center space-x-3">
@@ -317,6 +328,10 @@ export const InterviewHistoryDetails = ({
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {dynamicDescription}
                       </p>
+                      {/* <p className="text-sm text-blue-600 dark:text-blue-400">
+                        Communication Style Insight:{' '}
+                        <span className="font-bold">{communicationStyle}</span>
+                      </p> */}
                     </div>
                   </div>
                 </span>

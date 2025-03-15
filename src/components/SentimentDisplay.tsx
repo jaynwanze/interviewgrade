@@ -85,7 +85,7 @@ const SentimentDisplay = ({
   return (
     <Card className="p-4 flex flex-col justify-center h-full transform transition hover:scale-105">
       <CardTitle className="flex flex-col items-center p-2">
-        Personality Insights
+        Candidate Sentiment Insights
       </CardTitle>
       <Separator className="my-1" />
       <CardContent>

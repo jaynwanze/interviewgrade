@@ -339,7 +339,7 @@ export const InterviewHistoryDetails = ({
             <>
               <div className="flex flex-col justify-between space-y-6">
                 <CardTitle className="text-xl font-semibold">
-                  Candidate Sentiment Insights
+                  Candidate Sentiment Analysis
                 </CardTitle>
                 <span className="text-gray-700">
                   <div className="flex items-center space-x-3">

@@ -339,7 +339,7 @@ export const InterviewHistoryDetails = ({
             <>
               <div className="flex flex-col justify-between space-y-6">
                 <CardTitle className="text-xl font-semibold">
-                  Tone & Communcation Style Analysis
+                  Candidate Sentiment Insights
                 </CardTitle>
                 <span className="text-gray-700">
                   <div className="flex items-center space-x-3">
@@ -351,10 +351,10 @@ export const InterviewHistoryDetails = ({
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {dynamicDescription}
                       </p>
-                      {/* <p className="text-sm text-blue-600 dark:text-blue-400">
+                      <p className="text-sm text-blue-600 dark:text-blue-400">
                         Communication Style Insight:{' '}
                         <span className="font-bold">{communicationStyle}</span>
-                      </p> */}
+                      </p>
                     </div>
                   </div>
                 </span>

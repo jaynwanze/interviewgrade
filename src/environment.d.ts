@@ -24,9 +24,12 @@ declare global {
       RESEND_API_KEY: string;
       OPENAI_SECRET_KEY: string;
       DEEPSEEK_API_KEY: string;
+      HUGGING_FACE_API_KEY: string;
+      INTERVIEW_ANSWERS_SENTIMENT_MODEL_URL: string;
     }
   }
 }
 
 // eslint-disable-next-line prettier/prettier
-export {};
+export { };
+

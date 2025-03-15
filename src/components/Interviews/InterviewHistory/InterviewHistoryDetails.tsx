@@ -45,24 +45,47 @@ export type SentimentScore = {
   score: number;
   aggregated_scores?: Record<string, number>;
 };
-
-export async function fetchSentiment(
-  feedbacks: string[],
-): Promise<SentimentScore> {
+export async function fetchSentiment(answers: string[]): Promise<SentimentScore> {
   try {
-    const res = await fetch('http://localhost:5000/predict', {
+    // Join candidate answers into one input string
+    const inputText = answers.join('\n');
+
+    // Call your Next.js API route that acts as a proxy
+    const res = await fetch('/api/sentiment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ feedbacks }),
+      body: JSON.stringify({ inputs: inputText }),
     });
-    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`);
+    }
+
     const data = await res.json();
-    return data;
+    if (!Array.isArray(data) || data.length === 0 || !Array.isArray(data[0])) {
+      throw new Error('Unexpected response format');
+    }
+
+    // Sort scores in descending order
+    const scores = data[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sorted = scores.sort((a: any, b: any) => b.score - a.score);
+    const top = sorted[0];
+    let predicted_label: string = top.label;
+
+    if (predicted_label.startsWith('LABEL_')) {
+      const id = parseInt(predicted_label.split('_')[1], 10);
+      predicted_label = id === 0 ? 'negative' : id === 1 ? 'neutral' : 'positive';
+    }
+
+    const finalScore = top.score * 100;
+    return { label: predicted_label, score: finalScore, aggregated_scores: {} };
   } catch (error) {
     console.error('Error fetching sentiment:', error);
     return { label: 'neutral', score: 50, aggregated_scores: {} };
   }
 }
+
 
 export const InterviewHistoryDetails = ({
   interviewId,

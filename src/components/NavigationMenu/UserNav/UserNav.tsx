@@ -1,6 +1,5 @@
 import Notifications from '@/components/Notifcations';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { Tokens } from '@/components/Tokens';
 import { getUserProfile } from '@/data/user/user';
 import { getUserAvatarUrl } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';

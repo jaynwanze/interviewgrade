@@ -1,31 +1,27 @@
 'use client';
 
-import { useTokens } from '@/hooks/useTokens';
-import { NormalizedSubscription } from '@/types';
-import { ShoppingCartIcon } from '@heroicons/react/solid';
-import tokenImg from '@public/images/one_token.svg';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import React from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useTokens } from '@/hooks/useTokens';
+import { ShoppingCartIcon } from '@heroicons/react/solid';
+import tokenImg from '@public/images/one_token.svg';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
-export const Tokens: React.FC = () => {
+export const Tokens = ({ organizationId }: { organizationId: string }) => {
   const router = useRouter();
 
   // Use hooks to fetch the user's tokens
   const { data: tokens, isLoading, isError } = useTokens();
 
   const handleClick = () => {
-    router.push('/employer/purchase-tokens');
+    router.push(`/employer/${organizationId}/purchase-tokens`);
   };
 
   if (isLoading) {

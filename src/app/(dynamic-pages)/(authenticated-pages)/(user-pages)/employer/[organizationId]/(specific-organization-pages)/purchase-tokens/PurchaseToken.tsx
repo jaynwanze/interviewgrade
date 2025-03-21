@@ -7,7 +7,11 @@ import { Product } from '@/types';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-export default function PurchaseTokens() {
+export default function PurchaseTokens({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +92,10 @@ export default function PurchaseTokens() {
                 {product.price}
               </p>
               <p className="mb-4">Tokens Included: {product.quantity}</p>
-              <CreateTokenPurchaseButton product={product} />
+              <CreateTokenPurchaseButton
+                product={product}
+                organizationId={organizationId}
+              />
             </div>
           </Card>
         ))}

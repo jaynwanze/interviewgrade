@@ -427,10 +427,12 @@ export async function createEmployeeSessionAction({
   product,
   isTrial = false,
   isTokenBundlePurchase = false,
+  organizationId,
 }: {
   product: Product;
   isTrial?: boolean;
   isTokenBundlePurchase?: boolean;
+  organizationId?: string;
 }) {
   const TRIAL_DAYS = 14;
   const user = await serverGetLoggedInUser();
@@ -477,9 +479,9 @@ export async function createEmployeeSessionAction({
         metadata: {},
       },
       success_url: toSiteURL(
-        `/candidate/purchase-tokens/success/{CHECKOUT_SESSION_ID}`,
+        `/employer/${organizationId}/purchase-tokens/success/{CHECKOUT_SESSION_ID}`,
       ),
-      cancel_url: toSiteURL(`/candidate/purchase-tokens`),
+      cancel_url: toSiteURL(`/employer/${organizationId}//purchase-tokens`),
     });
 
     return stripeSession.id;
@@ -530,9 +532,11 @@ export async function createEmployeeSessionAction({
         metadata: {},
       },
       success_url: toSiteURL(
-        `/candidate/purchase-tokens/success?client=${customer}`,
+        `/employer/${organizationId}/purchase-tokens/success?client=${customer}`,
       ),
-      cancel_url: toSiteURL(`/candidate/purchase-tokens`),
+      cancel_url: toSiteURL(
+        `/employer/${organizationId}/purchase-tokens/purchase-tokens`,
+      ),
     });
 
     return stripeSession.id;

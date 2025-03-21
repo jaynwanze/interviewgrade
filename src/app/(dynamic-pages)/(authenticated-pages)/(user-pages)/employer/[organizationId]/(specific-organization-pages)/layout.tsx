@@ -37,7 +37,7 @@ export default async function Layout({
                 <Settings className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
               </Link>
               <span className="flex gap-1.5 py-1.5 px-1 cursor-pointer items-center group rounded-md transition hover:cursor-pointer hover:text-foreground">
-                <Tokens />
+                <Tokens organizationId={organizationId} />
               </span>
             </div>
           </div>

@@ -33,7 +33,7 @@ export async function unlockCandidateAction(
     throw new Error('No tokens found for employer');
   }
   // 2) if tokens < 1 => throw error
-  if (tokens.tokens_available < 2) {
+  if (tokens.tokens_available < 1) {
     throw new Error('No tokens available');
   }
   // 3) decrement token

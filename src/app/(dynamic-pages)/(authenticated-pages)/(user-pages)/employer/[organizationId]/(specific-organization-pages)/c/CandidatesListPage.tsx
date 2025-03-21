@@ -126,7 +126,7 @@ export default function CandidatesListPage({
         return score !== null && score >= filters.minScore;
       });
     }
-    
+
     // Filter by location
     if (filters.location !== 'All Locations') {
       // e.g. match or 'remote'
@@ -162,6 +162,7 @@ export default function CandidatesListPage({
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-4">
+      <h1 className="text-2xl font-bold">Candidate Search</h1>
       {/* Tabs for Mode Selection */}
       <Tabs
         defaultValue="practice"

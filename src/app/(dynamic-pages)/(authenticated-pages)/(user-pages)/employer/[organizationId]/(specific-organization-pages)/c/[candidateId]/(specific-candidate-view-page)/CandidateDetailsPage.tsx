@@ -32,6 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getCandidateById, unlockCandidateAction } from '@/data/user/employee';
+import { useToastMutation } from '@/hooks/useToastMutation';
 import { useTokens } from '@/hooks/useTokens';
 import { CandidateDetailsView } from '@/types';
 import { FileText, Lock, Mail, Star } from 'lucide-react';
@@ -143,27 +144,37 @@ export default function CandidateDetailsPage({
     return 'bg-red-500 text-white';
   };
 
-  async function handleUnlock() {
+  const handleUnlockCandidate = () => {
+    // if (!checkTokens()) return;
+    unlockCandidateMutation.mutate();
+  };
+
+  const checkTokens = () => {
+    if (!tokens) {
+      setError('Failed to fetch token balance. Refresh and try again.');
+      return false;
+    }
     if ((tokens?.tokens_available ?? 0) < 2) {
-      // Not enough tokens to unlock
-      // show dialog to buy more tokens
-      return;
+      setError('Not enough tokens to unlock. Please purchase more tokens.');
+      //change to pop up dialog
+      return false;
     }
-    // Real code: call server action or API to spend a token & mark as unlocked
-    const data = await unlockCandidateAction(candidateId);
+    return true;
+  };
 
-    if (!data) {
-      setError('Failed to unlock candidate. Refresh and try again.');
-      return;
-    }
-
-    if ('success' in data && data.success) {
-      //refresh hook
-      //Refresh page to show unlocked content 
-      window.location.reload();
-    }
-    setError('');
-  }
+  const unlockCandidateMutation = useToastMutation(
+    async () => {
+      return await unlockCandidateAction(candidateId);
+    },
+    {
+      loadingMessage: 'Unlocking candidate...',
+      errorMessage: 'Failed to unlock candidate',
+      successMessage: 'Candidate unlocked!',
+      onSuccess: () => {
+        window.location.reload();
+      },
+    },
+  );
 
   // Compute best skill among either interview_skill_stats or practice_skill_stats
   function getBestSkill(
@@ -292,7 +303,12 @@ export default function CandidateDetailsPage({
               Unlock access to potential hire to get in touch.
             </p>
             <div className="flex items-center justify-center mt-4">
-              <Button onClick={handleUnlock} variant="default">
+              <Button
+                onClick={() => {
+                  handleUnlockCandidate();
+                }}
+                variant="default"
+              >
                 <Lock className="mr-2 h-4 w-4" />
                 Unlock Candidate (Tokens left: {tokens?.tokens_available ?? 0})
               </Button>
@@ -543,4 +559,3 @@ export default function CandidateDetailsPage({
     </div>
   );
 }
-

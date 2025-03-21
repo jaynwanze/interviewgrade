@@ -44,7 +44,6 @@ const availableIndustries = [
 ];
 
 const availableSkills = [
-  'All Skills',
   'Problem Solving',
   'Communication',
   'Teamwork',
@@ -97,7 +96,7 @@ export default function EmployerDashboard() {
   // Multi-select filters: store as arrays.
   const [industryFilter, setIndustryFilter] =
     useState<string>('All Industries');
-  const [skillFilter, setSkillFilter] = useState<string>('All Skills');
+  const [skillFilter, setSkillFilter] = useState<string>('Select Skill');
   const [locationFilter, setLocationFilter] = useState<string>('All Locations');
   const [industryOpen, setIndustryOpen] = useState(false);
   const [skillOpen, setSkillOpen] = useState(false);
@@ -112,7 +111,7 @@ export default function EmployerDashboard() {
 
         if (data && !didSetFilters) {
           setIndustryFilter(data.industry || 'All Industries');
-          setSkillFilter(data.skills || 'All Skills');
+          setSkillFilter(data.skills || 'Select Skill');
           setLocationFilter(data.location || 'All Locations');
           setDidSetFilters(true);
         }
@@ -160,16 +159,14 @@ export default function EmployerDashboard() {
       );
     }
 
-    // 3) Filter by skill if user picked something other than "All Skills"
-    if (skillFilter !== 'All Skills') {
-      filtered = filtered.filter((cand) => {
-        const stats =
-          mode === 'interview'
-            ? cand.interview_skill_stats
-            : cand.practice_skill_stats;
-        return stats?.some((s) => s.skill === skillFilter);
-      });
-    }
+    // 3) Filter by skill
+    filtered = filtered.filter((cand) => {
+      const stats =
+        mode === 'interview'
+          ? cand.interview_skill_stats
+          : cand.practice_skill_stats;
+      return stats?.some((s) => s.skill === skillFilter);
+    });
 
     // 4) Filter by location if user picked something other than "All Locations"
     if (locationFilter !== 'All Locations') {
@@ -195,9 +192,8 @@ export default function EmployerDashboard() {
     }
 
     // 6) Sort the filtered results — typically by skillFilter
-    //    If "All Skills", you can default to employerPrefs?.skills or skip sorting
     let skillToSortBy = skillFilter;
-    if (!skillToSortBy || skillToSortBy === 'All Skills') {
+    if (!skillToSortBy) {
       skillToSortBy = employerPrefs?.skills || '';
     }
 
@@ -259,14 +255,14 @@ export default function EmployerDashboard() {
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto min-h-screen">
-        <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+        <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
         <LoadingSpinner />
       </div>
     );
   } else if (error) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto min-h-screen  ">
-        <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+        <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -274,7 +270,7 @@ export default function EmployerDashboard() {
     return (
       <TooltipProvider>
         <div className="space-y-6 max-w-5xl mx-auto">
-          <h1 className="text-2xl font-bold">Employer Dashboard</h1>
+          <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
 
           {employerPrefs && (
             <StatisticsView
@@ -353,7 +349,7 @@ export default function EmployerDashboard() {
                     className="w-full justify-between"
                   >
                     <span className="truncate">
-                      {skillFilter || 'All Skills...'}
+                      {skillFilter || 'Select Skill...'}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
@@ -459,7 +455,7 @@ export default function EmployerDashboard() {
           </div>
 
           {/* TABS for "Interview Mode" / "Practice Mode" */}
-          <h1 className="text-2xl font-bold">Candidate Statistics</h1>
+          <h1 className="text-2xl font-bold">Statistics</h1>
           <Tabs
             defaultValue="practice"
             onValueChange={(value) =>

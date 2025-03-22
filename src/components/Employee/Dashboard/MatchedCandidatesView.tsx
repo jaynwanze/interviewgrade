@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 
 import type { CandidateRow, EmployerCandidatePreferences } from '@/types';
 import { FireIcon } from '@heroicons/react/solid';
-import { PlaneTakeoffIcon, TrophyIcon } from 'lucide-react';
+import { TrophyIcon } from 'lucide-react';
 
 export function MatchedCandidatesView({
   skillGapMessage,
@@ -51,6 +51,23 @@ export function MatchedCandidatesView({
     router.push(`/messages?candidateId=${candidateId}`);
   }
 
+  function getShortName(fullName: string): string {
+    if (!fullName) return '';
+
+    // Split by spaces, ignoring empty strings
+    const parts = fullName.split(' ').filter(Boolean);
+
+    // If there's only one name part (e.g. "Cher" or "Madonna"), just return that
+    if (parts.length === 1) {
+      return parts[0];
+    }
+
+    // Otherwise, use the first part in full + the first letter of the *last* part
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1]; // handle middle names gracefully
+    return `${firstName} ${lastName.charAt(0).toUpperCase()}.`;
+  }
+
   function getCandidateScoreAvgBySkill(
     candidate: CandidateRow,
     skill: string,
@@ -66,7 +83,7 @@ export function MatchedCandidatesView({
   }
 
   const topThreeBarData = topThree?.map((cand) => ({
-    name: cand.full_name,
+    name: getShortName(cand.full_name),
     score: getCandidateScoreAvgBySkill(cand, employersPrefs.skills),
   }));
 
@@ -203,7 +220,7 @@ export function MatchedCandidatesView({
                           <Avatar className="h-10 w-10">
                             <AvatarImage
                               src={cand.avatar_url}
-                              alt={cand.full_name}
+                              alt={getShortName(cand.full_name)}
                             />
                             <AvatarFallback>
                               {cand.full_name
@@ -214,7 +231,9 @@ export function MatchedCandidatesView({
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{cand.full_name}</p>
+                            <p className="font-medium">
+                              {getShortName(cand.full_name)}
+                            </p>
                             <Tooltip>
                               <TooltipTrigger>
                                 <Badge variant="secondary">
@@ -261,7 +280,7 @@ export function MatchedCandidatesView({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-            <Card className="shadow-md border rounded-xl h-full ">
+          <Card className="shadow-md border rounded-xl h-full ">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <FireIcon className="text-orange-500 h-6 w-6 mr-2" />
@@ -282,7 +301,7 @@ export function MatchedCandidatesView({
                     <Avatar className="h-12 w-12">
                       <AvatarImage
                         src={topProspect.avatar_url}
-                        alt={topProspect.full_name}
+                        alt={getShortName(topProspect.full_name)}
                       />
                       <AvatarFallback>
                         {topProspect.full_name
@@ -294,7 +313,7 @@ export function MatchedCandidatesView({
                     </Avatar>
                     <div>
                       <p className="font-medium text-lg">
-                        {topProspect.full_name}
+                        {getShortName(topProspect.full_name)}
                       </p>
                       <Badge variant="secondary">
                         Score{' '}

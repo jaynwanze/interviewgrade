@@ -177,6 +177,23 @@ export default function CandidateDetailsPage({
     },
   );
 
+  function getShortName(fullName: string): string {
+    if (!fullName) return '';
+
+    // Split by spaces, ignoring empty strings
+    const parts = fullName.split(' ').filter(Boolean);
+
+    // If there's only one name part (e.g. "Cher" or "Madonna"), just return that
+    if (parts.length === 1) {
+      return parts[0];
+    }
+
+    // Otherwise, use the first part in full + the first letter of the *last* part
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1]; // handle middle names gracefully
+    return `${firstName} ${lastName.charAt(0).toUpperCase()}.`;
+  }
+
   // Compute best skill among either interview_skill_stats or practice_skill_stats
   function getBestSkill(
     cand: CandidateDetailsView,
@@ -242,7 +259,9 @@ export default function CandidateDetailsPage({
           </Avatar>
           <div>
             <CardTitle className="flex justify-center items-center text-lg">
-              {candidate.full_name}
+              {candidate.isUnlocked
+                ? candidate.full_name
+                : getShortName(candidate.full_name)}
             </CardTitle>
             <span className="flex justify-center items-center gap-2 mt-1">
               <Badge variant="secondary">{candidate.country}</Badge>
@@ -294,7 +313,7 @@ export default function CandidateDetailsPage({
           <CardHeader>
             <CardTitle>Contact Details</CardTitle>
             <CardDescription>
-              Spend 2 tokens to unlock deeper info and access to this contact
+              Spend 1 tokens to unlock deeper info and access to this contact
               candidate.
             </CardDescription>
           </CardHeader>

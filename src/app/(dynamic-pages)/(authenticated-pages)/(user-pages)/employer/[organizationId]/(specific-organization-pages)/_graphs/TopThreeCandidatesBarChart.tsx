@@ -36,6 +36,23 @@ export function TopThreeCandidatesBarChart({
 }: {
   topCandidates?: CandidateBarData[];
 }) {
+
+  function getShortName(fullName: string): string {
+    if (!fullName) return '';
+
+    // Split by spaces, ignoring empty strings
+    const parts = fullName.split(' ').filter(Boolean);
+
+    // If there's only one name part (e.g. "Cher" or "Madonna"), just return that
+    if (parts.length === 1) {
+      return parts[0];
+    }
+
+    // Otherwise, use the first part in full + the first letter of the *last* part
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1]; // handle middle names gracefully
+    return `${firstName} ${lastName.charAt(0).toUpperCase()}.`;
+  }
   // If needed, you can highlight the "best" candidate
   // by finding the highest .score's index:
   const highestIndex = topCandidates?.reduce(

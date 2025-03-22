@@ -144,6 +144,23 @@ export default function CandidatesListPage({
     router.push(`/employer/${organizationId}/c/${candidateId}`);
   }
 
+  function getShortName(fullName: string): string {
+    if (!fullName) return '';
+
+    // Split by spaces, ignoring empty strings
+    const parts = fullName.split(' ').filter(Boolean);
+
+    // If there's only one name part (e.g. "Cher" or "Madonna"), just return that
+    if (parts.length === 1) {
+      return parts[0];
+    }
+
+    // Otherwise, use the first part in full + the first letter of the *last* part
+    const firstName = parts[0];
+    const lastName = parts[parts.length - 1]; // handle middle names gracefully
+    return `${firstName} ${lastName.charAt(0).toUpperCase()}.`;
+  }
+
   // Use the mode state from your component in this helper.
   function getBestSkillObject(cand: CandidateRow): CandidateSkillsStats | null {
     const stats =
@@ -225,7 +242,7 @@ export default function CandidatesListPage({
                           <Avatar>
                             <AvatarImage
                               src={candidate.avatar_url}
-                              alt={candidate.full_name}
+                              alt={getShortName(candidate.full_name)}
                             />
                             <AvatarFallback>
                               {candidate.full_name
@@ -235,7 +252,7 @@ export default function CandidatesListPage({
                                 .toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          {candidate.full_name}
+                          {getShortName(candidate.full_name)}
                         </div>
                       </TableCell>
                       <TableCell>{candidate.role}</TableCell>

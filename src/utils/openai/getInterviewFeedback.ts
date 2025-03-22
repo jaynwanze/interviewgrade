@@ -1,9 +1,11 @@
 'use server';
 
 import {
+  getInterviewAnalytics,
   insertInterviewEvaluation,
   updateInterviewAnalyticsCurrentAvgPractice,
 } from '@/data/user/interviews';
+import { getCandidateUserProfile } from '@/data/user/user';
 import {
   EvaluationCriteriaType,
   FeedbackData,
@@ -12,6 +14,7 @@ import {
 } from '@/types';
 import OpenAI from 'openai';
 import { z } from 'zod';
+import { getCandidateSummary } from './getCandidateSummary';
 
 const feedback = z.object({
   overall_grade: z.number(),
@@ -346,6 +349,10 @@ export const getInterviewFeedback = async (
       interview.title,
     );
   }
+
+  //Update candidate summary based of latest interview analytics
+  const latestCandidateSummary = getCandidateSummary(interview.candidate_id);
+  console.log('Latest Candidate Summary:', latestCandidateSummary);
   console.log('Feedback Data:', feedbackData);
 
   return feedbackData;

@@ -269,6 +269,31 @@ export async function fetchJobTrackerApplications(): Promise<
   return data;
 }
 
+export async function updateCandidateSummary(
+  candidateId: string,
+  summary: string,
+): Promise<Table<'candidates'>> {
+  const supabase = createSupabaseUserServerActionClient();
+  const { data, error } = await supabase
+    .from('candidates')
+    .update({
+      summary,
+    })
+    .eq('id', candidateId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update candidate summary: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error('No data returned from Supabase');
+  }
+
+  return data;
+}
+
 export async function addJobTrackerApplication(
   newJob: Partial<JobTracker>,
 ): Promise<Table<'job_application_tracker'>> {

@@ -35,7 +35,7 @@ import { getCandidateById, unlockCandidateAction } from '@/data/user/employee';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { useTokens } from '@/hooks/useTokens';
 import { CandidateDetailsView } from '@/types';
-import { FileText, Lock, Mail, Star } from 'lucide-react';
+import { FileText, Linkedin, Lock, Mail, Star } from 'lucide-react';
 
 const mockCandidate: CandidateDetailsView = {
   id: 'c1',
@@ -72,7 +72,7 @@ const mockCandidate: CandidateDetailsView = {
   full_name: 'Alice Anderson',
   avatar_url: '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
   email: 'alice@example.com',
-  resumeUrl: 'https://example.com/mock-cv.pdf', // Simulated CV link
+  resume_url: 'https://example.com/mock-cv.pdf', // Simulated CV link
   recentAttempts: [
     {
       interview_id: 'attempt1',
@@ -138,10 +138,11 @@ export default function CandidateDetailsPage({
   }
   // Helper function to determine badge color based on score.
   const getBadgeColor = (score: number): string => {
-    if (score >= 80) return 'bg-green-500 text-white';
-    if (score >= 60) return 'bg-yellow-500 text-black';
-    if (score >= 40) return 'bg-orange-500 text-white';
-    return 'bg-red-500 text-white';
+    if (score >= 70) return 'bg-green-500 text-white'; // 70% - 100%
+    if (score >= 60) return 'bg-lime-500 text-white'; // 60% - 69%
+    if (score >= 50) return 'bg-yellow-500 text-white'; // 50% - 59%
+    if (score >= 40) return 'bg-orange-500 text-white'; // 40% - 49%
+    return 'bg-red-500 text-white'; // 0%  - 39%
   };
 
   const handleUnlockCandidate = () => {
@@ -351,11 +352,23 @@ export default function CandidateDetailsPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex">
+              <div className="flex gap-2">
                 <Button onClick={handleEmailCandidate} variant="default">
                   <Mail className="mr-2 h-4 w-4" />
                   Email Candidate
                 </Button>
+                {candidate.linkedin_url && (
+                  <a
+                    href={candidate.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded inline-flex items-center">
+                      <Linkedin className="mr-2 h-4 w-4" />
+                      Linkedin Profile
+                    </Button>
+                  </a>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -369,7 +382,7 @@ export default function CandidateDetailsPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {candidate.resumeUrl ? (
+              {candidate.resume_url ? (
                 <Dialog
                   open={openResumeDialog}
                   onOpenChange={setOpenResumeDialog}
@@ -390,7 +403,7 @@ export default function CandidateDetailsPage({
                     <div className="w-full h-[500px] mt-4 overflow-auto bg-muted">
                       {/* Sample PDF embed in an iframe */}
                       <iframe
-                        src={candidate.resumeUrl}
+                        src={candidate.resume_url}
                         title="Candidate Resume"
                         className="w-full h-full"
                       />

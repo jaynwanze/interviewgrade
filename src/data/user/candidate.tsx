@@ -19,18 +19,18 @@ export async function updateCandidateProfileDetailsAction({
   city,
   country,
   phone_number,
-  summary,
   role,
   industry,
+  linkedin_url,
   resume_url,
 }: {
   currentUser: User;
   city?: string;
   country?: string;
   phone_number?: string;
-  summary?: string;
   role?: string;
   industry?: string;
+  linkedin_url?: string;
   resume_url?: string;
 }) {
   const user = currentUser;
@@ -45,7 +45,7 @@ export async function updateCandidateProfileDetailsAction({
       city,
       country,
       phone_number,
-      summary,
+      linkedin_url,
       role,
       industry,
       resume_url,
@@ -84,9 +84,9 @@ export const updateCandidateDetails = async (
     city,
     country,
     phoneNumber,
-    summary,
     role,
     industry,
+    linkedin_url,
     resume_url,
   }: {
     fullName?: string;
@@ -94,9 +94,9 @@ export const updateCandidateDetails = async (
     city?: string;
     country?: string;
     phoneNumber?: string;
-    summary?: string;
     role?: string;
     industry?: string;
+    linkedin_url?: string;
     resume_url?: string;
   },
   {
@@ -114,9 +114,9 @@ export const updateCandidateDetails = async (
     city,
     country,
     phone_number: phoneNumber,
-    summary,
     role,
     industry,
+    linkedin_url,
     resume_url,
   });
 

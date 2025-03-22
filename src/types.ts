@@ -91,7 +91,6 @@ export interface CandidateRow {
 
 export type Candidate = Table<'candidates'>;
 
-
 export type CandidateDetailsView = {
   id: string;
   city: string;
@@ -106,7 +105,8 @@ export type CandidateDetailsView = {
   full_name: string;
   avatar_url?: string;
   email: string;
-  resumeUrl?: string;
+  linkedin_url?: string;
+  resume_url?: string;
   recentAttempts?: RecentAttempt[];
   isUnlocked?: boolean;
 };
@@ -336,12 +336,27 @@ export const mockCandidates: CandidateRow[] = [
     role: 'Software Engineer',
     industry: 'Tech',
     practice_skill_stats: [
-      { template_id: '1', skill: 'Problem Solving', avg_score: 92, previous_avg: 90 },
-      { template_id: '2', skill: 'Communication', avg_score: 88, previous_avg: 85 },
+      {
+        template_id: '1',
+        skill: 'Problem Solving',
+        avg_score: 92,
+        previous_avg: 90,
+      },
+      {
+        template_id: '2',
+        skill: 'Communication',
+        avg_score: 88,
+        previous_avg: 85,
+      },
       { template_id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
     ],
     interview_skill_stats: [
-      { template_id: 'p1', skill: 'Behavioural', avg_score: 89, previous_avg: 87 },
+      {
+        template_id: 'p1',
+        skill: 'Behavioural',
+        avg_score: 89,
+        previous_avg: 87,
+      },
     ],
     created_at: '2024-04-29T10:00:00Z',
     full_name: 'Alice Anderson',
@@ -357,11 +372,26 @@ export const mockCandidates: CandidateRow[] = [
     role: 'Full-Stack Developer',
     industry: 'Tech',
     practice_skill_stats: [
-      { template_id: 'p2', skill: 'Problem Solving', avg_score: 83, previous_avg: 80 },
-      { template_id: 'p3', skill: 'Communication', avg_score: 81, previous_avg: 76 },
+      {
+        template_id: 'p2',
+        skill: 'Problem Solving',
+        avg_score: 83,
+        previous_avg: 80,
+      },
+      {
+        template_id: 'p3',
+        skill: 'Communication',
+        avg_score: 81,
+        previous_avg: 76,
+      },
     ],
     interview_skill_stats: [
-      { template_id: '4', skill: 'Behavioural', avg_score: 85, previous_avg: 82 },
+      {
+        template_id: '4',
+        skill: 'Behavioural',
+        avg_score: 85,
+        previous_avg: 82,
+      },
       { template_id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
     ],
     created_at: '2024-04-20T09:30:00Z',
@@ -379,7 +409,12 @@ export const mockCandidates: CandidateRow[] = [
     industry: 'Tech',
     practice_skill_stats: [],
     interview_skill_stats: [
-      { template_id: '6', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
+      {
+        template_id: '6',
+        skill: 'Behavioural',
+        avg_score: 88,
+        previous_avg: 85,
+      },
       {
         template_id: '7',
         skill: 'Technical',
@@ -401,11 +436,26 @@ export const mockCandidates: CandidateRow[] = [
     role: 'Product Manager',
     industry: 'Tech',
     practice_skill_stats: [
-      { template_id: '8', skill: 'Problem Solving', avg_score: 90, previous_avg: 85 },
-      { template_id: '9', skill: 'Leadership', avg_score: 87, previous_avg: 86 },
+      {
+        template_id: '8',
+        skill: 'Problem Solving',
+        avg_score: 90,
+        previous_avg: 85,
+      },
+      {
+        template_id: '9',
+        skill: 'Leadership',
+        avg_score: 87,
+        previous_avg: 86,
+      },
     ],
     interview_skill_stats: [
-      { template_id: 'p4', skill: 'Behavioural', avg_score: 88, previous_avg: 84 },
+      {
+        template_id: 'p4',
+        skill: 'Behavioural',
+        avg_score: 88,
+        previous_avg: 84,
+      },
     ],
     created_at: '2024-04-25T11:45:00Z',
     full_name: 'Diana Evans',
@@ -422,11 +472,26 @@ export const mockCandidates: CandidateRow[] = [
     role: 'Software Engineer',
     industry: 'Tech',
     practice_skill_stats: [
-      { template_id: '10', skill: 'Adaptability', avg_score: 92, previous_avg: 90 },
-      { template_id: '11', skill: 'Communication', avg_score: 84, previous_avg: 80 },
+      {
+        template_id: '10',
+        skill: 'Adaptability',
+        avg_score: 92,
+        previous_avg: 90,
+      },
+      {
+        template_id: '11',
+        skill: 'Communication',
+        avg_score: 84,
+        previous_avg: 80,
+      },
     ],
     interview_skill_stats: [
-      { template_id: 'p5', skill: 'Behavioural', avg_score: 88, previous_avg: 85 },
+      {
+        template_id: 'p5',
+        skill: 'Behavioural',
+        avg_score: 88,
+        previous_avg: 85,
+      },
     ],
     created_at: '2024-04-27T07:00:00Z',
     full_name: 'Erin Green',

@@ -213,10 +213,10 @@ export function ProfileUpdate({
                         hasImageLoaded
                           ? undefined
                           : {
-                              duration: 0.5,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatType: 'reverse',
-                            }
+                            duration: 0.5,
+                            repeat: Number.POSITIVE_INFINITY,
+                            repeatType: 'reverse',
+                          }
                       }
                       onLoad={() => {
                         setHasImageLoaded(true);
@@ -286,7 +286,7 @@ const candidateDetailsSchema = z.object({
   country: z.string().min(1, 'Country is required'),
   role: z.string().min(1, 'Role is required'),
   industry: z.string().min(1, 'Industry is required'),
-  summary: z.string().optional(),
+  linkedin_url: z.string().optional(),
   resume_url: z.any().optional(),
 });
 
@@ -307,7 +307,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
       country: '',
       role: '',
       industry: '',
-      summary: '',
+      linkedin_url: '',
       resume_url: '',
     },
   });
@@ -441,6 +441,20 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
                 </p>
               )}
             </div>
+          </div>
+
+          <div className="flex-1">
+            <Label htmlFor="linkedin-url">Linkedin</Label>
+            <Input
+              id="linkedin-url"
+              placeholder="Linkedin URL"
+              {...register('linkedin_url')}
+            />
+            {errors.linkedin_url && (
+              <p className="text-xs text-red-600">
+                {errors.linkedin_url.message}
+              </p>
+            )}
           </div>
 
           {/* Resume Upload Section */}

@@ -45,7 +45,9 @@ export type SentimentScore = {
   score: number;
   aggregated_scores?: Record<string, number>;
 };
-export async function fetchSentiment(answers: string[]): Promise<SentimentScore> {
+export async function fetchSentiment(
+  answers: string[],
+): Promise<SentimentScore> {
   try {
     // Join candidate answers into one input string
     const inputText = answers.join('\n');
@@ -75,7 +77,8 @@ export async function fetchSentiment(answers: string[]): Promise<SentimentScore>
 
     if (predicted_label.startsWith('LABEL_')) {
       const id = parseInt(predicted_label.split('_')[1], 10);
-      predicted_label = id === 0 ? 'negative' : id === 1 ? 'neutral' : 'positive';
+      predicted_label =
+        id === 0 ? 'negative' : id === 1 ? 'neutral' : 'positive';
     }
 
     const finalScore = top.score * 100;
@@ -85,7 +88,6 @@ export async function fetchSentiment(answers: string[]): Promise<SentimentScore>
     return { label: 'neutral', score: 50, aggregated_scores: {} };
   }
 }
-
 
 export const InterviewHistoryDetails = ({
   interviewId,
@@ -310,11 +312,12 @@ export const InterviewHistoryDetails = ({
   };
 
   const renderOverview = (evaluation: InterviewEvaluation) => {
-    const getScoreColor = (score: number) => {
-      if (score >= 80) return 'bg-green-600';
-      if (score >= 60) return 'bg-orange-500';
-      if (score >= 40) return 'bg-yellow-500';
-      return 'bg-red-500';
+    const getScoreColor = (score: number): string => {
+      if (score >= 70) return 'bg-green-500 text-white'; // 70% - 100%
+      if (score >= 60) return 'bg-lime-500 text-white'; // 60% - 69%
+      if (score >= 50) return 'bg-yellow-500 text-white'; // 50% - 59%
+      if (score >= 40) return 'bg-orange-500 text-white'; // 40% - 49%
+      return 'bg-red-500 text-white'; // 0%  - 39%
     };
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">

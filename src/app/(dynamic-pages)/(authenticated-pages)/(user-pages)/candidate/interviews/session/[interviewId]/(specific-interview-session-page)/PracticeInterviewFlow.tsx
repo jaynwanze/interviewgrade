@@ -145,9 +145,11 @@ export function PracticeInterviewFlow({
       const score = Math.round(
         questionFeedback[currentQuestionIndex]?.mark ?? 0,
       );
-      if (score! >= 80) {
+      if (score! >= 70) {
         setScoreStringColour('text-green-600');
       } else if (score! >= 60) {
+        setScoreStringColour('text-lime-600');
+      } else if (score! >= 50) {
         setScoreStringColour('text-yellow-600');
       } else if (score! >= 40) {
         setScoreStringColour('text-orange-600');

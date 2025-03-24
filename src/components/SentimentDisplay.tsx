@@ -2,7 +2,14 @@
 
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
+import { Info, Sparkles } from 'lucide-react';
 
 export type SentimentDetails = {
   icon: string;
@@ -30,45 +37,63 @@ export const SENTIMENT_DETAILS = {
 export const getDynamicDescription = (label: string, score: number): string => {
   if (label === 'positive') {
     if (score < 70)
-      return "There's a positive vibe, though the candidate could show more conviction.";
+      return "There's a positive tone, but the candidate might convey more conviction.";
     else if (score < 90)
-      return 'A confident and engaging answer, demonstrating strong positivity.';
+      return 'A confident and engaging answer, reflecting strong positivity.';
     else
-      return 'An exceptionally positive and enthusiastic response, leaving a great impression.';
+      return 'Exceptionally upbeat and enthusiastic, leaving a great impression.';
   } else if (label === 'neutral') {
     if (score < 70)
-      return 'A measured tone with balanced insights, though it may lack distinctiveness.';
+      return 'A balanced but somewhat restrained tone; more distinct insights could help.';
     else if (score < 90)
-      return 'A calm and reflective response that remains consistently even-keeled.';
+      return 'Calm and even-keeled, indicating a reflective approach.';
     else
-      return 'A remarkably balanced answer, showcasing thoughtful and composed insights.';
+      return 'Highly composed and consistent, showcasing thoughtful insights.';
   } else if (label === 'negative') {
     if (score < 70)
-      return 'Minor negative signals are evident; the response could be more assertive.';
+      return 'Some negative hints; the response could be more assertive or optimistic.';
     else if (score < 90)
-      return 'The answer reveals clear hesitancy and self-doubt in the candidate’s tone.';
+      return 'Noticeable hesitancy and self-doubt in the candidate’s tone.';
     else
-      return 'A strongly negative response, indicating significant uncertainty and pessimism.';
-  } else {
-    return 'Sentiment analysis not available.';
+      return 'Strongly negative signals, suggesting significant uncertainty or pessimism.';
   }
+  return 'Sentiment analysis not available.';
 };
 
-export const getCommunicationStyle = (label: string, score: number): string => {
+export const getCommunicationStyleBadge = (label: string, score: number) => {
+  // Return a short descriptor + icon or badge color
   if (label === 'positive') {
-    if (score < 70) return 'Optimistic, but could express more conviction';
-    else if (score < 90) return 'Confident and engaging communicator';
-    else return 'Highly dynamic and persuasive communicator';
+    if (score < 70)
+      return {
+        text: 'Optimistic Speaker',
+        color: 'bg-green-200 text-green-800',
+      };
+    else if (score < 90)
+      return {
+        text: 'Confident Communicator',
+        color: 'bg-green-300 text-green-900',
+      };
+    else
+      return {
+        text: 'Charismatic Dynamo',
+        color: 'bg-green-400 text-green-900',
+      };
   } else if (label === 'neutral') {
-    if (score < 70) return 'Measured and thoughtful, though somewhat reserved';
-    else if (score < 90) return 'Balanced and clear in communication';
-    else return 'Consistently composed and articulate';
-  } else if (label === 'negative') {
-    if (score < 70) return 'Slightly hesitant with a subdued tone';
-    else if (score < 90) return 'Clear signs of uncertainty and self-doubt';
-    else return 'Markedly hesitant and reserved in expression';
+    if (score < 70)
+      return { text: 'Steady Speaker', color: 'bg-gray-200 text-gray-800' };
+    else if (score < 90)
+      return { text: 'Balanced Talker', color: 'bg-gray-300 text-gray-900' };
+    else return { text: 'Even-Tempered', color: 'bg-gray-400 text-gray-900' };
+  } else {
+    if (score < 70)
+      return { text: 'Cautious Speaker', color: 'bg-red-200 text-red-800' };
+    else if (score < 90)
+      return {
+        text: 'Reserved Communicator',
+        color: 'bg-red-300 text-red-900',
+      };
+    else return { text: 'Hesitant Talker', color: 'bg-red-400 text-red-900' };
   }
-  return '';
 };
 
 const SentimentDisplay = ({
@@ -79,25 +104,28 @@ const SentimentDisplay = ({
   score: number;
 }) => {
   const sentiment = SENTIMENT_DETAILS[label] || SENTIMENT_DETAILS['neutral'];
-  const dynamicDescription = getDynamicDescription(label, score);
-  const communicationStyle = getCommunicationStyle(label, score);
+  const styleBadge = getCommunicationStyleBadge(label, score);
 
   return (
-    <Card className="p-4 flex flex-col justify-center h-full transform transition hover:scale-105">
-      <CardTitle className="flex flex-col items-center p-2">
-        Candidate Sentiment Insights
+    <Card className="p-4 flex flex-col justify-center h-full transform transition hover:scale-105 relative overflow-hidden">
+      {/* Optional Decorative Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-40 pointer-events-none" />
+
+      <CardTitle className="flex flex-col items-center p-2 z-10">
+        <div className="flex items-center space-x-2">
+          <Sparkles className="text-yellow-500 w-5 h-5" />
+          <span>Communication Style</span>
+        </div>
       </CardTitle>
-      <Separator className="my-1" />
-      <CardContent>
+      <Separator className="my-1 z-10" />
+      <CardContent className="z-10">
         <div className="flex flex-col items-center">
-          <div className="flex items-center space-x-4 mb-4">
-            {/* Optionally, you can uncomment the icon if desired */}
-            {/* <span className="text-6xl">{sentiment.icon}</span> */}
+          <div className="flex items-center space-x-4 mb-3">
             <div className="text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Overall Tone: {sentiment.title}
               </h3>
-              <div className="relative w-full h-4 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
+              <div className="relative w-full h-4 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden my-2">
                 <motion.div
                   initial={{ width: '0%' }}
                   animate={{ width: `${score}%` }}
@@ -109,14 +137,31 @@ const SentimentDisplay = ({
                 Confidence:{' '}
                 <span className="font-bold">{score.toFixed(0)}%</span>
               </p>
-              {/* <p className="text-sm text-gray-600 dark:text-gray-300">
-                {dynamicDescription}
-              </p> */}
-              <p className="text-sm text-blue-600 dark:text-blue-400">
-                Communication Style Insight:{' '}
-                <span className="font-bold">{communicationStyle}</span>
-              </p>
             </div>
+          </div>
+          {/* Style Badge */}
+        {/* Style Badge + Tooltip */}
+        <div className="flex items-center gap-1">
+            <div
+              className={`inline-flex items-center px-3 py-1 rounded-full font-medium ${styleBadge?.color || 'bg-gray-200 text-gray-900'}`}
+            >
+              {styleBadge?.text || 'N/A'}
+            </div>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-gray-600 dark:text-gray-200 cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-xs">
+                    Sentiment analysis provides an <strong>exploratory glimpse</strong> of the candidate’s
+                    communication style. It uses <strong>one data point</strong> (overall answers) for a
+                    high-level overview.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </CardContent>

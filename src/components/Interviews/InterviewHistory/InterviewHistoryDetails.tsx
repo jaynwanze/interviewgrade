@@ -5,7 +5,6 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
   SENTIMENT_DETAILS,
   SentimentDetails,
-  getCommunicationStyle,
   getDynamicDescription,
 } from '@/components/SentimentDisplay';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +19,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   getInterviewAnswers,
   getInterviewById,
@@ -36,7 +41,7 @@ import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ClockIcon, Info } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
 
@@ -101,9 +106,6 @@ export const InterviewHistoryDetails = ({
   const [sentimentDetails, setSentimentDetails] =
     useState<SentimentDetails | null>(null);
   const [dynamicDescription, setDynamicDescription] = useState<string | null>(
-    null,
-  );
-  const [communicationStyle, setCommunicationStyle] = useState<string | null>(
     null,
   );
   const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(
@@ -196,7 +198,8 @@ export const InterviewHistoryDetails = ({
         (qa) => qa.answer,
       );
       fetchSentiment(candidateAnswers).then((data) => {
-        return setSentimentScore(data);
+        if (data) return setSentimentScore(data);
+        return null;
       });
     }
   }, [evaluation]);
@@ -213,12 +216,6 @@ export const InterviewHistoryDetails = ({
         sentimentScore?.score,
       );
       setDynamicDescription(dynamicDescription);
-      const communicationStyle = getCommunicationStyle(
-        sentimentScore.label,
-        sentimentScore.score,
-      );
-
-      setCommunicationStyle(communicationStyle);
     }
   }, [sentimentScore]);
 
@@ -341,9 +338,26 @@ export const InterviewHistoryDetails = ({
           {sentimentScore && dynamicDescription && sentimentDetails && (
             <>
               <div className="flex flex-col justify-between space-y-6">
-                <CardTitle className="text-xl font-semibold">
-                  Candidate Sentiment Analysis
-                </CardTitle>
+                <span className="flex items-center gap-2">
+                  <CardTitle className="text-xl font-semibold">
+                    Answer Sentiment Snapshot
+                  </CardTitle>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p className="text-xs">
+                          This sentiment analysis snapshot offers an{' '}
+                          <strong>initial look</strong> at the candidate’s
+                          answer tone for this session based off{' '}
+                          <strong>one data point</strong> (candidate answers).
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </span>
                 <span className="text-gray-700">
                   <div className="flex items-center space-x-3">
                     <span className="text-3xl">{sentimentDetails.icon}</span>
@@ -353,10 +367,6 @@ export const InterviewHistoryDetails = ({
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {dynamicDescription}
-                      </p>
-                      <p className="text-sm text-blue-600 dark:text-blue-400">
-                        Communication Style Insight:{' '}
-                        <span className="font-bold">{communicationStyle}</span>
                       </p>
                     </div>
                   </div>

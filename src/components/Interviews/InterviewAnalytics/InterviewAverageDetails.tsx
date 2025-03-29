@@ -1,6 +1,5 @@
 'use client';
 
-import SentimentDisplay from '@/components/SentimentDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Interview, InterviewAnalytics } from '@/types';
@@ -17,10 +16,13 @@ export const InterviewAverageDetails = ({
   latestInterview: Interview;
   sentimentAnalysis: SentimentScore | null;
 }) => {
+  const gridsColsSpanNum = analyticsData.interview_template_id ? 4 : 3;
   return (
     <>
       {/* Key Metrics Grid */}
-      <div className="grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-5 items-center">
+      <div
+        className={`grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-${gridsColsSpanNum} gap-6 mb-5 items-center`}
+      >
         {/* Left Column - Interview Info + Overall Score */}
         <InterviewLatestCard latestInterview={latestInterview} />
         {/* Overall Grade + Best Skill Badge */}
@@ -42,7 +44,7 @@ export const InterviewAverageDetails = ({
           </div>
         </Card>
         {/* Average Mark Per Question */}
-        {analyticsData.interview_template_id ? (
+        {analyticsData.interview_template_id && (
           <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
             <Star className="w-10 h-10 text-purple-500" />
             <CardTitle className="mt-2">Average Score Per Question</CardTitle>
@@ -58,29 +60,18 @@ export const InterviewAverageDetails = ({
               </p>
             </div>
           </Card>
-        ) : (
-          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
-            {/* Total Sessions Count */}
-            <ClipboardList className="w-10 h-10 text-blue-500" />
-            <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
-            <div>
-              <p className="text-4xl font-bold text-gray-900">
-                {analyticsData.total_interviews || 0}
-              </p>
-              <p className="text-gray-500">
-                Total completed interview sessions.
-              </p>
-            </div>
-          </Card>
         )}
-
-        {/* Sentiment Analysis */}
-        {sentimentAnalysis && (
-          <SentimentDisplay
-            label={sentimentAnalysis.label}
-            score={sentimentAnalysis.score}
-          />
-        )}
+        <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
+          {/* Total Sessions Count */}
+          <ClipboardList className="w-10 h-10 text-blue-500" />
+          <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
+          <div>
+            <p className="text-4xl font-bold text-gray-900">
+              {analyticsData.total_interviews || 0}
+            </p>
+            <p className="text-gray-500">Total completed interview sessions.</p>
+          </div>
+        </Card>
       </div>
     </>
   );

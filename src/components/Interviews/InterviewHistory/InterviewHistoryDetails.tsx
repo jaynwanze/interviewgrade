@@ -342,7 +342,7 @@ export const InterviewHistoryDetails = ({
                   <CardTitle className="text-xl font-semibold">
                     Answer Sentiment Snapshot
                   </CardTitle>
-                  <TooltipProvider>
+                  {/* <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
                         <Info className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-pointer" />
@@ -356,7 +356,7 @@ export const InterviewHistoryDetails = ({
                         </p>
                       </TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>
+                  </TooltipProvider> */}
                 </span>
                 <span className="text-gray-700">
                   <div className="flex items-center space-x-3">

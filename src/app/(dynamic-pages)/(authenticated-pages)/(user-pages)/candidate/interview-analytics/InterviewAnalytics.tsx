@@ -353,6 +353,7 @@ export default function InterviewAnalyticsPage() {
             />
             <InterviewGraphsDetailed
               analyticsData={detailed}
+              sentimentAnalysis={currentSentimentDetailed || null}
             />
           </div>
         ) : !detailed && selectedTemplateId && activeSwitch ? (

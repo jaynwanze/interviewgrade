@@ -107,10 +107,8 @@ const SentimentDisplay = ({
   const styleBadge = getCommunicationStyleBadge(label, score);
 
   return (
-    <Card className="p-4 flex flex-col justify-center h-full transform transition hover:scale-105 relative overflow-hidden">
+    <Card className="p-4 flex flex-col justify-center h-full transform transition hover:scale-105 relative overflow-hidden shadow-lg rounded-lg p-6">
       {/* Optional Decorative Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-40 pointer-events-none" />
-
       <CardTitle className="flex flex-col items-center p-2 z-10">
         <div className="flex items-center space-x-2">
           <Sparkles className="text-yellow-500 w-5 h-5" />
@@ -140,29 +138,30 @@ const SentimentDisplay = ({
             </div>
           </div>
           {/* Style Badge */}
-        {/* Style Badge + Tooltip */}
-        <div className="flex items-center gap-1">
+          {/* Style Badge + Tooltip */}
+          {/* <span className="flex items-center justify-center gap-1"> */}
             <div
-              className={`inline-flex items-center px-3 py-1 rounded-full font-medium ${styleBadge?.color || 'bg-gray-200 text-gray-900'}`}
+              className={`inline-flex justify-center px-3 py-1 rounded-full font-medium ${styleBadge?.color || 'bg-gray-200 text-gray-900'}`}
             >
               {styleBadge?.text || 'N/A'}
             </div>
 
-            <TooltipProvider>
+            {/* <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Info className="w-4 h-4 text-gray-600 dark:text-gray-200 cursor-pointer" />
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="text-xs">
-                    Sentiment analysis provides an <strong>exploratory glimpse</strong> of the candidate’s
-                    communication style. It uses <strong>one data point</strong> (overall answers) for a
-                    high-level overview.
+                    Sentiment analysis provides an{' '}
+                    <strong>exploratory glimpse</strong> of the candidate’s
+                    communication style. It uses <strong>one data point</strong>{' '}
+                    (overall answers) for a high-level overview.
                   </p>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
-          </div>
+            </TooltipProvider> */}
+          {/* </span> */}
         </div>
       </CardContent>
     </Card>

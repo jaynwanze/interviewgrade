@@ -19,6 +19,7 @@ type CandidatePreferencesForm = {
   location: string;
   industry: string;
   skills: string;
+  job: string;
 };
 
 export function EmployerPreferences({ onSuccess }: { onSuccess: () => void }) {
@@ -26,6 +27,7 @@ export function EmployerPreferences({ onSuccess }: { onSuccess: () => void }) {
     location: '',
     industry: '',
     skills: '',
+    job: '',
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -74,6 +76,18 @@ export function EmployerPreferences({ onSuccess }: { onSuccess: () => void }) {
               name="location"
               placeholder="e.g. United States, Remote"
               value={formValues.location}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="job">Preferred Job Title</Label>
+            <Input
+              id="job"
+              name="job"
+              placeholder="e.g. Software Engineer, Data Scientist"
+              value={formValues.job}
               onChange={handleChange}
               required
             />

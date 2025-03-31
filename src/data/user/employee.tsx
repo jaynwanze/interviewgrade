@@ -581,10 +581,12 @@ export const saveEmployerPreferences = async (
     location,
     industry,
     skills,
+    job,
   }: {
     location: string;
     industry: string;
     skills: string;
+    job: string;
   },
   {
     isOnboardingFlow = false,
@@ -607,6 +609,7 @@ export const saveEmployerPreferences = async (
     location,
     industry,
     skills,
+    job
   };
   try {
     const { data, error } = await supabaseClient

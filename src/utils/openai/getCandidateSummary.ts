@@ -19,7 +19,6 @@ const openai = new OpenAI({
     apiKey: openAiKey,
 });
 
-
 const constructCandidateSummaryPrompt = (candidate: Candidate) => {
     return `
 You are an AI assistant helping a hiring manager quickly understand the core profile and progress of a job candidate. 
@@ -36,6 +35,7 @@ Below is the candidate’s information:
 1. Synthesize this information into a concise overview (2-4 sentences).
 2. Highlight the candidate’s current skill level, notable achievements, and recent progress based on their interview and practice stats (if available).
 3. Present the summary in a way that an employer can quickly read and get a sense of the candidate’s suitability.
+4. Don't mention candidate's name within summary.
 
 **Output**:
 Return your answer **exclusively** in the following JSON format (no markdown):
@@ -91,7 +91,6 @@ const callOpenAIWithRetries = async (
 const CandidateSummarySchema = z.object({
     candidate_summary: z.string(),
 });
-
 
 const parseCandidateSummary = (aiResponse: string) => {
     let jsonString = '';

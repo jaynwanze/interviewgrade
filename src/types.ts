@@ -62,6 +62,7 @@ export type EmployerCandidatePreferences = {
   location: string;
   industry: string;
   skills: string;
+  job: string;
 };
 
 export type RecentAttempt = {

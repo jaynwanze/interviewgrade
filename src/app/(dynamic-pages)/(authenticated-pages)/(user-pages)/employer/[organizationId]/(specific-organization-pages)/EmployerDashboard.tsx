@@ -63,6 +63,25 @@ const availableLocations = [
   'Remote',
 ];
 
+const availableRoles = [
+  'All Roles',
+  'Software Engineer',
+  'Data Scientist',
+  'Product Manager',
+  'UX Designer',
+  'Marketing Specialist',
+  'Sales Executive',
+  'HR Manager',
+  'Customer Support',
+  'Project Manager',
+  'Business Analyst',
+  'DevOps Engineer',
+  'Web Developer',
+  'Mobile Developer',
+  'Cybersecurity Analyst',
+  'Game Developer',
+];
+
 // The EmployerDashboard
 export default function EmployerDashboard() {
   // Basic stats used in StatisticsView
@@ -101,6 +120,9 @@ export default function EmployerDashboard() {
   const [industryOpen, setIndustryOpen] = useState(false);
   const [skillOpen, setSkillOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
+  const [roleOpen, setRoleOpen] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<string>('All Roles');
+
   // On initial mount, load our mock data
   useEffect(() => {
     const fetchData = async () => {
@@ -279,7 +301,60 @@ export default function EmployerDashboard() {
               employerPrefs={employerPrefs}
             />
           )}
+
           <div className="flex flex-wrap justify-start gap-2">
+            {/* Role  MultiSelect */}
+            <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
+              <label className="text-sm text-muted-foreground mb-1">Role</label>
+              <Popover open={roleOpen} onOpenChange={setRoleOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={roleOpen}
+                    aria-haspopup="listbox"
+                    className="w-full justify-between"
+                  >
+                    <span className="truncate">
+                      {roleFilter || 'All Roles...'}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full min-w-[200px] max-w-[300px] p-0 z-40 mt-2">
+                  <Command>
+                    <CommandInput placeholder="Search role..." />
+                    <CommandList>
+                      <CommandEmpty>No results found.</CommandEmpty>
+                      <CommandGroup heading="Industries">
+                        {availableRoles.map((role) => (
+                          <CommandItem
+                            key={role}
+                            value={role}
+                            onSelect={() => {
+                              setRoleFilter(role);
+                              setEmployerPrefs((prev) =>
+                                prev
+                                  ? { ...prev, role: role }
+                                  : {
+                                    job: role,
+                                    industry: '',
+                                    location: '',
+                                    skills: '',
+                                  },
+                              );
+                              setIndustryOpen(false);
+                            }}
+                          >
+                            {role}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
             {/* Industry MultiSelect */}
             <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
               <label className="text-sm text-muted-foreground mb-1">
@@ -319,6 +394,7 @@ export default function EmployerDashboard() {
                                     industry: industry,
                                     location: '',
                                     skills: '',
+                                    job: '',
                                   },
                               );
                               setIndustryOpen(false);
@@ -373,6 +449,7 @@ export default function EmployerDashboard() {
                                     industry: '',
                                     location: '',
                                     skills: skill,
+                                    job: '',
                                   },
                               );
                               setSkillOpen(false);
@@ -423,7 +500,12 @@ export default function EmployerDashboard() {
                               setEmployerPrefs((prev) =>
                                 prev
                                   ? { ...prev, location: loc }
-                                  : { industry: '', location: loc, skills: '' },
+                                  : {
+                                    industry: '',
+                                    location: loc,
+                                    skills: '',
+                                    job: '',
+                                  },
                               );
                               setLocationOpen(false);
                             }}

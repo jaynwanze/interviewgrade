@@ -14,15 +14,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
+import { ResumeHighlights } from '@/components/Employee/Dashboard/CandidateDetailedView/ResumeHighlights';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -35,62 +28,8 @@ import { getCandidateById, unlockCandidateAction } from '@/data/user/employee';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { useTokens } from '@/hooks/useTokens';
 import { CandidateDetailsView } from '@/types';
-import { FileText, Linkedin, Lock, Mail, Star } from 'lucide-react';
+import { Linkedin, Lock, Mail, Star } from 'lucide-react';
 
-const mockCandidate: CandidateDetailsView = {
-  id: 'c1',
-  city: 'New York',
-  country: 'United States',
-  phone_number: '(555) 123-4567',
-  summary: 'Enthusiastic engineer with strong communication skills.',
-  role: 'Software Engineer',
-  industry: 'Tech',
-  practice_skill_stats: [
-    {
-      template_id: '1',
-      skill: 'Problem Solving',
-      avg_score: 92,
-      previous_avg: 90,
-    },
-    {
-      template_id: '2',
-      skill: 'Communication',
-      avg_score: 88,
-      previous_avg: 85,
-    },
-    { template_id: '3', skill: 'Teamwork', avg_score: 90, previous_avg: 88 },
-  ],
-  interview_skill_stats: [
-    {
-      template_id: 'p1',
-      skill: 'Behavioural',
-      avg_score: 89,
-      previous_avg: 87,
-    },
-  ],
-  created_at: '2024-04-29T10:00:00Z',
-  full_name: 'Alice Anderson',
-  avatar_url: '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
-  email: 'alice@example.com',
-  resume_url: 'https://example.com/mock-cv.pdf', // Simulated CV link
-  recentAttempts: [
-    {
-      interview_id: 'attempt1',
-      interview_mode: 'practice',
-      date: '2024-05-02T10:30:00Z',
-      skillFocus: 'Communication',
-      score: 85,
-    },
-    {
-      interview_id: 'attempt2',
-      interview_mode: 'interview',
-      date: '2024-04-29T09:00:00Z',
-      skillFocus: 'Problem Solving',
-      score: 92,
-    },
-  ],
-  isUnlocked: false,
-};
 export default function CandidateDetailsPage({
   candidateId,
 }: {
@@ -391,49 +330,9 @@ export default function CandidateDetailsPage({
               </div>
             </CardContent>
           </Card>
-          {/* Resume / CV link */}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Resume / CV</CardTitle>
-              <CardDescription>
-                Preview or download candidate’s resume.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {candidate.resume_url ? (
-                <Dialog
-                  open={openResumeDialog}
-                  onOpenChange={setOpenResumeDialog}
-                >
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <FileText className="mr-2 h-4 w-4" />
-                      View CV
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <DialogHeader>
-                      <DialogTitle>Candidate’s Resume</DialogTitle>
-                      <DialogDescription>
-                        The CV the candidate provided
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="w-full h-[500px] mt-4 overflow-auto bg-muted">
-                      {/* Sample PDF embed in an iframe */}
-                      <iframe
-                        src={candidate.resume_url}
-                        title="Candidate Resume"
-                        className="w-full h-full"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              ) : (
-                <p className="text-sm">No resume provided.</p>
-              )}
-            </CardContent>
-          </Card>
+          {/* Resume Highlights */}
+          <ResumeHighlights candidate={candidate} />
         </>
       )}
 

@@ -108,6 +108,7 @@ export type CandidateDetailsView = {
   email: string;
   linkedin_url?: string;
   resume_url?: string;
+  resume_metadata?: ResumeMetadata;
   recentAttempts?: RecentAttempt[];
   isUnlocked?: boolean;
 };
@@ -359,25 +360,31 @@ export const mockCandidates: CandidateRow[] = [
         previous_avg: 87,
       },
     ],
-    resume_metadata: {
-      skills: ['JavaScript', 'React', 'Node.js'],
+   resume_metadata: {
+      skills: ["Python", "React", "Docker"],
       experiences: [
         {
-          jobTitle: 'Software Engineer at TechCorp',
-          company: 'TechCorp',
-          startDate: '2022-01-01',
+          jobTitle: "Software Engineer",
+          company: "Acme Corp",
+          startDate: "2022-05-01",
           endDate: null,
+          description: "Developed microservices in Node.js and maintained Docker containers..."
+        }
+      ],
+      education: "Bachelor of Science in Computer Science, Some University",
+      certifications: ["AWS Certified Solutions Architect"],
+      projects: [
+        {
+          title: "Open Source CLI Tool",
+          description: "A CLI tool for data scraping. Implemented in Python...",
+          link: "https://github.com/username/cli-tool"
         },
         {
-          jobTitle: 'Intern at WebSolutions',
-          company: 'WebSolutions',
-          startDate: '2021-06-01',
-          endDate: '2021-12-01',
-        },
-      ],
-      education: 'BSc in Computer Science from NYU',
-      certifications: ['AWS Certified Developer'],
-      projects: ['Portfolio Website', 'E-commerce App'],
+          title: "Personal Portfolio",
+          description: "A React-based personal site with blog and resume sections",
+          link: null
+        }
+      ]
     },
     created_at: '2024-04-29T10:00:00Z',
     full_name: 'Alice Anderson',
@@ -416,24 +423,25 @@ export const mockCandidates: CandidateRow[] = [
       { template_id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
     ],
     resume_metadata: {
-      skills: ['Python', 'Django', 'Flask'],
+      skills: ["JavaScript", "Node.js", "PostgreSQL"],
       experiences: [
         {
-          jobTitle: 'Full-Stack Developer at WebInnovate',
-          company: 'WebInnovate',
-          startDate: '2023-01-01',
+          jobTitle: "Full-Stack Developer",
+          company: "Tech Innovations",
+          startDate: "2021-03-01",
           endDate: null,
-        },
-        {
-          jobTitle: 'Intern at CodeCrafters',
-          company: 'CodeCrafters',
-          startDate: '2022-06-01',
-          endDate: '2022-12-01',
-        },
+          description: "Led the development of a scalable web application..."
+        }
       ],
-      education: 'BSc in Software Engineering from Stanford',
-      certifications: ['Certified Kubernetes Administrator'],
-      projects: ['Task Management App', 'Blog Platform'],
+      education: "Master of Science in Software Engineering, Tech University",
+      certifications: ["Certified Kubernetes Administrator"],
+      projects: [
+        {
+          title: "E-commerce Platform",
+          description: "Built a full-stack e-commerce platform using MERN stack...",
+          link: null
+        }
+      ]
     },
     created_at: '2024-04-20T09:30:00Z',
     full_name: 'Bob Brown',

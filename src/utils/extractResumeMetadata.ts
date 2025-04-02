@@ -24,7 +24,6 @@ export interface Experience {
  */
 export async function getResumeBuffer(resumeUrl: string): Promise<Buffer> {
   const trimmedUrl = resumeUrl.trim();
-  console.log('Fetching resume from:', trimmedUrl);
   if (trimmedUrl.toLowerCase().startsWith('http')) {
     const response = await fetch(trimmedUrl);
     if (!response.ok) {
@@ -33,7 +32,6 @@ export async function getResumeBuffer(resumeUrl: string): Promise<Buffer> {
       );
     }
     const arrayBuffer = await response.arrayBuffer();
-    console.log('Downloaded resume size:', arrayBuffer.byteLength);
     return Buffer.from(arrayBuffer);
   } else {
     if (!fs.existsSync(trimmedUrl)) {
@@ -76,27 +74,36 @@ export async function getOpenAIExtractionResponse(
     apiKey: openAiKey,
   });
 
-
-  const prompt = `Extract the following information from the resume text below and output a JSON exactly in this format:
-{
-  "skills": [array of strings],
-  "experiences": [
-    {
-      "jobTitle": string,
-      "company": string,
-      "startDate": string or null,
-      "endDate": string or null
-    }
-  ],
-  "education": string,
-  "certifications": [array of strings],
-  "projects": [array of strings]
-}
-
-Resume Text:
-${text}
-
-Do not include any extra commentary or markdown formatting in your output.`;
+  const prompt = `
+  Extract the following information from the resume text below and output concise JSON in this format. For each experience/project description, limit to 1-2 sentences or ~40 words:
+  
+  {
+    "skills": [array of strings],
+    "experiences": [
+      {
+        "jobTitle": string,
+        "company": string,
+        "startDate": string or null,
+        "endDate": string or null,
+        "description": "a concise summary"
+      }
+    ],
+    "education": string,
+    "certifications": [array of strings],
+    "projects": [
+      {
+        "title": string,
+        "description": "a concise summary",
+        "link": string or null
+      }
+    ]
+  }
+  
+  Resume Text:
+  ${text}
+  
+  Do not exceed 1-2 sentences for each description. Output valid JSON, no extra commentary.
+  `;
 
   try {
     const response = await openai.chat.completions.create({
@@ -170,9 +177,7 @@ export async function extractResumeMetadataViaOpenAI(
 export async function extractResumeMetadataFromUrl(
   resumeUrl: string,
 ): Promise<ResumeMetadata> {
-  console.log('Resume URL:', resumeUrl);
   const fileBuffer = await getResumeBuffer(resumeUrl);
-  console.log('Buffer length:', fileBuffer.length);
   const metadata = await extractResumeMetadataViaOpenAI(fileBuffer);
   return metadata;
 }

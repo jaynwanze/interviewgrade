@@ -1,4 +1,5 @@
 import { EmployerCandidatePreferences, CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { ResumeMetadata } from '@/utils/zod-schemas/resumeMetaDataSchema'
 export type Json =
   | string
   | number
@@ -149,6 +150,7 @@ export type Database = {
           industry: string
           linkedin_url: string
           resume_url: string
+          resume_metadata: ResumeMetadata
           interview_skill_stats: CandidateSkillsStats[]
           practice_skill_stats: CandidateSkillsStats[]
           created_at: string
@@ -163,6 +165,7 @@ export type Database = {
           industry: string
           linkedin_url: string
           resume_url?: string
+          resume_metadata?: ResumeMetadata
           interview_skill_stats: CandidateSkillsStats[]
           practice_skill_stats: CandidateSkillsStats[]
           created_at: string
@@ -177,6 +180,7 @@ export type Database = {
           industry?: string
           linkedin_url?: string
           resume_url?: string
+          resume_metadata?: ResumeMetadata
           interview_skill_stats?: CandidateSkillsStats[]
           practice_skill_stats?: CandidateSkillsStats[]
           created_at?: string

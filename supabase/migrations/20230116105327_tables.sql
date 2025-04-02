@@ -73,6 +73,7 @@ CREATE TABLE "public"."candidates" (
   "industry" character varying,
   "linkedin_url" character varying,
   "resume_url" character varying,
+  "resume_metadata" "jsonb",
   "interview_skill_stats" "jsonb",
   "practice_skill_stats" "jsonb",
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL

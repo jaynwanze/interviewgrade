@@ -226,6 +226,13 @@ export async function getCandidateById(
   if (!isUnlocked) {
     candidate.resume_url = '';
     userProfile.email = '';
+    candidate.resume_metadata = {
+      skills: [],
+      experiences: [],
+      projects: [],
+      certifications: [],
+      education: '',
+    };
   }
 
   return {
@@ -609,7 +616,7 @@ export const saveEmployerPreferences = async (
     location,
     industry,
     skills,
-    job
+    job,
   };
   try {
     const { data, error } = await supabaseClient

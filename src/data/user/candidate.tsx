@@ -7,6 +7,7 @@ import type {
   SupabaseFileUploadOptions,
   Table,
 } from '@/types';
+import { extractResumeMetadataFromUrl } from '@/utils/extractResumeMetadata';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { User } from '@supabase/supabase-js';
@@ -38,6 +39,10 @@ export async function updateCandidateProfileDetailsAction({
     throw new Error('User not found');
   }
 
+  //Background resume extraction
+  if (resume_url) {
+    startResumeExtractionInBackground(currentUser.id, resume_url);
+  }
   const supabase = createSupabaseUserServerActionClient();
   const { data, error } = await supabase
     .from('candidates')
@@ -59,6 +64,26 @@ export async function updateCandidateProfileDetailsAction({
   }
 
   return data;
+}
+
+async function startResumeExtractionInBackground(
+  candidateId: string,
+  resumeUrl: string,
+) {
+  extractAndSaveMetadata(candidateId, resumeUrl);
+}
+
+async function extractAndSaveMetadata(candidateId: string, resumeUrl: string) {
+  try {
+    const resume_metadata = await extractResumeMetadataFromUrl(resumeUrl);
+    const supabase = createSupabaseUserServerActionClient();
+    await supabase
+      .from('candidates')
+      .update({ resume_metadata })
+      .eq('id', candidateId);
+  } catch (err) {
+    console.error('Resume extraction failed:', err);
+  }
 }
 
 // export async function updateCandidateSkillStatsAction({

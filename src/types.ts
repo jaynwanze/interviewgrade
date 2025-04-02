@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './lib/database.types';
-
+import { ResumeMetadata } from './utils/zod-schemas/resumeMetaDataSchema';
 export type AppSupabaseClient = SupabaseClient<Database>;
 export type Table<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row'];
@@ -84,12 +84,12 @@ export interface CandidateRow {
   industry: string;
   interview_skill_stats: CandidateSkillsStats[];
   practice_skill_stats: CandidateSkillsStats[];
+  resume_metadata?: ResumeMetadata;
   created_at: string;
   full_name: string;
   email: string;
   avatar_url?: string;
 }
-
 export type Candidate = Table<'candidates'>;
 
 export type CandidateDetailsView = {
@@ -359,6 +359,26 @@ export const mockCandidates: CandidateRow[] = [
         previous_avg: 87,
       },
     ],
+    resume_metadata: {
+      skills: ['JavaScript', 'React', 'Node.js'],
+      experiences: [
+        {
+          jobTitle: 'Software Engineer at TechCorp',
+          company: 'TechCorp',
+          startDate: '2022-01-01',
+          endDate: null,
+        },
+        {
+          jobTitle: 'Intern at WebSolutions',
+          company: 'WebSolutions',
+          startDate: '2021-06-01',
+          endDate: '2021-12-01',
+        },
+      ],
+      education: 'BSc in Computer Science from NYU',
+      certifications: ['AWS Certified Developer'],
+      projects: ['Portfolio Website', 'E-commerce App'],
+    },
     created_at: '2024-04-29T10:00:00Z',
     full_name: 'Alice Anderson',
     avatar_url: '/images/candidates/aiony-haust-3TLl_97HNJo-unsplash.ico',
@@ -395,6 +415,26 @@ export const mockCandidates: CandidateRow[] = [
       },
       { template_id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
     ],
+    resume_metadata: {
+      skills: ['Python', 'Django', 'Flask'],
+      experiences: [
+        {
+          jobTitle: 'Full-Stack Developer at WebInnovate',
+          company: 'WebInnovate',
+          startDate: '2023-01-01',
+          endDate: null,
+        },
+        {
+          jobTitle: 'Intern at CodeCrafters',
+          company: 'CodeCrafters',
+          startDate: '2022-06-01',
+          endDate: '2022-12-01',
+        },
+      ],
+      education: 'BSc in Software Engineering from Stanford',
+      certifications: ['Certified Kubernetes Administrator'],
+      projects: ['Task Management App', 'Blog Platform'],
+    },
     created_at: '2024-04-20T09:30:00Z',
     full_name: 'Bob Brown',
     avatar_url: '/images/candidates/irene-strong-v2aKnjMbP_k-unsplash.ico',

@@ -251,19 +251,19 @@ export function MatchedCandidatesView({
                         </div>
                         <div className="flex flex-col items-center space-y-2 *:gap-1">
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => handleViewProfile(cand.id)}
                           >
                             View Profile
                           </Button>
-                          <Button
+                          {/* <Button
                             variant="default"
                             size="sm"
                             onClick={() => handleContact(cand.id)}
                           >
                             Contact
-                          </Button>
+                          </Button> */}
                         </div>
                       </motion.div>
                     );
@@ -331,19 +331,19 @@ export function MatchedCandidatesView({
                 </CardContent>
                 <CardFooter className="flex gap-2">
                   <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
                     onClick={() => handleViewProfile(topProspect.id)}
                   >
                     View Profile
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="default"
                     size="sm"
                     onClick={() => handleContact(topProspect.id)}
                   >
                     Contact
-                  </Button>
+                  </Button> */}
                 </CardFooter>
               </>
             )}

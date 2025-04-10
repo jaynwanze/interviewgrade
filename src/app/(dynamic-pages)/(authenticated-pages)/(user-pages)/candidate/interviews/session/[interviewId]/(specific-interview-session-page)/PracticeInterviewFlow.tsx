@@ -5,12 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
-
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { markTutorialAsDoneAction } from '@/data/user/candidate';
 import {
@@ -33,6 +31,45 @@ type PracticeInterviewFlowProps = {
   questions: InterviewQuestion[];
   isTutorialMode: boolean;
 };
+function parsePartial(text: string) {
+  // We'll try to find lines of the form:
+  //   Score (%): xx/100%
+  //   Summary: ...
+  //   Advice for Next Question: ...
+  // If they are incomplete, we might not parse anything yet.
+
+  const result: {
+    mark?: number;
+    summary?: string;
+    advice_for_next_question?: string;
+  } = {};
+
+  // 1) Score
+  // e.g. "Score (%): 45/100%"
+  const scoreRegex = /Score \(%\):\s*(\d+)\s*\/\s*100%/;
+  const scoreMatch = text.match(scoreRegex);
+  if (scoreMatch && scoreMatch[1]) {
+    result.mark = parseInt(scoreMatch[1], 10);
+  }
+
+  // 2) Summary
+  // We'll capture everything after "Summary:" until "Advice for Next Question" (or end)
+  const summaryRegex = /Summary:\s*([\s\S]+?)(?=\nAdvice for Next Question|$)/;
+  const summaryMatch = text.match(summaryRegex);
+  if (summaryMatch && summaryMatch[1]) {
+    result.summary = summaryMatch[1].trim();
+  }
+
+  // 3) Advice
+  // We'll capture everything after "Advice for Next Question:" until the end
+  const adviceRegex = /Advice for Next Question:\s*([\s\S]+)/;
+  const adviceMatch = text.match(adviceRegex);
+  if (adviceMatch && adviceMatch[1]) {
+    result.advice_for_next_question = adviceMatch[1].trim();
+  }
+
+  return result;
+}
 
 export function PracticeInterviewFlow({
   interview,
@@ -50,12 +87,18 @@ export function PracticeInterviewFlow({
   const [questionFeedback, setQuestionFeedback] = useState<{
     [key: number]: specificFeedbackType | null;
   }>({});
+
+  const [partialFeedback, setPartialFeedback] = useState<{
+    [key: number]: string | null;
+  }>({});
   const answers = useRef<string[]>([]);
   const { addNotification } = useNotifications();
   const [scoreStringColour, setScoreStringColour] = useState('');
 
   const router = useRouter();
   const maxScorePerQuestion = 100;
+  const [partialText, setPartialText] = useState('');
+
   // If needed, you can keep a timer for the entire practice session
   const timerRef = useRef<number | null>(null);
 
@@ -112,34 +155,89 @@ export function PracticeInterviewFlow({
 
   const fetchSpecificFeedback = async (answer: string) => {
     setIsFetchingSpecificFeedback(true);
+
+    let accumulatedText = '';
+    let done = false;
+
     try {
       const nextQuestionIndex = currentQuestionIndex + 1;
       const nextQuestion = questions[nextQuestionIndex] || null;
 
-      // Example: if you have an existing getQuestionFeedback helper
-      const feedbackData = await getQuestionFeedback(
-        interview.skill,
-        questions[currentQuestionIndex],
-        answer,
-        nextQuestion,
-        interview.question_count,
-        interview.evaluation_criterias ?? [],
-      );
+      const response = await fetch('/api/realtime-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skill: interview?.skill ?? '',
+          currentQuestion: questions[currentQuestionIndex],
+          currentAnswer: answer,
+          nextQuestion,
+          interview_question_count: interview?.question_count ?? 0,
+          interview_evaluation_criterias: interview?.evaluation_criterias ?? [],
+        }),
+      });
 
-      setQuestionFeedback((prev) => ({
-        ...prev,
-        [currentQuestionIndex]: feedbackData || null,
-      }));
-    } catch (error) {
-      console.error('Error fetching specific feedback:', error);
-      setQuestionFeedback((prev) => ({
-        ...prev,
-        [currentQuestionIndex]: null,
-      }));
+      if (!response.ok || !response.body) {
+        console.error('Failed to get feedback from OpenAI.');
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        done = streamDone;
+
+        if (value) {
+          const chunk = decoder.decode(value);
+          // chunk can have multiple SSE lines
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            if (line.startsWith('data: ')) {
+              const data = line.replace(/^data:\s*/, '');
+              if (data === '[DONE]') {
+                done = true;
+                break;
+              }
+
+              // Each SSE line is JSON-encoded text
+              // e.g. "Practice Fe" or "edback\nScore ..."
+              try {
+                const token = JSON.parse(data) as string;
+                accumulatedText += token;
+                console.log('Accumulated text:', accumulatedText);
+
+                // 1) Update partial text for the user
+                setPartialText(accumulatedText);
+
+                // 2) Attempt partial parse for “Score”, “Summary”, “Advice”
+                const newFields = parsePartial(accumulatedText);
+                console.log('Parsed fields:', newFields);
+
+                if (Object.keys(newFields).length > 0) {
+                  // Merge them into questionFeedback
+                  setQuestionFeedback((prev) => ({
+                    ...prev,
+                    [currentQuestionIndex]: {
+                      ...(prev[currentQuestionIndex] || {}),
+                      ...newFields,
+                    },
+                  }));
+                }
+              } catch (err) {
+                console.error('Error parsing SSE token as string:', err);
+              }
+            }
+          }
+        }
+      }
     } finally {
       setIsFetchingSpecificFeedback(false);
     }
   };
+
   useEffect(() => {
     if (questionFeedback[currentQuestionIndex]) {
       const score = Math.round(
@@ -300,10 +398,65 @@ export function PracticeInterviewFlow({
           </CardHeader>
           <CardContent>
             {isFetchingSpecificFeedback ? (
-              <div className="flex items-center justify-center space-x-2 mt-4">
-                <p>Fetching feedback...</p>
-                <LoadingSpinner />
-              </div>
+              questionFeedback[currentQuestionIndex] ? (
+                <>
+                  <div className="text-left mt-4 space-y-3">
+                    {questionFeedback[currentQuestionIndex]?.mark && (
+                      <div className="text-center">
+                        <strong className="block text-base">Score (%):</strong>
+                        <p
+                          className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
+                        >
+                          {Math.round(
+                            questionFeedback[currentQuestionIndex]?.mark ?? 0,
+                          )}
+                          /100%
+                        </p>
+                      </div>
+                    )}
+
+                    {questionFeedback[currentQuestionIndex]?.summary && (
+                      <div>
+                        <strong>Summary:</strong>{' '}
+                        {questionFeedback[currentQuestionIndex]?.summary}
+                      </div>
+                    )}
+
+                    {/* Advice only if there's a next question */}
+                    {currentQuestionIndex < questions.length - 1 &&
+                      questionFeedback[currentQuestionIndex]?.summary && (
+                        <div>
+                          <strong>Advice for Next Question:</strong>{' '}
+                          {
+                            questionFeedback[currentQuestionIndex]
+                              ?.advice_for_next_question
+                          }
+                        </div>
+                      )}
+                  </div>
+
+                  <div className="flex items-center justify-center gap-4 mt-6">
+                    {currentQuestionIndex < questions.length - 1 && (
+                      <Button
+                        variant="secondary"
+                        onClick={() =>
+                          setCurrentQuestionIndex((prev) => prev + 1)
+                        }
+                      >
+                        Next Question
+                      </Button>
+                    )}
+                    <Button onClick={finishInterview}>
+                      {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center space-x-2 mt-4">
+                  <p>Fetching feedback...</p>
+                  <LoadingSpinner />
+                </div>
+              )
             ) : questionFeedback[currentQuestionIndex] ? (
               <>
                 <div className="text-left mt-4 space-y-3">

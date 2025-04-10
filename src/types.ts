@@ -148,9 +148,9 @@ export type EvaluationRubricType = {
 };
 
 export type specificFeedbackType = {
-  mark: number;
-  summary: string;
-  advice_for_next_question: string;
+  mark?: number;
+  summary?: string;
+  advice_for_next_question?: string;
 };
 
 export type EvaluationCriteriaType = {

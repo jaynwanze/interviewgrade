@@ -1,11 +1,9 @@
 'use server';
 
 import {
-  getInterviewAnalytics,
   insertInterviewEvaluation,
-  updateInterviewAnalyticsCurrentAvgPractice,
+  updateInterviewAnalyticsCurrentAvgPractice
 } from '@/data/user/interviews';
-import { getCandidateUserProfile } from '@/data/user/user';
 import {
   EvaluationCriteriaType,
   FeedbackData,
@@ -104,7 +102,7 @@ ${formatRubrics(criterion.rubrics)}`,
       (criterion) => `{
   "id": "${criterion.id}",
   "name": "${criterion.name}",
-  "score": 0,
+  "score": 0, // Ensure this score is between 0 and 10
   "feedback": ""
 }`,
     )
@@ -178,7 +176,7 @@ const callOpenAIWithRetries = async (
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo', // Use 'gpt-4' if preferred
+        model: 'gpt-4o-mini', // Use 'gpt-4' if preferred
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 3000,
         temperature: 0.5,

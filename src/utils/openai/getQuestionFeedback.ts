@@ -43,18 +43,10 @@ const openai = new OpenAI({
 //   apiKey: deepSeekKey,
 // });
 
-/**
- * Constructs the prompt for OpenAI based on the current question and answer
- */
-const constructQuestionFeedbackPrompt = (
-  skill: string,
-  currentQuestion: InterviewQuestion,
-  currentAnswer: string,
-  nextQuestion: InterviewQuestion | null,
-  interview_question_count: number,
-  intervieEvaluationsCriterias: EvaluationCriteriaType[],
-): string => {
-  // Helper function to format rubrics
+// Build a short system message with your rubric & instructions
+function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
+  const maxScorePerQuestion = 100;
+
   const formatRubrics = (
     rubrics: { order: number; percentage_range: string; description: string }[],
   ) =>
@@ -64,7 +56,7 @@ const constructQuestionFeedbackPrompt = (
       .join('\n');
 
   // Format the evaluation criteria
-  const formattedCriteria = intervieEvaluationsCriterias
+  const formattedCriteria = evaluationCriterias
     .map(
       (criterion, index) =>
         `${index + 1}. **${criterion.name}**: ${criterion.description}\n   
@@ -73,30 +65,12 @@ const constructQuestionFeedbackPrompt = (
 ${formatRubrics(criterion.rubrics)}`,
     )
     .join('\n\n');
-
-  const numberOfQuestions = interview_question_count || 1;
-  const maxTotalScore = 100;
-  // round to two decimal places
-  const maxScorePerQuestion = maxTotalScore;
-
-  return `### Interview Practice Feedback
-
-As an interviewer for an innovative online interview platform, your task is to evaluate candidates based on their responses practicing **${skill}** questions.
-
-### Evaluation Criteria
-Evaluate the candidate based on the following criteria, using the rubric provided:
-
+  return {
+    role: 'system' as const,
+    content: `
+You are an AI interviewer providing short JSON feedback. 
+Rubric (score out of 100):
 ${formattedCriteria}
-
-### Current Question
-**Linked Evaluation Criteria**: ${currentQuestion.evaluation_criteria.name}
-
-**Question**: ${currentQuestion.text}
-
-**Answer**: "${currentAnswer}"
-
-### Next Question
-${nextQuestion ? `**Question**: ${nextQuestion.text}` : '**Question**: N/A'}
 
 ### Instructions
 Your evaluation should include:
@@ -107,13 +81,12 @@ Your evaluation should include:
 ### Output Format
 Provide your evaluation in the following JSON format without any additional text.
 
-\`\`\`json
+Output JSON only:
 {
   "mark": number,
   "summary": string,
   "advice_for_next_question": string
 }
-\`\`\`
 
 **Note:**
 - Ensure the JSON is properly formatted for parsing.
@@ -124,8 +97,47 @@ Provide your evaluation in the following JSON format without any additional text
 -If the candidate's response is lacking or terrible, score it really low or zero marks if necessary and provide constructive feedback.
 -If the candidate's response is partially relevant, provide partial credit based on the relevance.
 -If the candidate's response is exemplary, provide full credit, fulls marks where due and highlight the strengths.
-`;
-};
+`,
+  };
+}
+
+/**
+ * Constructs the prompt for OpenAI based on the current question and answer
+ */
+function constructQuestionFeedbackPrompt(
+  skill: string,
+  currentQuestion: InterviewQuestion,
+  currentAnswer: string,
+  nextQuestion: InterviewQuestion | null,
+  interview_question_count: number,
+  intervieEvaluationsCriterias: EvaluationCriteriaType[],
+) {
+  return {
+    role: 'system' as const,
+    content: `
+### Current Question
+**Linked Evaluation Criteria**: ${currentQuestion.evaluation_criteria.name}
+
+**Question**: ${currentQuestion.text}
+
+**Answer**: "${currentAnswer}"
+
+### Next Question
+${nextQuestion ? `**Question**: ${nextQuestion.text}` : '**Question**: N/A'}
+
+### Output Format
+**Note**: Provide your evaluation in the following JSON format without any additional text.
+
+\`\`\`json
+{
+  "mark": number,
+  "summary": string,
+  "advice_for_next_question": string
+}
+\`\`\`
+`,
+  };
+}
 
 /**
  * Calls the OpenAI API with retry logic
@@ -139,9 +151,9 @@ const callOpenAIWithRetries = async (
     try {
       const completion = await openai.chat.completions.create({
         // model: 'deepseek-chat',
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200,
+        max_tokens: 150, // or 50, or 100
         temperature: 0.2,
       });
 
@@ -253,24 +265,41 @@ export const getQuestionFeedback = async (
   if (!currentAnswer.trim()) {
     throw new Error('Current answer cannot be empty.');
   }
+  try {
+    // Construct the prompt
+    const systemMsg = buildSystemMessage(intervieEvaluationsCriterias);
+    const userMsg = constructQuestionFeedbackPrompt(
+      skill,
+      currentQuestion,
+      currentAnswer,
+      nextQuestion,
+      interview_question_count,
+      intervieEvaluationsCriterias,
+    );
+    // // Call OpenAI API
+    // const aiResponse = await callOpenAI(s);
+    // if (aiResponse === 'error') {
+    //   return null;
+    // }
 
-  // Construct the prompt
-  const prompt = constructQuestionFeedbackPrompt(
-    skill,
-    currentQuestion,
-    currentAnswer,
-    nextQuestion,
-    interview_question_count,
-    intervieEvaluationsCriterias,
-  );
+    // Call the OpenAI chat completion
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini', // or gpt-3.5-turbo
+      messages: [systemMsg, userMsg],
+      max_tokens: 150, //
+      temperature: 0.2,
+    });
 
-  // Call OpenAI API
-  const aiResponse = await callOpenAI(prompt);
-  if (aiResponse === 'error') {
+    // Parse AI response
+    const aiMessage = response.choices[0]?.message?.content;
+    if (!aiMessage) {
+      console.error('No content from AI');
+      return null;
+    }
+    const feedback = parseAIResponse(aiMessage);
+    return feedback;
+  } catch (error) {
+    console.error('Error in getQuestionFeedback:', error.message);
     return null;
   }
-
-  // Parse AI response
-  const feedback = parseAIResponse(aiResponse);
-  return feedback;
 };

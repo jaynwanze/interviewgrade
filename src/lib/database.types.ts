@@ -1,4 +1,4 @@
-import { EmployerCandidatePreferences, CandidateSkillsStats, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { CandidateSkillsStats, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 import { ResumeMetadata } from '@/utils/zod-schemas/resumeMetaDataSchema'
 export type Json =
   | string
@@ -1115,7 +1115,7 @@ export type Database = {
       product_status: "active" | "inactive"
       interview_status: "not_started" | "in_progress" | "completed"
       template_difficulty: "Easy" | "Medium" | "Hard"
-      template_category: "General Skills-Based" | "General Job-Based" | "Accounting" | "Finance" | "Admin" | "Customer Service" | "IT" | "HR" | "Legal" | "Education" | "Training" | "Real Estate" | "Engineering" | "Construction" | "Healthcare" | "Pharma" | "Hospitality" | "Travel" | "Law Enforcement" | "Security" | "Logistics" | "Real Estate" | "Marketing" | "PR" | "Media" | "Sales" | "Retail" | "Other"
+      template_category: "Soft Skills" | "General Skills-Based" | "General Job-Based" | "Accounting" | "Finance" | "Admin" | "Customer Service" | "IT" | "HR" | "Legal" | "Education" | "Training" | "Real Estate" | "Engineering" | "Construction" | "Healthcare" | "Pharma" | "Hospitality" | "Travel" | "Law Enforcement" | "Security" | "Logistics" | "Real Estate" | "Marketing" | "PR" | "Media" | "Sales" | "Retail" | "Other"
       question_type: "General" | "Behavioral" | "Role-Specific" | "Operational"
       job_application_tracker_status: "not_started" | "applied" | "in_progress" | "rejected" | "offered" | "hired"
       interview_mode: "practice" | "interview"

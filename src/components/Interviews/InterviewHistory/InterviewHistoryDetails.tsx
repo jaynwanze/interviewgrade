@@ -20,12 +20,6 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
   getInterviewAnswers,
   getInterviewById,
   getInterviewEvaluation,
@@ -41,7 +35,7 @@ import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { CalendarIcon, ChevronLeft, ClockIcon, Info } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
 
@@ -52,12 +46,15 @@ export type SentimentScore = {
 };
 export async function fetchSentiment(
   answers: string[],
-): Promise<SentimentScore> {
+  attempt = 1,
+): Promise<SentimentScore | null> {
   try {
-    // Join candidate answers into one input string
-    const inputText = answers.join('\n');
+    const inputText = answers.join('\n').trim();
+    if (!inputText) {
+      // If there's nothing to analyze, default to neutral
+      return null;
+    }
 
-    // Call your Next.js API route that acts as a proxy
     const res = await fetch('/api/sentiment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -73,24 +70,27 @@ export async function fetchSentiment(
       throw new Error('Unexpected response format');
     }
 
-    // Sort scores in descending order
-    const scores = data[0];
+    // handle typical HF output
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sorted = scores.sort((a: any, b: any) => b.score - a.score);
-    const top = sorted[0];
-    let predicted_label: string = top.label;
-
+    const sorted = data[0].sort((a: any, b: any) => b.score - a.score);
+    let predicted_label = sorted[0].label;
     if (predicted_label.startsWith('LABEL_')) {
       const id = parseInt(predicted_label.split('_')[1], 10);
       predicted_label =
         id === 0 ? 'negative' : id === 1 ? 'neutral' : 'positive';
     }
-
-    const finalScore = top.score * 100;
+    const finalScore = sorted[0].score * 100;
     return { label: predicted_label, score: finalScore, aggregated_scores: {} };
   } catch (error) {
     console.error('Error fetching sentiment:', error);
-    return { label: 'neutral', score: 50, aggregated_scores: {} };
+
+    if (attempt === 1) {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      return fetchSentiment(answers, 2);
+    }
+
+    // if second attempt also fails, fallback:
+    return null;
   }
 }
 

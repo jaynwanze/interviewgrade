@@ -172,8 +172,12 @@ export type InterviewEvaluationCriteriaType = {
   is_system_defined: boolean;
   created_at: string;
 };
-export type PracticeTemplate = Table<'templates'>;
-export type InterviewTemplate = Table<'interview_templates'>;
+export type PracticeTemplate = Table<'templates'> & {
+  isComingSoon?: boolean;
+};
+export type InterviewTemplate = Table<'interview_templates'> & {
+  isComingSoon?: boolean;
+};
 export type Questions = Table<'questions'>;
 export type Interview = Table<'interviews'>;
 export type InterviewQuestion = Table<'interview_questions'>;
@@ -360,31 +364,33 @@ export const mockCandidates: CandidateRow[] = [
         previous_avg: 87,
       },
     ],
-   resume_metadata: {
-      skills: ["Python", "React", "Docker"],
+    resume_metadata: {
+      skills: ['Python', 'React', 'Docker'],
       experiences: [
         {
-          jobTitle: "Software Engineer",
-          company: "Acme Corp",
-          startDate: "2022-05-01",
+          jobTitle: 'Software Engineer',
+          company: 'Acme Corp',
+          startDate: '2022-05-01',
           endDate: null,
-          description: "Developed microservices in Node.js and maintained Docker containers..."
-        }
+          description:
+            'Developed microservices in Node.js and maintained Docker containers...',
+        },
       ],
-      education: "Bachelor of Science in Computer Science, Some University",
-      certifications: ["AWS Certified Solutions Architect"],
+      education: 'Bachelor of Science in Computer Science, Some University',
+      certifications: ['AWS Certified Solutions Architect'],
       projects: [
         {
-          title: "Open Source CLI Tool",
-          description: "A CLI tool for data scraping. Implemented in Python...",
-          link: "https://github.com/username/cli-tool"
+          title: 'Open Source CLI Tool',
+          description: 'A CLI tool for data scraping. Implemented in Python...',
+          link: 'https://github.com/username/cli-tool',
         },
         {
-          title: "Personal Portfolio",
-          description: "A React-based personal site with blog and resume sections",
-          link: null
-        }
-      ]
+          title: 'Personal Portfolio',
+          description:
+            'A React-based personal site with blog and resume sections',
+          link: null,
+        },
+      ],
     },
     created_at: '2024-04-29T10:00:00Z',
     full_name: 'Alice Anderson',
@@ -423,25 +429,26 @@ export const mockCandidates: CandidateRow[] = [
       { template_id: '5', skill: 'Technical', avg_score: 80, previous_avg: 78 },
     ],
     resume_metadata: {
-      skills: ["JavaScript", "Node.js", "PostgreSQL"],
+      skills: ['JavaScript', 'Node.js', 'PostgreSQL'],
       experiences: [
         {
-          jobTitle: "Full-Stack Developer",
-          company: "Tech Innovations",
-          startDate: "2021-03-01",
+          jobTitle: 'Full-Stack Developer',
+          company: 'Tech Innovations',
+          startDate: '2021-03-01',
           endDate: null,
-          description: "Led the development of a scalable web application..."
-        }
+          description: 'Led the development of a scalable web application...',
+        },
       ],
-      education: "Master of Science in Software Engineering, Tech University",
-      certifications: ["Certified Kubernetes Administrator"],
+      education: 'Master of Science in Software Engineering, Tech University',
+      certifications: ['Certified Kubernetes Administrator'],
       projects: [
         {
-          title: "E-commerce Platform",
-          description: "Built a full-stack e-commerce platform using MERN stack...",
-          link: null
-        }
-      ]
+          title: 'E-commerce Platform',
+          description:
+            'Built a full-stack e-commerce platform using MERN stack...',
+          link: null,
+        },
+      ],
     },
     created_at: '2024-04-20T09:30:00Z',
     full_name: 'Bob Brown',
@@ -546,5 +553,186 @@ export const mockCandidates: CandidateRow[] = [
     full_name: 'Erin Green',
     avatar_url: '/images/candidates/microsoft-365-7mBictB_urk-unsplash.jpg',
     email: 'erin@example.com',
+  },
+];
+
+export const COMING_SOON_TEMPLATES: PracticeTemplate[] = [
+  {
+    id: 'coming-soon-2',
+    user_id: '',
+    category: 'General Skills-Based',
+    title: 'Emotional Intelligence',
+    role: '',
+    skill: '',
+    description: 'Coming soon! Sharpen your EI and empathy in the workplace.',
+    duration: 10,
+    difficulty: 'Medium',
+    question_count: 3,
+    company: '',
+    is_company_specific: false,
+    is_industry_specific: false,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+
+  {
+    id: 'coming-soon-3',
+    user_id: '',
+    category: 'General Skills-Based',
+    title: 'Teamwork',
+    role: '',
+    skill: '',
+    description: 'Coming soon! Collaborate effectively with your team.',
+    duration: 10,
+    difficulty: 'Medium',
+    question_count: 3,
+    company: '',
+    is_company_specific: false,
+    is_industry_specific: false,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+
+  {
+    id: 'coming-soon-4',
+    user_id: '',
+    category: 'General Skills-Based',
+    title: 'Stess Management',
+    role: '',
+    skill: '',
+    description: 'Coming soon! Learn to manage stress effectively.',
+    duration: 10,
+    difficulty: 'Medium',
+    question_count: 3,
+    company: '',
+    is_company_specific: false,
+    is_industry_specific: false,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+
+  {
+    id: 'coming-soon-5',
+    user_id: '',
+    category: 'General Skills-Based',
+    title: 'Motivation',
+    role: '',
+    skill: '',
+    description: 'Coming soon! Learn how to stay motivated and inspire others.',
+    duration: 10,
+    difficulty: 'Medium',
+    question_count: 3,
+    company: '',
+    is_company_specific: false,
+    is_industry_specific: false,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+  {
+    id: 'coming-soon-6',
+    user_id: '',
+    category: 'General Skills-Based',
+    title: 'Leadership',
+    role: '',
+    skill: '',
+    description:
+      'Coming soon! Develop your leadership skills and inspire others.',
+    duration: 10,
+    difficulty: 'Medium',
+    question_count: 3,
+    company: '',
+    is_company_specific: false,
+    is_industry_specific: false,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+];
+
+export const COMING_SOON_MOCK_TEMPLATES: InterviewTemplate[] = [
+  {
+    id: 'coming-soon-102',
+    user_id: '',
+    category: 'IT',
+    title: 'Technical',
+    description: 'Coming soon! Prepare for technical interviews.',
+    duration: 20,
+    difficulty: 'Medium',
+    question_count: 6,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+
+  {
+    id: 'coming-soon-103',
+    user_id: '',
+    category: 'Finance',
+    title: 'Financial Services',
+    description:
+      'Prepare for financial analyst interviews with targeted questions. (Coming Soon)',
+    duration: 20,
+    difficulty: 'Medium',
+    question_count: 6,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+
+  {
+    id: 'coming-soon-104',
+    user_id: '',
+    category: 'HR',
+    title: 'Human Resources',
+    description:
+      'Strengthen your HR expertise with scenario-based questions on policy, culture, and compliance. (Coming Soon)',
+    duration: 15,
+    difficulty: 'Easy',
+    question_count: 4,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+  {
+    id: 'coming-soon-105',
+    user_id: '',
+    category: 'Marketing',
+    title: 'Digital Marketing',
+    description:
+      'Practice questions around campaign strategies, analytics, and growth tactics. (Coming Soon)',
+    duration: 20,
+    difficulty: 'Medium',
+    question_count: 5,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
+  },
+  {
+    id: 'coming-soon-106',
+    user_id: '',
+    category: 'Customer Service',
+    title: 'Customer Service ',
+    description:
+      'Focus on customer satisfaction, conflict resolution, and communication. (Coming Soon)',
+    duration: 15,
+    difficulty: 'Easy',
+    question_count: 5,
+    is_general: true,
+    is_system_defined: false,
+    created_at: new Date().toISOString(),
+    isComingSoon: true,
   },
 ];

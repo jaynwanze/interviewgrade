@@ -10,6 +10,8 @@ import {
   getPracticeTemplatesByCategoryAndMode,
 } from '@/data/user/templates';
 import {
+  COMING_SOON_MOCK_TEMPLATES,
+  COMING_SOON_TEMPLATES,
   InterviewModeType,
   InterviewTemplate,
   PracticeTemplate,
@@ -55,10 +57,14 @@ export function InterviewTemplates({
           INTERVIEW_PRACTICE_MODE,
           'Soft Skills',
         );
-        setPracticeTemplates(data);
+        // Combine real templates + placeholders
+        const combined = [...data, ...COMING_SOON_TEMPLATES];
+        setPracticeTemplates(combined);
       } else {
+        // same logic for interviewTemplates
         const data = await getInterviewTemplatesByCategory('Soft Skills');
-        setInterviewTemplates(data);
+        const combined = [...data, ...COMING_SOON_MOCK_TEMPLATES];
+        setInterviewTemplates(combined);
       }
     } catch (error) {
       console.error('Error fetching interview templates:', error);

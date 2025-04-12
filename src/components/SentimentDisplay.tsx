@@ -131,10 +131,10 @@ const SentimentDisplay = ({
                   className={`h-full ${sentiment.color} rounded-full`}
                 />
               </div>
-              <p className="text-center text-sm text-gray-700 dark:text-gray-300">
+              {/* <p className="text-center text-sm text-gray-700 dark:text-gray-300">
                 Confidence:{' '}
                 <span className="font-bold">{score.toFixed(0)}%</span>
-              </p>
+              </p> */}
             </div>
           </div>
           {/* Style Badge */}

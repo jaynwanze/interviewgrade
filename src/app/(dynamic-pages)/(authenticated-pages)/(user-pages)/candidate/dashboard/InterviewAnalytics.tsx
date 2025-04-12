@@ -49,7 +49,7 @@ export default function InterviewAnalyticsPage() {
   } = useAnalyticsData();
 
   const searchParams = useSearchParams();
-  const isTutorialMode = searchParams.get('tutorial') === '1'; // Detect tutorial mode
+  const isTutorialMode = true;
   const [tourStarted, setTourStarted] = useState(false);
 
   const [detailed, setDetailed] = useState<InterviewAnalytics | null>(null);
@@ -202,7 +202,7 @@ export default function InterviewAnalyticsPage() {
       id: 'dashboard-overview',
       title: 'Welcome to Your Analytics Dashboard',
       text: 'This is your personal interview analytics dashboard where you can track your progress and improve.',
-      attachTo: { element: '.dashboard-header', on: 'bottom' },
+      attachTo: { element: '', on: 'bottom' },
       buttons: [{ text: 'Next', action: tour.next }],
     });
 

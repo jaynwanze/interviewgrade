@@ -34,7 +34,7 @@ export async function UserSidebar() {
         />
         <SidebarLink
           label="Interview Analytics"
-          href="/candidate/interview-analytics"
+          href="/candidate/dashboard"
           icon={<BarChart3Icon className="h-5 w-5" />}
         />
         <SidebarLink

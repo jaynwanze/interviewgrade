@@ -120,7 +120,7 @@ export function InterviewTemplates({
           {interviewModeString}
         </Badge>
         <Input
-          placeholder="Search position or company..."
+          placeholder="Search templates..."
           className="max-w-lg shadow-md"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

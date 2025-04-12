@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { useWalkthrough } from '@/contexts/WalkthroughContext';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
 import { cn } from '@/lib/utils';
 import { Interview, InterviewAnalytics } from '@/types';
@@ -29,16 +30,18 @@ import {
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import Shepherd from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
-import { InterviewGraphsDetailed } from './_graphs/_detailed/InterviewGraphsDetailed';
-
+import { InterviewGraphsDetailed } from '../../_graphs/_detailed/InterviewGraphsDetailed';
 export type TemplateAndSwitchModeDetails = {
   current_template_id: string;
   current_switch_mode: string;
 };
 
-export default function InterviewAnalyticsPage() {
+export default function InterviewAnalyticsPage({
+  templateId,
+}: {
+  templateId: string;
+}) {
   const {
     loadingOverview,
     loadingDetailed,
@@ -49,7 +52,8 @@ export default function InterviewAnalyticsPage() {
   } = useAnalyticsData();
 
   const searchParams = useSearchParams();
-  const isTutorialMode = true;
+  const { startTour } = useWalkthrough();
+  const isTutorialMode = searchParams.get('1') === 'true';
   const [tourStarted, setTourStarted] = useState(false);
 
   const [detailed, setDetailed] = useState<InterviewAnalytics | null>(null);
@@ -83,6 +87,27 @@ export default function InterviewAnalyticsPage() {
     activeSwitch === 'Practice Mode'
       ? setPracticeModeValue
       : setInterviewModeValue;
+
+  // Define tour steps specific to InterviewAnalyticsPage
+  const analyticsTourSteps = [
+    {
+      id: 'dashboard-overview',
+      title: 'Welcome to Your Analytics Dashboard',
+      text: 'This is your personal interview analytics dashboard where you can track your progress and improve.',
+      attachTo: { element: '.dashboard-overview', on: 'bottom' as const },
+      buttons: [{ text: 'Next', action: () => this.next() }],
+    },
+    {
+      id: 'latest-interview',
+      title: 'Latest Interview Summary',
+      text: 'Here you see your most recent interview summary.',
+      attachTo: { element: '.latest-interview-card', on: 'top' as const },
+      buttons: [
+        { text: 'Back', action: () => this.back() },
+        { text: 'Next', action: () => this.next() },
+      ],
+    },
+  ];
 
   // Debounce the search query to optimize performance
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
@@ -181,66 +206,12 @@ export default function InterviewAnalyticsPage() {
 
   useEffect(() => {
     if (isTutorialMode && !tourStarted) {
-      startTutorialTour();
+      startTour(analyticsTourSteps);
       setTourStarted(true);
       //endTutorialMode();
       //replace router.push with endTutorialMode
     }
-  }, [isTutorialMode]);
-
-  const startTutorialTour = () => {
-    const tour = new Shepherd.Tour({
-      useModalOverlay: true,
-      defaultStepOptions: {
-        classes: 'shadow-md bg-white rounded-lg p-4 text-sm',
-        scrollTo: true,
-        cancelIcon: { enabled: true },
-      },
-    });
-
-    tour.addStep({
-      id: 'dashboard-overview',
-      title: 'Welcome to Your Analytics Dashboard',
-      text: 'This is your personal interview analytics dashboard where you can track your progress and improve.',
-      attachTo: { element: '', on: 'bottom' },
-      buttons: [{ text: 'Next', action: tour.next }],
-    });
-
-    tour.addStep({
-      id: 'latest-interview',
-      title: 'Latest Interview Summary',
-      text: 'This section provides a quick summary of your most recent interview, including your score and feedback.',
-      attachTo: { element: '.latest-interview-card', on: 'top' },
-      buttons: [
-        { text: 'Back', action: tour.back },
-        { text: 'Next', action: tour.next },
-      ],
-    });
-
-    tour.addStep({
-      id: 'performance-graph',
-      title: 'Performance Trends',
-      text: 'This graph shows how your interview performance has changed over time.',
-      attachTo: { element: '.performance-graph', on: 'right' },
-      buttons: [
-        { text: 'Back', action: tour.back },
-        { text: 'Next', action: tour.next },
-      ],
-    });
-
-    tour.addStep({
-      id: 'insights-section',
-      title: 'Your Strengths & Weaknesses',
-      text: 'This section provides insights into your best-performing skills and areas that need improvement.',
-      attachTo: { element: '.insights-section', on: 'left' },
-      buttons: [
-        { text: 'Back', action: tour.back },
-        { text: 'Finish', action: tour.complete },
-      ],
-    });
-
-    tour.start();
-  };
+  }, [isTutorialMode, tourStarted, startTour]);
 
   const renderDetailed = () => {
     if (loadingDetailed) {
@@ -345,7 +316,7 @@ export default function InterviewAnalyticsPage() {
         ) : detailed &&
           selectedTemplateId &&
           filteredCompletedInterviews.length > 0 ? (
-          <div className="performance-graph">
+          <div id="performance-graph">
             <InterviewAverageDetails
               analyticsData={detailed}
               latestInterview={overview.latestInterview!}

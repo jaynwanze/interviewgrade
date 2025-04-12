@@ -1,13 +1,14 @@
 'use client';
 
 import { Suspense } from 'react';
-import InterviewAnalytics from './InterviewAnalytics';
+
+import InterviewTemplatesPage from './InterviewTemplatesPage';
 
 export default function InterviewAnaltyicsPage() {
   return (
     <div>
       <Suspense>
-        <InterviewAnalytics />
+        <InterviewTemplatesPage />
       </Suspense>
     </div>
   );

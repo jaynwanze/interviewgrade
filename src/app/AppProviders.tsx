@@ -1,5 +1,6 @@
 'use client';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
+import { WalkthroughProvider } from '@/contexts/WalkthroughContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -29,25 +30,27 @@ export function AppProviders({
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <NotificationsProvider>
-          <QueryClientProvider client={queryClient}>
-            {children}
-            <Analytics />
-            <SpeedInsights />
-            <ReactNoSSR>
-              <SonnerToaster theme={'light'} />
-              <HotToaster />
-            </ReactNoSSR>
-            <Suspense>
-              <ProgressBar
-                height="4px"
-                color="#0047ab"
-                options={{ showSpinner: false }}
-                shallowRouting
-              />
-            </Suspense>
-          </QueryClientProvider>
-        </NotificationsProvider>
+        <WalkthroughProvider>
+          <NotificationsProvider>
+            <QueryClientProvider client={queryClient}>
+              {children}
+              <Analytics />
+              <SpeedInsights />
+              <ReactNoSSR>
+                <SonnerToaster theme={'light'} />
+                <HotToaster />
+              </ReactNoSSR>
+              <Suspense>
+                <ProgressBar
+                  height="4px"
+                  color="#0047ab"
+                  options={{ showSpinner: false }}
+                  shallowRouting
+                />
+              </Suspense>
+            </QueryClientProvider>
+          </NotificationsProvider>
+        </WalkthroughProvider>
       </ThemeProvider>
     </>
   );

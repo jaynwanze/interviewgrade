@@ -3,18 +3,16 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Interview, InterviewAnalytics } from '@/types';
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { ClipboardList, Star, Trophy } from 'lucide-react';
-import { SentimentScore } from '../InterviewHistory/InterviewHistoryDetails';
-import { InterviewLatestCard } from './InterviewLatestCard';
+import { TemplateOverview } from './TemplateOverview';
 
 export const InterviewAverageDetails = ({
   analyticsData,
   latestInterview,
-  sentimentAnalysis,
 }: {
   analyticsData: InterviewAnalytics;
   latestInterview: Interview;
-  sentimentAnalysis: SentimentScore | null;
 }) => {
   const gridsColsSpanNum = analyticsData.interview_template_id ? 4 : 3;
   return (
@@ -23,8 +21,8 @@ export const InterviewAverageDetails = ({
       <div
         className={`grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-${gridsColsSpanNum} gap-6 mb-5 items-center`}
       >
-        {/* Left Column - Interview Info + Overall Score */}
-        <InterviewLatestCard latestInterview={latestInterview} />
+        {/* Template over view */}
+        <TemplateOverview analyticsData={analyticsData} />
         {/* Overall Grade + Best Skill Badge */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
           <Trophy className="w-10 h-10 text-yellow-500" />
@@ -69,7 +67,13 @@ export const InterviewAverageDetails = ({
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.total_interviews || 0}
             </p>
-            <p className="text-gray-500">Total completed interview sessions.</p>
+            <a
+              href={`/candidate/interview-history/${latestInterview.id}`}
+              className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition p-1"
+            >
+              <MagnifyingGlassIcon className="inline w-4 h-4 mr-1" />
+              View latest session history
+            </a>
           </div>
         </Card>
       </div>

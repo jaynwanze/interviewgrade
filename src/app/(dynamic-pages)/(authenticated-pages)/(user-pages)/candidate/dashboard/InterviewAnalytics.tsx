@@ -349,7 +349,6 @@ export default function InterviewAnalyticsPage() {
             <InterviewAverageDetails
               analyticsData={detailed}
               latestInterview={overview.latestInterview!}
-              sentimentAnalysis={currentSentimentDetailed || null}
             />
             <InterviewGraphsDetailed
               analyticsData={detailed}
@@ -379,7 +378,7 @@ export default function InterviewAnalyticsPage() {
         Candidate Dashboard
       </h1>
       <p className="text-center text-gray-500">
-        View and analyze your interview performance.
+        View your interview performance and analytics.
       </p>
       <Separator className="my-4" />
       {renderDetailed()}

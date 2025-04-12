@@ -376,7 +376,7 @@ export default function InterviewAnalyticsPage() {
   return (
     <div className="dashboard-overview container mx-auto p-2 w-3/4">
       <h1 className="text-2xl font-bold text-center mb-1">
-        Interview Analytics Dashboard
+        Candidate Dashboard
       </h1>
       <p className="text-center text-gray-500">
         View and analyze your interview performance.

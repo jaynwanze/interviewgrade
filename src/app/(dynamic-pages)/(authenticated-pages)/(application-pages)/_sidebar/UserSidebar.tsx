@@ -4,8 +4,7 @@ import {
   LucideHistory,
   NotepadText,
   Settings,
-  Shield,
-  TableProperties,
+  TableProperties
 } from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
@@ -23,6 +22,11 @@ export async function UserSidebar() {
           <SidebarLogoAndToggle userType="candidate" />
         </div>
         <SidebarLink
+          label="Dashboard"
+          href="/candidate/dashboard"
+          icon={<BarChart3Icon className="h-5 w-5" />}
+        />
+        <SidebarLink
           label="Mock Interviews"
           href={`/candidate/interviews/library`}
           icon={<NotepadText className="h-5 w-5" />}
@@ -31,11 +35,6 @@ export async function UserSidebar() {
           label="Interview History"
           href="/candidate/interview-history"
           icon={<LucideHistory className="h-5 w-5" />}
-        />
-        <SidebarLink
-          label="Interview Analytics"
-          href="/candidate/dashboard"
-          icon={<BarChart3Icon className="h-5 w-5" />}
         />
         <SidebarLink
           label="Job Tracker"

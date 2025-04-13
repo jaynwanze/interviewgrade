@@ -38,6 +38,30 @@ export const getPracticeTemplatesByCategoryAndMode = async (
   return data;
 };
 
+export const getTemplateImgUrlById = async (
+  templateId: string,
+  mode: string,
+): Promise<string | null> => {
+
+  const tableName = mode === 'Practice Mode' ? 'templates' : 'interview_templates';
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from(tableName)
+    .select('img_url')
+    .eq('id', templateId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    console.warn('No template found for the provided ID.');
+    return null;
+  }
+  return data.img_url;
+}
+
 export const getInterviewTemplatesByCategory = async (
   category: string,
 ): Promise<Table<'interview_templates'>[]> => {

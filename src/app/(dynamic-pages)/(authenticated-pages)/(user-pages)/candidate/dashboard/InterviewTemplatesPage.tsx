@@ -1,29 +1,16 @@
 'use client';
 
+import CombinedTemplateCarousel from '@/components/Interviews/Dashboard/CombinedTemplateCarousel';
+import TipsCard from '@/components/Interviews/Dashboard/TipsCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { useWalkthrough } from '@/contexts/WalkthroughContext';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
-import { Interview, InterviewAnalytics } from '@/types';
-import {
-    INTERVIEW_INTERVIEW_MODE,
-    INTERVIEW_PRACTICE_MODE,
-} from '@/utils/constants';
+import { InterviewAnalytics } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import 'shepherd.js/dist/css/shepherd.css';
@@ -34,8 +21,7 @@ export default function InterviewAnalyticsPage() {
         loadingDetailed,
         error,
         overview,
-        fetchDetailedData,
-        currentSentimentDetailed,
+        fetchOverviewData
     } = useAnalyticsData();
 
     const searchParams = useSearchParams();
@@ -43,14 +29,17 @@ export default function InterviewAnalyticsPage() {
     const isTutorialMode = searchParams.get('1') === 'true';
     const [tourStarted, setTourStarted] = useState(false);
 
-    const [detailed, setDetailed] = useState<InterviewAnalytics | null>(null);
     const [activeSwitch, setActiveSwitch] = useState<'Practice Mode' | 'Interview Mode'>(
         'Practice Mode',
     );
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
-    const [filteredCompletedInterviews, setFilteredCompletedInterviews] = useState<Interview[]>([]);
+    const [filteredCompletedInterviews, setFilteredCompletedInterviews] = useState<InterviewAnalytics[]>([]);
     const router = useRouter();
+
+    useEffect(() => {
+        fetchOverviewData(activeSwitch);
+    }, []);
 
     // Debounce the search query
     useEffect(() => {
@@ -85,12 +74,12 @@ export default function InterviewAnalyticsPage() {
     const handleSwitchChange = useCallback(
         (switchMode: 'Practice Mode' | 'Interview Mode') => {
             setActiveSwitch(switchMode);
-            if (overview?.completedInterviews?.length) {
-                let filtered = [...overview.completedInterviews];
+            if (overview?.interviewAnalytics) {
+                let filtered = [...overview.interviewAnalytics];
                 if (switchMode === 'Practice Mode') {
-                    filtered = filtered.filter(interview => interview.mode === INTERVIEW_PRACTICE_MODE);
+                    filtered = filtered.filter(interview => interview.template_id !== null);
                 } else {
-                    filtered = filtered.filter(interview => interview.mode === INTERVIEW_INTERVIEW_MODE);
+                    filtered = filtered.filter(interview => interview.interview_template_id !== null);
                 }
                 setFilteredCompletedInterviews(filtered);
             }
@@ -113,13 +102,11 @@ export default function InterviewAnalyticsPage() {
     // Filter results by debounced query
     const uniqueFilteredTemplateInterviews = useMemo(() => {
         if (!filteredCompletedInterviews) return [];
-        const uniqueTitles = new Set<string>();
-        const templates: Interview[] = [];
+        const templates: InterviewAnalytics[] = [];
         const searchLower = debouncedQuery.toLowerCase();
         filteredCompletedInterviews.forEach(interview => {
-            const titleLower = interview.title.toLowerCase();
-            if (titleLower.includes(searchLower) && !uniqueTitles.has(titleLower)) {
-                uniqueTitles.add(titleLower);
+            const titleLower = interview.interview_title.toLowerCase();
+            if (titleLower.includes(searchLower)) {
                 templates.push(interview);
             }
         });
@@ -131,187 +118,98 @@ export default function InterviewAnalyticsPage() {
         router.push(`/candidate/dashboard/${templateId}`);
     };
 
-    // Renders the main content
+    const averageScore = useMemo(() => {
+        if (!overview?.interviewAnalytics?.length) return 0;
+        const scores = overview.interviewAnalytics.map((i) => i.avg_overall_grade || 0) || [];
+        const total = scores.reduce((a, b) => a + b, 0);
+        return Math.round(scores.length ? total / scores.length : 0);
+    }, [overview]);
+
     const renderContent = () => {
-        // Global error
         if (error) {
-            return (
-                <div className="text-center text-red-600 mb-4">
-                    <p>Failed to load data. Please try again later.</p>
-                </div>
-            );
+            return <p className="text-center text-red-600">Failed to load data.</p>;
         }
 
-        // Loading states
         if (loadingOverview || loadingDetailed) {
             return (
-                <div className="flex flex-col items-center py-4">
+                <div className="flex flex-col items-center py-10">
                     <LoadingSpinner />
                     <p className="mt-2 text-gray-500">Loading your dashboard...</p>
                 </div>
             );
         }
 
-        // No data
         if (!overview?.completedInterviews?.length) {
             return (
-                <div className="text-center text-gray-600 my-4">
-                    <p>No interviews found. Start one to see analytics here.</p>
+                <div className="text-center text-gray-600 my-6">
+                    <p>No completed sessions found. Start one to see analytics here.</p>
+                    <Button className="mt-4" onClick={() => router.push('/interview/start')}>Start Interview</Button>
                 </div>
             );
         }
 
-
         return (
-            <div className="container mx-auto py-6 px-4 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+            <div className="space-y-6">
+                {/* <div className="mb-6 text-center">
+                    <h2 className="text-xl font-bold text-gray-800">Current Skills Breakdown</h2>
+                    <div className="flex justify-center mt-2">
+                        {uniqueFilteredTemplateInterviews.length > 0 && (
+                            <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                                <TooltipProvider>
+                                    Total Grade Avg: <br></br> {averageScore}%
+                                    <Tooltip>
+                                        <TooltipTrigger className="cursor-pointer">
+                                            <Info className="inline-block ml-1 w-4 h-4 text-gray-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="w-48">
+                                            This is the average score across all your skills in {activeSwitch}.
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </span>
+                        )}
+                    </div>
+                </div> */}
 
-                {/* Switch */}
-                <div className="flex justify-center">
-                    <div >
-                        <h1 className="text-2xl font-bold text-center mb-1">Candidate Dashboard</h1>
-                        <p className="text-center text-gray-500">View your interview performance and analytics.</p>
-                        <Separator className="my-4" />
-                        {/* Goal Completion Card */}
-                        <Card className="mb-6 bg-blue-50 border-blue-200 text-center" >
-                            <CardHeader>
-                                <CardTitle>Overall Goal Completion</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+                    <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                        {uniqueFilteredTemplateInterviews.length} Skills Found
+                    </div>
 
-                            </CardContent>
-                        </Card>
-                        <Card className="mb-4 p-4">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-                                <Input
-                                    placeholder="Search sessions..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <div className="flex items-center gap-2">
-                                    <Switch
-                                        id="analytics-history-mode"
-                                        checked={activeSwitch === 'Interview Mode'}
-                                        onCheckedChange={() =>
-                                            handleSwitchChange(
-                                                activeSwitch === 'Practice Mode' ? 'Interview Mode' : 'Practice Mode'
-                                            )
-                                        }
-                                    />
-                                    <Label htmlFor="analytics-history-mode">
-                                        {activeSwitch}
-                                    </Label>
-                                </div>
-                            </div>
-                        </Card>
-                        {/* Templates */}
-                        <Card>
-                            {uniqueFilteredTemplateInterviews.length === 0 ? (
-                                <div className="text-center text-gray-500 p-4">
-                                    No completed sessions found.
-                                </div>
-                            )
-                                : (
-                                    <>
-                                        <CardHeader>
-                                            <CardTitle>Interview Templates</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <Table>
-                                                <TableCaption>
-                                                    List of your current perfomance metrics for each template.
-                                                </TableCaption>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead className="w-[200px]">Title</TableHead>
-                                                        <TableHead>Grade</TableHead>
-                                                        <TableHead className="text-right">Action</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {uniqueFilteredTemplateInterviews.map((template) => (
-                                                        <TableRow key={template.id}>
-                                                            <TableCell className="font-medium">
-                                                                {template.title}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {/* {template.score ?? '—'}% */}
-                                                                %
-                                                            </TableCell>
-
-                                                            <TableCell className="text-right">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    onClick={() =>
-                                                                        handleTemplateClick(template.id)
-                                                                    }>
-                                                                    View Template
-                                                                </Button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                                {/* Optional footer row */}
-                                                <TableFooter>
-                                                    <TableRow>
-                                                        <TableCell colSpan={4}>
-                                                            <span className="text-sm text-muted-foreground">
-                                                                Page 1 / 1 | Total {uniqueFilteredTemplateInterviews.length}
-                                                            </span>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                </TableFooter>
-                                            </Table>
-                                        </CardContent>
-                                    </>
-                                )}
-                        </Card>
-
+                    <Input
+                        placeholder="Search skills..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={activeSwitch === 'Interview Mode'}
+                            onCheckedChange={() =>
+                                setActiveSwitch(
+                                    activeSwitch === 'Practice Mode' ? 'Interview Mode' : 'Practice Mode'
+                                )
+                            }
+                        />
+                        <Label>{activeSwitch}</Label>
                     </div>
                 </div>
-
-                {/* Right Sidebar */}
-                <div className="space-y-4">
-                    {/* Profile Summary */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Profile</CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-center">
-                            <div className="rounded-full h-20 w-20 bg-gray-300 mx-auto mb-2" />
-                            <p className="font-semibold">You</p>
-                            <p className="text-sm text-gray-500">Aspiring Professional</p>
-                        </CardContent>
-                    </Card>
-
-                    {/* Mini Chart Placeholder */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Performance Breakdown</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-gray-600">Coming soon: Skill radar & weekly goal graph.</p>
-                            {/* You can insert <RadarChart /> or <LineChart /> here */}
-                        </CardContent>
-                    </Card>
-
-                    {/* Tips / AI Suggestions */}
-                    <Card className="bg-blue-100 border-blue-300">
-                        <CardContent className="py-4">
-                            <p className="text-sm font-medium">💡 Keep it up!</p>
-                            <p className="text-xs text-gray-700 mt-1">
-                                You’ve improved your Communication score by 12% over your last 3 interviews.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div >
+                <CombinedTemplateCarousel
+                    templates={uniqueFilteredTemplateInterviews}
+                    onView={handleTemplateClick}
+                />
+                <Separator className="my-4" />
+                <TipsCard />
+            </div>
         );
     };
 
     return (
         <div className="dashboard-overview container mx-auto p-4 w-3/4">
-
+            <div className="space-y-2 mb-4">
+                <h1 className="text-2xl font-bold text-center">Candidate Dashboard</h1>
+                <p className="text-center text-gray-500 mb-2 ">Track your progress and improve your performance with detailed skill insights.</p>
+                <Separator />
+            </div>
             {renderContent()}
         </div>
     );

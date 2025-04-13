@@ -222,6 +222,7 @@ CREATE TABLE "public"."templates" (
   "difficulty" "public"."template_difficulty",
   "question_count" integer,
   "company" character varying,
+  "img_url" character varying,
   "is_company_specific" boolean DEFAULT false,
   "is_industry_specific" boolean DEFAULT false,
   "is_general" boolean DEFAULT false,
@@ -242,6 +243,7 @@ CREATE TABLE "public"."interview_templates" (
   "duration" character varying,
   "difficulty" "public"."template_difficulty",
   "question_count" integer,
+  "img_url" character varying,
   "is_general" boolean DEFAULT false,
   "is_system_defined" boolean DEFAULT false,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL

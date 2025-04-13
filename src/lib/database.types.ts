@@ -810,6 +810,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number;
           company: string
+          img_url: string
           is_company_specific: boolean
           is_industry_specific: boolean
           is_general: boolean
@@ -827,6 +828,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number;
           company?: string
+          img_url?: string
           is_company_specific: boolean
           is_industry_specific: boolean
           is_general: boolean
@@ -844,6 +846,7 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
           question_count: number;
           company?: string
+          img_url?: string
           is_company_specific?: boolean
           is_industry_specific?: boolean
           is_general?: boolean
@@ -871,6 +874,7 @@ export type Database = {
           duration: number
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number;
+          img_url: string
           is_general: boolean
           is_system_defined: boolean
           created_at: string
@@ -883,6 +887,7 @@ export type Database = {
           duration: number
           difficulty: Database["public"]["Enums"]["template_difficulty"]
           question_count: number;
+          img_url?: string
           is_general: boolean
           is_system_defined: boolean
           created_at: string
@@ -895,6 +900,7 @@ export type Database = {
           duration?: number
           difficulty?: Database["public"]["Enums"]["template_difficulty"]
           question_count: number;
+          img_url?: string
           is_general?: boolean
           is_system_defined?: boolean
           created_at?: string

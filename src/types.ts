@@ -198,6 +198,7 @@ export type InterviewAnalytics = {
   recommendations_summary: string[];
   completed_interview_evaluations: InterviewEvaluation[];
   best_evaluation_crieria: string;
+  img_url: string | null;
 };
 export type AvgEvaluationScores = {
   name: string;
@@ -575,6 +576,7 @@ export const COMING_SOON_TEMPLATES: PracticeTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 
   {
@@ -595,6 +597,7 @@ export const COMING_SOON_TEMPLATES: PracticeTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 
   {
@@ -615,6 +618,7 @@ export const COMING_SOON_TEMPLATES: PracticeTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 
   {
@@ -635,6 +639,7 @@ export const COMING_SOON_TEMPLATES: PracticeTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
   {
     id: 'coming-soon-6',
@@ -655,6 +660,7 @@ export const COMING_SOON_TEMPLATES: PracticeTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 ];
 
@@ -672,6 +678,7 @@ export const COMING_SOON_MOCK_TEMPLATES: InterviewTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 
   {
@@ -688,6 +695,7 @@ export const COMING_SOON_MOCK_TEMPLATES: InterviewTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 
   {
@@ -704,6 +712,7 @@ export const COMING_SOON_MOCK_TEMPLATES: InterviewTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
   {
     id: 'coming-soon-105',
@@ -718,6 +727,8 @@ export const COMING_SOON_MOCK_TEMPLATES: InterviewTemplate[] = [
     is_general: true,
     is_system_defined: false,
     created_at: new Date().toISOString(),
+    img_url: '',
+
     isComingSoon: true,
   },
   {
@@ -734,5 +745,6 @@ export const COMING_SOON_MOCK_TEMPLATES: InterviewTemplate[] = [
     is_system_defined: false,
     created_at: new Date().toISOString(),
     isComingSoon: true,
+    img_url: '',
   },
 ];

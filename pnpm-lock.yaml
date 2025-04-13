@@ -38,6 +38,9 @@ importers:
       '@huggingface/transformers':
         specifier: ^3.4.0
         version: 3.4.0
+      '@lottiefiles/dotlottie-react':
+        specifier: ^0.13.3
+        version: 0.13.3(react@18.3.1)
       '@next/env':
         specifier: ^14.2.15
         version: 14.2.15
@@ -1934,6 +1937,14 @@ packages:
 
   '@kurkle/color@0.3.4':
     resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
+  '@lottiefiles/dotlottie-react@0.13.3':
+    resolution: {integrity: sha512-V4FfdYlqzjBUX7f0KV6vfQOOI0Cp+3XeG/ZqSDFSEVg5P7fpROpDv5/I9aTM8sOCESK1SWT96Fem+QVUnBV1wQ==}
+    peerDependencies:
+      react: ^17 || ^18 || ^19
+
+  '@lottiefiles/dotlottie-web@0.42.0':
+    resolution: {integrity: sha512-Zr2LCaOAoPCsdAQgeLyCSiQ1+xrAJtRCyuEYDj0qR5heUwpc+Pxbb88JyTVumcXFfKOBMOMmrlsTScLz2mrvQQ==}
 
   '@manypkg/find-root@2.2.1':
     resolution: {integrity: sha512-34NlypD5mmTY65cFAK7QPgY5Tzt0qXR4ZRXdg97xAlkiLuwXUPBEXy5Hsqzd+7S2acsLxUz6Cs50rlDZQr4xUA==}
@@ -10488,6 +10499,13 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.0
 
   '@kurkle/color@0.3.4': {}
+
+  '@lottiefiles/dotlottie-react@0.13.3(react@18.3.1)':
+    dependencies:
+      '@lottiefiles/dotlottie-web': 0.42.0
+      react: 18.3.1
+
+  '@lottiefiles/dotlottie-web@0.42.0': {}
 
   '@manypkg/find-root@2.2.1':
     dependencies:

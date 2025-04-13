@@ -4,10 +4,9 @@ import {
 } from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
 import {
   getInterviewAnalytics,
-  getLatestInterviewCompleted,
-  getTotalCompletedInterviews,
+  getTotalCompletedInterviews
 } from '@/data/user/interviews';
-import { Interview } from '@/types';
+import { Interview, InterviewAnalytics } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { useEffect, useState } from 'react';
 export const useAnalyticsData = () => {
@@ -17,16 +16,16 @@ export const useAnalyticsData = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [overview, setOverview] = useState<{
     completedInterviews: Interview[] | null;
-    latestInterview: Interview | null;
+    interviewAnalytics: InterviewAnalytics[] | null;
   }>({
     completedInterviews: [],
-    latestInterview: null,
+    interviewAnalytics: [],
   });
   const [currentSentimentDetailed, setCurrentSentimentDetailed] =
     useState<SentimentScore | null>(null);
 
   // Fetch Overview Data
-  const fetchOverviewData = async () => {
+  const fetchOverviewData = async (mode: string) => {
     try {
       setLoadingOverview(true);
       setError(null);
@@ -38,12 +37,45 @@ export const useAnalyticsData = () => {
       }
       setUserId(user.id);
 
+      // Fetch all completed interviews
       const completedInterviews = await getTotalCompletedInterviews(user.id);
-      const latestInterview = await getLatestInterviewCompleted(user.id);
+      if (!completedInterviews || completedInterviews.length === 0) {
+        setError('No completed interviews found.');
+        console.error('No completed interviews found.');
+        setLoadingOverview(false);
+        return;
+      }
 
+      // Filter unique templates with at least one completed interview
+      const uniqueTemplates = new Set<string>();
+      const filteredTemplates = completedInterviews.filter((interview) => {
+        if (uniqueTemplates.has(interview.template_id)) {
+          return false;
+        }
+        uniqueTemplates.add(interview.template_id);
+        return true;
+      });
+
+      // Fetch detailed analytics for each template
+      const interviewAnalytics = (
+        await Promise.all(
+          filteredTemplates.map((interview) =>
+            getInterviewAnalytics(user.id, interview.template_id, 'Practice Mode')
+          )
+        )
+      ).filter((analytics): analytics is InterviewAnalytics => analytics !== null);
+
+      if (!interviewAnalytics || interviewAnalytics.length === 0) {
+        setError('Failed to fetch interview analytics data.');
+        console.error('Failed to fetch interview analytics data.');
+        setLoadingOverview(false);
+        return;
+      }
+
+      // Update the overview state
       setOverview({
         completedInterviews,
-        latestInterview,
+        interviewAnalytics,
       });
       setLoadingOverview(false);
     } catch (err) {
@@ -99,10 +131,6 @@ export const useAnalyticsData = () => {
       return null;
     }
   };
-
-  useEffect(() => {
-    fetchOverviewData();
-  }, []);
 
   return {
     loadingOverview,

@@ -4,6 +4,7 @@ import {
   getPracticeTemplateEvaluationsByTemplateId,
   getPracticeTemplateQuestionByTemplateId,
   getPracticeTemplateQuestionsByTemplateIdAndEvalCriteria,
+  getTemplateImgUrlById,
 } from '@/data/user/templates';
 import { getCandidateUserProfile } from '@/data/user/user';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
@@ -11,7 +12,6 @@ import type {
   AvgEvaluationScores,
   Candidate,
   CandidateSkillsStats,
-  EmployerCandidatePreferences,
   EvaluationCriteriaType,
   FeedbackData,
   Interview,
@@ -23,9 +23,8 @@ import type {
   InterviewTemplate,
   InterviewUpdate,
   PracticeTemplate,
-  RecentAttempt,
   SAPayload,
-  Table,
+  Table
 } from '@/types';
 import { getRandomElements } from '@/utils/getRandomElements';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
@@ -631,6 +630,11 @@ export const getInterviewAnalytics = async (
     (prev, current) => (prev.avg_score > current.avg_score ? prev : current),
   );
 
+  const templateImgUrl = await getTemplateImgUrlById(
+    currentTemplateId,
+    interviewMode,
+  );
+
   // Assuming all interviews have the same title and description
   const {
     title: interviewTitle,
@@ -652,6 +656,7 @@ export const getInterviewAnalytics = async (
       recommendations_summary: recommendationsSummary,
       completed_interview_evaluations: evaluations,
       best_evaluation_crieria: bestEvaluationCriteria.name,
+      img_url: templateImgUrl,
     };
   } else {
     return {
@@ -668,6 +673,7 @@ export const getInterviewAnalytics = async (
       recommendations_summary: recommendationsSummary,
       completed_interview_evaluations: evaluations,
       best_evaluation_crieria: bestEvaluationCriteria.name,
+      img_url: templateImgUrl,
     };
   }
 };

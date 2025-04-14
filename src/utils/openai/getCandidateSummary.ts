@@ -64,6 +64,7 @@ const callOpenAIWithRetries = async (
             });
 
             const aiMessage = completion.choices?.[0]?.message?.content;
+            console.log('AI Response Candidate Summary:', aiMessage); // Log the AI response for debugging
             if (!aiMessage) {
                 throw new Error('No content returned from OpenAI.');
             }

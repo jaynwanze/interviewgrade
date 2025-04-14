@@ -21,10 +21,10 @@ export default function TipsCard() {
   }, []);
 
   return (
-    <Card className="bg-blue-100 border-blue-300">
+    <Card className="bg-blue-100 border-blue-300 dark:bg-blue-400/70 dark:border-blue-700 shadow-md rounded-lg p-4">
       <CardContent className="py-4">
         <p className="text-sm font-medium">💡 Tip of the Day</p>
-        <p className="text-xs text-gray-700 mt-1">{tip}</p>
+        <p className="text-xs text-gray-700 mt-1 dark:text-gray-300">{tip}</p>
       </CardContent>
     </Card>
   );

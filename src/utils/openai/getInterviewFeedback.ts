@@ -183,6 +183,7 @@ const callOpenAIWithRetries = async (
       });
 
       const aiMessage = completion.choices?.[0]?.message?.content;
+      console.log('AI Response - Intial getInterviewFeedback:', aiMessage); // Log the AI response for debugging
       if (!aiMessage) {
         throw new Error('No content returned from OpenAI.');
       }
@@ -317,10 +318,6 @@ export const getInterviewFeedback = async (
   );
 
   console.log('Prompt:', prompt);
-  // // Determine maximum score per question
-  // const numberOfQuestions = interviewAnswersDetails.length || 1; // Avoid division by zero
-  // const maxTotalScore = 100;
-  // const maxScorePerQuestion = Math.floor(maxTotalScore / numberOfQuestions);
 
   // Call OpenAI API
   const aiResponse = await callOpenAI(prompt);
@@ -350,7 +347,6 @@ export const getInterviewFeedback = async (
 
   //Update candidate summary based of latest interview analytics
   const latestCandidateSummary = getCandidateSummary(interview.candidate_id);
-  console.log('Latest Candidate Summary:', latestCandidateSummary);
   console.log('Feedback Data:', feedbackData);
 
   return feedbackData;

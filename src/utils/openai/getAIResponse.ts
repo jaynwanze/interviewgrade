@@ -47,7 +47,7 @@ export const getAIResponse = async (
             - Question Answer Feedback: ${evaluation.question_answer_feedback}
 
             Provide:
-            --Short concise feedback
+            --Short concise feedback (1-3 sentences).
             --Avoid lengthy explanations.
             --Focus on key points.
             `,

@@ -32,12 +32,6 @@ type PracticeInterviewFlowProps = {
   isTutorialMode: boolean;
 };
 function parsePartial(text: string) {
-  // We'll try to find lines of the form:
-  //   Score (%): xx/100%
-  //   Summary: ...
-  //   Advice for Next Question: ...
-  // If they are incomplete, we might not parse anything yet.
-
   const result: {
     mark?: number;
     summary?: string;
@@ -48,7 +42,7 @@ function parsePartial(text: string) {
   // e.g. "Score (%): 45/100%"
   const scoreRegex = /Score \(%\):\s*(\d+)\s*\/\s*100%/;
   const scoreMatch = text.match(scoreRegex);
-  if (scoreMatch && scoreMatch[1]) {
+  if (scoreMatch && scoreMatch[1] !== undefined && scoreMatch[0].includes('/100%')) {
     result.mark = parseInt(scoreMatch[1], 10);
   }
 
@@ -239,23 +233,22 @@ export function PracticeInterviewFlow({
   };
 
   useEffect(() => {
-    if (questionFeedback[currentQuestionIndex]) {
-      const score = Math.round(
-        questionFeedback[currentQuestionIndex]?.mark ?? 0,
-      );
-      if (score! >= 70) {
-        setScoreStringColour('text-green-600');
-      } else if (score! >= 60) {
-        setScoreStringColour('text-lime-600');
-      } else if (score! >= 50) {
-        setScoreStringColour('text-yellow-600');
-      } else if (score! >= 40) {
-        setScoreStringColour('text-orange-600');
-      } else {
-        setScoreStringColour('text-red-600');
-      }
+    const feedback = questionFeedback[currentQuestionIndex];
+    const score = feedback?.mark;
+
+    if (score !== undefined && score !== null) {
+      const rounded = Math.round(score);
+
+      if (rounded >= 70) setScoreStringColour('text-green-600');
+      else if (rounded >= 60) setScoreStringColour('text-lime-600');
+      else if (rounded >= 50) setScoreStringColour('text-yellow-600');
+      else if (rounded >= 40) setScoreStringColour('text-orange-600');
+      else setScoreStringColour('text-red-600');
+    } else {
+      setScoreStringColour(''); // reset if not yet available
     }
   }, [questionFeedback[currentQuestionIndex]]);
+
 
   const finishInterview = async () => {
     stopTimer();
@@ -401,16 +394,11 @@ export function PracticeInterviewFlow({
               questionFeedback[currentQuestionIndex] ? (
                 <>
                   <div className="text-left mt-4 space-y-3">
-                    {questionFeedback[currentQuestionIndex]?.mark && (
+                    {questionFeedback[currentQuestionIndex]?.mark !== undefined && (
                       <div className="text-center">
                         <strong className="block text-base">Score (%):</strong>
-                        <p
-                          className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
-                        >
-                          {Math.round(
-                            questionFeedback[currentQuestionIndex]?.mark ?? 0,
-                          )}
-                          /100%
+                        <p className={`text-3xl font-bold mt-1 ${scoreStringColour}`}>
+                          {Math.round(questionFeedback[currentQuestionIndex]?.mark ?? 0)}/100%
                         </p>
                       </div>
                     )}

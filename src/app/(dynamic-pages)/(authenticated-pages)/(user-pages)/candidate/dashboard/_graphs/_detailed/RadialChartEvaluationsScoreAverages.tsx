@@ -73,7 +73,7 @@ export function RadialChartEvaluationsScoreAverages({
   return (
     <Card className="flex flex-col transform transition hover:scale-105">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Current Average Skills</CardTitle>
+        <CardTitle>Current Average Sub-Skills</CardTitle>
         <CardDescription>Scores out of 10</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
@@ -149,7 +149,7 @@ export function RadialChartEvaluationsScoreAverages({
 
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="leading-none text-muted-foreground">
-          Showing average scores for your skills
+          Showing average scores for your sub-skills
         </div>
       </CardFooter>
     </Card>

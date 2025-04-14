@@ -115,7 +115,8 @@ export default function InterviewAnalyticsPage() {
 
     // Navigate to template details
     const handleTemplateClick = (templateId: string) => {
-        router.push(`/candidate/dashboard/${templateId}`);
+        const mode = activeSwitch === 'Practice Mode' ? 'practice' : 'interview';
+        router.push(`/candidate/dashboard/${templateId}?mode=${mode}`);
     };
 
     const averageScore = useMemo(() => {

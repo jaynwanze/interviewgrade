@@ -8,7 +8,7 @@ import {
 } from '@/data/user/interviews';
 import { Interview, InterviewAnalytics } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 export const useAnalyticsData = () => {
   const [loadingOverview, setLoadingOverview] = useState(true);
   const [loadingDetailed, setLoadingDetailed] = useState(false);
@@ -90,44 +90,55 @@ export const useAnalyticsData = () => {
     currentTemplateId: string,
     interviewMode: string,
   ) => {
-    const templateId = currentTemplateId;
-    if (!templateId || !userId) {
-      setError('Template ID or User ID not found.');
-      console.error('Template ID or User ID not found.');
-      setLoadingDetailed(false);
-      return null;
-    }
-
     try {
       setLoadingDetailed(true);
       setError(null);
-      const analytics = await getInterviewAnalytics(
-        userId,
-        templateId,
-        interviewMode,
-      );
-      if (!analytics) {
-        setError('Failed to fetch detailed analytics data.');
-        console.error('Failed to fetch detailed analytics data.');
+
+      const user = await serverGetLoggedInUser();
+      if (!user || !user.id) {
+        console.error('User not found');
+        setError('User not found.');
         setLoadingDetailed(false);
         return null;
       }
 
+      const templateId = currentTemplateId;
+      if (!templateId) {
+        setError('Template ID not found.');
+        console.error('Template ID not found.');
+        setLoadingDetailed(false);
+        return null;
+      }
+
+      setUserId(user.id);
+
+      const analytics = await getInterviewAnalytics(user.id, templateId, interviewMode);
+      if (!analytics) {
+        setError('No detailed analytics returned.');
+        console.error('No detailed analytics returned.');
+        setLoadingDetailed(false);
+        return null;
+      }
+      console.log('Detailed analytics:', analytics);
+      console.log('Current template ID:', templateId);
+      console.log('Interview mode:', interviewMode);
+      console.log('User ID:', user.id);
+      
+
       const allAnswers = analytics.completed_interview_evaluations.flatMap(
         (evaluation) =>
-          evaluation.question_answer_feedback.map(
-            (question) => question.answer,
-          ),
+          evaluation.question_answer_feedback.map((question) => question.answer)
       );
 
       const sentiment = await fetchSentiment(allAnswers);
       setCurrentSentimentDetailed(sentiment);
+
       setLoadingDetailed(false);
       return analytics;
     } catch (err) {
-      setLoadingDetailed(false);
-      setError('Failed to fetch detailed analytics data.');
       console.error('Error fetching detailed analytics:', err);
+      setError('Failed to fetch detailed analytics data.');
+      setLoadingDetailed(false);
       return null;
     }
   };

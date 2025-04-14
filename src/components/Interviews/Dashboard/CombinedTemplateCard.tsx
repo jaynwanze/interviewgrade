@@ -105,12 +105,12 @@ export function CombinedTemplateCard({ template, onView }: CombinedTemplateCardP
                     <InlineTargetEditor target={targetScore} onSave={(newTarget) => setTargetScore(newTarget)} />
                 </div> */}
                 <Button
-                    variant="outline"
+                    variant="link"
                     size="sm"
                     onClick={() =>
                         onView(template.interview_template_id || template.template_id || "")
                     }
-                    className="mt-2 flex items-center justify-center"
+                    className="mt-2 flex items-center justify-center border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors duration-200"
                 >
                     View Skill
                     <ArrowRightIcon className="ml-2 w-4 h-4" />

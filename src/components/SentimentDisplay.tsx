@@ -2,14 +2,8 @@
 
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { motion } from 'framer-motion';
-import { Info, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export type SentimentDetails = {
   icon: string;
@@ -107,22 +101,26 @@ const SentimentDisplay = ({
   const styleBadge = getCommunicationStyleBadge(label, score);
 
   return (
-    <Card className="p-4 flex flex-col justify-center h-full transform transition hover:scale-105 relative overflow-hidden shadow-lg rounded-lg p-6">
+    <Card className="flex flex-col justify-center h-full transform transition hover:scale-105 relative overflow-hidden shadow-lg rounded-lg p-2">
       {/* Optional Decorative Background */}
       <CardTitle className="flex flex-col items-center p-2 z-10">
-        <div className="flex items-center space-x-2">
-          <Sparkles className="text-yellow-500 w-5 h-5" />
-          <span>Communication Style</span>
-        </div>
+        <CardTitle className="flex items-center justify-center gap-2 text-lg font-semibold">
+          <Sparkles className="text-yellow-500 w-5 h-5 animate-pulse" />
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Communication Tone
+          </h1>
+        </CardTitle>
+
       </CardTitle>
       <Separator className="my-1 z-10" />
       <CardContent className="z-10">
         <div className="flex flex-col items-center">
           <div className="flex items-center space-x-4 mb-3">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Overall Tone: {sentiment.title}
-              </h3>
+              <p className="text-md text-gray-700 dark:text-gray-300">
+                Your overall tone when answering questions is <span className="font-bold">{sentiment.title}</span>
+                {/* with a confidence level of <span className="font-bold">{score.toFixed(0)}%</span>. */}
+              </p>
               <div className="relative w-full h-4 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden my-2">
                 <motion.div
                   initial={{ width: '0%' }}
@@ -140,13 +138,13 @@ const SentimentDisplay = ({
           {/* Style Badge */}
           {/* Style Badge + Tooltip */}
           {/* <span className="flex items-center justify-center gap-1"> */}
-            <div
-              className={`inline-flex justify-center px-3 py-1 rounded-full font-medium ${styleBadge?.color || 'bg-gray-200 text-gray-900'}`}
-            >
-              {styleBadge?.text || 'N/A'}
-            </div>
+          <div
+            className={`inline-flex justify-center text-center px-3 py-1 rounded-full font-medium ${styleBadge?.color || 'bg-gray-200 text-gray-900'}`}
+          >
+            {styleBadge?.text || 'N/A'}
+          </div>
 
-            {/* <TooltipProvider>
+          {/* <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Info className="w-4 h-4 text-gray-600 dark:text-gray-200 cursor-pointer" />

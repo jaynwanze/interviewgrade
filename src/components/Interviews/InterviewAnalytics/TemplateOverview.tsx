@@ -35,7 +35,7 @@ export const TemplateOverview = ({
     analyticsData: InterviewAnalytics;
 }) => {
     return (
-        <div className="space-y-1">
+        <div className="space-y-1 h-full">
             <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg p-2 transform transition hover:scale-105">
                 <CardContent>
                     {/* Title */}
@@ -46,11 +46,7 @@ export const TemplateOverview = ({
 
                     {/* Description */}
                     <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        The interview template{' '}
-                        <span className="font-semibold">
-                            {analyticsData.interview_title || 'Unnamed Template'}
-                        </span>{' '}
-                        evaluates candidates based on the following skill areas:
+                        Evaluates candidates based on the following sub-skill areas:
                     </p>
                     {analyticsData.avg_evaluation_criteria_scores.length > 0 ? (
                         <ul className="list-disc pl-5 mt-2  text-gray-600 dark:text-gray-300 text-sm">

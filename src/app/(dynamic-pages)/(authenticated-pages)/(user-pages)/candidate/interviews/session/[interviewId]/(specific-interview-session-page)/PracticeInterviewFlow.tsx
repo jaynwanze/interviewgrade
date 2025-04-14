@@ -8,7 +8,6 @@ import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { markTutorialAsDoneAction } from '@/data/user/candidate';
 import {
@@ -332,64 +331,53 @@ export function PracticeInterviewFlow({
 
   // Otherwise, show the main practice flow
   return (
-    <div className="flex flex-col items-center min-h-screen space-y-6 p-4">
-      <div className="flex flex-col md:flex-row w-full max-w-5xl gap-6">
-        {/* Leave Session Button */}
-        <div className="flex justify-start">
-          <Button variant="destructive" onClick={() => window.history.back()}>
-            <ChevronLeft className="h-4 w-4">Leave Session </ChevronLeft>
-          </Button>
-        </div>
-
-        {/* Left Column: Interviewer (Question) */}
-        <div className="flex-1 space-y-4">
-          <AIQuestionSpeaker
-            question={questions[currentQuestionIndex]}
-            currentIndex={currentQuestionIndex}
-            questionsLength={questions.length}
-          />
-        </div>
-
-        {/* Right Column: Timer & Candidate Camera */}
-        <div className="flex-1 space-y-4">
-          <Card className="shadow-md text-center">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Timer</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-bold">
-                {Math.floor(recordingTime / 60)}:
-                {('0' + (recordingTime % 60)).slice(-2)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UserCamera
-                answerCallback={handleAnswer}
-                isCameraOn={isCameraOn}
-                onRecordEnd={null}
-                isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
-                interviewMode={interview.mode}
-              />
-            </CardContent>
-          </Card>
+    <div className="min-h-screen w-full p-2 flex flex-col space-y-2 overflow-hidden">
+      {/* Top Control Bar */}
+      <div className="flex justify-between items-center mb-2">
+        <Button variant="destructive" onClick={() => window.history.back()}>
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Leave Session
+        </Button>
+        <div className="text-sm text-muted-foreground">
+          Time: <span className="font-semibold">{Math.floor(recordingTime / 60)}:{('0' + (recordingTime % 60)).slice(-2)}</span>
         </div>
       </div>
 
-      {/* Feedback Panel */}
-      <div className="w-full max-w-2xl">
-        <Card className="shadow-md text-center">
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
+        {/* Interviewer */}
+        <AIQuestionSpeaker
+          question={questions[currentQuestionIndex]}
+          currentIndex={currentQuestionIndex}
+          questionsLength={questions.length}
+        />
+        {/* Candidate */}
+        <Card className="overflow-hidden flex flex-col justify-between">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
+          </CardHeader>
+          <div className="flex justify-center items-center">
+            <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-600 dark:text-blue-200">
+              You
+            </span>
+          </div>
+          <CardContent className="flex-1 flex flex-col justify-center items-center">
+            <UserCamera
+              answerCallback={handleAnswer}
+              isCameraOn={isCameraOn}
+              onRecordEnd={null}
+              isFetchingSpecificFeedback={setIsFetchingSpecificFeedback}
+              interviewMode={interview.mode}
+            />
+          </CardContent>
+        </Card>
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">
               Practice Feedback
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col items-center justify-center h-full text-center">
             {isFetchingSpecificFeedback ? (
               questionFeedback[currentQuestionIndex] ? (
                 <>
@@ -422,27 +410,31 @@ export function PracticeInterviewFlow({
                         </div>
                       )}
                   </div>
-
-                  <div className="flex items-center justify-center gap-4 mt-6">
-                    {currentQuestionIndex < questions.length - 1 && (
-                      <Button
-                        variant="secondary"
-                        onClick={() =>
-                          setCurrentQuestionIndex((prev) => prev + 1)
-                        }
-                      >
-                        Next Question
-                      </Button>
-                    )}
-                    <Button onClick={finishInterview}>
-                      {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
-                    </Button>
-                  </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center space-x-2 mt-4">
-                  <p>Fetching feedback...</p>
-                  <LoadingSpinner />
+                <div className="flex flex-col items-center justify-center mt-4 space-y-4">
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Fetching feedback, please wait...
+                  </p>
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div
+                      className="bg-blue-500 h-2 rounded-full"
+                      style={{
+                        width: '0%',
+                        animation: 'loading-bar 5s linear forwards',
+                      }}
+                    ></div>
+                    <style jsx>{`
+                    @keyframes loading-bar {
+                      from {
+                      width: 0%;
+                      }
+                      to {
+                      width: 100%;
+                      }
+                    }
+                    `}</style>
+                  </div>
                 </div>
               )
             ) : questionFeedback[currentQuestionIndex] ? (
@@ -476,7 +468,6 @@ export function PracticeInterviewFlow({
                     </div>
                   )}
                 </div>
-
                 <div className="flex items-center justify-center gap-4 mt-6">
                   {currentQuestionIndex < questions.length - 1 && (
                     <Button
@@ -494,13 +485,20 @@ export function PracticeInterviewFlow({
                 </div>
               </>
             ) : (
-              <p className="mt-4 text-sm md:text-base">
-                After you answer, feedback will be displayed here.
-              </p>
+              <div className="flex flex-col items-center justify-center mt-4">
+                <p className="text-sm md:text-base text-muted-foreground">
+                  Your feedback will appear here after you answer.
+                </p>
+                <div className="mt-4 flex items-center space-x-2">
+                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
+                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-150"></div>
+                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-300"></div>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div >
   );
 }

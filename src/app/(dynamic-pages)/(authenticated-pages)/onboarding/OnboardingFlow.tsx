@@ -319,29 +319,57 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
     null,
   );
 
-  async function handleResumeUpload(
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const { mutate: uploadResume } = useSAToastMutation(
+    async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
 
-    setUploading(true);
+      return uploadPublicCandidateResume(formData, file.name);
+    },
+    {
+      onMutate: () => {
+        setUploading(true);
+      },
+      successMessage: 'Resume uploaded!',
+      errorMessage: 'Failed to upload resume',
+      onSuccess: (result) => {
+        setUploading(false);
 
-    // Upload resume file
-    const formData = new FormData();
-    formData.append('file', file);
-    const result = await uploadPublicCandidateResume(formData, file.name);
+        if (result.status === 'success') {
+          setUploadedResumeUrl(result.data);
+          setResumePreview(result.data);
+        }
+      },
+    },
+  );
 
-    if (result.status === 'success') {
-      setUploadedResumeUrl(result.data); // Store uploaded file URL
-      setResumePreview(result.data); // Preview it in the UI
-    } else {
-      alert('Failed to upload resume: ' + result.message);
+  const { mutate: saveCandidateDetails, isLoading: isSaving } = useSAToastMutation(
+    async (formData: CandidateDetailsSchema) => {
+      // We pass the final resume URL if we have one
+      return updateCandidateDetails(
+        {
+          ...formData,
+          resume_url: uploadedResumeUrl ?? undefined,
+        },
+        { isOnboardingFlow: true },
+      );
+    },
+    {
+      successMessage: 'Candidate details saved!',
+      errorMessage: 'Failed to update details',
+      onSuccess: () => {
+        onSuccess();
+      },
+    },
+  );
+
+  function handleResumeFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadResume(file);
     }
-
-    setUploading(false);
   }
-
+  
   function handleRemoveResume() {
     setUploadedResumeUrl(null);
     setResumePreview(null);
@@ -349,17 +377,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   function onSubmit(formData: CandidateDetailsSchema) {
-    updateCandidateDetails(
-      {
-        ...formData,
-        resume_url: uploadedResumeUrl ?? undefined, // Save only if confirmed
-      },
-      {
-        isOnboardingFlow: true,
-      },
-    ).then(() => {
-      onSuccess();
-    });
+    saveCandidateDetails(formData);
   }
 
   return (
@@ -464,7 +482,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               id="resumeFile"
               type="file"
               accept=".pdf,.doc,.docx"
-              onChange={handleResumeUpload}
+              onChange={handleResumeFileChange}
             />
             {uploading && <p className="text-sm text-gray-600">Uploading...</p>}
           </div>

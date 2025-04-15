@@ -37,8 +37,8 @@ export async function UserSidebar() {
           icon={<LucideHistory className="h-5 w-5" />}
         />
         <SidebarLink
-          label="Job Tracker"
-          href="/candidate/jobtracker"
+          label="Employers Interests"
+          href="/candidate/employers-intrests"
           icon={<TableProperties className="h-5 w-5" />}
         />
         {/* <SidebarLink

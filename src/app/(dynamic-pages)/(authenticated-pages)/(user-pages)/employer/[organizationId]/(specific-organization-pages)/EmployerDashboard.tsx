@@ -65,6 +65,32 @@ const availableLocations = [
   'Australia',
   'Germany',
   'India',
+  'France',
+  'Spain',
+  'Italy',
+  'Netherlands',
+  'Brazil',
+  'Mexico',
+  'Japan',
+  'China',
+  'South Korea',
+  'Russia',
+  'South Africa',
+  'Singapore',
+  'New Zealand',
+  'Sweden',
+  'Norway',
+  'Finland',
+  'Denmark',
+  'Ireland',
+  'Belgium',
+  'Switzerland',
+  'Austria',
+  'Czech Republic',
+  'Poland',
+  'Portugal',
+  'Greece',
+  'Turkey',
   'Remote',
 ];
 
@@ -688,7 +714,7 @@ export default function EmployerDashboard() {
                   </Popover>
                 </div>
               </div>
-              <h1 className="text-2xl font-bold">Statistics</h1>
+              <h1 className="text-2xl font-bold">Matched Candidate Statistics</h1>
               <Tabs
                 defaultValue="practice"
                 onValueChange={(value) =>

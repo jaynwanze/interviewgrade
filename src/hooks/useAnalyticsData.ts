@@ -119,12 +119,7 @@ export const useAnalyticsData = () => {
         setLoadingDetailed(false);
         return null;
       }
-      console.log('Detailed analytics:', analytics);
-      console.log('Current template ID:', templateId);
-      console.log('Interview mode:', interviewMode);
-      console.log('User ID:', user.id);
       
-
       const allAnswers = analytics.completed_interview_evaluations.flatMap(
         (evaluation) =>
           evaluation.question_answer_feedback.map((question) => question.answer)

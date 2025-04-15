@@ -1,11 +1,10 @@
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
 import {
+  CoinsIcon,
   Home,
-  MessageCircleMoreIcon,
   Settings,
-  Trophy,
-  UserRound,
+  UserRound
 } from 'lucide-react';
 
 import { Suspense } from 'react';
@@ -42,6 +41,12 @@ async function OrganizationSidebarInternal({
               label="Candidates"
               href={`/employer/${organizationId}/c`}
               icon={<UserRound className="h-5 w-5" />}
+            />
+
+            <SidebarLink
+              label="Products"
+              href={`/employer/${organizationId}/purchase-tokens`}
+              icon={<CoinsIcon className="h-5 w-5" />}
             />
             {/* <SidebarLink
               label="Messages"

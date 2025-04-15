@@ -353,9 +353,21 @@ export default function EmployerDashboard() {
         return true;
       });
 
+      if (roleFilter !== 'All Roles') {
+        filtered = filtered.filter((cand) => cand.role.includes(roleFilter));
+      }
+
       if (industryFilter !== 'All Industries') {
         filtered = filtered.filter((cand) =>
           cand.industry.includes(industryFilter),
+        );
+      }
+
+      if (locationFilter !== 'All Locations') {
+        filtered = filtered.filter(
+          (cand) =>
+            cand.country.includes(locationFilter) ||
+            cand.country.toLowerCase() === 'remote',
         );
       }
 
@@ -367,17 +379,9 @@ export default function EmployerDashboard() {
         return stats?.some((s) => s.skill === skillFilter);
       });
 
-      if (locationFilter !== 'All Locations') {
-        filtered = filtered.filter(
-          (cand) =>
-            cand.country.includes(locationFilter) ||
-            cand.country.toLowerCase() === 'remote',
-        );
-      }
 
-      if (roleFilter !== 'All Roles') {
-        filtered = filtered.filter((cand) => cand.role.includes(roleFilter));
-      }
+
+
     }
     if (filtered.length === 0) {
       setSkillGapMessage(

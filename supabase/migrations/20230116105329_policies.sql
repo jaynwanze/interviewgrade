@@ -59,6 +59,20 @@ UPDATE TO "authenticated" USING (EXISTS (
 WITH CHECK (EXISTS (
     SELECT 1 FROM "public"."employees" WHERE "employees"."token_id" = "tokens"."id" AND "employees"."id" = "auth"."uid"()
 ));
+
+--
+-- Name: candidates: Only the employees view all candidates; Type: POLICY; Schema: public; Owner: supabase_admin
+CREATE POLICY "employers_can_view_all_candidates"
+ON "public"."candidates"
+FOR SELECT
+TO "authenticated"
+USING (
+  EXISTS (
+    SELECT 1
+    FROM "employees"
+    WHERE "employees"."id" = "auth"."uid"()
+  )
+);
 --
 -- Name: interviews Only the candidates can view their own interviews; Type: POLICY; Schema: public; Owner: supabase_admin
 --

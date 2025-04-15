@@ -479,6 +479,35 @@ export const mockCandidates: CandidateRow[] = [
         previous_avg: 88,
       },
     ],
+    resume_metadata: {
+      skills: ['SQL', 'Python', 'Tableau'],
+      experiences: [
+        {
+          jobTitle: 'Data Analyst',
+          company: 'Data Insights',
+          startDate: '2023-01-01',
+          endDate: null,
+          description:
+            'Analyzed large datasets to provide actionable insights for clients...',
+        },
+      ],
+      education: 'Bachelor of Arts in Statistics, Data University',
+      certifications: ['Google Data Analytics Professional Certificate'],
+      projects: [
+        {
+          title: 'Sales Forecasting Model',
+          description:
+            'Developed a predictive model for sales forecasting using Python...',
+          link: null,
+        },
+        {
+          title: 'Customer Segmentation Analysis',
+          description:
+            'Performed customer segmentation analysis using clustering techniques...',
+          link: null,
+        },
+      ],
+    },
     created_at: '2024-04-22T14:15:00Z',
     full_name: 'Charlie Davis',
     avatar_url: '/images/candidates/charles-deluvio-7lXJ7Vqch9Y-unsplash.ico',
@@ -514,6 +543,29 @@ export const mockCandidates: CandidateRow[] = [
         previous_avg: 84,
       },
     ],
+    resume_metadata: {
+      skills: ['Agile', 'Scrum', 'Project Management'],
+      experiences: [
+        {
+          jobTitle: 'Product Manager',
+          company: 'Innovatech',
+          startDate: '2022-06-01',
+          endDate: null,
+          description:
+            'Led cross-functional teams to deliver high-impact products...',
+        },
+      ],
+      education: 'Master of Business Administration, Business University',
+      certifications: ['Certified Scrum Product Owner'],
+      projects: [
+        {
+          title: 'New Product Launch',
+          description:
+            'Managed the launch of a new product line, achieving 20% market share in the first quarter...',
+          link: null,
+        },
+      ],
+    },
     created_at: '2024-04-25T11:45:00Z',
     full_name: 'Diana Evans',
     avatar_url:
@@ -550,6 +602,29 @@ export const mockCandidates: CandidateRow[] = [
         previous_avg: 85,
       },
     ],
+    resume_metadata: {
+      skills: ['Java', 'Spring Boot', 'MySQL'],
+      experiences: [
+        {
+          jobTitle: 'Junior Software Engineer',
+          company: 'Tech Solutions',
+          startDate: '2023-02-01',
+          endDate: null,
+          description:
+            'Assisted in the development of web applications using Java and Spring Boot...',
+        },
+      ],
+      education: 'Bachelor of Science in Computer Science, Tech University',
+      certifications: ['Oracle Certified Java Programmer'],
+      projects: [
+        {
+          title: 'Web Application Development',
+          description:
+            'Contributed to the development of a web application using Java and Spring Boot...',
+          link: null,
+        },
+      ],
+    },
     created_at: '2024-04-27T07:00:00Z',
     full_name: 'Erin Green',
     avatar_url: '/images/candidates/microsoft-365-7mBictB_urk-unsplash.jpg',

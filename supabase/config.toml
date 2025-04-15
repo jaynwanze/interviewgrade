@@ -50,7 +50,6 @@ site_url = "env(NEXT_PUBLIC_SITE_URL)"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
   "env(NEXT_PUBLIC_SITE_URL)",
-  "env(NEXT_PUBLIC_SITE_URL)/dashboard"
   ]
 
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 seconds (one

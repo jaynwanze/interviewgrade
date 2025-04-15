@@ -130,7 +130,6 @@ export const updateCandidateDetails = async (
     isOnboardingFlow?: boolean;
   } = {},
 ): Promise<SAPayload<Table<'candidates'>>> => {
-  'use server';
   const supabaseClient = createSupabaseUserServerActionClient();
   const user = await serverGetLoggedInUser();
 

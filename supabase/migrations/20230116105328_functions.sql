@@ -16,7 +16,6 @@ END IF;
 END;
 $function$;
 
-
 CREATE OR REPLACE FUNCTION "public"."handle_auth_user_created"()
 RETURNS "trigger"
 LANGUAGE "plpgsql"
@@ -28,12 +27,11 @@ DECLARE
 BEGIN
     -- Extract userType from raw metadata
     user_type_value := (NEW.raw_user_meta_data->>'userType')::public.user_types;
-    email := NEW.email;
 
     -- Insert into user_profiles
     INSERT INTO public.user_profiles (id, user_type, email)
-    VALUES (NEW.id, user_type_value, email);
-    
+    VALUES (NEW.id, user_type_value, NEW.email);
+
     -- Handle based on user_type
     IF user_type_value = 'candidate' THEN
         -- Insert into candidate
@@ -42,16 +40,16 @@ BEGIN
     END IF;
 
     IF user_type_value = 'employer' THEN
-        --Create token for employer
-         INSERT INTO public.tokens (id, tokens_available, total_tokens_used, total_tokens_purchased, last_purchase_date)
+        -- Create token for employer
+        INSERT INTO public.tokens (id, tokens_available, total_tokens_used, total_tokens_purchased, last_purchase_date)
         VALUES (extensions.uuid_generate_v4(), 5, 0, 0, NOW())
         RETURNING id INTO new_token_id;
-        
+
         -- Insert into employee with the newly created token
         INSERT INTO public.employees (id, token_id)
         VALUES (NEW.id, new_token_id);
     END IF;
-    
+
     RETURN NEW;
 END;
 $$;

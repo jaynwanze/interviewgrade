@@ -16,47 +16,46 @@ export interface Experience {
   startDate?: string;
   endDate?: string | null;
 }
+const FALLBACK_PDF_URL = `${process.env.NEXT_PUBLIC_SITE_URL}/test/05-versions-space.pdf`;
 
 /**
  * Returns a Buffer from a given resume source.
  * If the resumeUrl starts with "http", it fetches the file from the network;
  * otherwise, it treats it as a local file path.
  */
-export async function getResumeBuffer(resumeUrl: string): Promise<Buffer> {
-  const trimmedUrl = resumeUrl.trim();
-  // This is the public URL served by Next.js from your `public/` folder
-  const testResumeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/test/05-versions-space.pdf`;
+async function getResumeBuffer(resumeUrl: string): Promise<Buffer> {
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  const trimmed = resumeUrl.trim().toLowerCase();
 
-  // If it's already a remote URL
-  if (trimmedUrl.toLowerCase().startsWith('http')) {
-    const response = await fetch(trimmedUrl);
+  // If it's already a remote URL, fetch it:
+  if (trimmed.startsWith('http')) {
+    const response = await fetch(resumeUrl);
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch resume from URL: ${trimmedUrl}. Status: ${response.status} ${response.statusText}`
+        `Failed to fetch from URL ${resumeUrl}. 
+         Status: ${response.status} ${response.statusText}`,
       );
     }
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
-  } else {
-    // If we're in production, read from a public URL instead of local
-    if (process.env.NODE_ENV === 'production') {
-      // fetch from that public URL in production:
-      const response = await fetch(testResumeUrl);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch test resume PDF from ${testResumeUrl}: ${response.status} ${response.statusText}`
-        );
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      return Buffer.from(arrayBuffer);
-    }
-
-    // Otherwise, in dev mode we can read from the local filesystem path
-    if (!fs.existsSync(trimmedUrl)) {
-      throw new Error(`Local file does not exist: ${trimmedUrl}`);
-    }
-    return fs.readFileSync(trimmedUrl);
+    return Buffer.from(await response.arrayBuffer());
   }
+
+  // If local path in PRODUCTION => fetch fallback PDF from /public/test
+  if (process.env.NODE_ENV === 'production') {
+    const response = await fetch(FALLBACK_PDF_URL);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch fallback PDF: ${FALLBACK_PDF_URL}. 
+         Status: ${response.status} ${response.statusText}`,
+      );
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  // Otherwise, local dev => read from filesystem
+  if (!fs.existsSync(resumeUrl)) {
+    throw new Error(`Local file does not exist: ${resumeUrl}`);
+  }
+  return fs.readFileSync(resumeUrl);
 }
 
 /**

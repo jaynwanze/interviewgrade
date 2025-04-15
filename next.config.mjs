@@ -8,6 +8,7 @@ export default {
       bodySizeLimit: '10mb',
       allowedOrigins: ['my-proxy.com', '*.my-proxy.com'],
     },
+    serverComponentsExternalPackages: ['pdf-parse'],
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if

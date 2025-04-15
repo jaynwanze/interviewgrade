@@ -142,7 +142,11 @@ function computeExperienceYears(startDate: string, endDate?: string | null) {
   return end.diff(start, 'year', true); // fractional years
 }
 
-export default function EmployerDashboard() {
+export default function EmployerDashboard({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   // Core stats
   const [stats] = useState({
     tokensLeft: 5,
@@ -746,6 +750,7 @@ export default function EmployerDashboard() {
                   top3Worldwide={top3Worldwide}
                   mode={mode}
                   employersPrefs={employerPrefs}
+                  organizationId={organizationId}
                 />
               )}
             </>

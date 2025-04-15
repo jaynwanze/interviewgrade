@@ -32,6 +32,7 @@ export function MatchedCandidatesView({
   matched,
   mode,
   employersPrefs,
+  organizationId,
 }: {
   skillGapMessage: string;
   topThree: CandidateRow[] | null;
@@ -40,16 +41,17 @@ export function MatchedCandidatesView({
   matched: CandidateRow[];
   mode: string;
   employersPrefs: EmployerCandidatePreferences;
+  organizationId: string;
 }) {
   const router = useRouter();
 
   function handleViewProfile(candidateId: string) {
-    router.push(`/candidate/${candidateId}`);
+    router.push(`/employer/${organizationId}/c/${candidateId}`);
   }
 
-  function handleContact(candidateId: string) {
-    router.push(`/messages?candidateId=${candidateId}`);
-  }
+  // function handleContact(candidateId: string) {
+  //   router.push(`/messages?candidateId=${candidateId}`);
+  // }
 
   function getShortName(fullName: string): string {
     if (!fullName) return '';

@@ -340,12 +340,15 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
           setResumePreview(result.data);
         }
       },
+      onError: () => {
+        setUploading(false);
+        handleRemoveResume();
+      },
     },
   );
 
   const { mutate: saveCandidateDetails, isLoading: isSaving } = useSAToastMutation(
     async (formData: CandidateDetailsSchema) => {
-      // We pass the final resume URL if we have one
       return updateCandidateDetails(
         {
           ...formData,
@@ -369,7 +372,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
       uploadResume(file);
     }
   }
-  
+
   function handleRemoveResume() {
     setUploadedResumeUrl(null);
     setResumePreview(null);

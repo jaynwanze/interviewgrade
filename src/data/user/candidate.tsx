@@ -350,6 +350,35 @@ export async function addJobTrackerApplication(
   return data[0];
 }
 
+export async function getEmployersInterestedInCandidate(
+): Promise<{ employer_id: string; employer_name: string; logo_url: string }[]> {
+
+  const user = await serverGetLoggedInUser();
+  const { user_metadata, id } = user;
+  if (user_metadata.userType === 'employee') {
+    throw new Error('This user is not a candidate');
+  }
+  const candidateId = id;
+  const { data, error } = await createSupabaseUserServerActionClient()
+    .from('employee_candidate_unlocks')
+    .select('employee_id, employees(user_profiles(full_name, avatar_url))')
+    .eq('candidate_id', candidateId);
+
+  if (error) {
+    console.error('Error fetching employer interests:', error.message);
+    throw new Error('Unable to fetch interested employers');
+  }
+
+  return (
+    data?.map((entry) => ({
+      employer_id: entry.employee_id,
+      employer_name: entry.employees?.user_profiles?.full_name ?? 'Unknown',
+      logo_url: entry.employees?.user_profiles?.avatar_url ?? '',
+    })) ?? []
+  );
+}
+
+
 export async function updateJobTrackerApplication(
   updatedJob: Partial<JobTracker>,
 ): Promise<Table<'job_application_tracker'>> {

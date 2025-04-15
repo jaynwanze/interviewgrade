@@ -36,6 +36,7 @@ Below is the candidate’s information:
 2. Highlight the candidate’s current skill level, notable achievements, and recent progress based on their interview and practice stats (if available).
 3. Present the summary in a way that an employer can quickly read and get a sense of the candidate’s suitability.
 4. Don't mention candidate's name within summary.
+5. If the candidate has no interview or practice stats, focus on their role, industry, location, and existing summary.
 
 **Output**:
 Return your answer **exclusively** in the following JSON format (no markdown):

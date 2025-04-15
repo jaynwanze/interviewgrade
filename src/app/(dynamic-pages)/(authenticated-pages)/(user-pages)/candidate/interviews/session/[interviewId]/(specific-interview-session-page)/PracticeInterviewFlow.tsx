@@ -23,7 +23,8 @@ import type {
   specificFeedbackType,
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
-import { ChevronLeft } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, MessageSquare, SidebarOpenIcon } from 'lucide-react';
 
 type PracticeInterviewFlowProps = {
   interview: Interview;
@@ -91,6 +92,8 @@ export function PracticeInterviewFlow({
   const router = useRouter();
   const maxScorePerQuestion = 100;
   const [partialText, setPartialText] = useState('');
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(true);
+
 
   // If needed, you can keep a timer for the entire practice session
   const timerRef = useRef<number | null>(null);
@@ -333,18 +336,29 @@ export function PracticeInterviewFlow({
   return (
     <div className="min-h-screen w-full p-2 flex flex-col space-y-2 overflow-hidden">
       {/* Top Control Bar */}
-      <div className="flex justify-between items-center mb-2">
+      <div className="w-full flex items-center justify-between shadow-md px-6 py-3 rounded-lg mb-4 border">
+        <div className="flex items-center space-x-2">
+          <div className="text-lg font-bold text-blue-900 dark:text-green-100 truncate">
+            {interview.title}
+          </div>
+          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-700 dark:text-blue-200">
+            Practice Mode
+          </span>
+        </div>
+        <div className="text-md font-semibold text-gray-700 dark:text-gray-300">
+          ⏱ {Math.floor(recordingTime / 60)}:{('0' + (recordingTime % 60)).slice(-2)}
+        </div>
         <Button variant="destructive" onClick={() => window.history.back()}>
           <ChevronLeft className="h-4 w-4 mr-1" />
           Leave Session
         </Button>
-        <div className="text-sm text-muted-foreground">
-          Time: <span className="font-semibold">{Math.floor(recordingTime / 60)}:{('0' + (recordingTime % 60)).slice(-2)}</span>
-        </div>
       </div>
 
       {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
+      <div
+        className={`grid gap-4 w-full h-full transition-all duration-300 ${isFeedbackOpen ? 'md:grid-cols-3' : 'md:grid-cols-2'
+          }`}
+      >
         {/* Interviewer */}
         <AIQuestionSpeaker
           question={questions[currentQuestionIndex]}
@@ -353,8 +367,22 @@ export function PracticeInterviewFlow({
         />
         {/* Candidate */}
         <Card className="overflow-hidden flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
+          <CardHeader className="flex flex-row">
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
+              {/* Floating Button */}
+              {!isFeedbackOpen && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="flex justify-end shadow-md mt-1"
+                  onClick={() => setIsFeedbackOpen(true)}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Show Feedback
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <div className="flex justify-center items-center">
             <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-600 dark:text-blue-200">
@@ -371,60 +399,81 @@ export function PracticeInterviewFlow({
             />
           </CardContent>
         </Card>
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Practice Feedback
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center h-full text-center">
-            {isFetchingSpecificFeedback ? (
-              questionFeedback[currentQuestionIndex] ? (
-                <>
-                  <div className="text-left mt-4 space-y-3">
-                    {questionFeedback[currentQuestionIndex]?.mark !== undefined && (
-                      <div className="text-center">
-                        <strong className="block text-base">Score (%):</strong>
-                        <p className={`text-3xl font-bold mt-1 ${scoreStringColour}`}>
-                          {Math.round(questionFeedback[currentQuestionIndex]?.mark ?? 0)}/100%
-                        </p>
-                      </div>
-                    )}
 
-                    {questionFeedback[currentQuestionIndex]?.summary && (
-                      <div>
-                        <strong>Summary:</strong>{' '}
-                        {questionFeedback[currentQuestionIndex]?.summary}
-                      </div>
-                    )}
+        {/* Feedback */}
+        <AnimatePresence>
+          {isFeedbackOpen && (
+            <motion.div
+              key="feedback"
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 100, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="col-span-1 w-full"
+            >
+              <Card className="shadow-md overflow-hidden flex flex-col justify-between">
+                <CardHeader className="flex flex-row">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className='flex justify-self-end'
+                    onClick={() => setIsFeedbackOpen(false)}
+                  >
+                    <SidebarOpenIcon className="h-4 w-4" />
+                  </Button>
+                  <CardTitle className="text-lg font-semibold">
 
-                    {/* Advice only if there's a next question */}
-                    {currentQuestionIndex < questions.length - 1 &&
-                      questionFeedback[currentQuestionIndex]?.summary && (
-                        <div>
-                          <strong>Advice for Next Question:</strong>{' '}
-                          {
-                            questionFeedback[currentQuestionIndex]
-                              ?.advice_for_next_question
-                          }
+                    Practice Feedback
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center justify-center h-full text-center">
+                  {isFetchingSpecificFeedback ? (
+                    questionFeedback[currentQuestionIndex] ? (
+                      <>
+                        <div className="text-left mt-4 space-y-3">
+                          {questionFeedback[currentQuestionIndex]?.mark !== undefined && (
+                            <div className="text-center">
+                              <strong className="block text-base">Score (%):</strong>
+                              <p className={`text-3xl font-bold mt-1 ${scoreStringColour}`}>
+                                {Math.round(questionFeedback[currentQuestionIndex]?.mark ?? 0)}/100%
+                              </p>
+                            </div>
+                          )}
+
+                          {questionFeedback[currentQuestionIndex]?.summary && (
+                            <div>
+                              <strong>Summary:</strong>{' '}
+                              {questionFeedback[currentQuestionIndex]?.summary}
+                            </div>
+                          )}
+
+                          {/* Advice only if there's a next question */}
+                          {currentQuestionIndex < questions.length - 1 &&
+                            questionFeedback[currentQuestionIndex]?.summary && (
+                              <div>
+                                <strong>Advice for Next Question:</strong>{' '}
+                                {
+                                  questionFeedback[currentQuestionIndex]
+                                    ?.advice_for_next_question
+                                }
+                              </div>
+                            )}
                         </div>
-                      )}
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center mt-4 space-y-4">
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    Fetching feedback, please wait...
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{
-                        width: '0%',
-                        animation: 'loading-bar 5s linear forwards',
-                      }}
-                    ></div>
-                    <style jsx>{`
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center mt-4 space-y-4">
+                        <p className="text-sm md:text-base text-muted-foreground">
+                          Fetching feedback, please wait...
+                        </p>
+                        <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                          <div
+                            className="bg-blue-500 h-2 rounded-full"
+                            style={{
+                              width: '0%',
+                              animation: 'loading-bar 5s linear forwards',
+                            }}
+                          ></div>
+                          <style jsx>{`
                     @keyframes loading-bar {
                       from {
                       width: 0%;
@@ -434,70 +483,73 @@ export function PracticeInterviewFlow({
                       }
                     }
                     `}</style>
-                  </div>
-                </div>
-              )
-            ) : questionFeedback[currentQuestionIndex] ? (
-              <>
-                <div className="text-left mt-4 space-y-3">
-                  <div className="text-center">
-                    <strong className="block text-base">Score (%):</strong>
-                    <p
-                      className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
-                    >
-                      {Math.round(
-                        questionFeedback[currentQuestionIndex]?.mark ?? 0,
-                      )}
-                      /100%
-                    </p>
-                  </div>
+                        </div>
+                      </div>
+                    )
+                  ) : questionFeedback[currentQuestionIndex] ? (
+                    <>
+                      <div className="text-left mt-4 space-y-3">
+                        <div className="text-center">
+                          <strong className="block text-base">Score (%):</strong>
+                          <p
+                            className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
+                          >
+                            {Math.round(
+                              questionFeedback[currentQuestionIndex]?.mark ?? 0,
+                            )}
+                            /100%
+                          </p>
+                        </div>
 
-                  <div>
-                    <strong>Summary:</strong>{' '}
-                    {questionFeedback[currentQuestionIndex]?.summary}
-                  </div>
+                        <div>
+                          <strong>Summary:</strong>{' '}
+                          {questionFeedback[currentQuestionIndex]?.summary}
+                        </div>
 
-                  {/* Advice only if there's a next question */}
-                  {currentQuestionIndex < questions.length - 1 && (
-                    <div>
-                      <strong>Advice for Next Question:</strong>{' '}
-                      {
-                        questionFeedback[currentQuestionIndex]
-                          ?.advice_for_next_question
-                      }
+                        {/* Advice only if there's a next question */}
+                        {currentQuestionIndex < questions.length - 1 && (
+                          <div>
+                            <strong>Advice for Next Question:</strong>{' '}
+                            {
+                              questionFeedback[currentQuestionIndex]
+                                ?.advice_for_next_question
+                            }
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-center gap-4 mt-6">
+                        {currentQuestionIndex < questions.length - 1 && (
+                          <Button
+                            variant="secondary"
+                            onClick={() =>
+                              setCurrentQuestionIndex((prev) => prev + 1)
+                            }
+                          >
+                            Next Question
+                          </Button>
+                        )}
+                        <Button onClick={finishInterview}>
+                          {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center mt-4">
+                      <p className="text-sm md:text-base text-muted-foreground">
+                        Your feedback will appear here after you answer.
+                      </p>
+                      <div className="mt-4 flex items-center space-x-2">
+                        <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
+                        <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-150"></div>
+                        <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-300"></div>
+                      </div>
                     </div>
                   )}
-                </div>
-                <div className="flex items-center justify-center gap-4 mt-6">
-                  {currentQuestionIndex < questions.length - 1 && (
-                    <Button
-                      variant="secondary"
-                      onClick={() =>
-                        setCurrentQuestionIndex((prev) => prev + 1)
-                      }
-                    >
-                      Next Question
-                    </Button>
-                  )}
-                  <Button onClick={finishInterview}>
-                    {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center mt-4">
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Your feedback will appear here after you answer.
-                </p>
-                <div className="mt-4 flex items-center space-x-2">
-                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
-                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-150"></div>
-                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-300"></div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div >
   );

@@ -1,16 +1,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { transcribeInterviewAudio } from '@/utils/openai/transcribeInterviewAudio';
 import { MediaRecorderHandler } from '@/utils/webspeech/mediaRecorder';
 import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
+import { MicrophoneIcon } from '@heroicons/react/solid';
+import { StopCircle } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Meter } from './SoundMeter';
@@ -250,28 +245,34 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   ]);
 
   return (
-    <div className="user-camera">
-      <video
-        ref={videoRef}
-        muted
-        className="w-full h-auto border-4 border-gray-300 rounded mb-5"
-        playsInline
-      ></video>
-      <div className="flex justify-center items-center space-x-5 mb-10">
-        <Button className="mr-4" onClick={handleRecord} disabled={isRecording}>
-          Start Recording
+    <div className="flex flex-col items-center space-y-4 w-full">
+      {/* Video Stream */}
+      <div className="w-full">
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          className="max-w-full w-full h-auto max-h-[300px] object-cover rounded-md border border-gray-300 shadow-sm"
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-center items-center space-x-4">
+        <Button onClick={handleRecord} disabled={isRecording}>
+          <MicrophoneIcon className="h-6 w-6" />
         </Button>
-        <Button onClick={handleEndRecord} disabled={!isRecording}>
-          End Recording
+        <Button
+          onClick={handleEndRecord}
+          disabled={!isRecording}
+          className="bg-red-500 hover:bg-red-600"
+        >
+          <StopCircle className="h-6 w-6" />
         </Button>
       </div>
-      {isMicMuted && (
-        <p className="text-red-500 text-center mb-4">
-          Your microphone is muted. Please unmute to record audio.
-        </p>
-      )}
+
+      {/* Meter */}
       {isRecording && audioStreamRef.current && audioContextRef.current && (
-        <div className="mt-5 flex justify-center items-center">
+        <div className="flex justify-center items-center">
           <Meter
             audioContext={audioContextRef.current}
             stream={audioStreamRef.current}
@@ -279,37 +280,21 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           />
         </div>
       )}
+
+      {/* Recording Status */}
       {isRecording && (
-        <p className="mt-2 flex justify-center items-center">
+        <p className="text-sm text-muted-foreground">
           Recording for {recordingTime} seconds...
         </p>
       )}
 
-      {/* Permission Dialog */}
-      <Dialog
-        open={showPermissionDialog}
-        onOpenChange={setShowPermissionDialog}
-      >
-        <DialogTrigger asChild>
-          <Button className="hidden" />
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Microphone Permissions Required</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-gray-600">
-              It looks like your microphone permissions are denied. Please allow
-              microphone access in your browser settings to record audio.
-            </p>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button onClick={() => setShowPermissionDialog(false)}>
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Mic Warning */}
+      {isMicMuted && (
+        <p className="text-red-500 text-center text-sm">
+          Your microphone is muted. Please unmute to record audio.
+        </p>
+      )}
     </div>
+
   );
 };

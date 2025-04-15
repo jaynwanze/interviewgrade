@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Lottie from 'lottie-react';
+import { T } from '@/components/ui/Typography';
 import {
   Card,
   CardContent,
@@ -10,11 +9,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { T } from '@/components/ui/Typography';
 import { InterviewQuestion } from '@/types';
-import talkingInterviewer from 'public/assets/animations/AnimationSpeakingRings.json';
 import { generateTTS } from '@/utils/openai/textToSpeech';
-import { set } from 'nprogress';
+import Lottie from 'lottie-react';
+import talkingInterviewer from 'public/assets/animations/AnimationSpeakingRings.json';
+import { useEffect, useRef, useState } from 'react';
 
 const colors = [
   'bg-blue-100',
@@ -129,47 +128,53 @@ export const AIQuestionSpeaker = ({
   }, [question, currentIndex]);
 
   return (
-    <div className="ai-speaker">
-      <Card className="max-w-md text-center">
-        <CardHeader>
-          <CardTitle>Interviewer</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center items-center">
-            <Lottie
-              animationData={talkingInterviewer}
-              loop={true}
-              autoplay={false}
-              lottieRef={lottieRef}
-              style={{ width: 400, height: 226 }}
-            />
-          </div>
-          <div className="flex justify-center items-center">
-            <Card className="max-w-25 text-center">
-              <CardHeader>
-                <CardTitle>Question {currentIndex + 1}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span
-                  className={`${randomColor} text-gray-800 text-s font-semibold px-2.5 py-0.5 rounded dark:${randomDarkColor} dark:text-gray-300`}
-                >
-                  {question.evaluation_criteria.name}
-                </span>
-                <T.Subtle className="mt-2">{question.text}</T.Subtle>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-        <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+    <Card className="ai-speaker max-w-md h-full overflow-hidden flex flex-col justify-between">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">
+          Interviewer
+        </CardTitle>
+      </CardHeader>
+      <div className="flex justify-center items-center">
+        <span className="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-gray-600 dark:text-gray-200">
+          Avery
+        </span>
+      </div>
+      <CardContent className="">
+        <div className="flex justify-center items-center">
+          <Lottie
+            animationData={talkingInterviewer}
+            loop={true}
+            autoplay={false}
+            lottieRef={lottieRef}
+            style={{ width: 400, height: 226 }}
+          />
+        </div>
+        <div className="flex justify-center items-center">
+          <Card className="max-w-25 text-center">
+            <CardHeader>
+              <CardTitle>Question {currentIndex + 1}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span
+                className={`${randomColor} text-gray-800 text-s font-semibold px-2.5 py-0.5 rounded dark:${randomDarkColor} dark:text-gray-300`}
+              >
+                {question.evaluation_criteria.name}
+              </span>
+              <T.Subtle className="mt-2">{question.text}</T.Subtle>
+            </CardContent>
+          </Card>
+        </div>
+      </CardContent>
+
+      <CardFooter className="flex flex-col items-center">
+        <span className="text-center bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
           Progress
         </span>
-        <CardFooter>
-          <Progress
-            className="mt-5"
-            value={((currentIndex + 1) / questionsLength) * 100}
-          />
-        </CardFooter>
-      </Card>
-    </div>
+        <Progress
+          className="mt-5"
+          value={((currentIndex + 1) / questionsLength) * 100}
+        />
+      </CardFooter>
+    </Card>
   );
 };

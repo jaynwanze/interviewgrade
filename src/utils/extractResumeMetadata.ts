@@ -9,7 +9,6 @@ import {
   ResumeMetadata,
   resumeMetadataSchema,
 } from './zod-schemas/resumeMetaDataSchema';
-import pdf from 'pdf-parse/lib/pdf-parse.js';
 
 export interface Experience {
   jobTitle: string;
@@ -25,20 +24,37 @@ export interface Experience {
  */
 export async function getResumeBuffer(resumeUrl: string): Promise<Buffer> {
   const trimmedUrl = resumeUrl.trim();
+  // This is the public URL served by Next.js from your `public/` folder
+  const testResumeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/test/05-versions-space.pdf`;
+
+  // If it's already a remote URL
   if (trimmedUrl.toLowerCase().startsWith('http')) {
     const response = await fetch(trimmedUrl);
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch resume from URL: ${trimmedUrl}. Status: ${response.status} ${response.statusText}`,
+        `Failed to fetch resume from URL: ${trimmedUrl}. Status: ${response.status} ${response.statusText}`
       );
     }
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } else {
+    // If we're in production, read from a public URL instead of local
+    if (process.env.NODE_ENV === 'production') {
+      // fetch from that public URL in production:
+      const response = await fetch(testResumeUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch test resume PDF from ${testResumeUrl}: ${response.status} ${response.statusText}`
+        );
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    }
+
+    // Otherwise, in dev mode we can read from the local filesystem path
     if (!fs.existsSync(trimmedUrl)) {
       throw new Error(`Local file does not exist: ${trimmedUrl}`);
     }
-    console.log('Reading local file:', trimmedUrl);
     return fs.readFileSync(trimmedUrl);
   }
 }

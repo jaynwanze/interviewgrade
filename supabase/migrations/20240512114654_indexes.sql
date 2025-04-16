@@ -90,3 +90,7 @@ CREATE INDEX idx_subscriptions_organization_id ON "public"."subscriptions" ("org
 CREATE INDEX idx_employees_id ON "public"."employees" ("id");
 CREATE INDEX idx_employees_default_organization_id ON "public"."employees" ("default_organization");
 CREATE INDEX idx_employees_token_id ON "public"."employees" ("token_id");
+
+CREATE INDEX idx_employee_candidate_unlocks_employee_id ON public.employee_candidate_unlocks (employee_id);
+CREATE INDEX idx_employee_candidate_unlocks_candidate_id ON public.employee_candidate_unlocks (candidate_id);
+CREATE INDEX idx_employee_candidate_unlocks_candidate_id_employee_id ON public.employee_candidate_unlocks (candidate_id, employee_id);

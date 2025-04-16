@@ -54,6 +54,7 @@ export async function fetchSentiment(
       // If there's nothing to analyze, default to neutral
       return null;
     }
+    console.log("Sending text to HF with length:", inputText);
 
     const res = await fetch('/api/sentiment', {
       method: 'POST',
@@ -62,7 +63,10 @@ export async function fetchSentiment(
     });
 
     if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
+      const errorText = await res.text();
+      throw new Error(
+        `HTTP error! Status: ${res.status} - ${errorText}. URL: ${res.url}`
+      );
     }
 
     const data = await res.json();

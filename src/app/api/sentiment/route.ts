@@ -21,8 +21,12 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(body),
     });
+    console.log("HF response status:", response.status);
+    const text = await response.text();
+    console.log("HF response text:", text);
 
     const data = await response.json();
+    console.log("Received body for sentiment:", body);
 
     // Return the response with CORS headers
     return NextResponse.json(data, {

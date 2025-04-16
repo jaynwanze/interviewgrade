@@ -337,16 +337,20 @@ export const getInterviewFeedback = async (
   }
   await insertInterviewEvaluation(interview.id, feedbackData);
 
-  if (interview.mode === 'practice') {
-    await updateInterviewAnalyticsCurrentAvgPractice(
-      interview.candidate_id,
-      interview.template_id,
-      interview.title,
-    );
-  }
+  await Promise.all([
+    insertInterviewEvaluation(interview.id, feedbackData),
+    interview.mode === 'practice'
+      ? updateInterviewAnalyticsCurrentAvgPractice(
+        interview.candidate_id,
+        interview.template_id,
+        interview.title,
+      )
+      : Promise.resolve(),
+  ]);
 
   //Update candidate summary based of latest interview analytics
-  const latestCandidateSummary = getCandidateSummary(interview.candidate_id);
+  const newSummary = await getCandidateSummary(interview.candidate_id);
+  console.log('Candidate summary updated:', newSummary);
   console.log('Feedback Data:', feedbackData);
 
   return feedbackData;

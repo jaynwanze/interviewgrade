@@ -178,7 +178,7 @@ const callOpenAIWithRetries = async (
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini', // Use 'gpt-4' if preferred
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 3000,
+        max_tokens: 1500,
         temperature: 0.5,
       });
 

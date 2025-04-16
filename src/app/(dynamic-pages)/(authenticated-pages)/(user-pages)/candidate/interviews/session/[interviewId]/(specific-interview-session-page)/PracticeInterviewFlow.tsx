@@ -356,7 +356,7 @@ export function PracticeInterviewFlow({
 
       {/* Grid Layout */}
       <div
-        className={`grid gap-4 w-full h-full transition-all duration-300 ${isFeedbackOpen ? 'md:grid-cols-3' : 'md:grid-cols-2'
+        className={`grid gap-4 w-full h-full transition-all duration-300 ${isFeedbackOpen ? 'md:grid-cols-3' : 'md:grid-cols-2'}
           }`}
       >
         {/* Interviewer */}
@@ -367,7 +367,7 @@ export function PracticeInterviewFlow({
         />
         {/* Candidate */}
         <Card className="overflow-hidden flex flex-col justify-between">
-          <CardHeader className="flex flex-row">
+          <CardHeader className={`flex flex-row ${isFeedbackOpen === true ? 'p-4' : 'p-2.5'} border-b dark:border-gray-700 bg-muted/50 mb-2`}>
             <div className="flex items-center justify-between w-full">
               <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
               {/* Floating Button */}
@@ -385,7 +385,7 @@ export function PracticeInterviewFlow({
             </div>
           </CardHeader>
           <div className="flex justify-center items-center">
-            <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-600 dark:text-blue-200">
+            <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-600 dark:text-blue-200 mb-2">
               You
             </span>
           </div>
@@ -412,7 +412,7 @@ export function PracticeInterviewFlow({
               className="col-span-1 w-full"
             >
               <Card className="shadow-md overflow-hidden flex flex-col justify-between">
-                <CardHeader className="flex flex-row">
+                <CardHeader className="flex flex-row p-2.5 border-b dark:border-gray-700 bg-muted/50">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -422,7 +422,6 @@ export function PracticeInterviewFlow({
                     <SidebarOpenIcon className="h-4 w-4" />
                   </Button>
                   <CardTitle className="text-lg font-semibold">
-
                     Practice Feedback
                   </CardTitle>
                 </CardHeader>

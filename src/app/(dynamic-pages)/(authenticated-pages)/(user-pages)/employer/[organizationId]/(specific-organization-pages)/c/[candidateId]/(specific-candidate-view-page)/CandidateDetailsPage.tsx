@@ -429,7 +429,7 @@ export default function CandidateDetailsPage({
       </Card>
 
       {/* Recent Attempts (optional) */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Recent Attempts</CardTitle>
           <CardDescription>
@@ -465,7 +465,7 @@ export default function CandidateDetailsPage({
             </p>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Employer’s Private Notes */}
       {/* <Card>

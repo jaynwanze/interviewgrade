@@ -252,7 +252,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           ref={videoRef}
           muted
           playsInline
-          className="max-w-full w-full h-auto max-h-[300px] object-cover rounded-md border border-gray-300 shadow-sm"
+          className="max-w-full w-full h-auto object-cover rounded-md border-4 border-blue-300 shadow-sm"
         />
       </div>
 
@@ -270,14 +270,16 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </Button>
       </div>
 
-      {/* Meter */}
+      {/* Sound Meter */}
       {isRecording && audioStreamRef.current && audioContextRef.current && (
-        <div className="flex justify-center items-center">
-          <Meter
-            audioContext={audioContextRef.current}
-            stream={audioStreamRef.current}
-            settings={{ bars: 30, spacing: 2, width: 8, height: 50 }}
-          />
+        <div className="w-full flex justify-center items-center">
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 shadow-sm">
+            <Meter
+              audioContext={audioContextRef.current}
+              stream={audioStreamRef.current}
+              settings={{ bars: 30, spacing: 2, width: 5, height: 40 }}
+            />
+          </div>
         </div>
       )}
 

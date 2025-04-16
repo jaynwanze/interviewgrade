@@ -128,8 +128,8 @@ export const AIQuestionSpeaker = ({
   }, [question, currentIndex]);
 
   return (
-    <Card className="ai-speaker max-w-md h-full overflow-hidden flex flex-col justify-between">
-      <CardHeader>
+    <Card className="ai-speaker w-full h-full overflow-hidden flex flex-col justify-between">
+      <CardHeader className="p-4 border-b dark:border-gray-700 bg-muted/50 mb-2">
         <CardTitle className="text-lg font-semibold">
           Interviewer
         </CardTitle>

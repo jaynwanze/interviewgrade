@@ -351,7 +351,7 @@ export const mockCandidates: CandidateRow[] = [
       },
       {
         template_id: '2',
-        skill: 'Communication',
+        skill: 'Decision Making',
         avg_score: 88,
         previous_avg: 85,
       },
@@ -415,7 +415,7 @@ export const mockCandidates: CandidateRow[] = [
       },
       {
         template_id: 'p3',
-        skill: 'Communication',
+        skill: 'Adaptability',
         avg_score: 81,
         previous_avg: 76,
       },
@@ -472,12 +472,6 @@ export const mockCandidates: CandidateRow[] = [
         avg_score: 88,
         previous_avg: 85,
       },
-      {
-        template_id: '7',
-        skill: 'Technical',
-        avg_score: 90,
-        previous_avg: 88,
-      },
     ],
     resume_metadata: {
       skills: ['SQL', 'Python', 'Tableau'],
@@ -525,12 +519,12 @@ export const mockCandidates: CandidateRow[] = [
       {
         template_id: '8',
         skill: 'Problem Solving',
-        avg_score: 90,
+        avg_score: 60,
         previous_avg: 85,
       },
       {
         template_id: '9',
-        skill: 'Leadership',
+        skill: 'Conflict Resolution',
         avg_score: 87,
         previous_avg: 86,
       },
@@ -589,7 +583,7 @@ export const mockCandidates: CandidateRow[] = [
       },
       {
         template_id: '11',
-        skill: 'Communication',
+        skill: 'Conflict Resolution',
         avg_score: 84,
         previous_avg: 80,
       },

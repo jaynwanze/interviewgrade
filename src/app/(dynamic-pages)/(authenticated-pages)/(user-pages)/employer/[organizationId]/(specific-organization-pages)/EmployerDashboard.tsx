@@ -50,9 +50,7 @@ const availableIndustries = [
 
 const availableSkills = [
   'Problem Solving',
-  'Communication',
-  'Teamwork',
-  'Leadership',
+  'Conflict Resolution',
   'Adaptability',
   'Decision Making',
 ];

@@ -335,7 +335,6 @@ export const getInterviewFeedback = async (
       });
     });
   }
-  await insertInterviewEvaluation(interview.id, feedbackData);
 
   await Promise.all([
     insertInterviewEvaluation(interview.id, feedbackData),

@@ -54,7 +54,6 @@ export async function fetchSentiment(
       // If there's nothing to analyze, default to neutral
       return null;
     }
-    console.log("Sending text to HF with length:", inputText);
 
     const res = await fetch('/api/sentiment', {
       method: 'POST',

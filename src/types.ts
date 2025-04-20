@@ -41,6 +41,7 @@ export type CourseRec = {
   length_minutes: number
   url: string
   tags: string[]
+  type?: string
 }
 
 export type SkillBundle = {

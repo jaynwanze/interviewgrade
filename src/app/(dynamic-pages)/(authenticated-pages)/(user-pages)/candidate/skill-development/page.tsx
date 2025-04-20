@@ -144,7 +144,7 @@ export default function SkillBuilderPage() {
                                 target="_blank"
                                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                               >
-                                Go to course <ExternalLink className="w-4 h-4" />
+                                Link <ExternalLink className="w-4 h-4" />
                               </Link>
                             </CardContent>
 

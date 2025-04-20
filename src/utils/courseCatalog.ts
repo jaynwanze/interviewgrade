@@ -65,16 +65,14 @@ export const COURSE_CATALOG: CourseRec[] = [
     url: "https://www.edx.org/learn/critical-thinking-skills/tecnologico-de-monterrey-critical-thinking-reasoned-decision-making?index=product&queryID=833a687c2093fdc5c2fdd457ff10a3da&position=10&results_level=second-level-results&term=decision+making&objectID=course-5127aff6-6a49-4592-bdd1-f608b8b43f3e&campaign=Critical+thinking%3A+reasoned+decision+making&source=edX&product_category=course&placement_url=https%3A%2F%2Fwww.edx.org%2Fsearch",
     tags: ["Decision Making"],
   },
-
   {
-    id: "mit-ocw-data-models-decisions",
-    title: "Data, Models & Decisions",
-    provider: "MIT OpenCourseWare",
-    length_minutes: 900,                // ~15 h lecture videos
-    url: "https://ocw.mit.edu/courses/15-060-data-models-and-decision-making-fall-2011/",
+    id: "brian-tracy-decision-making",
+    title: "6 Tips for Successful Decision Making in the Workplace",
+    url: "https://www.youtube.com/watch?v=WPFDtijUbMg&ab_channel=BrianTracy",
+    provider: "Youtube | Brian Tracy",
+    length_minutes: 8,
     tags: ["Decision Making"],
   },
-
 
 
   /* ──────────── Conflict resolution ──────────── */

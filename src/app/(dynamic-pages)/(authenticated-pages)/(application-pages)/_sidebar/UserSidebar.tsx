@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
+import { ChartBarIcon } from '@heroicons/react/solid';
 
 export async function UserSidebar() {
   return (
@@ -41,11 +42,11 @@ export async function UserSidebar() {
           href="/candidate/employer-interests"
           icon={<TableProperties className="h-5 w-5" />}
         />
-        {/* <SidebarLink
+        <SidebarLink
           label="Skill Development"
           href="/candidate/skill-development"
-          icon={<Shield className="h-5 w-5" />}
-        /> */}
+          icon={<ChartBarIcon className="h-5 w-5" />}
+        />
         <SidebarLink
           label="Account Settings"
           href="/candidate/settings"

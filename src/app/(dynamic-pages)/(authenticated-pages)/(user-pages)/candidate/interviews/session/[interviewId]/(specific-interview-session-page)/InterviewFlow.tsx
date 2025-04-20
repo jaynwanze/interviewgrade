@@ -318,7 +318,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-          100,
+        100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');
@@ -385,37 +385,44 @@ export default function InterviewFlow({
   }
 
   return (
-    <div className="interview-flow-container flex flex-col items-center min-h-screen">
-      <Button
-        className="p-2 rounded-md bg-red-600 hover:bg-red-500 "
-        onClick={() => window.history.back()}
-      >
-        <ChevronLeft className="h-6 w-6"></ChevronLeft>
-        Leave Session
-      </Button>
+    <div className="min-h-screen w-full p-2 flex flex-col space-y-2 overflow-hidden">
+      {/* Top Bar */}
+      <div className="w-full flex items-center justify-between bg-white dark:bg-gray-900 shadow-md px-6 py-3 rounded-lg mb-4 border">
+        <div className="flex items-center space-x-2">
+          <div className="text-lg font-semibold text-blue-700 dark:text-blue-300 truncate">
+            {interview?.title}
+          </div>
+          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+            Interview Mode
+          </span>
+        </div>
+        <div className="text-md font-semibold">
+          ⏱ {Math.floor(recordingTime / 60)}:{('0' + (recordingTime % 60)).slice(-2)}
+        </div>
+        <Button variant="destructive" onClick={() => window.history.back()}>
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Leave
+        </Button>
+      </div>
 
-      {/* Main Cards: AIQuestionSpeaker and UserCamera */}
-      <div className="flex w-full max-w-4xl">
-        <div className="left-side w-1/2 p-4">
+      {/* Main Interview Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
+        {/* Question Panel */}
+        <div className="col-span-1">
           <AIQuestionSpeaker
             question={questions[currentQuestionIndex]}
             currentIndex={currentQuestionIndex}
             questionsLength={questions.length}
           />
         </div>
-        <div className="right-side w-1/2 p-4 jusitfy-center ">
-          <Card className=" p-4 text-center mb-5">
-            <h1 className="2xl font-bold">Timer</h1>
-            <p>
-              {Math.floor(recordingTime / 60)}:
-              {('0' + (recordingTime % 60)).slice(-2)}
-            </p>
-          </Card>
-          <Card className="max-w-md mx-auto text-center">
+
+        {/* Candidate Panel: center using col-span-2 */}
+        <div className="col-span-2 flex flex-col space-y-4">
+          <Card className="text-center shadow-md">
             <CardHeader>
-              <CardTitle>Candidate</CardTitle>
+              <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col justify-center items-center space-y-4">
               <UserCamera
                 answerCallback={handleAnswer}
                 isCameraOn={isCameraOn}
@@ -431,74 +438,6 @@ export default function InterviewFlow({
           </Card>
         </div>
       </div>
-      {/* Feedback Card: Appears beneath the main cards in practice mode */}
-      {interview && interview.mode === INTERVIEW_PRACTICE_MODE && (
-        <div className="w-full max-w-4xl p-4">
-          <Card className="mx-auto text-center">
-            <CardHeader>
-              <CardTitle>Feedback</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isFetchingSpecificFeedback ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <p>Fetching feedback...</p>
-                  <LoadingSpinner />
-                </div>
-              ) : questionFeedback[currentQuestionIndex] ? (
-                <>
-                  <div className="text-left text-lg space-y-2">
-                    <div className="text-center">
-                      <strong className="text-center">Score(%):</strong>{' '}
-                      <p
-                        className={`text-3xl text-center font-bold ${scoreStringColour}`}
-                      >
-                        {Math.round(
-                          ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
-                            maxScorePerQuestion) *
-                            100,
-                        )}
-                        /100%{' '}
-                        {/* /100% ({questionFeedback[currentQuestionIndex]?.mark}/
-                      {maxScorePerQuestion}) */}
-                      </p>
-                    </div>
-                    <p>
-                      <strong>Summary:</strong>{' '}
-                      {questionFeedback[currentQuestionIndex]?.summary}
-                    </p>
-                    {currentQuestionIndex < questions.length - 1 && (
-                      <p>
-                        <strong>Advice for Next Question:</strong>{' '}
-                        {
-                          questionFeedback[currentQuestionIndex]
-                            ?.advice_for_next_question
-                        }
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <>
-                      {currentQuestionIndex < questions.length && (
-                        <Button onClick={handleNextQuestion} className="mt-4">
-                          Next Question
-                        </Button>
-                      )}
-                      <Button
-                        onClick={handleInterviewComplete}
-                        className="mt-4"
-                      >
-                        Finish Interview
-                      </Button>
-                    </>
-                  </div>
-                </>
-              ) : (
-                'After the question is answered, feedback will be loaded.'
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

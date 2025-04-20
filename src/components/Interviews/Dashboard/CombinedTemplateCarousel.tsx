@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/carousel";
 import { InterviewAnalytics } from "@/types";
 import { CombinedTemplateCard } from "./CombinedTemplateCard";
-import { CardDescription, CardTitle } from "@/components/ui/card";
 
 type CombinedTemplateCarouselProps = {
     templates: InterviewAnalytics[] | null;
@@ -27,7 +26,7 @@ export default function CombinedTemplateCarousel({
     return (
         <div className="">
             <Carousel className="w-full">
-                <CarouselContent className="-ml-2">
+                <CarouselContent className="ml-2">
                     {templates.map((template, index) => (
                         // Display 3 cards per slide on larger screens
                         <CarouselItem key={index} className="pl-2 md:basis-1/2 lg:basis-1/3">

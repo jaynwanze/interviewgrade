@@ -34,6 +34,20 @@ export interface SupabaseFileUploadOptions {
   upsert?: boolean;
 }
 
+export type CourseRec = {
+  id: string
+  title: string
+  provider: string
+  length_minutes: number
+  url: string
+  tags: string[]
+}
+
+export type SkillBundle = {
+  stats: CandidateSkillsStats;
+  courses: CourseRec[];
+};
+
 export type QuestionAnswerFeedback = {
   question: string;
   answer: string;

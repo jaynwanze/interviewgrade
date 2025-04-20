@@ -31,8 +31,8 @@ export function StatisticsView({
   return (
     <>
       {/* <div className="grid grid-cols-3 gap-4"> */}
-        {/* 1) Tokens */}
-        {/* <Card>
+      {/* 1) Tokens */}
+      {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Your Tokens</CardTitle>
             <CardDescription>
@@ -58,7 +58,7 @@ export function StatisticsView({
           )}
         </Card> */}
 
-        {/* 2) Incoming Pipeline
+      {/* 2) Incoming Pipeline
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Incoming Pipeline</CardTitle>
@@ -74,8 +74,8 @@ export function StatisticsView({
         </Card>
 
         {/* 3) Unlocked Candidates */}
-        {/* <Card> */}
-          {/* <CardHeader className="pb-2">
+      {/* <Card> */}
+      {/* <CardHeader className="pb-2">
             <CardTitle className="text-sm">Unlocked Candidates</CardTitle>
             <CardDescription>How many you’ve already unlocked</CardDescription>
           </CardHeader>
@@ -86,8 +86,8 @@ export function StatisticsView({
           </CardContent>
         </Card> */}
 
-        {/* Trend Over Time */}
-        {/* <Card>
+      {/* Trend Over Time */}
+      {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Score Trend vs. Last Week</CardTitle>
             <CardDescription>

@@ -357,7 +357,8 @@ export async function getEmployersInterestedInCandidate() {
 
   const { data, error } = await createSupabaseUserServerActionClient()
     .from('employee_candidate_unlocks')
-    .select(`
+    .select(
+      `
       employee_id,
       employees (
         id,
@@ -370,7 +371,8 @@ export async function getEmployersInterestedInCandidate() {
           title
         )
       )
-    `)
+    `,
+    )
     .eq('candidate_id', candidateId);
 
   if (error) {
@@ -383,12 +385,11 @@ export async function getEmployersInterestedInCandidate() {
       employer_id: entry.employee_id,
       employer_name: entry.employees?.user_profiles?.full_name ?? 'Unknown',
       logo_url: entry.employees?.user_profiles?.avatar_url ?? '',
-      organization_title: entry.employees?.organizations?.title ?? 'Unknown Org',
+      organization_title:
+        entry.employees?.organizations?.title ?? 'Unknown Org',
     })) ?? []
   );
 }
-
-
 
 export async function updateJobTrackerApplication(
   updatedJob: Partial<JobTracker>,

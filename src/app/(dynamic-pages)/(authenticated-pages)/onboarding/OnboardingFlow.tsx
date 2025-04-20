@@ -213,10 +213,10 @@ export function ProfileUpdate({
                         hasImageLoaded
                           ? undefined
                           : {
-                            duration: 0.5,
-                            repeat: Number.POSITIVE_INFINITY,
-                            repeatType: 'reverse',
-                          }
+                              duration: 0.5,
+                              repeat: Number.POSITIVE_INFINITY,
+                              repeatType: 'reverse',
+                            }
                       }
                       onLoad={() => {
                         setHasImageLoaded(true);
@@ -347,24 +347,25 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
     },
   );
 
-  const { mutate: saveCandidateDetails, isLoading: isSaving } = useSAToastMutation(
-    async (formData: CandidateDetailsSchema) => {
-      return updateCandidateDetails(
-        {
-          ...formData,
-          resume_url: uploadedResumeUrl ?? undefined,
-        },
-        { isOnboardingFlow: true },
-      );
-    },
-    {
-      successMessage: 'Candidate details saved!',
-      errorMessage: 'Failed to update details',
-      onSuccess: () => {
-        onSuccess();
+  const { mutate: saveCandidateDetails, isLoading: isSaving } =
+    useSAToastMutation(
+      async (formData: CandidateDetailsSchema) => {
+        return updateCandidateDetails(
+          {
+            ...formData,
+            resume_url: uploadedResumeUrl ?? undefined,
+          },
+          { isOnboardingFlow: true },
+        );
       },
-    },
-  );
+      {
+        successMessage: 'Candidate details saved!',
+        errorMessage: 'Failed to update details',
+        onSuccess: () => {
+          onSuccess();
+        },
+      },
+    );
 
   function handleResumeFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

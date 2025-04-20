@@ -87,7 +87,7 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
 
 // this middleware refreshes the user's session and must be run
 // for any Server Component route that uses `createServerComponentSupabaseClient`
- export async function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   // Handle preflight CORS requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -95,7 +95,8 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+        'Access-Control-Allow-Headers':
+          'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
       },
     });
   }
@@ -107,9 +108,8 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.headers.set(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
-
 
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();

@@ -6,9 +6,8 @@ const paramsSchema = z.object({
   organizationId: z.coerce.string(),
 });
 
-
-export default function PurchaseTokenPage( { params }: { params: unknown; }) {
+export default function PurchaseTokenPage({ params }: { params: unknown }) {
   const parsedParams = paramsSchema.parse(params);
   const { organizationId } = parsedParams;
-  return <PurchaseTokens organizationId= {organizationId} />;
+  return <PurchaseTokens organizationId={organizationId} />;
 }

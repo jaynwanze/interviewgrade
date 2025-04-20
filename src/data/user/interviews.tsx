@@ -24,7 +24,7 @@ import type {
   InterviewUpdate,
   PracticeTemplate,
   SAPayload,
-  Table
+  Table,
 } from '@/types';
 import { getRandomElements } from '@/utils/getRandomElements';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';

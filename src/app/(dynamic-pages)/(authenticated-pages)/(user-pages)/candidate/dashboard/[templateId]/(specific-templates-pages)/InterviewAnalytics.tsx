@@ -34,18 +34,18 @@ export default function InterviewAnalyticsPage({
   const [loading, setLoading] = useState(true);
 
   const mockLatestInterview: Interview = {
-    id: "mock-id",
-    candidate_id: "mock-candidate-id",
-    template_id: "mock-template-id",
-    interview_template_id: "mock-interview-template-id",
-    title: "Mock Interview Title",
-    role: "Mock Role",
-    skill: "Mock Skill",
-    description: "Mock Description",
-    mode: "practice",
-    difficulty: "Easy",
-    status: "completed",
-    created_at: "2023-01-01T00:00:00Z",
+    id: 'mock-id',
+    candidate_id: 'mock-candidate-id',
+    template_id: 'mock-template-id',
+    interview_template_id: 'mock-interview-template-id',
+    title: 'Mock Interview Title',
+    role: 'Mock Role',
+    skill: 'Mock Skill',
+    description: 'Mock Description',
+    mode: 'practice',
+    difficulty: 'Easy',
+    status: 'completed',
+    created_at: '2023-01-01T00:00:00Z',
     is_general: false,
     is_system_defined: false,
     evaluation_criterias: [],
@@ -53,7 +53,7 @@ export default function InterviewAnalyticsPage({
     question_count: 5,
     duration: 0,
     start_time: '',
-    end_time: ''
+    end_time: '',
   };
 
   if (!templateId)
@@ -81,7 +81,10 @@ export default function InterviewAnalyticsPage({
 
   const selectedTemplateId = templateId;
   const selectedMode = mode === 'practice' ? 'Practice Mode' : 'Interview Mode';
-  const badgeColor = mode === 'practice' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
+  const badgeColor =
+    mode === 'practice'
+      ? 'bg-blue-100 text-blue-800'
+      : 'bg-purple-100 text-purple-800';
 
   useEffect(() => {
     setLoading(true);
@@ -125,7 +128,6 @@ export default function InterviewAnalyticsPage({
     }
   }, [isTutorialMode, tourStarted, startTour]);
 
-
   const renderDetailed = () => {
     if (loadingDetailed || loading) {
       return (
@@ -138,35 +140,35 @@ export default function InterviewAnalyticsPage({
       <>
         {error ? (
           <p className="text-center text-red-500">{error}</p>
-        ) : detailed &&
-          selectedTemplateId &&
-          selectedMode
-          ? (
-            <>
-              <div className="flex justify-center space-x-2 mb-4">
-                <Badge variant="secondary" className={`text-sm md:text-base px-4 py-2 rounded-full flex items-center gap-2 ${badgeColor} shadow-sm hover:shadow-md transition-all`}>
-                  <Sparkles className="w-4 h-4 text-blue-500" />
-                  {detailed?.interview_title || 'Deleted Template'}
-                </Badge>
-              </div>
-              <div id="performance-graph">
-                <InterviewAverageDetails
-                  analyticsData={detailed}
-                  latestInterview={mockLatestInterview!}
-                />
-                <InterviewGraphsDetailed
-                  analyticsData={detailed}
-                  sentimentAnalysis={currentSentimentDetailed || null}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center">
-              <p className="mt-5 text-center text-gray-500">
-                No analytics data found for this interview template.
-              </p>
+        ) : detailed && selectedTemplateId && selectedMode ? (
+          <>
+            <div className="flex justify-center space-x-2 mb-4">
+              <Badge
+                variant="secondary"
+                className={`text-sm md:text-base px-4 py-2 rounded-full flex items-center gap-2 ${badgeColor} shadow-sm hover:shadow-md transition-all`}
+              >
+                <Sparkles className="w-4 h-4 text-blue-500" />
+                {detailed?.interview_title || 'Deleted Template'}
+              </Badge>
             </div>
-          )}
+            <div id="performance-graph">
+              <InterviewAverageDetails
+                analyticsData={detailed}
+                latestInterview={mockLatestInterview!}
+              />
+              <InterviewGraphsDetailed
+                analyticsData={detailed}
+                sentimentAnalysis={currentSentimentDetailed || null}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center">
+            <p className="mt-5 text-center text-gray-500">
+              No analytics data found for this interview template.
+            </p>
+          </div>
+        )}
       </>
     );
   };

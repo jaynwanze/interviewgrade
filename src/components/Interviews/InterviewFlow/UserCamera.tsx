@@ -297,6 +297,5 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </p>
       )}
     </div>
-
   );
 };

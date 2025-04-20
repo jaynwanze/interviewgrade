@@ -130,9 +130,7 @@ export const AIQuestionSpeaker = ({
   return (
     <Card className="ai-speaker w-full h-full overflow-hidden flex flex-col justify-between">
       <CardHeader className="p-4 border-b dark:border-gray-700 bg-muted/50 mb-2">
-        <CardTitle className="text-lg font-semibold">
-          Interviewer
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold">Interviewer</CardTitle>
       </CardHeader>
       <div className="flex justify-center items-center">
         <span className="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-gray-600 dark:text-gray-200">

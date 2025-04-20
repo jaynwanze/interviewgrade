@@ -1,11 +1,6 @@
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
-import {
-  CoinsIcon,
-  Home,
-  Settings,
-  UserRound
-} from 'lucide-react';
+import { CoinsIcon, Home, Settings, UserRound } from 'lucide-react';
 
 import { Suspense } from 'react';
 import { SidebarLink } from './SidebarLink';

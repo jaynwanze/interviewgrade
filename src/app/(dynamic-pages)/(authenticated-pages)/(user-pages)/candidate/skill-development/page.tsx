@@ -1,41 +1,45 @@
-"use client";
+'use client';
 
-import { ExternalLink } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-import { useSkillBuilder } from "@/hooks/useSkillBuilder";
-import { getBadgeColor, getProgressBarColor, getStatus } from "@/utils/getBadgeColour";
+import { useSkillBuilder } from '@/hooks/useSkillBuilder';
+import {
+  getBadgeColor,
+  getProgressBarColor,
+  getStatus,
+} from '@/utils/getBadgeColour';
 
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/carousel';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 
 export default function SkillBuilderPage() {
-  const [activeSwitch, setActiveSwitch] = useState<'Practice Mode' | 'Interview Mode'>(
-    'Practice Mode',
-  );
+  const [activeSwitch, setActiveSwitch] = useState<
+    'Practice Mode' | 'Interview Mode'
+  >('Practice Mode');
 
   const { bundles, isLoading, error, fetchData, mode } = useSkillBuilder();
 
   useEffect(() => {
-    const nextMode = activeSwitch === 'Practice Mode' ? 'practice' : 'interview';
+    const nextMode =
+      activeSwitch === 'Practice Mode' ? 'practice' : 'interview';
     fetchData(nextMode);
   }, [activeSwitch]);
 
   if (isLoading) return <LoadingSpinner />;
-  if (error)
-    return <p className="text-center text-red-500">Error: {error}</p>;
+  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 p-4">
@@ -53,7 +57,9 @@ export default function SkillBuilderPage() {
           checked={activeSwitch === 'Interview Mode'}
           onCheckedChange={() =>
             setActiveSwitch(
-              activeSwitch === 'Practice Mode' ? 'Interview Mode' : 'Practice Mode'
+              activeSwitch === 'Practice Mode'
+                ? 'Interview Mode'
+                : 'Practice Mode',
             )
           }
         />
@@ -81,9 +87,12 @@ export default function SkillBuilderPage() {
                       <CardHeader>
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-semibold text-base capitalize">{bundle.stats.skill}</h3>
+                            <h3 className="font-semibold text-base capitalize">
+                              {bundle.stats.skill}
+                            </h3>
                             <p className="text-sm text-muted-foreground">
-                              Current Grade Avg: {Math.round(bundle.stats.avg_score)}%
+                              Current Grade Avg:{' '}
+                              {Math.round(bundle.stats.avg_score)}%
                             </p>
                           </div>
                           <span
@@ -166,7 +175,7 @@ export default function SkillBuilderPage() {
                       </div>
 
                       <p className="text-sm text-muted-foreground text-center mt-4">
-                        Want to improve your{" "}
+                        Want to improve your{' '}
                         <strong>{bundle.stats.skill}</strong>? These courses can
                         help you grow.
                       </p>

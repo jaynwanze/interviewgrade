@@ -8,7 +8,6 @@ import { PersonIcon } from '@radix-ui/react-icons';
 import { Building2, CalendarIcon, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-
 //mock employers data
 const mockEmployers = [
   {
@@ -34,7 +33,7 @@ export default function EmployerInterestsPage() {
   useEffect(() => {
     const fetchEmployers = async () => {
       const data = await getEmployersInterestedInCandidate();
-      setEmployers((data));
+      setEmployers(data);
     };
     fetchEmployers();
   }, []);
@@ -45,7 +44,8 @@ export default function EmployerInterestsPage() {
         Recruiters Interested in You
       </h1>
       <p className="text-muted-foreground text-md text-center mb-2">
-        These employers have unlocked your profile and may reach out to you soon.
+        These employers have unlocked your profile and may reach out to you
+        soon.
       </p>
       <Separator className="my-5" />
       <div className="flex items-center justify-between mt-3">
@@ -85,20 +85,23 @@ export default function EmployerInterestsPage() {
                 <CardContent className="text-sm text-muted-foreground space-y-3">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
-                    <p>This recruiter has unlocked your profile and might reach out soon.</p>
+                    <p>
+                      This recruiter has unlocked your profile and might reach
+                      out soon.
+                    </p>
                   </div>
                   {employer.created_at && (
                     <div className="flex items-center gap-2 text-xs">
                       <CalendarIcon className="h-4 w-4" />
                       <span>
-                        Unlocked on {new Date(employer.created_at).toLocaleDateString()}
+                        Unlocked on{' '}
+                        {new Date(employer.created_at).toLocaleDateString()}
                       </span>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ))}
-
           </div>
         )}
       </div>

@@ -10,17 +10,17 @@ import { Candidate } from '@/types';
 const openAiKey = process.env.OPENAI_SECRET_KEY;
 
 if (!openAiKey) {
-    throw new Error(
-        'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
-    );
+  throw new Error(
+    'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
+  );
 }
 
 const openai = new OpenAI({
-    apiKey: openAiKey,
+  apiKey: openAiKey,
 });
 
 const constructCandidateSummaryPrompt = (candidate: Candidate) => {
-    return `
+  return `
 You are an AI assistant helping a hiring manager quickly understand the core profile and progress of a job candidate. 
 
 Below is the candidate’s information:
@@ -51,97 +51,97 @@ Make sure the summary is clear, professional, and under 100 words.
 
 // ============ 3. Helper: Call OpenAI with Retries ==============
 const callOpenAIWithRetries = async (
-    prompt: string,
-    retries = 3,
-    delay = 1000,
+  prompt: string,
+  retries = 3,
+  delay = 1000,
 ): Promise<string> => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            const completion = await openai.chat.completions.create({
-                model: 'gpt-3.5-turbo',
-                messages: [{ role: 'user', content: prompt }],
-                max_tokens: 500,
-                temperature: 0.7,
-            });
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 500,
+        temperature: 0.7,
+      });
 
-            const aiMessage = completion.choices?.[0]?.message?.content;
-            console.log('AI Response Candidate Summary:', aiMessage); // Log the AI response for debugging
-            if (!aiMessage) {
-                throw new Error('No content returned from OpenAI.');
-            }
+      const aiMessage = completion.choices?.[0]?.message?.content;
+      console.log('AI Response Candidate Summary:', aiMessage); // Log the AI response for debugging
+      if (!aiMessage) {
+        throw new Error('No content returned from OpenAI.');
+      }
 
-            return aiMessage;
-        } catch (error) {
-            if (attempt === retries) {
-                console.error(
-                    `OpenAI API call failed after ${retries} attempts:`,
-                    error,
-                );
-                throw error;
-            }
-            console.warn(
-                `OpenAI API call failed on attempt ${attempt}. Retrying in ${delay}ms...`,
-                error,
-            );
-            await new Promise((res) => setTimeout(res, delay));
-            delay *= 2; // Exponential backoff
-        }
+      return aiMessage;
+    } catch (error) {
+      if (attempt === retries) {
+        console.error(
+          `OpenAI API call failed after ${retries} attempts:`,
+          error,
+        );
+        throw error;
+      }
+      console.warn(
+        `OpenAI API call failed on attempt ${attempt}. Retrying in ${delay}ms...`,
+        error,
+      );
+      await new Promise((res) => setTimeout(res, delay));
+      delay *= 2; // Exponential backoff
     }
-    throw new Error('Failed to call OpenAI API after multiple attempts.');
+  }
+  throw new Error('Failed to call OpenAI API after multiple attempts.');
 };
 
 const CandidateSummarySchema = z.object({
-    candidate_summary: z.string(),
+  candidate_summary: z.string(),
 });
 
 const parseCandidateSummary = (aiResponse: string) => {
-    let jsonString = '';
+  let jsonString = '';
 
-    // Attempt to extract JSON from triple backticks
-    const jsonRegex = /```json([\s\S]*?)```/i;
-    const match = aiResponse.match(jsonRegex);
+  // Attempt to extract JSON from triple backticks
+  const jsonRegex = /```json([\s\S]*?)```/i;
+  const match = aiResponse.match(jsonRegex);
 
-    if (match && match[1]) {
-        jsonString = match[1].trim();
+  if (match && match[1]) {
+    jsonString = match[1].trim();
+  } else {
+    // If the model didn't return a code block, attempt fallback parsing
+    const firstBraceIndex = aiResponse.indexOf('{');
+    const lastBraceIndex = aiResponse.lastIndexOf('}');
+    if (firstBraceIndex !== -1 && lastBraceIndex !== -1) {
+      jsonString = aiResponse
+        .substring(firstBraceIndex, lastBraceIndex + 1)
+        .trim();
     } else {
-        // If the model didn't return a code block, attempt fallback parsing
-        const firstBraceIndex = aiResponse.indexOf('{');
-        const lastBraceIndex = aiResponse.lastIndexOf('}');
-        if (firstBraceIndex !== -1 && lastBraceIndex !== -1) {
-            jsonString = aiResponse
-                .substring(firstBraceIndex, lastBraceIndex + 1)
-                .trim();
-        } else {
-            throw new Error('No JSON object found in the AI response.');
-        }
+      throw new Error('No JSON object found in the AI response.');
     }
+  }
 
-    const parsedJson = JSON.parse(jsonString);
-    const result = CandidateSummarySchema.parse(parsedJson);
-    return result;
+  const parsedJson = JSON.parse(jsonString);
+  const result = CandidateSummarySchema.parse(parsedJson);
+  return result;
 };
 
 export const getCandidateSummary = async (
-    candidateId: string,
+  candidateId: string,
 ): Promise<string> => {
-    // 1) Fetch candidate from DB
-    const candidate = await getCandidateUserProfile(candidateId);
-    if (!candidate) {
-        throw new Error('Candidate not found.');
-    }
+  // 1) Fetch candidate from DB
+  const candidate = await getCandidateUserProfile(candidateId);
+  if (!candidate) {
+    throw new Error('Candidate not found.');
+  }
 
-    // 2) Construct prompt
-    const prompt = constructCandidateSummaryPrompt(candidate);
+  // 2) Construct prompt
+  const prompt = constructCandidateSummaryPrompt(candidate);
 
-    // 3) Call OpenAI
-    const aiResponse = await callOpenAIWithRetries(prompt);
+  // 3) Call OpenAI
+  const aiResponse = await callOpenAIWithRetries(prompt);
 
-    // 4) Parse & validate
-    const { candidate_summary } = parseCandidateSummary(aiResponse);
+  // 4) Parse & validate
+  const { candidate_summary } = parseCandidateSummary(aiResponse);
 
-    // 5) (Optional) Update DB with new summary
-    await updateCandidateSummary(candidateId, candidate_summary);
+  // 5) (Optional) Update DB with new summary
+  await updateCandidateSummary(candidateId, candidate_summary);
 
-    // Return the new summary
-    return candidate_summary;
+  // Return the new summary
+  return candidate_summary;
 };

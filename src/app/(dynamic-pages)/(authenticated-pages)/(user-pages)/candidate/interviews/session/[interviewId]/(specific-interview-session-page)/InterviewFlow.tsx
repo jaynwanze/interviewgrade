@@ -318,7 +318,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-        100,
+          100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');
@@ -397,7 +397,8 @@ export default function InterviewFlow({
           </span>
         </div>
         <div className="text-md font-semibold">
-          ⏱ {Math.floor(recordingTime / 60)}:{('0' + (recordingTime % 60)).slice(-2)}
+          ⏱ {Math.floor(recordingTime / 60)}:
+          {('0' + (recordingTime % 60)).slice(-2)}
         </div>
         <Button variant="destructive" onClick={() => window.history.back()}>
           <ChevronLeft className="h-4 w-4 mr-1" />

@@ -12,7 +12,9 @@ const WalkthroughContext = createContext<WalkthroughContextType>({
   resetTour: () => {},
 });
 
-export const WalkthroughProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const WalkthroughProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Use useMemo so the tour instance remains stable
   const tour = useMemo(() => {
     return new Shepherd.Tour({

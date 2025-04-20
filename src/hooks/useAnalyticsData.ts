@@ -4,7 +4,7 @@ import {
 } from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
 import {
   getInterviewAnalytics,
-  getTotalCompletedInterviews
+  getTotalCompletedInterviews,
 } from '@/data/user/interviews';
 import { Interview, InterviewAnalytics } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
@@ -60,10 +60,16 @@ export const useAnalyticsData = () => {
       const interviewAnalytics = (
         await Promise.all(
           filteredTemplates.map((interview) =>
-            getInterviewAnalytics(user.id, interview.template_id, 'Practice Mode')
-          )
+            getInterviewAnalytics(
+              user.id,
+              interview.template_id,
+              'Practice Mode',
+            ),
+          ),
         )
-      ).filter((analytics): analytics is InterviewAnalytics => analytics !== null);
+      ).filter(
+        (analytics): analytics is InterviewAnalytics => analytics !== null,
+      );
 
       if (!interviewAnalytics || interviewAnalytics.length === 0) {
         setError('Failed to fetch interview analytics data.');
@@ -112,17 +118,23 @@ export const useAnalyticsData = () => {
 
       setUserId(user.id);
 
-      const analytics = await getInterviewAnalytics(user.id, templateId, interviewMode);
+      const analytics = await getInterviewAnalytics(
+        user.id,
+        templateId,
+        interviewMode,
+      );
       if (!analytics) {
         setError('No detailed analytics returned.');
         console.error('No detailed analytics returned.');
         setLoadingDetailed(false);
         return null;
       }
-      
+
       const allAnswers = analytics.completed_interview_evaluations.flatMap(
         (evaluation) =>
-          evaluation.question_answer_feedback.map((question) => question.answer)
+          evaluation.question_answer_feedback.map(
+            (question) => question.answer,
+          ),
       );
 
       const sentiment = await fetchSentiment(allAnswers);

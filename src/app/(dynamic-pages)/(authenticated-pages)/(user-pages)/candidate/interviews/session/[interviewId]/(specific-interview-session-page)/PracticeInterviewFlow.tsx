@@ -42,7 +42,11 @@ function parsePartial(text: string) {
   // e.g. "Score (%): 45/100%"
   const scoreRegex = /Score \(%\):\s*(\d+)\s*\/\s*100%/;
   const scoreMatch = text.match(scoreRegex);
-  if (scoreMatch && scoreMatch[1] !== undefined && scoreMatch[0].includes('/100%')) {
+  if (
+    scoreMatch &&
+    scoreMatch[1] !== undefined &&
+    scoreMatch[0].includes('/100%')
+  ) {
     result.mark = parseInt(scoreMatch[1], 10);
   }
 
@@ -93,7 +97,6 @@ export function PracticeInterviewFlow({
   const maxScorePerQuestion = 100;
   const [partialText, setPartialText] = useState('');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(true);
-
 
   // If needed, you can keep a timer for the entire practice session
   const timerRef = useRef<number | null>(null);
@@ -251,7 +254,6 @@ export function PracticeInterviewFlow({
     }
   }, [questionFeedback[currentQuestionIndex]]);
 
-
   const finishInterview = async () => {
     stopTimer();
     setIsInterviewComplete(true);
@@ -346,7 +348,8 @@ export function PracticeInterviewFlow({
           </span>
         </div>
         <div className="text-md font-semibold text-gray-700 dark:text-gray-300">
-          ⏱ {Math.floor(recordingTime / 60)}:{('0' + (recordingTime % 60)).slice(-2)}
+          ⏱ {Math.floor(recordingTime / 60)}:
+          {('0' + (recordingTime % 60)).slice(-2)}
         </div>
         <Button variant="destructive" onClick={() => window.history.back()}>
           <ChevronLeft className="h-4 w-4 mr-1" />
@@ -367,7 +370,9 @@ export function PracticeInterviewFlow({
         />
         {/* Candidate */}
         <Card className="overflow-hidden flex flex-col justify-between">
-          <CardHeader className={`flex flex-row ${isFeedbackOpen === true ? 'p-4' : 'p-2.5'} border-b dark:border-gray-700 bg-muted/50 mb-2`}>
+          <CardHeader
+            className={`flex flex-row ${isFeedbackOpen === true ? 'p-4' : 'p-2.5'} border-b dark:border-gray-700 bg-muted/50 mb-2`}
+          >
             <div className="flex items-center justify-between w-full">
               <CardTitle className="text-lg font-semibold">Candidate</CardTitle>
               {/* Floating Button */}
@@ -416,7 +421,7 @@ export function PracticeInterviewFlow({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className='flex justify-self-end'
+                    className="flex justify-self-end"
                     onClick={() => setIsFeedbackOpen(false)}
                   >
                     <SidebarOpenIcon className="h-4 w-4" />
@@ -430,11 +435,20 @@ export function PracticeInterviewFlow({
                     questionFeedback[currentQuestionIndex] ? (
                       <>
                         <div className="text-left mt-4 space-y-3">
-                          {questionFeedback[currentQuestionIndex]?.mark !== undefined && (
+                          {questionFeedback[currentQuestionIndex]?.mark !==
+                            undefined && (
                             <div className="text-center">
-                              <strong className="block text-base">Score (%):</strong>
-                              <p className={`text-3xl font-bold mt-1 ${scoreStringColour}`}>
-                                {Math.round(questionFeedback[currentQuestionIndex]?.mark ?? 0)}/100%
+                              <strong className="block text-base">
+                                Score (%):
+                              </strong>
+                              <p
+                                className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
+                              >
+                                {Math.round(
+                                  questionFeedback[currentQuestionIndex]
+                                    ?.mark ?? 0,
+                                )}
+                                /100%
                               </p>
                             </div>
                           )}
@@ -473,15 +487,15 @@ export function PracticeInterviewFlow({
                             }}
                           ></div>
                           <style jsx>{`
-                    @keyframes loading-bar {
-                      from {
-                      width: 0%;
-                      }
-                      to {
-                      width: 100%;
-                      }
-                    }
-                    `}</style>
+                            @keyframes loading-bar {
+                              from {
+                                width: 0%;
+                              }
+                              to {
+                                width: 100%;
+                              }
+                            }
+                          `}</style>
                         </div>
                       </div>
                     )
@@ -489,7 +503,9 @@ export function PracticeInterviewFlow({
                     <>
                       <div className="text-left mt-4 space-y-3">
                         <div className="text-center">
-                          <strong className="block text-base">Score (%):</strong>
+                          <strong className="block text-base">
+                            Score (%):
+                          </strong>
                           <p
                             className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
                           >
@@ -528,7 +544,9 @@ export function PracticeInterviewFlow({
                           </Button>
                         )}
                         <Button onClick={finishInterview}>
-                          {isTutorialMode ? 'Finish Tutorial' : 'Finish Session'}
+                          {isTutorialMode
+                            ? 'Finish Tutorial'
+                            : 'Finish Session'}
                         </Button>
                       </div>
                     </>
@@ -550,6 +568,6 @@ export function PracticeInterviewFlow({
           )}
         </AnimatePresence>
       </div>
-    </div >
+    </div>
   );
 }

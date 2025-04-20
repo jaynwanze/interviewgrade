@@ -110,7 +110,6 @@ const SentimentDisplay = ({
             Communication Tone
           </h1>
         </CardTitle>
-
       </CardTitle>
       <Separator className="my-1 z-10" />
       <CardContent className="z-10">
@@ -118,7 +117,8 @@ const SentimentDisplay = ({
           <div className="flex items-center space-x-4 mb-3">
             <div className="text-center">
               <p className="text-md text-gray-700 dark:text-gray-300">
-                Your overall tone when answering questions is <span className="font-bold">{sentiment.title}</span>
+                Your overall tone when answering questions is{' '}
+                <span className="font-bold">{sentiment.title}</span>
                 {/* with a confidence level of <span className="font-bold">{score.toFixed(0)}%</span>. */}
               </p>
               <div className="relative w-full h-4 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden my-2">

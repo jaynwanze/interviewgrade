@@ -2,8 +2,8 @@
 
 import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
 import { ResumeMatchedCandidatesView } from '@/components/Employee/Dashboard/ResumeMatchedView';
+import { KeywordInput } from '@/components/KeywordInput';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { MultiSelect } from '@/components/MultiSelect';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -31,109 +31,36 @@ import {
   type CandidateRow,
   type EmployerCandidatePreferences,
 } from '@/types';
-import dayjs from 'dayjs'; // or date-fns for experience calculation
+import {
+  availableIndustries,
+  availableLocations,
+  availableRoles,
+  availableSkills,
+  experienceRanges,
+} from '@/utils/filterOptions';
+import dayjs from 'dayjs';
 import { ChevronsUpDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { MultiValueProps, components } from 'react-select';
 
-// Existing filters options.
-const availableIndustries = [
-  'All Industries',
-  'Tech',
-  'IT',
-  'Finance',
-  'Healthcare',
-  'Education',
-  'Retail',
-  'Real Estate',
-  'Marketing',
-];
+// 1) curry the component so it captures maxVisible
+const createLimitedMultiValue =
+  (maxVisible: number) =>
+    <Option,>(props: MultiValueProps<Option, true>) => {
+      const { index, getValue } = props;
+      const values = getValue();
 
-const availableSkills = [
-  'Problem Solving',
-  'Conflict Resolution',
-  'Adaptability',
-  'Decision Making',
-];
+      if (index >= maxVisible) return null;
+      if (index === maxVisible - 1 && values.length > maxVisible) {
+        return (
+          <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+            +{values.length - maxVisible} more
+          </div>
+        );
+      }
+      return <components.MultiValue {...props} />;
+    };
 
-const availableLocations = [
-  'All Locations',
-  'United States',
-  'Canada',
-  'United Kingdom',
-  'Australia',
-  'Germany',
-  'India',
-  'France',
-  'Spain',
-  'Italy',
-  'Netherlands',
-  'Brazil',
-  'Mexico',
-  'Japan',
-  'China',
-  'South Korea',
-  'Russia',
-  'South Africa',
-  'Singapore',
-  'New Zealand',
-  'Sweden',
-  'Norway',
-  'Finland',
-  'Denmark',
-  'Ireland',
-  'Belgium',
-  'Switzerland',
-  'Austria',
-  'Czech Republic',
-  'Poland',
-  'Portugal',
-  'Greece',
-  'Turkey',
-  'Remote',
-];
-
-const availableRoles = [
-  'All Roles',
-  'Software Engineer',
-  'Data Scientist',
-  'Product Manager',
-  'UX Designer',
-  'Marketing Specialist',
-  'Sales Executive',
-  'HR Manager',
-  'Customer Support',
-  'Project Manager',
-  'Business Analyst',
-  'DevOps Engineer',
-  'Web Developer',
-  'Mobile Developer',
-  'Cybersecurity Analyst',
-  'Game Developer',
-];
-
-// Define available resume keywords options for the resume view.
-const availableResumeKeywords = [
-  { value: 'Python', label: 'Python' },
-  { value: 'JavaScript', label: 'JavaScript' },
-  { value: 'React', label: 'React' },
-  { value: 'SQL', label: 'SQL' },
-  { value: 'Java', label: 'Java' },
-  { value: 'Typescript', label: 'Typescript' },
-  { value: 'C++', label: 'C++' },
-  { value: 'Docker', label: 'Docker' },
-  { value: 'Jenkins', label: 'Jenkins' },
-  { value: 'GitHub Actions', label: 'GitHub Actions' },
-  { value: 'Cypress', label: 'Cypress' },
-  { value: 'Selenium', label: 'Selenium' },
-];
-
-const experienceRanges = [
-  { label: 'All Experience', min: 0, max: 999 },
-  { label: '0-1 year', min: 0, max: 1 },
-  { label: '2-4 years', min: 2, max: 4 },
-  { label: '5-7 years', min: 5, max: 7 },
-  { label: '8+ years', min: 8, max: 99 }, // or some large upper bound
-];
 function computeExperienceYears(startDate: string, endDate?: string | null) {
   const start = dayjs(startDate);
   const end = endDate ? dayjs(endDate) : dayjs(); // if endDate is null => "Present"
@@ -208,67 +135,64 @@ export default function EmployerDashboard({
   const [resumeRoleOpen, setResumeRoleOpen] = useState(false);
   const [resumeLocationOpen, setResumeLocationOpen] = useState(false);
 
-  // ========== Resume-based filtering ==========
+  // ========== Resume‑based filtering ==========
   useEffect(() => {
     if (matchView !== 'resume') {
       setMatchedByResume([]);
       return;
     }
-    let filtered: CandidateRow[] = [];
 
-    filtered = candidates.filter((cand) => {
+    const filtered = candidates.filter((cand) => {
+      /* 0. resume metadata guard ------------------------------------------- */
       if (!cand.resume_metadata) return false;
+      const { skills = [], experiences = [] } = cand.resume_metadata;
+      if (skills.length === 0 && experiences.length === 0) return false;
 
-      // If no keywords or fields selected, we skip for now
-      // (Alternatively, you could show all candidates who have resume_metadata.)
-      const { skills, experiences } = cand.resume_metadata;
-      if (!skills && !experiences) return false;
+      // Keyword filter
+      if (selectedResumeKeywords.length) {
+        const searchable = skills.map((s) => s.toLowerCase());
+        const blob = searchable.join(' ');
 
-      // Keywords
-      if (selectedResumeKeywords.length > 0) {
-        if (!skills) return false;
-        const lowerSkills = skills.map((s) => s.toLowerCase());
-        // At least one selected keyword must appear in the candidate's resume skills
-        const hasKeyword = selectedResumeKeywords.some((kw) =>
-          lowerSkills.includes(kw.toLowerCase()),
-        );
-        if (!hasKeyword) return false;
-      }
-      // Role + bracket
-      const isFilteringExperience =
-        resumeRoleFilter !== 'All Roles' ||
-        (selectedExpRange && selectedExpRange.label !== 'All Experience');
-
-      if (isFilteringExperience) {
-        if (!experiences || experiences.length === 0) {
-          return false; // no experiences => can't match
-        }
-        // We want at least one experience that satisfies both
-        const hasExp = experiences.some((exp) => {
-          // a) Role check
-          if (resumeRoleFilter !== 'All Roles') {
-            if (
-              !exp.jobTitle
-                ?.toLowerCase()
-                .includes(resumeRoleFilter.toLowerCase())
-            ) {
-              return false;
-            }
-          }
-          // b) Bracket check
-          if (selectedExpRange && selectedExpRange.label !== 'All Experience') {
-            if (!exp.startDate) return false;
-            const years = computeExperienceYears(exp.startDate, exp.endDate);
-            if (years < selectedExpRange.min || years > selectedExpRange.max) {
-              return false;
-            }
-          }
-          return true;
+        const allPresent = selectedResumeKeywords.every((kw) => {
+          const needle = kw.toLowerCase();
+          return searchable.includes(needle) || blob.includes(needle);
         });
-        if (!hasExp) return false;
+
+        if (!allPresent) return false;
       }
 
-      // Filter by location if not "All Locations"
+      // role and years of experience filters
+      const needRole = resumeRoleFilter !== 'All Roles';
+      const needYears =
+        selectedExpRange && selectedExpRange.label !== 'All Experience';
+
+      if (needRole || needYears) {
+        if (experiences.length === 0) return false;
+
+        /* rolePass: at least one jobTitle contains the chosen role */
+        let rolePass = true;
+        if (needRole) {
+          rolePass = experiences.some((exp) =>
+            exp.jobTitle
+              ?.toLowerCase()
+              .includes(resumeRoleFilter.toLowerCase()),
+          );
+        }
+
+        // yearsPass: at least one experience matches the chosen range
+        let yearsPass = true;
+        if (needYears) {
+          yearsPass = experiences.some((exp) => {
+            if (!exp.startDate) return false;
+            const yrs = computeExperienceYears(exp.startDate, exp.endDate);
+            return yrs >= selectedExpRange!.min && yrs <= selectedExpRange!.max;
+          });
+        }
+
+        if (!rolePass || !yearsPass) return false;
+      }
+
+      // Location filter
       if (
         resumeLocationFilter !== 'All Locations' &&
         !cand.country.includes(resumeLocationFilter) &&
@@ -277,16 +201,17 @@ export default function EmployerDashboard({
         return false;
       }
 
-      return true;
+      return true; // ✨ candidate passed every active sub‑filter
     });
 
+    // Update the skill gap message if no candidates match the filters.
     if (filtered.length === 0) {
       setResumeSkillGapMessage(
         `No candidates found for Resume filters:
-          Keywords: ${selectedResumeKeywords.join(', ')}
-          Role: ${resumeRoleFilter}
-          Location: ${resumeLocationFilter}
-          Min Years Exp: ${selectedExpRange ? selectedExpRange.label : 'N/A'}`,
+       Keywords: ${selectedResumeKeywords.join(', ') || '—'}
+       Role: ${resumeRoleFilter}
+       Location: ${resumeLocationFilter}
+       Experience: ${selectedExpRange?.label ?? 'All'}`,
       );
     } else {
       setResumeSkillGapMessage('');
@@ -380,10 +305,6 @@ export default function EmployerDashboard({
             : cand.practice_skill_stats;
         return stats?.some((s) => s.skill === skillFilter);
       });
-
-
-
-
     }
     if (filtered.length === 0) {
       setSkillGapMessage(
@@ -413,42 +334,6 @@ export default function EmployerDashboard({
     setMatched(sorted);
     setTopThree(sorted.slice(0, 3));
     setTopProspect(sorted.length > 0 ? sorted[0] : null);
-
-    // // Global ranking (optional) remains based on performance.
-    // const globalCandidates = candidates.filter((cand) => {
-    //   const stats =
-    //     mode === 'interview'
-    //       ? cand.interview_skill_stats
-    //       : cand.practice_skill_stats;
-    //   return stats && stats.length > 0;
-    // });
-    // const skillToSortBy = skillFilter || employerPrefs?.skills || '';
-    // const globalSorted = globalCandidates.slice().sort((a, b) => {
-    //   return (
-    //     getCandidateScoreAvgBySkill(b, skillToSortBy) -
-    //     getCandidateScoreAvgBySkill(a, skillToSortBy)
-    //   );
-    // });
-    // setTop3Worldwide(globalSorted.slice(0, 3));
-
-    // // Compute weekDelta (example).
-    // let totalDelta = 0;
-    // let deltaCount = 0;
-    // candidates.forEach((cand) => {
-    //   const stats =
-    //     mode === 'interview'
-    //       ? cand.interview_skill_stats
-    //       : cand.practice_skill_stats;
-    //   if (stats) {
-    //     stats.forEach((skill) => {
-    //       if (skill.previous_avg != null) {
-    //         totalDelta += skill.avg_score - skill.previous_avg;
-    //         deltaCount += 1;
-    //       }
-    //     });
-    //   }
-    // });
-    // setWeekDelta(deltaCount > 0 ? totalDelta / deltaCount : 0);
   }, [
     mode,
     candidates,
@@ -720,7 +605,9 @@ export default function EmployerDashboard({
                   </Popover>
                 </div>
               </div>
-              <h1 className="text-2xl font-bold">Matched Candidate Statistics</h1>
+              <h1 className="text-2xl font-bold">
+                Matched Candidate Statistics
+              </h1>
               <Tabs
                 defaultValue="practice"
                 onValueChange={(value) =>
@@ -757,20 +644,18 @@ export default function EmployerDashboard({
             <>
               <div className="flex flex-wrap justify-start gap-2">
                 <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[350px]">
-                  {/* Resume Keywords Multi-Select */}
-                  <label className="block text-sm mb-1">Resume Keywords</label>
-                  <MultiSelect
-                    options={availableResumeKeywords}
-                    defaultValue={[]}
-                    onValueChange={(values: string[]) =>
-                      setSelectedResumeKeywords(values)
-                    }
-                    placeholder="Select resume keywords"
-                    variant="inverted"
-                    maxCount={2}
+                  <label className="block text-sm mb-1">
+                    Resume Skill Keywords
+                  </label>
+                  <KeywordInput
+                    value={selectedResumeKeywords}
+                    onChange={setSelectedResumeKeywords}
+                    components={{
+                      ...components,
+                      MultiValue: createLimitedMultiValue(3),
+                    }}
                   />
                 </div>
-
                 {/* Desired Role */}
                 <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
                   <label className="text-sm text-muted-foreground mb-1">

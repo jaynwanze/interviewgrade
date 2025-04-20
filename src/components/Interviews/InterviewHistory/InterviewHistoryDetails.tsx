@@ -64,7 +64,7 @@ export async function fetchSentiment(
     if (!res.ok) {
       const errorText = await res.text();
       throw new Error(
-        `HTTP error! Status: ${res.status} - ${errorText}. URL: ${res.url}`
+        `HTTP error! Status: ${res.status} - ${errorText}. URL: ${res.url}`,
       );
     }
 

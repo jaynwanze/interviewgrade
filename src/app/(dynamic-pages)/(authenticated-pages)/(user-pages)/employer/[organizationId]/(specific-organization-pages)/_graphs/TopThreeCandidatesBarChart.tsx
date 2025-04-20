@@ -36,7 +36,6 @@ export function TopThreeCandidatesBarChart({
 }: {
   topCandidates?: CandidateBarData[];
 }) {
-
   function getShortName(fullName: string): string {
     if (!fullName) return '';
 

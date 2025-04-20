@@ -42,8 +42,8 @@ export const getTemplateImgUrlById = async (
   templateId: string,
   mode: string,
 ): Promise<string | null> => {
-
-  const tableName = mode === 'Practice Mode' ? 'templates' : 'interview_templates';
+  const tableName =
+    mode === 'Practice Mode' ? 'templates' : 'interview_templates';
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from(tableName)
@@ -60,7 +60,7 @@ export const getTemplateImgUrlById = async (
     return null;
   }
   return data.img_url;
-}
+};
 
 export const getInterviewTemplatesByCategory = async (
   category: string,

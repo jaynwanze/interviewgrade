@@ -35,14 +35,14 @@ export interface SupabaseFileUploadOptions {
 }
 
 export type CourseRec = {
-  id: string
-  title: string
-  provider: string
-  length_minutes: number
-  url: string
-  tags: string[]
-  type?: string
-}
+  id: string;
+  title: string;
+  provider: string;
+  length_minutes: number;
+  url: string;
+  tags: string[];
+  type?: string;
+};
 
 export type SkillBundle = {
   stats: CandidateSkillsStats;

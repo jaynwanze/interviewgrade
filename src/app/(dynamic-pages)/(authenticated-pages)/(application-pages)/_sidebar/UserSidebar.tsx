@@ -4,7 +4,7 @@ import {
   LucideHistory,
   NotepadText,
   Settings,
-  TableProperties
+  TableProperties,
 } from 'lucide-react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';

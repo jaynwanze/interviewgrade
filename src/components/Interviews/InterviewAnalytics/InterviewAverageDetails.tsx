@@ -31,7 +31,7 @@ export const InterviewAverageDetails = ({
           <div className="flex flex-col items-center">
             <p
               className={`text-2xl mt-2 font-bold px-2 py-1 rounded-lg shadow-md ${getBadgeColor(
-                Math.min(Math.round(analyticsData.avg_overall_grade))
+                Math.min(Math.round(analyticsData.avg_overall_grade)),
               )}`}
             >
               {Math.min(Math.round(analyticsData.avg_overall_grade))}%
@@ -42,9 +42,7 @@ export const InterviewAverageDetails = ({
               className="mt-1 text-sm px-3 py-1 rounded-full bg-gradient-to-r from-green-400 via-green-300 to-green-200 text-green-900 shadow-md"
             >
               {analyticsData.best_evaluation_crieria ? (
-                <>
-                  {analyticsData.best_evaluation_crieria}
-                </>
+                <>{analyticsData.best_evaluation_crieria}</>
               ) : (
                 'No Data Available'
               )}
@@ -53,27 +51,25 @@ export const InterviewAverageDetails = ({
               Performance averaged over all sessions.
             </p> */}
           </div>
-        </Card >
+        </Card>
         {/* Average Mark Per Question */}
-        {
-          analyticsData.interview_template_id && (
-            <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
-              <Star className="w-10 h-10 text-purple-500" />
-              <CardTitle className="mt-2">Average Score Per Question</CardTitle>
-              <div>
-                <p className="text-4xl font-bold text-gray-900">
-                  {(
-                    analyticsData.avg_overall_grade / analyticsData.question_count
-                  ).toFixed(0)}
-                  /{Math.floor(100 / analyticsData.question_count)}
-                </p>
-                <p className="text-gray-500">
-                  Marks scored per question on average.
-                </p>
-              </div>
-            </Card>
-          )
-        }
+        {analyticsData.interview_template_id && (
+          <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
+            <Star className="w-10 h-10 text-purple-500" />
+            <CardTitle className="mt-2">Average Score Per Question</CardTitle>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">
+                {(
+                  analyticsData.avg_overall_grade / analyticsData.question_count
+                ).toFixed(0)}
+                /{Math.floor(100 / analyticsData.question_count)}
+              </p>
+              <p className="text-gray-500">
+                Marks scored per question on average.
+              </p>
+            </div>
+          </Card>
+        )}
         <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
           {/* Total Sessions Count */}
           <ClipboardList className="w-10 h-10 text-blue-500" />
@@ -91,7 +87,7 @@ export const InterviewAverageDetails = ({
             </a>
           </div>
         </Card>
-      </div >
+      </div>
     </>
   );
 };

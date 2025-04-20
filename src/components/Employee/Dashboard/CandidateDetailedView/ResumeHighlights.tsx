@@ -1,27 +1,27 @@
 'use client';
 
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import type { CandidateDetailsView } from '@/types';
 import { FileText } from 'lucide-react';
@@ -45,14 +45,14 @@ export function ResumeHighlights({ candidate }: ResumeHighlightsProps) {
     <Card>
       <CardHeader className="flex justify-between">
         <div className="space-y-2">
-          <CardTitle >Resume Highlights</CardTitle>
+          <CardTitle>Resume Highlights</CardTitle>
           {!candidate.isUnlocked ? (
             <CardDescription>
               Some details hidden. Unlock to see all.
             </CardDescription>
           ) : (
             <CardDescription>
-                Resume details provided by the candidate.
+              Resume details provided by the candidate.
             </CardDescription>
           )}
         </div>
@@ -61,7 +61,7 @@ export function ResumeHighlights({ candidate }: ResumeHighlightsProps) {
         {candidate.resume_url && candidate.isUnlocked && (
           <Dialog open={openResumeDialog} onOpenChange={setOpenResumeDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="w-28 mt-5" >
+              <Button variant="outline" size="sm" className="w-28 mt-5">
                 <FileText className="mr-1 h-4 w-4 items-end" />
                 View CV
               </Button>

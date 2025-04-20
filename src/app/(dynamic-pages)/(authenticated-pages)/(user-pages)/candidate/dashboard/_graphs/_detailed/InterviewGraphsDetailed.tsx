@@ -35,7 +35,6 @@ export function InterviewGraphsDetailed({
   analyticsData: InterviewAnalytics;
   sentimentAnalysis: SentimentScore | null;
 }) {
-
   return (
     <motion.div
       className="flex flex-col gap-6"

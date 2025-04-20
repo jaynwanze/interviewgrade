@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card";
-import type { CandidateRow, EmployerCandidatePreferences } from "@/types";
+} from '@/components/ui/card';
+import type { CandidateRow, EmployerCandidatePreferences } from '@/types';
 
 /**
  * Props for the ResumeMatchedCandidatesView component.
@@ -41,8 +41,8 @@ export function ResumeMatchedCandidatesView({
 
   // Function to shorten names, e.g., "John S."
   function getShortName(fullName: string): string {
-    if (!fullName) return "";
-    const parts = fullName.split(" ").filter(Boolean);
+    if (!fullName) return '';
+    const parts = fullName.split(' ').filter(Boolean);
     if (parts.length === 1) return parts[0];
     return `${parts[0]} ${parts[parts.length - 1]?.[0].toUpperCase()}.`;
   }
@@ -58,7 +58,7 @@ export function ResumeMatchedCandidatesView({
   function highlightSkills(skill: string): JSX.Element {
     const lowerSkill = skill.toLowerCase();
     const matchedKeyword = selectedKeywords.find(
-      (kw) => lowerSkill === kw.toLowerCase()
+      (kw) => lowerSkill === kw.toLowerCase(),
     );
     if (matchedKeyword) {
       // highlight the skill
@@ -75,10 +75,15 @@ export function ResumeMatchedCandidatesView({
     <div className="mt-4 space-y-4">
       {/* Display skill gap or "no matches" message if any */}
       {skillGapMessage && (
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <Card className="border-red-400 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-red-500">Resume Filtered Candidates</CardTitle>
+              <CardTitle className="text-red-500">
+                Resume Filtered Candidates
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-red-600">{skillGapMessage}</p>
@@ -92,7 +97,8 @@ export function ResumeMatchedCandidatesView({
           <CardHeader>
             <CardTitle>Resume Matches</CardTitle>
             <CardDescription>
-              Matched on: {selectedKeywords.join(", ") || "No keywords selected"}
+              Matched on:{' '}
+              {selectedKeywords.join(', ') || 'No keywords selected'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -104,7 +110,7 @@ export function ResumeMatchedCandidatesView({
                   const shortName = getShortName(cand.full_name);
                   const candidateSkills = cand.resume_metadata?.skills || [];
                   const topSkills = candidateSkills.slice(0, 3); // show first 3 as a teaser
-                  const role = cand.role || "No Role Listed";
+                  const role = cand.role || 'No Role Listed';
 
                   return (
                     <motion.div
@@ -117,12 +123,15 @@ export function ResumeMatchedCandidatesView({
                       {/* Row Layout */}
                       <div className="flex items-center gap-3 mb-2">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={cand.avatar_url} alt={cand.full_name} />
+                          <AvatarImage
+                            src={cand.avatar_url}
+                            alt={cand.full_name}
+                          />
                           <AvatarFallback>
                             {cand.full_name
-                              .split(" ")
+                              .split(' ')
                               .map((n) => n[0])
-                              .join("")
+                              .join('')
                               .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>

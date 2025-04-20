@@ -2,7 +2,7 @@
 
 import {
   insertInterviewEvaluation,
-  updateInterviewAnalyticsCurrentAvgPractice
+  updateInterviewAnalyticsCurrentAvgPractice,
 } from '@/data/user/interviews';
 import {
   EvaluationCriteriaType,
@@ -340,10 +340,10 @@ export const getInterviewFeedback = async (
     insertInterviewEvaluation(interview.id, feedbackData),
     interview.mode === 'practice'
       ? updateInterviewAnalyticsCurrentAvgPractice(
-        interview.candidate_id,
-        interview.template_id,
-        interview.title,
-      )
+          interview.candidate_id,
+          interview.template_id,
+          interview.title,
+        )
       : Promise.resolve(),
   ]);
 

@@ -88,9 +88,7 @@ export function InterviewMode() {
                 Recent Interviews
               </CardTitle>
               <Table>
-                <TableCaption>
-                  List of your recent interviews.
-                </TableCaption>
+                <TableCaption>List of your recent interviews.</TableCaption>
 
                 <TableHeader>
                   <TableRow>

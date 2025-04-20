@@ -17,9 +17,9 @@ export const getProgressBarColor = (score: number): string => {
   return 'bg-red-500';
 };
 export const getStatus = (score: number) => {
-  if (score >= 70) return { label: "On Track", variant: "success" }
-  if (score >= 60) return { label: "Getting There", variant: "primary" }
-  if (score >= 50) return { label: "Needs Practice", variant: "warning" }
-  if (score >= 40) return { label: "Struggling", variant: "light" }
-  return { label: "Needs Improvement", variant: "danger" }
-}
+  if (score >= 70) return { label: 'On Track', variant: 'success' };
+  if (score >= 60) return { label: 'Getting There', variant: 'primary' };
+  if (score >= 50) return { label: 'Needs Practice', variant: 'warning' };
+  if (score >= 40) return { label: 'Struggling', variant: 'light' };
+  return { label: 'Needs Improvement', variant: 'danger' };
+};

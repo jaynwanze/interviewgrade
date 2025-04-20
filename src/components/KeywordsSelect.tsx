@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 // ----------------- imports -----------------
 import React from 'react';
 import {

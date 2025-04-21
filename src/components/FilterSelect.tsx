@@ -2,17 +2,17 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
 } from '@/components/ui/command';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
 import { ChevronsUpDown } from 'lucide-react';
 import * as React from 'react';
@@ -20,7 +20,7 @@ import * as React from 'react';
 /* ---------- public API ------------------------------------------------ */
 export interface FilterSelectProps<T extends string = string> {
   /** visible label above the field (“Role”, “Industry” …) */
-  label: string;
+  label?: string;
   /** placeholder when nothing picked */
   placeholder: string;
   /** options list */
@@ -56,14 +56,18 @@ export const FilterSelect = <T extends string>({
             aria-expanded={open}
             className="w-full justify-between"
           >
-            <span className="truncate">{value ?? placeholder}</span>
+            <span
+              className={`truncate ${!value ? 'text-muted-foreground' : ''}`}
+            >
+              {value || placeholder}
+            </span>{' '}
             <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
 
         <PopoverContent className="w-full min-w-[160px] max-w-[300px] p-0 z-40 mt-2">
           <Command>
-            <CommandInput placeholder={`Search ${label.toLowerCase()}…`} />
+            <CommandInput placeholder={`${!label ? placeholder : `Search ${label}…`}`} />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup heading={label}>

@@ -11,15 +11,14 @@ service.
 InterviewGrade allows employers to:
 
 * view the public areas of your profile (name, headline, skills, location,  
-  performance statistics, résumé excerpts you mark as **public**);
+  performance statistics, resume extracts you mark as **public**);
 * contact you through the platform for potential job opportunities.
 
 We never reveal your private e‑mail address or phone number until you
 explicitly accept an employer’s outreach.
 
 ## 3.  AI Processing  
-To rank candidates and generate personalised feedback we apply machine‑learning
-algorithms to the data you provide (profile, test results, résumé).  
+To rank candidates and generate personalised feedback we utilize OpenAI AND WE  apply machine‑learning algorithms and I to the data you provide (profile, test results, resume).  
 By using the service you consent to this automated processing.
 
 ## 4.  Your Responsibilities  

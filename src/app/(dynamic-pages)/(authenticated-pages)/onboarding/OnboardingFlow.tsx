@@ -27,8 +27,11 @@ import {
 } from '@/data/user/user';
 import {
   availableCountries,
+  availableCountriesCandidates,
   availableIndustries,
+  availableIndustriesCandidates,
   availableRoles,
+  availableRolesCandidates,
 } from '@/utils/filterOptions';
 
 import {
@@ -68,10 +71,7 @@ type TermsAcceptanceProps = {
   userType: UserType;
 };
 
-function TermsAcceptance(
-  { onSuccess }: TermsAcceptanceProps,
-  { userType }: { userType: UserType },
-) {
+function TermsAcceptance({ onSuccess, userType }: TermsAcceptanceProps) {
   const { mutate: acceptTerms, isLoading } = useSAToastMutation(
     async () => {
       return acceptTermsOfService(true);
@@ -427,9 +427,8 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               <RHFSelect
                 control={control}
                 name="country"
-                label="Country"
-                placeholder="All Countries…"
-                options={availableCountries}
+                placeholder="Select Country…"
+                options={availableCountriesCandidates}
               />
               {errors.country && (
                 <p className="text-xs text-red-600">{errors.country.message}</p>
@@ -453,12 +452,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               )}
             </div>
             <div className="flex-1">
+            <Label htmlFor="role">Role</Label>
               <RHFSelect
                 control={control}
                 name="role"
-                label="Role"
-                placeholder="All Roles…"
-                options={availableRoles}
+                placeholder="Select Role…"
+                options={availableRolesCandidates}
               />
               {errors.role && (
                 <p className="text-xs text-red-600">{errors.role.message}</p>
@@ -469,12 +468,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
           {/* Industry & Summary */}
           <div className="flex gap-3">
             <div className="flex-1">
+            <Label htmlFor="industry">Industry</Label>
               <RHFSelect
                 control={control}
                 name="industry"
-                label="Industry"
-                placeholder="All Industries…"
-                options={availableIndustries}
+                placeholder="Select Industry…"
+                options={availableIndustriesCandidates}
               />
               {errors.industry && (
                 <p className="text-xs text-red-600">

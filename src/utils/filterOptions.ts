@@ -115,7 +115,6 @@ export const availableRoles = [
   'Quality Assurance / QA Tester',
 ];
 
-
 export const experienceRanges = [
   { label: 'All Experience', min: 0, max: 999 },
   { label: '0-1 year', min: 0, max: 1 },
@@ -123,3 +122,14 @@ export const experienceRanges = [
   { label: '5-7 years', min: 5, max: 7 },
   { label: '8+ years', min: 8, max: 99 },
 ];
+
+export const availableCountriesCandidates = availableCountries.filter(
+  (country) => country !== 'All Locations',
+);
+
+export const availableIndustriesCandidates = availableIndustries.filter(
+  (industry) => industry !== 'All Industries',
+);
+export const availableRolesCandidates = availableRoles.filter(
+  (role) => role !== 'All Roles',
+);

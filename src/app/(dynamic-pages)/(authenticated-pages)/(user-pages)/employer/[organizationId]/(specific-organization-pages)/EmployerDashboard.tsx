@@ -3,23 +3,10 @@
 
 import { MatchedCandidatesView } from '@/components/Employee/Dashboard/MatchedCandidatesView';
 import { ResumeMatchedCandidatesView } from '@/components/Employee/Dashboard/ResumeMatchedView';
+import { FilterBar } from '@/components/FilterBar';
 import { KeywordInput } from '@/components/KeywordInput';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { Label } from '@/components/ui/label';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -40,27 +27,26 @@ import {
   experienceRanges,
 } from '@/utils/filterOptions';
 import dayjs from 'dayjs';
-import { ChevronsUpDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { MultiValueProps, components } from 'react-select';
 
 // 1) curry the component so it captures maxVisible
 const createLimitedMultiValue =
   (maxVisible: number) =>
-  <Option,>(props: MultiValueProps<Option, true>) => {
-    const { index, getValue } = props;
-    const values = getValue();
+    <Option,>(props: MultiValueProps<Option, true>) => {
+      const { index, getValue } = props;
+      const values = getValue();
 
-    if (index >= maxVisible) return null;
-    if (index === maxVisible - 1 && values.length > maxVisible) {
-      return (
-        <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-          {values.length - maxVisible} more
-        </div>
-      );
-    }
-    return <components.MultiValue {...props} />;
-  };
+      if (index >= maxVisible) return null;
+      if (index === maxVisible - 1 && values.length > maxVisible) {
+        return (
+          <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+            {values.length - maxVisible} more
+          </div>
+        );
+      }
+      return <components.MultiValue {...props} />;
+    };
 
 function computeExperienceYears(startDate: string, endDate?: string | null) {
   const start = dayjs(startDate);
@@ -135,6 +121,64 @@ export default function EmployerDashboard({
   // Popover states for resume filters.
   const [resumeRoleOpen, setResumeRoleOpen] = useState(false);
   const [resumeLocationOpen, setResumeLocationOpen] = useState(false);
+
+  /* ---------- performance filters --------------------- */
+  const performanceFields = [
+    {
+      label: 'Role',
+      placeholder: 'All Roles…',
+      options: availableRoles,
+      value: roleFilter,
+      onChange: setRoleFilter,
+    },
+    {
+      label: 'Industry',
+      placeholder: 'All Industries…',
+      options: availableIndustries,
+      value: industryFilter,
+      onChange: setIndustryFilter,
+    },
+    {
+      label: 'Skill',
+      placeholder: 'Select Skill…',
+      options: availableSkills,
+      value: skillFilter,
+      onChange: setSkillFilter,
+    },
+    {
+      label: 'Location',
+      placeholder: 'All Locations…',
+      options: availableLocations,
+      value: locationFilter,
+      onChange: setLocationFilter,
+    },
+  ];
+
+  /* ---------- résumé filters -------------------------- */
+  const resumeFields = [
+    {
+      label: 'Role',
+      placeholder: 'All Roles…',
+      options: availableRoles,
+      value: resumeRoleFilter,
+      onChange: setResumeRoleFilter,
+    },
+    {
+      label: 'Location',
+      placeholder: 'All Locations…',
+      options: availableLocations,
+      value: resumeLocationFilter,
+      onChange: setResumeLocationFilter,
+    },
+    {
+      label: 'Experience Range',
+      placeholder: 'Experience Range',
+      options: experienceRanges.map((r) => r.label),
+      value: selectedExpRange?.label ?? 'Experience Range',
+      onChange: (label: string) =>
+        setSelectedExpRange(experienceRanges.find((r) => r.label === label)!),
+    },
+  ];
 
   // ========== Resume‑based filtering ==========
   useEffect(() => {
@@ -388,224 +432,7 @@ export default function EmployerDashboard({
           {/* Show different filter panels based on matchView */}
           {matchView === 'performance' ? (
             <>
-              <div className="flex flex-wrap justify-start gap-2">
-                {/* Role MultiSelect */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Role
-                  </label>
-                  <Popover open={roleOpen} onOpenChange={setRoleOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={roleOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {roleFilter || 'All Roles...'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[200px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search role..." />
-                        <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Roles">
-                            {availableRoles.map((role) => (
-                              <CommandItem
-                                key={role}
-                                value={role}
-                                onSelect={() => {
-                                  setRoleFilter(role);
-                                  setEmployerPrefs((prev) =>
-                                    prev
-                                      ? { ...prev, role: role }
-                                      : {
-                                          job: role,
-                                          industry: '',
-                                          location: '',
-                                          skills: '',
-                                        },
-                                  );
-                                  setRoleOpen(false);
-                                }}
-                              >
-                                {role}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                {/* Industry MultiSelect */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Industry
-                  </label>
-                  <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={industryOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {industryFilter || 'All Industries...'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[200px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search industry..." />
-                        <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Industries">
-                            {availableIndustries.map((industry) => (
-                              <CommandItem
-                                key={industry}
-                                value={industry}
-                                onSelect={() => {
-                                  setIndustryFilter(industry);
-                                  setEmployerPrefs((prev) =>
-                                    prev
-                                      ? { ...prev, industry: industry }
-                                      : {
-                                          industry: industry,
-                                          location: '',
-                                          skills: '',
-                                          job: '',
-                                        },
-                                  );
-                                  setIndustryOpen(false);
-                                }}
-                              >
-                                {industry}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                {/* Skill MultiSelect */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Skill
-                  </label>
-                  <Popover open={skillOpen} onOpenChange={setSkillOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={skillOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {skillFilter || 'Select Skill...'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[100px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search skill..." />
-                        <CommandList className="w-full h-full">
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Skills">
-                            {availableSkills.map((skill) => (
-                              <CommandItem
-                                key={skill}
-                                value={skill}
-                                onSelect={() => {
-                                  setSkillFilter(skill);
-                                  setEmployerPrefs((prev) =>
-                                    prev
-                                      ? { ...prev, skills: skill }
-                                      : {
-                                          industry: '',
-                                          location: '',
-                                          skills: skill,
-                                          job: '',
-                                        },
-                                  );
-                                  setSkillOpen(false);
-                                }}
-                              >
-                                {skill}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                {/* Location MultiSelect */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Location
-                  </label>
-                  <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={locationOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {locationFilter || 'All Locations...'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[100px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search location..." />
-                        <CommandList className="w-full h-full">
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Locations">
-                            {availableLocations.map((loc) => (
-                              <CommandItem
-                                key={loc}
-                                value={loc}
-                                onSelect={() => {
-                                  setLocationFilter(loc);
-                                  setEmployerPrefs((prev) =>
-                                    prev
-                                      ? { ...prev, location: loc }
-                                      : {
-                                          industry: '',
-                                          location: loc,
-                                          skills: '',
-                                          job: '',
-                                        },
-                                  );
-                                  setLocationOpen(false);
-                                }}
-                              >
-                                {loc}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
+              <FilterBar fields={performanceFields} />
               <h1 className="text-2xl font-bold">
                 Matched Candidate Statistics
               </h1>
@@ -657,153 +484,8 @@ export default function EmployerDashboard({
                     }}
                   />
                 </div>
-                {/* Desired Role */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Role
-                  </label>
-                  <Popover
-                    open={resumeRoleOpen}
-                    onOpenChange={setResumeRoleOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={resumeRoleOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {resumeRoleFilter || 'All Roles...'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[200px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search role..." />
-                        <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Roles">
-                            {availableRoles.map((role) => (
-                              <CommandItem
-                                key={role}
-                                value={role}
-                                onSelect={() => {
-                                  setResumeRoleFilter(role);
-                                  setResumeRoleOpen(false);
-                                }}
-                              >
-                                {role}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Location */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Location
-                  </label>
-                  <Popover
-                    open={resumeLocationOpen}
-                    onOpenChange={setResumeLocationOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={resumeLocationOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {resumeLocationFilter || 'All Locations...'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[100px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search location..." />
-                        <CommandList className="w-full h-full">
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Locations">
-                            {availableLocations.map((loc) => (
-                              <CommandItem
-                                key={loc}
-                                value={loc}
-                                onSelect={() => {
-                                  setResumeLocationFilter(loc);
-                                  setResumeLocationOpen(false);
-                                }}
-                              >
-                                {loc}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Min Years of Experience */}
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[200px]">
-                  <label className="text-sm text-muted-foreground mb-1">
-                    Min Years Experience
-                  </label>
-                  <Popover
-                    open={experienceBracketOpen}
-                    onOpenChange={setExperienceBracketOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={experienceBracketOpen}
-                        aria-haspopup="listbox"
-                        className="w-full justify-between"
-                      >
-                        <span className="truncate">
-                          {selectedExpRange
-                            ? selectedExpRange.label
-                            : 'Experience Range'}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full min-w-[100px] max-w-[300px] p-0 z-40 mt-2">
-                      <Command>
-                        <CommandInput placeholder="Search experience bracket..." />
-                        <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
-                          <CommandGroup heading="Experience Ranges">
-                            {experienceRanges.map((range) => (
-                              <CommandItem
-                                key={range.label}
-                                value={range.label}
-                                onSelect={() => {
-                                  setSelectedExpRange(range);
-                                  setExperienceBracketOpen(false);
-                                }}
-                              >
-                                {range.label}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <FilterBar fields={resumeFields} />
               </div>
-
               {employerPrefs && (
                 <ResumeMatchedCandidatesView
                   matchedByResume={matchedByResume}

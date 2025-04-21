@@ -32,7 +32,7 @@ interface KeywordInputProps {
 export const KeywordInput: React.FC<KeywordInputProps> = ({
   value,
   onChange,
-  placeholder = 'Type something and press Enter…',
+  placeholder = 'Type keyword and press enter',
 }) => {
   /* react‑select internal state */
   const [input, setInput] = React.useState('');

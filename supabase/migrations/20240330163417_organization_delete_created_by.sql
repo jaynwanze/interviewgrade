@@ -1,13 +1,13 @@
--- Migration to delete the 'made_by' column from the 'organizations' table
-ALTER TABLE "public"."organizations" DROP CONSTRAINT "organizations_made_by_fkey";
+-- Migration to delete the 'created_by' column from the 'organizations' table
+ALTER TABLE "public"."organizations" DROP CONSTRAINT "organizations_created_by_fkey";
 
--- We need to drop the policies that refer to the 'made_by' column
+-- We need to drop the policies that refer to the 'created_by' column
 DROP POLICY IF EXISTS "All team members can read organizations" ON "public"."organizations";
 DROP POLICY IF EXISTS "All organization members can read organizations" ON "public"."organizations";
 
 BEGIN;
 
-ALTER TABLE organizations DROP COLUMN IF EXISTS made_by;
+ALTER TABLE organizations DROP COLUMN IF EXISTS created_by;
 
 COMMIT;
 

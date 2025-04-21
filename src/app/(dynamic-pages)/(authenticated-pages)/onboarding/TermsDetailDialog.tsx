@@ -1,3 +1,4 @@
+// TermsDetailDialog.tsx
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -9,58 +10,53 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
-export function TermsDetailDialog({
-  onConfirm,
-  isLoading,
-}: {
+type Props = {
+  userType: 'candidate' | 'employer';
   onConfirm: () => void;
   isLoading: boolean;
-}) {
+};
+
+export function TermsDetailDialog({ userType, onConfirm, isLoading }: Props) {
+  const [md, setMd] = useState<string | null>(null);
+
+  useEffect(() => {
+    const path =
+      userType === 'candidate'
+        ? '/legal/candidate-tos.md'
+        : '/legal/employer-tos.md';
+
+    fetch(path)
+      .then((r) => r.text())
+      .then(setMd)
+      .catch(() => setMd('# Error loading terms '));
+  }, [userType]);
+
   return (
-    <Dialog data-testid="accept-terms-onboarding">
+    <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full" variant="default">
-          View Terms
-        </Button>
+        <Button className="w-full">View Terms</Button>
       </DialogTrigger>
-      <DialogContent>
+
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="text-lg pb-4 space-y-4">
-            Terms and conditions
-          </DialogTitle>
+          <DialogTitle className="text-lg mb-4">Terms & Conditions</DialogTitle>
         </DialogHeader>
-        <div className="ring-1 ring-foreground/10 rounded-md">
-          <div className="overflow-auto max-h-80 flex flex-col  space-y-2 p-2 bg-muted">
-            <p className="text-sm  rounded-lg p-4 text-foreground/70 ">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed
-              lorem placerat, finibus nulla vitae, molestie ligula. Praesent
-              viverra elit luctus metus sagittis viverra. In eleifend lacus ut
-              eros mattis bibendum in eu dui. Nunc eu diam mauris. Aliquam
-              auctor, nisi et efficitur rutrum, leo nisi fringilla orci, sit
-              amet semper nibh sem vel libero. Ut tempor quam eget lectus
-              consequat, id egestas nisi semper. Aliquam pharetra tincidunt
-              sagittis. Ut nec gravida tortor. Proin vitae dolor magna. Duis sed
-              pulvinar lectus, et volutpat tortor. Vestibulum ante ipsum primis
-              in faucibus orci luctus et ultrices posuere cubilia curae; Sed eu
-              blandit justo. Sed dapibus tempor luctus. Ut tempor quam eget
-              lectus consequat, id egestas nisi semper. Aliquam pharetra
-              tincidunt sagittis. Ut nec gravida tortor. Proin vitae dolor
-              magna. Duis sed pulvinar lectus, et volutpat tortor. Vestibulum
-              ante ipsum primis in faucibus orci luctus et ultrices posuere
-              cubilia curae; Sed eu blandit justo. Sed dapibus tempor luctus.
-            </p>
+
+        {!md ? (
+          <Skeleton className="w-full h-40" />
+        ) : (
+          <div className="prose max-h-[60vh] overflow-auto">
+            <ReactMarkdown>{md}</ReactMarkdown>
           </div>
-        </div>
+        )}
+
         <DialogFooter>
-          <Button
-            type="button"
-            onClick={() => onConfirm()}
-            variant="default"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? 'Accepting terms...' : 'Accept Terms'}
+          <Button onClick={onConfirm} disabled={isLoading} className="w-full">
+            {isLoading ? 'Accepting…' : 'Accept Terms'}
           </Button>
         </DialogFooter>
       </DialogContent>

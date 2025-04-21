@@ -234,23 +234,23 @@ export type Database = {
           id: string
           title: string
           created_at: string
-          made_by: string
+          created_by: string
         }
         Insert: {
           title: string
           created_at?: string
-          made_by: string
+          created_by: string
         }
         Update: {
           id?: string
           title?: string
           created_at?: string
-          made_by?: string
+          created_by?: string
         }
         Relationships: [
           {
-            foreignKeyName: "organizations_made_by_fkey"
-            columns: ["made_by"]
+            foreignKeyName: "organizations_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: true
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]

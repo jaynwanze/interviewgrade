@@ -71,7 +71,7 @@ CREATE INDEX idx_organizations_members_organization_id ON "public"."organization
 
 -- Indexes for organizations
 CREATE INDEX idx_organizations_id ON "public"."organizations" ("id");
--- CREATE INDEX idx_organizations_made_by ON "public"."organizations" ("made_by");
+-- CREATE INDEX idx_organizations_created_by ON "public"."organizations" ("created_by");
 
 -- Indexes for organization_join_invitations
 CREATE INDEX idx_organization_join_invitations_id ON "public"."organization_join_invitations" ("id");

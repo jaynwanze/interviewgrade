@@ -13,7 +13,7 @@ ALTER TABLE "public"."organization_members" OWNER TO "postgres";
 CREATE TABLE "public"."organizations" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "title" character varying DEFAULT 'Test Organization'::character varying NOT NULL,
-  "made_by" "uuid" NOT NULL,
+  "created_by" "uuid" NOT NULL,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
   );
   
@@ -526,11 +526,11 @@ ADD CONSTRAINT "organization_members_member_id_fkey" FOREIGN KEY ("member_id") R
 ALTER TABLE ONLY "public"."organization_members"
 ADD CONSTRAINT "organization_members_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id");
 --
--- Name: organizations organizations_made_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: organizations organizations_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."organizations"
-ADD CONSTRAINT "organizations_made_by_fkey" FOREIGN KEY ("made_by") REFERENCES "public"."user_profiles"("id");
+ADD CONSTRAINT "organizations_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."user_profiles"("id");
 --
 -- Name: organizations_private_info organizations_private_info_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: supabase_admin
 --

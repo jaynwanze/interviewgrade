@@ -62,7 +62,7 @@ export const updateUserName = async (
 //     .from('organizations')
 //     .insert({
 //       title: name,
-//       made_by: user.id,
+//       created_by: user.id,
 //     })
 //     .select('*')
 //     .single();

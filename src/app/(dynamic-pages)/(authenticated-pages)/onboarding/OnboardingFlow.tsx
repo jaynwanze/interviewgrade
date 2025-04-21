@@ -65,9 +65,13 @@ const MotionImage = motion(Image);
 
 type TermsAcceptanceProps = {
   onSuccess: () => void;
+  userType: UserType;
 };
 
-function TermsAcceptance({ onSuccess }: TermsAcceptanceProps) {
+function TermsAcceptance(
+  { onSuccess }: TermsAcceptanceProps,
+  { userType }: { userType: UserType },
+) {
   const { mutate: acceptTerms, isLoading } = useSAToastMutation(
     async () => {
       return acceptTermsOfService(true);
@@ -97,12 +101,16 @@ function TermsAcceptance({ onSuccess }: TermsAcceptanceProps) {
           </T.Small>
 
           <T.Subtle>
-            Last updated : <strong>24th April 2024</strong>
+            Last updated : <strong>21st April 2025</strong>
           </T.Subtle>
         </div>
       </CardContent>
       <CardFooter>
-        <TermsDetailDialog isLoading={isLoading} onConfirm={acceptTerms} />
+        <TermsDetailDialog
+          isLoading={isLoading}
+          onConfirm={acceptTerms}
+          userType={userType}
+        />
       </CardFooter>
     </Card>
   );
@@ -420,7 +428,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
                 control={control}
                 name="country"
                 label="Country"
-                placeholder="All Country…"
+                placeholder="All Countries…"
                 options={availableCountries}
               />
               {errors.country && (
@@ -748,7 +756,9 @@ export function UserOnboardingFlow({
 
   return (
     <>
-      {currentStep === 'TERMS' && <TermsAcceptance onSuccess={nextStep} />}
+      {currentStep === 'TERMS' && (
+        <TermsAcceptance onSuccess={nextStep} userType={userType} />
+      )}
       {currentStep === 'PROFILE' && (
         <ProfileUpdate
           userEmail={userEmail}

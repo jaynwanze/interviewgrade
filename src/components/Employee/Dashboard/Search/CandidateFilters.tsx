@@ -45,7 +45,7 @@ const defaultLocations = [
 type CandidateFiltersProps = {
   availableIndustries?: string[];
   availableSkills?: string[];
-  availableLocations?: string[];
+  availableCountries?: string[];
   industryValue?: string;
   skillValue?: string;
   locationValue?: string;
@@ -63,7 +63,7 @@ type CandidateFiltersProps = {
 export function CandidateFilters({
   availableIndustries = defaultIndustries,
   availableSkills = defaultSkills,
-  availableLocations = defaultLocations,
+  availableCountries = defaultLocations,
   industryValue = 'All Industries',
   skillValue = 'All Skills',
   locationValue = 'All Locations',
@@ -222,7 +222,7 @@ export function CandidateFilters({
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup heading="Locations">
-                  {availableLocations.map((loc) => (
+                  {availableCountries.map((loc) => (
                     <CommandItem
                       key={loc}
                       value={loc}

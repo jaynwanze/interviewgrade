@@ -351,12 +351,12 @@ export const mockCandidates: CandidateRow[] = [
   {
     id: 'c1',
     city: 'New York',
-    country: 'United States',
+    country: 'Ireland',
     phone_number: '(555) 123-4567',
     summary:
       'Highly motivated and skilled software engineer with a passion for developing innovative solutions. Alice excels in problem-solving and has a keen eye for detail and her strong communication skills enable her to collaborate seamlessly with cross-functional teams, making her an invaluable asset to any organization. Alice is always eager to learn and adapt to new technologies, continuously improving her skill set to stay ahead in the ever-evolving tech industry.',
     role: 'Software Engineer',
-    industry: 'Tech',
+    industry: 'Information Technology & Software',
     practice_skill_stats: [
       {
         template_id: '1',
@@ -416,11 +416,11 @@ export const mockCandidates: CandidateRow[] = [
   {
     id: 'c2',
     city: 'San Francisco',
-    country: 'United States',
+    country: 'Ireland',
     phone_number: '(555) 555-1234',
     summary: 'Full-stack developer with a focus on back-end optimization.',
     role: 'Full-Stack Developer',
-    industry: 'Tech',
+    industry: 'Information Technology & Software',
     practice_skill_stats: [
       {
         template_id: 'p2',
@@ -478,7 +478,7 @@ export const mockCandidates: CandidateRow[] = [
     phone_number: '(416) 999-0000',
     summary: 'Skilled data analyst passionate about Decision Making & stats.',
     role: 'Data Analyst',
-    industry: 'Tech',
+    industry: 'Information Technology & Software',
     practice_skill_stats: [],
     interview_skill_stats: [
       {
@@ -529,7 +529,7 @@ export const mockCandidates: CandidateRow[] = [
     phone_number: '(555) 999-9999',
     summary: 'Problem solver with a knack for creative solutions.',
     role: 'Product Manager',
-    industry: 'Tech',
+    industry: 'Information Technology & Software',
     practice_skill_stats: [
       {
         template_id: '8',
@@ -588,7 +588,7 @@ export const mockCandidates: CandidateRow[] = [
     phone_number: '+353 12 345 6789',
     summary: 'Focused on continuous improvement and quick learning.',
     role: 'Software Engineer',
-    industry: 'Tech',
+    industry: 'Information Technology & Software',
     practice_skill_stats: [
       {
         template_id: '10',

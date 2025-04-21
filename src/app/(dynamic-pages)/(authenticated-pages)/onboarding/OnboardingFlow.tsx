@@ -19,11 +19,17 @@ import {
 } from '@/data/user/candidate';
 import { createOrganization } from '@/data/user/organizations';
 // import { createOrganization } from '@/data/user/organizations';
+import { RHFSelect } from '@/components/RHFSelect';
 import {
   acceptTermsOfService,
   updateUserProfileNameAndAvatar,
   uploadPublicUserAvatar,
 } from '@/data/user/user';
+import {
+  availableCountries,
+  availableIndustries,
+  availableRoles,
+} from '@/utils/filterOptions';
 
 import {
   Dialog,
@@ -213,10 +219,10 @@ export function ProfileUpdate({
                         hasImageLoaded
                           ? undefined
                           : {
-                              duration: 0.5,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatType: 'reverse',
-                            }
+                            duration: 0.5,
+                            repeat: Number.POSITIVE_INFINITY,
+                            repeatType: 'reverse',
+                          }
                       }
                       onLoad={() => {
                         setHasImageLoaded(true);
@@ -298,6 +304,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors, isValid },
   } = useForm<CandidateDetailsSchema>({
     resolver: zodResolver(candidateDetailsSchema),
@@ -409,10 +416,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
             <div className="flex-1">
               <Label htmlFor="country">Country</Label>
-              <Input
-                id="country"
-                placeholder="e.g. United States"
-                {...register('country')}
+              <RHFSelect
+                control={control}
+                name="country"
+                label="Country"
+                placeholder="All Country…"
+                options={availableCountries}
               />
               {errors.country && (
                 <p className="text-xs text-red-600">{errors.country.message}</p>
@@ -436,11 +445,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               )}
             </div>
             <div className="flex-1">
-              <Label htmlFor="role">Role</Label>
-              <Input
-                id="role"
-                placeholder="e.g. Software Engineer"
-                {...register('role')}
+              <RHFSelect
+                control={control}
+                name="role"
+                label="Role"
+                placeholder="All Roles…"
+                options={availableRoles}
               />
               {errors.role && (
                 <p className="text-xs text-red-600">{errors.role.message}</p>
@@ -451,11 +461,12 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
           {/* Industry & Summary */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <Label htmlFor="industry">Industry</Label>
-              <Input
-                id="industry"
-                placeholder="e.g. Tech"
-                {...register('industry')}
+              <RHFSelect
+                control={control}
+                name="industry"
+                label="Industry"
+                placeholder="All Industries…"
+                options={availableIndustries}
               />
               {errors.industry && (
                 <p className="text-xs text-red-600">

@@ -20,8 +20,8 @@ import {
   type EmployerCandidatePreferences,
 } from '@/types';
 import {
+  availableCountries,
   availableIndustries,
-  availableLocations,
   availableRoles,
   availableSkills,
   experienceRanges,
@@ -148,7 +148,7 @@ export default function EmployerDashboard({
     {
       label: 'Location',
       placeholder: 'All Locations…',
-      options: availableLocations,
+      options: availableCountries,
       value: locationFilter,
       onChange: setLocationFilter,
     },
@@ -166,7 +166,7 @@ export default function EmployerDashboard({
     {
       label: 'Location',
       placeholder: 'All Locations…',
-      options: availableLocations,
+      options: availableCountries,
       value: resumeLocationFilter,
       onChange: setResumeLocationFilter,
     },

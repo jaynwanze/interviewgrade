@@ -351,7 +351,7 @@ export const mockCandidates: CandidateRow[] = [
   {
     id: 'c1',
     city: 'New York',
-    country: 'Ireland',
+    country: 'United States',
     phone_number: '(555) 123-4567',
     summary:
       'Highly motivated and skilled software engineer with a passion for developing innovative solutions. Alice excels in problem-solving and has a keen eye for detail and her strong communication skills enable her to collaborate seamlessly with cross-functional teams, making her an invaluable asset to any organization. Alice is always eager to learn and adapt to new technologies, continuously improving her skill set to stay ahead in the ever-evolving tech industry.',
@@ -416,7 +416,7 @@ export const mockCandidates: CandidateRow[] = [
   {
     id: 'c2',
     city: 'San Francisco',
-    country: 'Ireland',
+    country: 'United States',
     phone_number: '(555) 555-1234',
     summary: 'Full-stack developer with a focus on back-end optimization.',
     role: 'Full-Stack Developer',

@@ -112,17 +112,6 @@ export default function EmployerDashboard({
     'performance',
   );
 
-  // Popover states for existing filters.
-  const [industryOpen, setIndustryOpen] = useState(false);
-  const [skillOpen, setSkillOpen] = useState(false);
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [roleOpen, setRoleOpen] = useState(false);
-
-  // Popover states for resume filters.
-  const [resumeRoleOpen, setResumeRoleOpen] = useState(false);
-  const [resumeLocationOpen, setResumeLocationOpen] = useState(false);
-
-  /* ---------- performance filters --------------------- */
   const performanceFields = [
     {
       label: 'Role',
@@ -154,7 +143,6 @@ export default function EmployerDashboard({
     },
   ];
 
-  /* ---------- résumé filters -------------------------- */
   const resumeFields = [
     {
       label: 'Role',
@@ -180,7 +168,7 @@ export default function EmployerDashboard({
     },
   ];
 
-  // ========== Resume‑based filtering ==========
+  // Resume‑based filtering
   useEffect(() => {
     if (matchView !== 'resume') {
       setMatchedByResume([]);
@@ -343,13 +331,19 @@ export default function EmployerDashboard({
         );
       }
 
-      filtered = filtered.filter((cand) => {
-        const stats =
-          mode === 'interview'
-            ? cand.interview_skill_stats
-            : cand.practice_skill_stats;
-        return stats?.some((s) => s.skill === skillFilter);
-      });
+      // Skill — only filter once they've picked a skill
+      if (skillFilter !== 'Select Skill') {
+        filtered = filtered.filter((cand) => {
+          const stats =
+            mode === 'interview'
+              ? cand.interview_skill_stats
+              : cand.practice_skill_stats;
+          // must have done at least one session and scored > 0
+          return !!stats?.some(
+            (s) => s.skill === skillFilter && s.avg_score > 0,
+          );
+        });
+      }
     }
     if (filtered.length === 0) {
       setSkillGapMessage(
@@ -462,7 +456,7 @@ export default function EmployerDashboard({
                   matched={matched}
                   top3Worldwide={top3Worldwide}
                   mode={mode}
-                  employersPrefs={employerPrefs}
+                  selectedSkill={skillFilter}
                   organizationId={organizationId}
                 />
               )}

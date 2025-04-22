@@ -77,7 +77,7 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
           ...base,
           flexWrap: 'wrap',
           gap: '0.25rem',
-          padding: '6px 8px',
+          padding: '2px 8px',
         }),
         control: (base, state) => ({
           ...base,

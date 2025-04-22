@@ -1,18 +1,18 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from '@/components/ui/card';
 import type { CandidateRow, EmployerCandidatePreferences } from '@/types';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 /**
  * Props for the ResumeMatchedCandidatesView component.
@@ -26,10 +26,6 @@ interface ResumeMatchedCandidatesViewProps {
 
 /**
  * This component shows resume-based matches in a more visually appealing way:
- * 1) Subtle hover effect on each candidate card,
- * 2) Small snippet of the candidate’s resume data,
- * 3) Highlight any matching keywords in their skill list,
- * 4) “View Profile” button for token-based detail viewing.
  */
 export function ResumeMatchedCandidatesView({
   matchedByResume,
@@ -57,17 +53,32 @@ export function ResumeMatchedCandidatesView({
    */
   function highlightSkills(skill: string): JSX.Element {
     const lowerSkill = skill.toLowerCase();
-    const matchedKeyword = selectedKeywords.find(
-      (kw) => lowerSkill === kw.toLowerCase(),
+    const matchedKeyword = selectedKeywords.find((kw) =>
+      lowerSkill.match(kw.toLowerCase()),
     );
+
     if (matchedKeyword) {
-      // highlight the skill
+      const regex = new RegExp(`(${matchedKeyword})`, 'i');
+      const parts = skill.split(regex);
+
       return (
-        <span className="bg-yellow-200 px-1 rounded-sm text-black">
-          {skill}
-        </span>
+        <>
+          {parts.map((part, index) =>
+            regex.test(part) ? (
+              <span
+                key={index}
+                className="bg-yellow-200  rounded-sm text-black"
+              >
+                {part}
+              </span>
+            ) : (
+              part
+            ),
+          )}
+        </>
       );
     }
+
     return <span>{skill}</span>;
   }
 

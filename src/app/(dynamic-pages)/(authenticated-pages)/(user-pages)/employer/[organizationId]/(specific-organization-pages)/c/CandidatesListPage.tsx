@@ -1,13 +1,13 @@
 'use client';
 
-import { ChevronLeft, Star } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
+import { FilterBar } from '@/components/FilterBar';
+import { KeywordInput } from '@/components/KeywordInput';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -16,293 +16,455 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-import { CandidateFilters } from '@/components/Employee/Dashboard/Search/CandidateFilters';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { getCandidates } from '@/data/user/employee';
+import { mockCandidates, type CandidateRow } from '@/types';
 import {
-  mockCandidates,
-  type CandidateRow,
-  type CandidateSkillsStats,
-} from '@/types';
+  availableCountries,
+  availableIndustries,
+  availableRoles,
+  availableSkills,
+  experienceRanges,
+} from '@/utils/filterOptions';
+import dayjs from 'dayjs';
+import { Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
-interface CandidatesListPageProps {
-  organizationId: string;
+// helper to compute experience years
+type ExpRange = { label: string; min: number; max: number };
+function computeYears(start: string, end?: string | null) {
+  const s = dayjs(start);
+  const e = end ? dayjs(end) : dayjs();
+  return e.diff(s, 'year', true);
 }
 
-export default function CandidatesListPage({
-  organizationId,
-}: CandidatesListPageProps) {
-  const [candidates, setCandidates] = useState<CandidateRow[]>([]);
-  const [filteredCandidates, setFilteredCandidates] = useState<CandidateRow[]>(
-    [],
-  );
-  const [mode, setMode] = useState<'interview' | 'practice'>('practice');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+export default function CandidatesListPage({ organizationId }) {
+  const router = useRouter();
 
-  // State to store selected filters
-  const [filters, setFilters] = useState({
+  // raw data
+  const [candidates, setCandidates] = useState<CandidateRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // UI & filters
+  type Filters = {
+    industry: string;
+    role: string;
+    skill: string;
+    location: string;
+    minScore: number;
+    search: string;
+    keywords: string[];
+    resumeRole: string;
+    resumeLoc: string;
+    resumeExp: ExpRange;
+  };
+  const [filterView, setFilterView] = useState<'performance' | 'resume'>(
+    'performance'
+  );
+  const [mode, setMode] = useState<'practice' | 'interview'>('practice');
+  const [filters, setFilters] = useState<Filters>({
     industry: 'All Industries',
+    role: 'All Roles',
     skill: 'All Skills',
     location: 'All Locations',
     minScore: 0,
-    searchQuery: '',
+    search: '',
+    keywords: [],
+    resumeRole: 'All Roles',
+    resumeLoc: 'All Locations',
+    resumeExp: experienceRanges[0],
   });
 
-  const router = useRouter();
-  // On mount, load the candidates
+  // pagination
+  const pageSize = 10;
+  const [page, setPage] = useState(1);
+
+  // fetch candidates
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-
-        const candData = await getCandidates();
-        setCandidates(candData.concat(mockCandidates));
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error.message);
-        setLoading(false);
-      }
-    };
-    fetchData();
+    getCandidates()
+      .then((data) => setCandidates(data.concat(mockCandidates)))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Helper: Returns the candidate’s skill score for the selected mode
-  function getCandidateSkillScore(
-    cand: CandidateRow,
-    skill: string,
-  ): number | null {
-    const stats =
-      mode === 'interview'
-        ? cand.interview_skill_stats
-        : cand.practice_skill_stats;
-    if (!stats || stats.length === 0) return null;
-    const found = stats.find((s) => s.skill === skill);
-    return found ? found.avg_score : null;
-  }
+  // compute filtered list
+  const filtered = useMemo(() => {
+    if (loading || error) return [];
+    return candidates.filter((c) => {
+      // global search
+      const hay = (c.full_name + c.role + c.industry).toLowerCase();
+      if (
+        filters.search &&
+        !hay.includes(filters.search.toLowerCase())
+      )
+        return false;
 
-  // // Helper: Compute candidate's best skill average from the selected mode stats
-  // function getBestSkillAvg(cand: CandidateRow): number {
-  //   const stats =
-  //     mode === 'interview'
-  //       ? cand.interview_skill_stats
-  //       : cand.practice_skill_stats;
-  //   if (!stats || stats.length === 0) return 0;
-  //   return stats.reduce((max, s) => Math.max(max, s.avg_score), 0);
-  // }
-
-  useEffect(() => {
-    // 1) Filter out candidates that don’t have any stats for the selected mode.
-    let filtered = candidates.filter((cand) => {
-      if (mode === 'interview' && !cand.interview_skill_stats) return false;
-      if (mode === 'practice' && !cand.practice_skill_stats) return false;
+      if (filterView === 'performance') {
+        const stats =
+          mode === 'practice'
+            ? c.practice_skill_stats
+            : c.interview_skill_stats;
+        if (!stats?.length) return false;
+        if (
+          filters.industry !== 'All Industries' &&
+          !c.industry.includes(filters.industry)
+        )
+          return false;
+        if (filters.role !== 'All Roles' && !c.role.includes(filters.role))
+          return false;
+        if (
+          filters.location !== 'All Locations' &&
+          !c.country.includes(filters.location) &&
+          c.country.toLowerCase() !== 'remote'
+        )
+          return false;
+        if (filters.skill !== 'All Skills') {
+          const s = stats.find((s) => s.skill === filters.skill);
+          if (!s || s.avg_score < filters.minScore) return false;
+        }
+      } else {
+        const meta = c.resume_metadata;
+        if (!meta) return false;
+        if (filters.keywords.length) {
+          const blob = meta.skills
+            .map((s) => s.toLowerCase())
+            .join(' ');
+          if (
+            !filters.keywords.every((k) =>
+              blob.includes(k.toLowerCase())
+            )
+          )
+            return false;
+        }
+        if (filters.resumeRole !== 'All Roles') {
+          if (
+            !meta.experiences.some((e) =>
+              e.jobTitle
+                ?.toLowerCase()
+                .includes(filters.resumeRole.toLowerCase())
+            )
+          )
+            return false;
+        }
+        if (filters.resumeExp.label !== 'All Experience') {
+          if (
+            !meta.experiences.some((e) => {
+              if (!e.startDate) return false;
+              const yrs = computeYears(e.startDate, e.endDate);
+              return (
+                yrs >= filters.resumeExp.min &&
+                yrs <= filters.resumeExp.max
+              );
+            })
+          )
+            return false;
+        }
+        if (
+          filters.resumeLoc !== 'All Locations' &&
+          !c.country.includes(filters.resumeLoc) &&
+          c.country.toLowerCase() !== 'remote'
+        )
+          return false;
+      }
       return true;
     });
+  }, [candidates, loading, error, filters, filterView, mode]);
 
-    // 2) Basic text search on name, role, or industry.
-    if (filters.searchQuery.trim()) {
-      filtered = filtered.filter((c) => {
-        const fullStr = c.full_name + c.role + c.industry;
-        return fullStr
-          .toLowerCase()
-          .includes(filters.searchQuery.toLowerCase());
-      });
-    }
+  // whenever filter criteria change, reset to first page
+  useEffect(() => {
+    setPage(1);
+  }, [filtered, filterView, mode, filters]);
 
-    // Filter by industry only if a specific industry is chosen.
-    if (filters.industry !== 'All Industries') {
-      filtered = filtered.filter((cand) =>
-        cand.industry.includes(filters.industry),
-      );
-    }
+  // slice out current page
+  const pageCount = Math.ceil(filtered.length / pageSize);
+  const startIdx = (page - 1) * pageSize;
+  const currentPageItems = filtered.slice(
+    startIdx,
+    startIdx + pageSize
+  );
 
-    if (filters.skill !== 'All Skills') {
-      // Filter by skill and minimum score only if a specific skill is chosen.
-      filtered = filtered.filter((cand) => {
-        const score = getCandidateSkillScore(cand, filters.skill);
-        return score !== null && score >= filters.minScore;
-      });
-    }
-
-    // Filter by location
-    if (filters.location !== 'All Locations') {
-      // e.g. match or 'remote'
-      filtered = filtered.filter(
-        (cand) =>
-          cand.country.includes(filters.location) ||
-          cand.country.toLowerCase() === 'remote',
-      );
-    }
-
-    setFilteredCandidates(filtered);
-  }, [filters, candidates, mode]);
-
-  function handleViewCandidate(candidateId: string) {
-    router.push(`/employer/${organizationId}/c/${candidateId}`);
-  }
-
-  function getShortName(fullName: string): string {
-    if (!fullName) return '';
-
-    // Split by spaces, ignoring empty strings
-    const parts = fullName.split(' ').filter(Boolean);
-
-    // If there's only one name part (e.g. "Cher" or "Madonna"), just return that
-    if (parts.length === 1) {
-      return parts[0];
-    }
-
-    // Otherwise, use the first part in full + the first letter of the *last* part
-    const firstName = parts[0];
-    const lastName = parts[parts.length - 1]; // handle middle names gracefully
-    return `${firstName} ${lastName.charAt(0).toUpperCase()}.`;
-  }
-
-  // Use the mode state from your component in this helper.
-  function getBestSkillObject(cand: CandidateRow): CandidateSkillsStats | null {
+  // helpers for columns
+  function getTopSkill(c) {
     const stats =
-      mode === 'interview'
-        ? cand.interview_skill_stats
-        : cand.practice_skill_stats;
-    if (stats === null) return null;
-    let best = stats[0];
-    for (const s of stats) {
-      if (s.avg_score > best.avg_score) {
-        best = s;
-      }
-    }
-    return best;
+      mode === 'practice'
+        ? c.practice_skill_stats
+        : c.interview_skill_stats;
+    if (!stats?.length) return null;
+    return stats.reduce(
+      (best, s) => (s.avg_score > best.avg_score ? s : best),
+      stats[0]
+    );
   }
+  function getKeywordCount(c) {
+    const skills = c.resume_metadata?.skills ?? [];
+    return skills.filter((s) =>
+      filters.keywords
+        .map((k) => k.toLowerCase())
+        .includes(s.toLowerCase())
+    ).length;
+  }
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-4">
+    <div className="space-y-6 max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold">Candidate Search</h1>
-      {/* Tabs for Mode Selection */}
-      <Tabs
-        defaultValue="practice"
-        onValueChange={(value) => setMode(value as 'interview' | 'practice')}
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="practice">Practice Statistics</TabsTrigger>
-          <TabsTrigger value="interview">Interview Statistics</TabsTrigger>
-        </TabsList>
-      </Tabs>
-      {/* Header / Nav / Filter */}
-      <div className="flex items-center h-full w-full justify-between gap-4 space-x-4">
-        <div className="flex flex-wrap gap-4 ">
-          <button
-            onClick={() => window.history.back()}
-            className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 p-1"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          {/* Reusable Filter Bar */}
-          <CandidateFilters
-            // If you have saved prefs, pass them here as initial or override
-            industryValue={'All Industries'}
-            skillValue={'All Skills'}
-            locationValue={'All Locations'}
-            minScoreValue={0}
-            searchQueryValue={''}
-            onChange={(updated) => setFilters(updated)}
+
+      {/* Search + toggle */}
+      <div className="flex justify-between items-end space-x-3">
+        <div className="flex-1 min-w-[200px]">
+          <Label className="text-sm text-muted-foreground">
+            Search
+          </Label>
+          <Input
+            placeholder="Search by name, job or industry…"
+            className="w-full"
+            value={filters.search}
+            onChange={(e) =>
+              setFilters((f) => ({
+                ...f,
+                search: e.target.value,
+              }))
+            }
           />
+        </div>
+        <div className="flex items-center space-x-2 p-2">
+          <Switch
+            checked={filterView === 'performance'}
+            onCheckedChange={() =>
+              setFilterView((fv) =>
+                fv === 'performance' ? 'resume' : 'performance'
+              )
+            }
+          />
+          <Label className="text-sm">
+            {filterView === 'performance'
+              ? 'Performance View'
+              : 'Resume View'}
+          </Label>
         </div>
       </div>
 
-      {/* Candidate Results Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Candidate Results</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredCandidates.length === 0 ? (
-            <p className="text-sm text-gray-500">No candidates found.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Top Skill</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCandidates.map((candidate) => {
-                  const bestSkill = getBestSkillObject(candidate);
-                  return (
-                    <TableRow key={candidate.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage
-                              src={candidate.avatar_url}
-                              alt={getShortName(candidate.full_name)}
-                            />
-                            <AvatarFallback>
-                              {candidate.full_name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          {getShortName(candidate.full_name)}
-                        </div>
-                      </TableCell>
-                      <TableCell>{candidate.role}</TableCell>
-                      <TableCell>
-                        {candidate.city}, {candidate.country}
-                      </TableCell>
-                      <TableCell>{candidate.industry}</TableCell>
-                      <TableCell className="justify-center ">
-                        {bestSkill ? (
-                          <>
-                            <Badge variant="outline" className="gap-1">
-                              <Star className="h-4 w-4 text-yellow-500" />
-                              {bestSkill.skill}
-                            </Badge>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">N/A</span>
-                        )}
-                      </TableCell>
-                      {/* <TableCell>
-                        <Badge variant="outline">
-                          {cost} {cost > 1 ? 'tokens' : 'token'}
-                        </Badge>
-                      </TableCell> */}
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {/* <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUnlockCandidate(candidate)}
-                          >
-                            Unlock
-                          </Button> */}
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() => handleViewCandidate(candidate.id)}
-                          >
-                            View
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      {/* Resume keywords */}
+      {filterView === 'resume' && (
+        <div className="flex-1 min-w-[200px]">
+          <Label className="text-sm text-muted-foreground">
+            Resume Skill Keywords
+          </Label>
+          <KeywordInput
+            value={filters.keywords}
+            onChange={(ks) =>
+              setFilters((f) => ({ ...f, keywords: ks }))
+            }
+          />
+        </div>
+      )}
+
+      {/* Filter bar */}
+      <FilterBar
+        fields={
+          filterView === 'performance'
+            ? [
+                {
+                  label: 'Role',
+                  placeholder: 'All Roles…',
+                  options: availableRoles,
+                  value: filters.role,
+                  onChange: (v) =>
+                    setFilters((f) => ({ ...f, role: v })),
+                },
+                {
+                  label: 'Industry',
+                  placeholder: 'All Industries…',
+                  options: availableIndustries,
+                  value: filters.industry,
+                  onChange: (v) =>
+                    setFilters((f) => ({ ...f, industry: v })),
+                },
+                {
+                  label: 'Skill',
+                  placeholder: 'All Skills…',
+                  options: availableSkills,
+                  value: filters.skill,
+                  onChange: (v) =>
+                    setFilters((f) => ({ ...f, skill: v })),
+                },
+                {
+                  label: 'Location',
+                  placeholder: 'All Locations…',
+                  options: availableCountries,
+                  value: filters.location,
+                  onChange: (v) =>
+                    setFilters((f) => ({ ...f, location: v })),
+                },
+              ]
+            : [
+                {
+                  label: 'Role',
+                  placeholder: 'All Roles…',
+                  options: availableRoles,
+                  value: filters.resumeRole,
+                  onChange: (v) =>
+                    setFilters((f) => ({ ...f, resumeRole: v })),
+                },
+                {
+                  label: 'Location',
+                  placeholder: 'All Locations…',
+                  options: availableCountries,
+                  value: filters.resumeLoc,
+                  onChange: (v) =>
+                    setFilters((f) => ({ ...f, resumeLoc: v })),
+                },
+                {
+                  label: 'Experience',
+                  placeholder: 'All Experience…',
+                  options: experienceRanges.map((r) => r.label),
+                  value: filters.resumeExp.label,
+                  onChange: (lbl) => {
+                    const rng = experienceRanges.find(
+                      (r) => r.label === lbl
+                    )!;
+                    setFilters((f) => ({ ...f, resumeExp: rng }));
+                  },
+                },
+              ]
+        }
+      />
+
+      {/* performance-tabs */}
+      {filterView === 'performance' && (
+        <Tabs
+          defaultValue="practice"
+          onValueChange={(v) =>
+            setMode(v as 'practice' | 'interview')
+          }
+        >
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="practice">
+              Practice Statistics
+            </TabsTrigger>
+            <TabsTrigger value="interview">
+              Interview Statistics
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
+
+      {/* results table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Job Title</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Industry</TableHead>
+            <TableHead>
+              {filterView === 'performance'
+                ? 'Top Skill'
+                : 'Keywords Matched'}
+            </TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {currentPageItems.map((c) => {
+            const top =
+              filterView === 'performance' ? getTopSkill(c) : null;
+            const kwCount =
+              filterView === 'resume' ? getKeywordCount(c) : 0;
+            return (
+              <TableRow key={c.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={c.avatar_url}
+                        alt={c.full_name}
+                      />
+                      <AvatarFallback>
+                        {c.full_name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    {c.full_name}
+                  </div>
+                </TableCell>
+                <TableCell>{c.role}</TableCell>
+                <TableCell>
+                  {c.city}, {c.country}
+                </TableCell>
+                <TableCell>{c.industry}</TableCell>
+                <TableCell>
+                  {filterView === 'performance' && top ? (
+                    <Badge
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
+                      <Star className="h-4 w-4 text-yellow-500" />{' '}
+                      {top.skill}
+                    </Badge>
+                  ) : filterView === 'resume' ? (
+                    <Badge variant="outline">
+                      {kwCount} / {filters.keywords.length}
+                    </Badge>
+                  ) : null}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="link"
+                    onClick={() =>
+                      router.push(
+                        `/employer/${organizationId}/c/${c.id}`
+                      )
+                    }
+                  >
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+
+      {/* pagination controls */}
+      {pageCount > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-sm text-muted-foreground">
+            Showing {startIdx + 1}–
+            {Math.min(startIdx + pageSize, filtered.length)} of{' '}
+            {filtered.length}
+          </span>
+          <div className="space-x-2">
+            <Button
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              size="sm"
+              disabled={page === pageCount}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {filtered.length === 0 && (
+        <p className="text-center text-gray-500 mt-4">
+          No candidates found.
+        </p>
+      )}
     </div>
   );
 }

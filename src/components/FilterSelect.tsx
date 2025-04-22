@@ -31,6 +31,10 @@ export interface FilterSelectProps<T extends string = string> {
   onChange: (v: T) => void;
   /** width classes (Tailwind) */
   className?: string;
+
+  
+
+
 }
 
 /* ---------- component -------------------------------------------------- */

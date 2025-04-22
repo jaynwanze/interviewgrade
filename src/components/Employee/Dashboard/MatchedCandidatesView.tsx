@@ -20,7 +20,7 @@ import {
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
-import type { CandidateRow, EmployerCandidatePreferences } from '@/types';
+import type { CandidateRow } from '@/types';
 import { FireIcon } from '@heroicons/react/solid';
 import { TrophyIcon } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export function MatchedCandidatesView({
   top3Worldwide,
   matched,
   mode,
-  employersPrefs,
+  selectedSkill,
   organizationId,
 }: {
   skillGapMessage: string;
@@ -40,7 +40,7 @@ export function MatchedCandidatesView({
   top3Worldwide: CandidateRow[] | null;
   matched: CandidateRow[];
   mode: string;
-  employersPrefs: EmployerCandidatePreferences;
+  selectedSkill: string;
   organizationId: string;
 }) {
   const router = useRouter();
@@ -86,7 +86,7 @@ export function MatchedCandidatesView({
 
   const topThreeBarData = topThree?.map((cand) => ({
     name: getShortName(cand.full_name),
-    score: getCandidateScoreAvgBySkill(cand, employersPrefs.skills),
+    score: getCandidateScoreAvgBySkill(cand, selectedSkill),
   }));
 
   return (
@@ -205,7 +205,7 @@ export function MatchedCandidatesView({
                   {topThree.map((cand, idx) => {
                     const candidateAvg = getCandidateScoreAvgBySkill(
                       cand,
-                      employersPrefs.skills,
+                      selectedSkill,
                     );
                     return (
                       <motion.div
@@ -321,7 +321,7 @@ export function MatchedCandidatesView({
                         Score{' '}
                         {getCandidateScoreAvgBySkill(
                           topProspect,
-                          employersPrefs.skills,
+                          selectedSkill,
                         ).toFixed(1)}
                         /100
                       </Badge>

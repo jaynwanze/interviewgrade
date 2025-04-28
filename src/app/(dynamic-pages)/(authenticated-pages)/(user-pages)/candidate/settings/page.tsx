@@ -1,11 +1,19 @@
-import { getUserProfile } from '@/data/user/user';
-import { AccountSettings } from './AccountSettings';
 
+import { T } from '@/components/ui/Typography';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { Suspense } from 'react';
+import { SetCandidateAccountDetails } from './SetCandidateDetails';
 
 export default async function AccountSettingsPage() {
   const user = await serverGetLoggedInUser();
-  const userProfile = await getUserProfile(user.id);
 
-  return <AccountSettings userProfile={userProfile} userEmail={user.email} />;
+  if (!user) {
+    return <p className="text-sm"> User not found</p>;
+  }
+
+  return (
+    <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
+      <SetCandidateAccountDetails />
+    </Suspense>
+  );
 }

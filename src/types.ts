@@ -354,7 +354,7 @@ export const mockCandidates: CandidateRow[] = [
     country: 'United States',
     phone_number: '(555) 123-4567',
     summary:
-      'Highly motivated and skilled software engineer with a passion for developing innovative solutions. Alice excels in problem-solving and has a keen eye for detail and her strong communication skills enable her to collaborate seamlessly with cross-functional teams, making her an invaluable asset to any organization. Alice is always eager to learn and adapt to new technologies, continuously improving her skill set to stay ahead in the ever-evolving tech industry.',
+      'Experienced Software Engineer in New York, United States with a strong skill set in Problem Solving (avg. 92) and Decision Making (avg. 88). Notable progress shown in Problem Solving from a previous average score of 90. Candidate is committed to developing innovative solutions and excelling in cross-functional collaboration.',
     role: 'Software Engineer',
     industry: 'Information Technology & Software',
     practice_skill_stats: [
@@ -418,7 +418,8 @@ export const mockCandidates: CandidateRow[] = [
     city: 'San Francisco',
     country: 'United States',
     phone_number: '(555) 555-1234',
-    summary: 'Full-stack developer with a focus on back-end optimization.',
+    summary:
+      'Full-Stack Developer in San Francisco, United States with expertise in Problem Solving (avg. 83) and Adaptability (avg. 81). Demonstrates consistent improvement in Adaptability from a previous average score of 76. Candidate is focused on back-end optimization and scalable web application development.',
     role: 'Full-Stack Developer',
     industry: 'Information Technology & Software',
     practice_skill_stats: [
@@ -473,10 +474,11 @@ export const mockCandidates: CandidateRow[] = [
   },
   {
     id: 'c3',
-    city: 'Toronto',
+    city: 'Calfornia',
     country: 'United States',
     phone_number: '(416) 999-0000',
-    summary: 'Skilled data analyst passionate about Decision Making & stats.',
+    summary:
+      'Data Analyst in Calfornia, United States with a focus on Behavioural skills (avg. 88). Demonstrates steady improvement in Behavioural skills from a previous average score of 85. Candidate is passionate about decision-making and statistical analysis.',
     role: 'Data Analyst',
     industry: 'Information Technology & Software',
     practice_skill_stats: [],
@@ -527,7 +529,8 @@ export const mockCandidates: CandidateRow[] = [
     city: 'Remote',
     country: 'Remote',
     phone_number: '(555) 999-9999',
-    summary: 'Problem solver with a knack for creative solutions.',
+    summary:
+      'Product Manager working remotely with expertise in Conflict Resolution (avg. 87) and Problem Solving (avg. 60). Shows consistent performance in Conflict Resolution with a previous average score of 86. Candidate excels in leading cross-functional teams and delivering impactful products.',
     role: 'Product Manager',
     industry: 'Information Technology & Software',
     practice_skill_stats: [
@@ -586,7 +589,8 @@ export const mockCandidates: CandidateRow[] = [
     city: 'Dublin',
     country: 'Ireland',
     phone_number: '+353 12 345 6789',
-    summary: 'Focused on continuous improvement and quick learning.',
+    summary:
+      'Experienced Software Engineer in Dublin, Ireland with a strong skill set in Adaptability (avg. 92) and Conflict Resolution (avg. 84). Notable progress shown in Adaptability from a previous average score of 90. Candidate is focused on continuous improvement and quick learning.',
     role: 'Software Engineer',
     industry: 'Information Technology & Software',
     practice_skill_stats: [

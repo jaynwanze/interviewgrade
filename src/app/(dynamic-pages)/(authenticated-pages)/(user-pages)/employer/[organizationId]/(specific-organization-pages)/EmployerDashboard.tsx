@@ -7,6 +7,7 @@ import { FilterBar } from '@/components/FilterBar';
 import { KeywordInput } from '@/components/KeywordInput';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -104,13 +105,12 @@ export default function EmployerDashboard({
     min: number;
     max: number;
   } | null>(null);
-  const [experienceBracketOpen, setExperienceBracketOpen] =
-    useState<boolean>(false);
+
+  type FilterStatisticsType = 'performance' | 'resume';
 
   //  State: which matching view is active: "performance" or "resume".
-  const [matchView, setMatchView] = useState<'performance' | 'resume'>(
-    'performance',
-  );
+  const [matchView, setMatchView] =
+    useState<FilterStatisticsType>('performance');
 
   const performanceFields = [
     {
@@ -388,48 +388,62 @@ export default function EmployerDashboard({
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto min-h-screen">
-        <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
         <LoadingSpinner />
       </div>
     );
   } else if (error) {
     return (
       <div className="space-y-6 max-w-5xl mx-auto min-h-screen">
-        <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
+        <h1 className="text-2xl font-bold text-center mb-1">
+          Candidate Dashboard
+        </h1>
+        <p className="text-center text-gray-500">
+          Explore detailed analytics and insights for this {mode} mode template.
+        </p>
+        <Separator className="my-4" />
         <p className="text-red-500">{error}</p>
       </div>
     );
   } else
     return (
       <TooltipProvider>
-        <div className="space-y-6 max-w-5xl mx-auto">
-          <div className="flex justify-between mb-4 relative">
-            <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
-            <span className="flex justify-center space-x-2 items-center text-sm">
-              <Label htmlFor="filter-mode">
-                {matchView === 'performance'
-                  ? 'Performance Filter'
-                  : 'Resume Filter'}
-              </Label>
-              <Switch
-                id="filter-mode"
-                checked={matchView === 'performance'}
-                onCheckedChange={() =>
-                  setMatchView((prev) =>
-                    prev === 'performance' ? 'resume' : 'performance',
-                  )
-                }
-              />
-            </span>
+        <div className="space-y-4 max-w-5xl mx-auto">
+          <h1 className="text-2xl font-bold text-center">
+            Candidate Dashboard
+          </h1>
+          <div className="flex mb-4 relative flex-col items-center">
+            <p className="text-center text-gray-500">
+              Browse and filter matched candidates based on your preferences.
+            </p>
           </div>
+          <Separator className="my-4" />
 
           {/* Show different filter panels based on matchView */}
           {matchView === 'performance' ? (
             <>
+              <span className="flex justify-end space-x-2 items-center text-sm mt-3">
+                <Label htmlFor="filter-mode">
+                  {matchView === 'performance'
+                    ? 'Performance Filter'
+                    : 'Resume Filter'}
+                </Label>
+                <Switch
+                  id="filter-mode"
+                  checked={
+                    matchView === ('performance' as FilterStatisticsType)
+                  }
+                  onCheckedChange={() =>
+                    setMatchView((prev) =>
+                      prev === 'performance' ? 'resume' : 'performance',
+                    )
+                  }
+                />
+              </span>
               <FilterBar fields={performanceFields} />
               <h1 className="text-2xl font-bold">
                 Matched Candidate Statistics
               </h1>
+              <Separator className="my-4" />
               <Tabs
                 defaultValue="practice"
                 onValueChange={(value) =>
@@ -464,6 +478,22 @@ export default function EmployerDashboard({
           ) : (
             // Resume Matches Filter Panel
             <>
+              <span className="flex justify-end space-x-2 items-center text-sm mt-3">
+                <Label htmlFor="filter-mode">
+                  {matchView === ('performance' as FilterStatisticsType)
+                    ? 'Performance Filter'
+                    : 'Resume Filter'}
+                </Label>
+                <Switch
+                  id="filter-mode"
+                  checked={
+                    matchView === ('performance' as FilterStatisticsType)
+                  }
+                  onCheckedChange={(checked) =>
+                    setMatchView(checked ? 'performance' : 'resume')
+                  }
+                />
+              </span>
               <div className="flex flex-wrap justify-start gap-2">
                 <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[350px]">
                   <label className="block text-sm mb-1">

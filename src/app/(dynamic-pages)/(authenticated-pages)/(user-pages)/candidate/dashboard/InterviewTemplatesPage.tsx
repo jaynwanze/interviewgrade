@@ -185,7 +185,7 @@ export default function InterviewAnalyticsPage() {
                 </div> */}
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+          <div className="bg-blue-100 text-blue-800 text-xs text-center font-medium px-2.5 py-0.5 rounded-full">
             {uniqueFilteredTemplateInterviews.length} Skills Found
           </div>
 

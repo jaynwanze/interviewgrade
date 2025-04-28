@@ -52,6 +52,7 @@ export function TutorialPracticeStep() {
   const [picking, setPicking] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null);
+  
 
   useEffect(() => {
     getPracticeTemplatesByCategoryAndMode(
@@ -155,97 +156,105 @@ export function TutorialPracticeStep() {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Start practice tutorial</Button>
-      </DialogTrigger>
+    <>
+      {isStarting ? (
+        <LoadingOverlay />
+      ) : (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">Start practice tutorial</Button>
+          </DialogTrigger>
 
-      <DialogContent className="max-w-md p-0 overflow-hidden">
-        {/* progress bar */}
-        <div
-          className="h-1 bg-primary transition-all"
-          style={{ width: `${((step + 1) / tutorial.length) * 100}%` }}
-        />
+          <DialogContent className="max-w-md p-0 overflow-hidden">
+            {/* progress bar */}
+            <div
+              className="h-1 bg-primary transition-all"
+              style={{ width: `${((step + 1) / tutorial.length) * 100}%` }}
+            />
 
-        <div className="p-6">
-          <DialogHeader className="mb-4">
-            <DialogTitle>{tutorial[step].title}</DialogTitle>
-          </DialogHeader>
+            <div className="p-6">
+              <DialogHeader className="mb-4">
+                <DialogTitle>{tutorial[step].title}</DialogTitle>
+              </DialogHeader>
 
-          {/* animated body */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              variants={slide}
-              initial="hidden"
-              animate="show"
-              exit="exit"
-              transition={{ duration: 0.25 }}
-              className="space-y-4"
-            >
-              {/* 2) Render Lottie with imported JSON */}
-              <div className="flex justify-center">
-                <Lottie
-                  lottieRef={lottieRef}
-                  animationData={tutorial[step].anim}
-                  loop
-                  autoplay
-                  style={{}}
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {tutorial[step].desc}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-
-          {error && (
-            <p className="text-sm text-destructive mt-4 text-center">{error}</p>
-          )}
-
-          <DialogFooter className="mt-6 flex justify-between">
-            {step > 0 ? (
-              <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
-                <ArrowLeftIcon className="mr-1" /> Back
-              </Button>
-            ) : (
-              <div />
-            )}
-
-            {step < tutorial.length - 1 ? (
-              <Button onClick={() => setStep((s) => s + 1)}>
-                Next <ArrowRightIcon className="ml-1" />
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  onClick={() => setPicking(true)}
-                  disabled={isStarting}
+              {/* animated body */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  variants={slide}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  transition={{ duration: 0.25 }}
+                  className="space-y-4"
                 >
-                  Choose topic…
-                </Button>
-                <Button onClick={startRandom} disabled={isStarting}>
-                  {isStarting ? 'Starting…' : 'Surprise me!'}
-                </Button>
-              </div>
+                  {/* 2) Render Lottie with imported JSON */}
+                  <div className="flex justify-center">
+                    <Lottie
+                      lottieRef={lottieRef}
+                      animationData={tutorial[step].anim}
+                      loop
+                      autoplay
+                      style={{}}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {tutorial[step].desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+
+              {error && (
+                <p className="text-sm text-destructive mt-4 text-center">
+                  {error}
+                </p>
+              )}
+
+              <DialogFooter className="mt-6 flex justify-between">
+                {step > 0 ? (
+                  <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
+                    <ArrowLeftIcon className="mr-1" /> Back
+                  </Button>
+                ) : (
+                  <div />
+                )}
+
+                {step < tutorial.length - 1 ? (
+                  <Button onClick={() => setStep((s) => s + 1)}>
+                    Next <ArrowRightIcon className="ml-1" />
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      onClick={() => setPicking(true)}
+                      disabled={isStarting}
+                    >
+                      Choose topic…
+                    </Button>
+                    <Button onClick={startRandom} disabled={isStarting}>
+                      {isStarting ? 'Starting…' : 'Surprise me!'}
+                    </Button>
+                  </div>
+                )}
+              </DialogFooter>
+            </div>
+
+            {/* Loading overlay */}
+            {isStarting && <LoadingOverlay />}
+
+            {picking && (
+              <TemplatePicker
+                onSelect={(tpl) => {
+                  setPicking(false);
+                  startWithTemplate(tpl);
+                }}
+                onCancel={() => setPicking(false)}
+              />
             )}
-          </DialogFooter>
-        </div>
-
-        {/* Loading overlay */}
-        {isStarting && <LoadingOverlay />}
-
-        {picking && (
-          <TemplatePicker
-            onSelect={(tpl) => {
-              setPicking(false);
-              startWithTemplate(tpl);
-            }}
-            onCancel={() => setPicking(false)}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }

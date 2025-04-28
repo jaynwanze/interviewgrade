@@ -32,10 +32,9 @@ export async function SetCandidateAccountDetails() {
 
             <Card className="max-md ">
                 <CardHeader className="text-center space-y-2">
-                    <CardTitle>Candidate preferences</CardTitle>
+                    <CardTitle>Candidate Details</CardTitle>
                     <p className="text-sm text-muted-foreground max-w-lg">
-                        Set your preferences for candidates. This will help us find the best
-                        candidates for you.
+                        Manage your candidate details here.
                     </p>
                 </CardHeader>
                 <CardContent>

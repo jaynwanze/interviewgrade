@@ -39,7 +39,6 @@ function parsePartial(text: string) {
   } = {};
 
   // 1) Score
-  // e.g. "Score (%): 45/100%"
   const scoreRegex = /Score \(%\):\s*(\d+)\s*\/\s*100%/;
   const scoreMatch = text.match(scoreRegex);
   if (
@@ -51,7 +50,6 @@ function parsePartial(text: string) {
   }
 
   // 2) Summary
-  // We'll capture everything after "Summary:" until "Advice for Next Question" (or end)
   const summaryRegex = /Summary:\s*([\s\S]+?)(?=\nAdvice for Next Question|$)/;
   const summaryMatch = text.match(summaryRegex);
   if (summaryMatch && summaryMatch[1]) {
@@ -59,7 +57,6 @@ function parsePartial(text: string) {
   }
 
   // 3) Advice
-  // We'll capture everything after "Advice for Next Question:" until the end
   const adviceRegex = /Advice for Next Question:\s*([\s\S]+)/;
   const adviceMatch = text.match(adviceRegex);
   if (adviceMatch && adviceMatch[1]) {
@@ -86,9 +83,6 @@ export function PracticeInterviewFlow({
     [key: number]: specificFeedbackType | null;
   }>({});
 
-  const [partialFeedback, setPartialFeedback] = useState<{
-    [key: number]: string | null;
-  }>({});
   const answers = useRef<string[]>([]);
   const { addNotification } = useNotifications();
   const [scoreStringColour, setScoreStringColour] = useState('');
@@ -315,21 +309,38 @@ export function PracticeInterviewFlow({
 
   if (isInterviewComplete && isTutorialMode) {
     return (
-      <div className="flex flex-col items-center min-h-screen">
-        <h1 className="mt-8 text-2xl font-bold">Practice session complete!</h1>
-        <p className="mt-4">
-          We are evaluating your session so please Hold tight!
-        </p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+        <div className="p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg text-center">
+          <h1 className="text-3xl font-bold mb-4">🎉 Practice Complete!</h1>
+          <p className="text-lg mb-6">
+            We are evaluating your session. Please hold tight!
+          </p>
+          <div className="flex items-center justify-center space-x-2">
+            <div className="w-4 h-4 rounded-full bg-grey-500 animate-pulse"></div>
+            <div className="w-4 h-4 rounded-full bg-grey-500 animate-pulse delay-150"></div>
+            <div className="w-4 h-4 rounded-full bg-grey-500 animate-pulse delay-300"></div>
+          </div>
+        </div>
       </div>
     );
   } else if (isInterviewComplete) {
     return (
-      <div className="flex flex-col items-center min-h-screen">
-        <h1 className="mt-8 text-2xl font-bold">Practice session complete!</h1>
-        <p className="mt-4 mb-3">
-          Check your session report in the notifiction link.
-        </p>
-        <Button onClick={() => router.push('/candidate')}>Return Home</Button>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gr">
+        <div className="p-6  shadow-lg rounded-lg text-center">
+          <h1 className="text-3xl font-bold mb-4">
+            <IconCheckCircle className="h-6 w-6 text-green-500" />
+            Practice Complete!
+          </h1>
+          <p className="text-lg mb-6">
+            Check your session report in the notification link.
+          </p>
+          <Button
+            onClick={() => router.push('/candidate')}
+            className="px-6 py-3 transition-all"
+          >
+            Return Home
+          </Button>
+        </div>
       </div>
     );
   }
@@ -437,21 +448,21 @@ export function PracticeInterviewFlow({
                         <div className="text-left mt-4 space-y-3">
                           {questionFeedback[currentQuestionIndex]?.mark !==
                             undefined && (
-                            <div className="text-center">
-                              <strong className="block text-base">
-                                Score (%):
-                              </strong>
-                              <p
-                                className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
-                              >
-                                {Math.round(
-                                  questionFeedback[currentQuestionIndex]
-                                    ?.mark ?? 0,
-                                )}
-                                /100%
-                              </p>
-                            </div>
-                          )}
+                              <div className="text-center">
+                                <strong className="block text-base">
+                                  Score (%):
+                                </strong>
+                                <p
+                                  className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
+                                >
+                                  {Math.round(
+                                    questionFeedback[currentQuestionIndex]
+                                      ?.mark ?? 0,
+                                  )}
+                                  /100%
+                                </p>
+                              </div>
+                            )}
 
                           {questionFeedback[currentQuestionIndex]?.summary && (
                             <div>

@@ -56,8 +56,8 @@ export default function PurchaseTokens({
 
   return (
     <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-center mb-4">Purchase Tokens</h1>
-      <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
+      <h1 className="text-2xl font-bold text-center mb-2">Purchase Tokens</h1>
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
         Choose a token bundle to make a one time payment.
       </p>
       <Separator className="my-4" />

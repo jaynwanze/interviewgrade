@@ -20,16 +20,16 @@ export default function OrganizationSettingsLayout({
       href: `/employer/${organizationId}/settings`,
       icon: <SquarePen />,
     },
-    {
-      label: 'Organization Members',
-      href: `/employer/${organizationId}/settings/members`,
-      icon: <UserRound />,
-    },
-    {
-      label: 'Billing',
-      href: `/employer/${organizationId}/settings/billing`,
-      icon: <DollarSign />,
-    },
+    // {
+    //   label: 'Organization Members',
+    //   href: `/employer/${organizationId}/settings/members`,
+    //   icon: <UserRound />,
+    // },
+    // {
+    //   label: 'Billing',
+    //   href: `/employer/${organizationId}/settings/billing`,
+    //   icon: <DollarSign />,
+    // },
   ];
 
   return (

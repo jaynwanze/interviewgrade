@@ -3,6 +3,7 @@ import { EditOrganizationForm } from './EditOrganizationForm';
 import { getOrganizationTitle } from '@/data/user/organizations';
 import { T } from '@/components/ui/Typography';
 import { SetDefaultOrganizationPreference } from './SetDefaultOrganizationPreference';
+import { SetEmployerPreferences } from './SetEmployerPreferences';
 
 async function EditOrganization({
   organizationId,
@@ -28,11 +29,14 @@ export default async function EditOrganizationPage({
   const { organizationId } = params;
   return (
     <div className="space-y-4">
-      <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
+      {/* <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
         <EditOrganization organizationId={organizationId} />
       </Suspense>
       <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
         <SetDefaultOrganizationPreference organizationId={organizationId} />
+      </Suspense> */}
+      <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
+        <SetEmployerPreferences />
       </Suspense>
     </div>
   );

@@ -314,7 +314,7 @@ export function MatchedCandidatesView({
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium text-lg">
+                      <p className="font-medium text-lg text-center">
                         {getShortName(topProspect.full_name)}
                       </p>
                       <Badge variant="secondary">

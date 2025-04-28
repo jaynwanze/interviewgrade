@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-import { ResumeHighlights } from '@/components/Employee/Dashboard/CandidateDetailedView/ResumeHighlights';
+import { ResumeHighlights } from '@/components/Employee/CandidateDetailedView/ResumeHighlights';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
   Table,

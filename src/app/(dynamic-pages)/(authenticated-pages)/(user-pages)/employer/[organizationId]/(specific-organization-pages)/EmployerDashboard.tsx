@@ -407,17 +407,20 @@ export default function EmployerDashboard({
   } else
     return (
       <TooltipProvider>
-        <div className="space-y-4 max-w-5xl mx-auto">
-          <h1 className="text-2xl font-bold text-center">
-            Candidate Dashboard
-          </h1>
-          <div className="flex mb-4 relative flex-col items-center">
-            <p className="text-center text-gray-500">
-              Browse and filter matched candidates based on your preferences.
-            </p>
-          </div>
-          <Separator className="my-4" />
-
+        <div className="max-w-5xl mx-auto">
+          <span className="space-y-2">
+            <h1 className="text-2xl font-bold text-center">
+              Candidate Dashboard
+            </h1>
+            <div className="flex mb-4 relative flex-col items-center">
+              <p className="text-center text-gray-500">
+                Browse and filter matched candidates based on your preferences.
+              </p>
+            </div>
+          </span>
+        </div>
+        <Separator className="my-4" />
+        <div className="space-y-6">
           {/* Show different filter panels based on matchView */}
           {matchView === 'performance' ? (
             <>
@@ -521,6 +524,6 @@ export default function EmployerDashboard({
             </>
           )}
         </div>
-      </TooltipProvider>
+      </TooltipProvider >
     );
 }

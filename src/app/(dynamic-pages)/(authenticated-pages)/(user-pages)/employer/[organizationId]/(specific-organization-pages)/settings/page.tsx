@@ -3,7 +3,7 @@ import { EditOrganizationForm } from './EditOrganizationForm';
 import { getOrganizationTitle } from '@/data/user/organizations';
 import { T } from '@/components/ui/Typography';
 import { SetDefaultOrganizationPreference } from './SetDefaultOrganizationPreference';
-import { SetEmployerPreferences } from './SetEmployerPreferences';
+import { SetEmployerAccountSettings } from './SetEmployerAccountSettings';
 
 async function EditOrganization({
   organizationId,
@@ -35,8 +35,9 @@ export default async function EditOrganizationPage({
       <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
         <SetDefaultOrganizationPreference organizationId={organizationId} />
       </Suspense> */}
+
       <Suspense fallback={<T.Subtle>Loading...</T.Subtle>}>
-        <SetEmployerPreferences />
+        <SetEmployerAccountSettings />
       </Suspense>
     </div>
   );

@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ConfirmDeleteAccountDialog } from '@/components/Settings/ConfirmDeleteAccountDialog';
 
-export function AccountSettings({
+export function EmployerAccountSettings({
   userProfile,
   userEmail,
 }: {

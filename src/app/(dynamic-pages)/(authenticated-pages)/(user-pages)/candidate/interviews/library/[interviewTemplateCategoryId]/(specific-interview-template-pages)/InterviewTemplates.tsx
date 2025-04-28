@@ -98,15 +98,15 @@ export function InterviewTemplates({
   }
 
   return (
-    <div className=" mx-auto max-w-5xl">
-      <div className="flex items-center justify-self-center">
+    <div className="mx-auto max-w-5xl">
+      <div className="flex flex-row justify-normal items-center mb-4">
         <button
-          className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
+          className="justify-start rounded-md hover:bg-gray-200 dark:hover:bg-gray-800"
           onClick={() => window.history.back()}
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col justify-center mx-auto items-center">
           <h1 className="text-2xl font-bold">{displayString}</h1>
           <p className="text-gray-500 mt-2">
             Select a mock interview that aligns with your role, industry, or

@@ -1,5 +1,5 @@
 import { TabsNavigation } from '@/components/TabsNavigation';
-import { DollarSign, SquarePen, UserRound } from 'lucide-react';
+import { DollarSign, SquarePen, UserRound,Lock} from 'lucide-react';
 import { z } from 'zod';
 
 const paramsSchema = z.object({
@@ -19,6 +19,11 @@ export default function OrganizationSettingsLayout({
       label: 'General',
       href: `/employer/${organizationId}/settings`,
       icon: <SquarePen />,
+    },
+    {
+      label: 'Security',
+      href: `/employer/${organizationId}/settings/security`,
+      icon: <Lock />,
     },
     // {
     //   label: 'Organization Members',

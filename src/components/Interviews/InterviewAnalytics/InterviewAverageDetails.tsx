@@ -78,13 +78,13 @@ export const InterviewAverageDetails = ({
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.total_interviews || 0}
             </p>
-            <a
+            {/* <a
               href={`/candidate/interview-history/${latestInterview.id}`}
               className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition p-1"
             >
               <MagnifyingGlassIcon className="inline w-4 h-4 mr-1" />
               View latest session history
-            </a>
+            </a> */}
           </div>
         </Card>
       </div>

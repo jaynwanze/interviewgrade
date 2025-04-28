@@ -152,7 +152,8 @@ export default function InterviewAnalyticsPage() {
           <p>No completed sessions found. Start one to see analytics here.</p>
           <Button
             className="mt-4"
-            onClick={() => router.push('/interview/start')}
+            onClick={() => router.push('/interviews/library')}
+            variant="outline"
           >
             Start Interview
           </Button>

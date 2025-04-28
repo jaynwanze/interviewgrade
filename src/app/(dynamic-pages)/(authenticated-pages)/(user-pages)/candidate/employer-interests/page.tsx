@@ -40,7 +40,7 @@ export default function EmployerInterestsPage() {
 
   return (
     <div className="p-6 max-w-3/4 mx-auto space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight text-center">
+      <h1 className="text-2xl font-semibold  text-center">
         Recruiters Interested in You
       </h1>
       <p className="text-muted-foreground text-md text-center mb-2">
@@ -48,12 +48,14 @@ export default function EmployerInterestsPage() {
         soon.
       </p>
       <Separator className="my-5" />
-      <div className="flex items-center justify-between mt-3">
-        {employers.length === 0 ? (
-          <p className="text-muted-foreground text-lg mt-6">
+      {employers.length === 0 ? (
+        <div className="flex items-center justify-center">
+          <p className="text-muted-foreground text-lg mt-6 ">
             No employers have viewed your profile yet.
           </p>
-        ) : (
+        </div>
+      ) : (
+        <div className="flex items-center justify-between mt-3">
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {employers.map((employer) => (
               <Card
@@ -103,8 +105,8 @@ export default function EmployerInterestsPage() {
               </Card>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,16 +1,16 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InterviewMode } from '@/types';
 import {
   INTERVIEW_INTERVIEW_MODE,
   INTERVIEW_MODE_INTERVIEW_DESCRIPTION,
   INTERVIEW_MODE_PRACTICE_DESCRIPTION,
 } from '@/utils/constants';
+import { ArrowRightIcon, BookOpen, Briefcase } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../../ui/button';
-import { Briefcase, BookOpen } from 'lucide-react';
 
 export const InterviewModeCard = (interviewMode: InterviewMode) => {
   const interviewModeNameDisplay: string =
@@ -34,6 +34,11 @@ export const InterviewModeCard = (interviewMode: InterviewMode) => {
     interviewMode.name === INTERVIEW_INTERVIEW_MODE
       ? 'bg-blue-500 text-white'
       : 'bg-green-500 text-white';
+
+  const modeButton =
+    interviewMode.name === INTERVIEW_INTERVIEW_MODE
+      ? 'border-blue-600 text-blue-600 hover:bg-blue-500'
+      : 'border-green-600 text-green-600 hover:bg-green-500';
 
   const modeIcon =
     interviewMode.name === INTERVIEW_INTERVIEW_MODE ? (
@@ -62,9 +67,14 @@ export const InterviewModeCard = (interviewMode: InterviewMode) => {
 
         <CardContent className="text-gray-600 space-y-3">
           <p className="text-sm">{interviewDescription}</p>
-
-          <Button className="w-full mt-3" onClick={handleClick}>
-            Browse {interviewModeNameDisplay} Templates
+          <Button
+            variant="link"
+            size="sm"
+            onClick={handleClick}
+            className={`w-full mt-2 flex items-center justify-center border ${modeButton} hover:text-white transition-colors duration-200`}
+          >
+            {interviewModeNameDisplay} Templates
+            <ArrowRightIcon className="ml-2 w-4 h-4" />
           </Button>
         </CardContent>
       </Card>

@@ -135,6 +135,15 @@ export function Login({
         />
       ) : (
         <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
+          <header className="text-center space-y-1">
+            <h1
+              className="text-3xl font-semibold tracking-tight 
+               bg-gradient-to-r
+               bg-clip-text "
+            >
+              Candidate Login
+            </h1>
+          </header>
           <Tabs defaultValue="password" className="md:min-w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>

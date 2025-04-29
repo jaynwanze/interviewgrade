@@ -17,7 +17,7 @@ export default function SignupPage({
   const userType: UserType = 'candidate';
   return (
     <>
-      <AuthLayout link="/e/sign-up" text="Sign Up as Employer">
+      <AuthLayout link="/e/sign-up" text="Sign Up as Employer" userType={userType}>
         <SignUp
           next={next}
           nextActionType={nextActionType}

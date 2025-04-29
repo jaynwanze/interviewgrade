@@ -13,7 +13,7 @@ export default function LoginPage({ searchParams }: { searchParams: unknown }) {
 
   return (
     <>
-      <AuthLayout link="/e/login" text="Log In as Employer">
+      <AuthLayout link="/e/login" text="Log In as Employer" userType={userType}>
         <Login
           next={next}
           nextActionType={nextActionType}

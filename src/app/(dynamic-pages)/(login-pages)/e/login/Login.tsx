@@ -19,10 +19,10 @@ import {
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import { supabaseUserClientComponentClient } from '@/supabase-clients/user/supabaseUserClientComponentClient';
 import type { AuthProvider } from '@/types';
+import { UserType } from '@/types/userTypes';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { UserType } from '@/types/userTypes';
 export function Login({
   next,
   nextActionType,
@@ -134,6 +134,15 @@ export function Login({
         />
       ) : (
         <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
+          <header className="text-center space-y-1">
+            <h1
+              className="text-3xl font-semibold tracking-tight 
+               bg-gradient-to-r
+               bg-clip-text "
+            >
+              Employer Login
+            </h1>
+          </header>
           <Tabs defaultValue="password" className="md:min-w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>

@@ -133,6 +133,20 @@ export function SignUp({
         />
       ) : (
         <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
+          <header className="text-center space-y-1">
+            <div className="inline-flex items-center space-x-2">
+              <span
+                className="text-3xl font-semibold tracking-tight 
+               bg-gradient-to-r
+               bg-clip-text"
+              >
+                Candidate Signup
+              </span>
+              <span className="px-2 py-1 text-sm font-medium text-white bg-green-500 rounded-full">
+                New
+              </span>
+            </div>
+          </header>
           <Tabs defaultValue="password" className="md:min-w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>

@@ -201,7 +201,6 @@ export function PracticeInterviewFlow({
               }
 
               // Each SSE line is JSON-encoded text
-              // e.g. "Practice Fe" or "edback\nScore ..."
               try {
                 const token = JSON.parse(data) as string;
                 accumulatedText += token;
@@ -361,7 +360,7 @@ export function PracticeInterviewFlow({
             {interview.title}
           </div>
 
-          <span className="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-700 dark:text-blue-200">
+          <span className="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded ">
             Practice Mode
           </span>
         </div>
@@ -408,7 +407,7 @@ export function PracticeInterviewFlow({
             </div>
           </CardHeader>
           <div className="flex justify-center items-center">
-            <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-blue-600 dark:text-blue-200 mb-2">
+            <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full  mb-2">
               You
             </span>
           </div>

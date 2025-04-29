@@ -24,7 +24,7 @@ import {
 import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { getQuestionFeedback } from '@/utils/openai/getQuestionFeedback';
-import { ChevronLeft } from 'lucide-react';
+import { CheckCircle, ChevronLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -318,7 +318,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-          100,
+        100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');
@@ -368,17 +368,22 @@ export default function InterviewFlow({
     );
   } else if (isInterviewComplete) {
     return (
-      <div className="interview-flow-container flex flex-col items-center min-h-screen">
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="flex flex-col items-center">
-            <p className="text-center text-lg">
-              Your interview is complete. Thank you for participating!
-            </p>
-            <p className="text-center text-lg">
-              Feedback is being processed. You will receive a notification when
-              it's ready.
-            </p>
-          </div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gr">
+        <div className="p-6  shadow-lg rounded-lg text-center">
+          <h1 className="text-3xl font-bold mb-4 flex items-center space-x-2 gap-2">
+            <CheckCircle className="h-6 w-6 text-green-500" />
+            <span>Mock Interview Complete!</span>
+          </h1>
+          <p className="text-lg mb-6">
+            Check your session report in the notification link when it becomes
+            available.
+          </p>
+          <Button
+            onClick={() => router.push('/candidate')}
+            className="px-6 py-3 transition-all"
+          >
+            Return Home
+          </Button>
         </div>
       </div>
     );
@@ -386,26 +391,27 @@ export default function InterviewFlow({
 
   return (
     <div className="min-h-screen w-full p-2 flex flex-col space-y-2 overflow-hidden">
-      {/* Top Bar */}
-      <div className="w-full flex items-center justify-between bg-white dark:bg-gray-900 shadow-md px-6 py-3 rounded-lg mb-4 border">
+      {/* Top Control Bar */}
+      <div className="w-full flex items-center justify-between shadow-md px-6 py-3 rounded-lg mb-4 border">
         <div className="flex items-center space-x-2">
-          <div className="text-lg font-semibold text-blue-700 dark:text-blue-300 truncate">
+          <div className="text-lg font-bold  d0 truncate">
             {interview?.title}
+            FFG
           </div>
-          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+
+          <span className="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded ">
             Interview Mode
           </span>
         </div>
-        <div className="text-md font-semibold">
+        <div className="text-md font-semibold text-gray-700 dark:text-gray-300">
           ⏱ {Math.floor(recordingTime / 60)}:
           {('0' + (recordingTime % 60)).slice(-2)}
         </div>
         <Button variant="destructive" onClick={() => window.history.back()}>
           <ChevronLeft className="h-4 w-4 mr-1" />
-          Leave
+          Leave Session
         </Button>
       </div>
-
       {/* Main Interview Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
         {/* Question Panel */}

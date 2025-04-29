@@ -1,23 +1,23 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import { AIQuestionSpeaker } from '@/components/Interviews/InterviewFlow/AIQuestionSpeaker';
 import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { insertInterviewAnswer, updateInterview } from '@/data/user/interviews';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
-import { useNotifications } from '@/contexts/NotificationsContext';
 
 import type {
-  Interview,
-  InterviewQuestion,
-  InterviewAnswerDetail,
   FeedbackData,
+  Interview,
+  InterviewAnswerDetail,
+  InterviewQuestion,
 } from '@/types';
+import { CheckCircle, ChevronLeft } from 'lucide-react';
 
 type MockInterviewFlowFlowProps = {
   interview: Interview;
@@ -128,20 +128,48 @@ export function MockInterviewFlow({
 
   if (isInterviewComplete) {
     return (
-      <div className="flex flex-col items-center min-h-screen justify-center">
-        <h1 className="text-2xl font-bold">Interview Complete</h1>
-        <p className="mt-4">Thank you for your time!</p>
-        <Button onClick={() => router.push('/candidate')}>Return Home</Button>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gr">
+        <div className="p-6  shadow-lg rounded-lg text-center">
+          <h1 className="text-3xl font-bold mb-4 flex items-center space-x-2 gap-2">
+            <CheckCircle className="h-6 w-6 text-green-500" />
+            <span>Mock Interview Complete!</span>
+          </h1>
+          <p className="text-lg mb-6">
+            Check your session report in the notification link when it becomes
+            available.
+          </p>
+          <Button
+            onClick={() => router.push('/candidate')}
+            className="px-6 py-3 transition-all"
+          >
+            Return Home
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="interview-flow-container flex flex-col items-center min-h-screen">
-      <Button variant="destructive" onClick={() => window.history.back()}>
-        Leave Session
-      </Button>
+    <div className="interview-flow-container flex flex-col items-center min-h-screen ">
+      <div className="w-full flex items-center justify-between shadow-md px-6 py-3 rounded-lg mb-4 border">
+        <div className="flex items-center space-x-2">
+          <div className="text-lg font-bold  d0 truncate">
+            {interview?.title}
+          </div>
 
+          <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-0.5 rounded ">
+            Mock Interview
+          </span>
+        </div>
+        <div className="text-md font-semibold text-gray-700 dark:text-gray-300">
+          ⏱ {Math.floor(recordingTime / 60)}:
+          {('0' + (recordingTime % 60)).slice(-2)}
+        </div>
+        <Button variant="destructive" onClick={() => window.history.back()}>
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Leave Session
+        </Button>
+      </div>
       <div className="flex w-full max-w-4xl">
         <div className="w-1/2 p-4">
           <AIQuestionSpeaker
@@ -150,27 +178,31 @@ export function MockInterviewFlow({
             questionsLength={questions.length}
           />
         </div>
-        <div className="w-1/2 p-4">
-          <Card className="p-4 text-center mb-5">
-            <h1 className="text-2xl font-bold">Timer</h1>
-            <p>
-              {Math.floor(recordingTime / 60)}:
-              {('0' + (recordingTime % 60)).slice(-2)}
-            </p>
-          </Card>
-          <Card className="max-w-md mx-auto text-center">
-            <CardHeader>
-              <CardTitle>Candidate</CardTitle>
+        <div className="w-1/2 p-4 flex justify-center items-center ">
+          <Card className="flex flex-col justify-between max-w-md mx-auto text-center h-full ">
+            <CardHeader
+              className={`flex flex-row p-4 border-b dark:border-gray-700 bg-muted/50 mb-2`}
+            >
+              <div className="flex items-center justify-between w-full">
+                <CardTitle className="text-lg font-semibold">
+                  Candidate
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
+            <div className="flex justify-center items-center">
+              <span className="bg-blue-200 text-blue-800 text-sm font-medium px-3 py-1 rounded-full mb-2">
+                You
+              </span>
+            </div>
+            <CardContent className="flex-1 flex flex-col justify-center items-center">
               <UserCamera
                 answerCallback={handleAnswer}
                 isCameraOn={true}
-                // In live mode, maybe automatically proceed after recording
+                // In live mode,
                 onRecordEnd={() => {
                   questions[currentQuestionIndex + 1];
                 }}
-                // Not needed for live mode
+                // Not needed for interview mode
                 isFetchingSpecificFeedback={() => null}
                 interviewMode={interview.mode}
               />

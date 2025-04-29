@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { saveChatMessage } from '@/data/user/interviews';
 import { Interview, InterviewEvaluation } from '@/types';
 import { getAIResponse } from '@/utils/openai/getAIResponse';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -32,6 +33,18 @@ export const ChatInterface = ({
     // Randomize the array order.
     return prompts.sort(() => Math.random() - 0.5).slice(0, 3);
   }, []);
+  useEffect(() => {
+    const history = evaluation.chat_messages ?? [];
+
+    if (history.length) {
+      const chatMessages = history.map((m) => ({
+        sender: m.sender,
+        text: m.text,
+      }));
+      setMessages(chatMessages);
+    }
+  }, [evaluation.chat_messages]);
+
   // Updated handleSend accepts an optional text value.
   const handleSend = async (textToSend?: string) => {
     const text = textToSend ?? input;
@@ -39,6 +52,8 @@ export const ChatInterface = ({
 
     // Add the user's message to the chat.
     setMessages((prev) => [...prev, { sender: 'user', text }]);
+    saveChatMessage(evaluation.id, 'user', text);
+
     // If text was provided from a sample, clear the input if needed.
     if (!textToSend) setInput('');
     setIsLoading(true);
@@ -60,6 +75,10 @@ export const ChatInterface = ({
         ...prev,
         { sender: 'assistant', text: response || 'No response' },
       ]);
+      if (response) {
+        // Save the AI response to the chat.
+        saveChatMessage(evaluation.id, 'assistant', response);
+      }
     } catch (error) {
       console.error('Error fetching AI response:', error);
       setMessages((prev) => [
@@ -97,16 +116,14 @@ export const ChatInterface = ({
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex ${
-              msg.sender === 'user' ? 'justify-end' : 'justify-start'
-            }`}
+            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'
+              }`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${
-                msg.sender === 'user'
+              className={`max-w-[80%] p-3 rounded-lg ${msg.sender === 'user'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              }`}
+                }`}
             >
               {msg.text}
             </div>

@@ -81,12 +81,16 @@ export function UserNavDropDownMenu({
   userFullname,
   userEmail,
   userId,
+  userType,
 }: {
   avatarUrl: string;
   userFullname: string;
   userEmail: string;
   userId: string;
+  userType: string;
 }) {
+
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>

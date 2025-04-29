@@ -1,4 +1,4 @@
-import { CandidateSkillsStats, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { CandidateSkillsStats, ChatRow, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
 import { ResumeMetadata } from '@/utils/zod-schemas/resumeMetaDataSchema'
 export type Json =
   | string
@@ -617,6 +617,7 @@ export type Database = {
           areas_for_improvement: string
           recommendations: string
           question_answer_feedback: QuestionAnswerFeedback[];
+          chat_messages?: ChatRow[]
           created_at: string
         }
 
@@ -628,6 +629,7 @@ export type Database = {
           areas_for_improvement: string
           recommendations: string
           question_answer_feedback: QuestionAnswerFeedback[];
+          chat_messages?: ChatRow[]
           created_at?: string
         }
         Update: {
@@ -638,6 +640,7 @@ export type Database = {
           areas_for_improvement?: string
           recommendations?: string
           question_answer_feedback?: QuestionAnswerFeedback[];
+          chat_messages?: ChatRow[]
           created_at?: string
         }
         Relationships: [

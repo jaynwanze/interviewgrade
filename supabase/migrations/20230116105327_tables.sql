@@ -204,6 +204,7 @@ CREATE TABLE "public"."interview_evaluations" (
   "areas_for_improvement" text,
   "recommendations" text,
   "question_answer_feedback" jsonb,
+  "chat_messages" jsonb,
   "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
 ALTER TABLE "public"."interview_evaluations" OWNER TO "postgres";

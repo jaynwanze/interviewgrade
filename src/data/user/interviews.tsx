@@ -12,6 +12,7 @@ import type {
   AvgEvaluationScores,
   Candidate,
   CandidateSkillsStats,
+  ChatRow,
   EvaluationCriteriaType,
   FeedbackData,
   Interview,
@@ -28,6 +29,7 @@ import type {
 } from '@/types';
 import { getRandomElements } from '@/utils/getRandomElements';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { randomUUID } from 'crypto';
 import moment from 'moment';
 
 /**
@@ -423,6 +425,38 @@ export const getInterviewAnswers = async (
 
   return data;
 };
+
+export async function saveChatMessage(
+  interviewEvalId: string,
+  sender: 'user' | 'assistant',
+  text: string,
+): Promise<void> {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const newRow: ChatRow = {
+    id: randomUUID(),
+    sender,
+    text,
+    created_at: new Date().toISOString(),
+  };
+
+  const { data: current, error: readErr } = await supabase
+    .from('interview_evaluations')
+    .select('chat_messages')
+    .eq('id', interviewEvalId)
+    .single();
+
+  if (readErr) throw new Error(readErr.message);
+
+  const currentArray: ChatRow[] = current?.chat_messages ?? [];
+
+  const { error: writeErr } = await supabase
+    .from('interview_evaluations')
+    .update({ chat_messages: [...currentArray, newRow] })
+    .eq('id', interviewEvalId);
+
+  if (writeErr) throw new Error(writeErr.message);
+}
 
 export const getInterview = async (
   interviewId: string,

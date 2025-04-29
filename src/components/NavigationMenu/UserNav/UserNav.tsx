@@ -14,6 +14,7 @@ export async function UserNav() {
   }
 
   const userProfile = await getUserProfile(user.id);
+  const userType = userProfile.user_type;
   return (
     <>
       <ThemeToggle />
@@ -26,6 +27,7 @@ export async function UserNav() {
         userFullname={userProfile.full_name ?? `User ${email}`}
         userEmail={email}
         userId={user.id}
+        userType={userType}
       />
     </>
   );

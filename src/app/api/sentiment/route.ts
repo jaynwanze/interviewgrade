@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     });
 
     const data = await response.json();
+    console.log('Response from Hugging Face:', data);
 
     // Return the response with CORS headers
     return NextResponse.json(data, {

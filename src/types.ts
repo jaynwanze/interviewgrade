@@ -185,8 +185,17 @@ export type InterviewEvaluationCriteriaType = {
   description: string;
   rubrics: EvaluationRubricType[];
   is_system_defined: boolean;
+  chat_messages: ChatRow[];
   created_at: string;
 };
+
+export type ChatRow  = {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  created_at: string;
+}
+
 export type PracticeTemplate = Table<'templates'> & {
   isComingSoon?: boolean;
 };

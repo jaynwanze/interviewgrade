@@ -24,7 +24,12 @@ import type {
 } from '@/types';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, MessageSquare, SidebarOpenIcon } from 'lucide-react';
+import {
+  CheckCircle,
+  ChevronLeft,
+  MessageSquare,
+  SidebarOpenIcon,
+} from 'lucide-react';
 
 type PracticeInterviewFlowProps = {
   interview: Interview;
@@ -309,9 +314,9 @@ export function PracticeInterviewFlow({
 
   if (isInterviewComplete && isTutorialMode) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-        <div className="p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg text-center">
-          <h1 className="text-3xl font-bold mb-4">🎉 Practice Complete!</h1>
+      <div className="flex flex-col items-center justify-center min-h-screen ">
+        <div className="p-6 shadow-lg rounded-lg text-center">
+          <h1 className="text-3xl font-bold mb-4">Practice Complete!</h1>
           <p className="text-lg mb-6">
             We are evaluating your session. Please hold tight!
           </p>
@@ -327,12 +332,13 @@ export function PracticeInterviewFlow({
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gr">
         <div className="p-6  shadow-lg rounded-lg text-center">
-          <h1 className="text-3xl font-bold mb-4">
-            <IconCheckCircle className="h-6 w-6 text-green-500" />
-            Practice Complete!
+          <h1 className="text-3xl font-bold mb-4 flex items-center space-x-2 gap-2">
+            <CheckCircle className="h-6 w-6 text-green-500" />
+            <span>Practice Complete!</span>
           </h1>
           <p className="text-lg mb-6">
-            Check your session report in the notification link.
+            Check your session report in the notification link when it becomes
+            available.
           </p>
           <Button
             onClick={() => router.push('/candidate')}
@@ -351,10 +357,11 @@ export function PracticeInterviewFlow({
       {/* Top Control Bar */}
       <div className="w-full flex items-center justify-between shadow-md px-6 py-3 rounded-lg mb-4 border">
         <div className="flex items-center space-x-2">
-          <div className="text-lg font-bold text-blue-900 dark:text-green-100 truncate">
+          <div className="text-lg font-bold  d0 truncate">
             {interview.title}
           </div>
-          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-700 dark:text-blue-200">
+
+          <span className="bg-green-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-700 dark:text-blue-200">
             Practice Mode
           </span>
         </div>

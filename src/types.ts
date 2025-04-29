@@ -185,7 +185,6 @@ export type InterviewEvaluationCriteriaType = {
   description: string;
   rubrics: EvaluationRubricType[];
   is_system_defined: boolean;
-  chat_messages: ChatRow[];
   created_at: string;
 };
 

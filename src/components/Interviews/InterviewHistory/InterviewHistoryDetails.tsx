@@ -382,12 +382,6 @@ export const InterviewHistoryDetails = ({
                     className={`h-full ${sentimentDetails.color} rounded-full`}
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                  Confidence:{' '}
-                  <span className="font-bold">
-                    {sentimentScore.score.toFixed(0)}%
-                  </span>
-                </p>
               </div>
               <Separator />
               <div className="flex flex-col justify-between space-y-6">

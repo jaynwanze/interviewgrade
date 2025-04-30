@@ -407,7 +407,7 @@ export default function EmployerDashboard({
   } else
     return (
       <TooltipProvider>
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto p-6">
           <span className="space-y-2">
             <h1 className="text-2xl font-bold text-center">
               Candidate Dashboard

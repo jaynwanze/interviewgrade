@@ -48,31 +48,53 @@ export function ExternalNavigation() {
         <div className="flex space-x-10 items-center lg:-mr-2">
           <ThemeToggle />
           {isHome && (
-            <div className="ml-6 hidden lg:block space-x-2">
-              {/* <Link href="/c/login">
-                <Button variant="default" size="default" className="group">
-                  Log In
-                  <svg
-                    className="ml-2 -mr-1 w-5 h-5 group-hover:translate-x-1 transition"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </Button>
-              </Link> */}
-            </div>
+            <>
+              <div className="ml-6 hidden lg:block space-x-2">
+                <Link href="/c/login">
+                  <Button variant="default" size="default" className="group">
+                    Candidate Log In
+                    <svg
+                      className="ml-2 -mr-1 w-5 h-5 group-hover:translate-x-1 transition"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="ml-6 hidden lg:block space-x-2">
+                <Link href="/e/login">
+                  <Button variant="default" size="default" className="group">
+                    Employer Log In
+                    <svg
+                      className="ml-2 -mr-1 w-5 h-5 group-hover:translate-x-1 transition"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Button>
+                </Link>
+              </div>
+            </>
           )}
         </div>
-        {/* <Menu
+        <Menu
           onClick={() => setMobileMenuOpen((prev) => !prev)}
           className="hover:cursor-pointer lg:hidden -mr-2"
-        /> */}
+        />
       </nav>
       {mobileMenuOpen && (
         <ul className="md:hidden w-full shadow-2xl py-2 flex flex-col items-start font-medium pb-2">

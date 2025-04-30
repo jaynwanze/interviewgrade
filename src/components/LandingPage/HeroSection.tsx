@@ -26,9 +26,9 @@ export default function HeroSection() {
           </p>
           <div className="flex items-center gap-2 py-1 px-3 w-fit rounded-full border border-border dark:border-none bg-secondary cursor-pointer">
             <Clock4Icon size={16} />
-            <span className="text-md font-medium lg:text-base">
+            {/* <span className="text-md font-medium lg:text-base">
               Coming Soon
-            </span>
+            </span> */}
             <ChevronRight size={16} />
           </div>
           {/* <div className="flex flex-col md:flex-row items-center max-w-md w-full  gap-3 pt-2 ">

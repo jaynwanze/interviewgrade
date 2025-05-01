@@ -25,13 +25,7 @@ import {
   getInterviewEvaluation,
   getInterviewQuestions,
 } from '@/data/user/interviews';
-import {
-  FeedbackData,
-  Interview,
-  InterviewAnswerDetail,
-  InterviewEvaluation,
-} from '@/types';
-import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
+import { Interview, InterviewAnswerDetail, InterviewEvaluation } from '@/types';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -144,15 +138,27 @@ export const InterviewHistoryDetails = ({
     );
 
     try {
-      const feedback: FeedbackData | null = await getInterviewFeedback(
-        interview,
-        interview.evaluation_criterias,
-        interviewAnswersDetails,
-      );
-      if (feedback) {
-        const interviewEvaluation = await getInterviewEvaluation(interviewId);
-        setEvaluation(interviewEvaluation);
+      const res = await fetch('/api/interview/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          interview,
+          criteria: interview.evaluation_criterias ?? [],
+          answers: interviewAnswersDetails,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
       }
+
+      // The route returns { status:'ok', feedback:{…} }
+      const { feedback } = (await res.json()) as {
+        status: 'ok';
+        feedback: InterviewEvaluation;
+      };
+      const interviewEvaluation = await getInterviewEvaluation(interviewId);
+      setEvaluation(interviewEvaluation);
     } catch (error) {
       console.error('Error fetching interview feedback:', error);
       setIsFetchingFeedback(false);

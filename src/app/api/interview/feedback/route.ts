@@ -1,4 +1,3 @@
-// app/api/interview/feedback/route.ts
 import {
   EvaluationCriteriaType,
   Interview,
@@ -7,8 +6,6 @@ import {
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
-export const memory = 1024;
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {

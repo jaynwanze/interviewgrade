@@ -10,20 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { markTutorialAsDoneAction } from '@/data/user/candidate';
-import {
-  insertInterviewAnswer,
-  updateInterview
-} from '@/data/user/interviews';
+import { insertInterviewAnswer, updateInterview } from '@/data/user/interviews';
 import type {
   Interview,
   InterviewAnswerDetail,
   InterviewEvaluation,
   InterviewQuestion,
-  specificFeedbackType
+  specificFeedbackType,
 } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   CheckCircle,
+  CheckCircleIcon,
   ChevronLeft,
   MessageSquare,
   SidebarOpenIcon,
@@ -315,7 +313,10 @@ export function PracticeInterviewFlow({
     return (
       <div className="flex flex-col items-center justify-center min-h-screen ">
         <div className="p-6 shadow-lg rounded-lg text-center">
-          <h1 className="text-3xl font-bold mb-4">Practice Complete!</h1>
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <CheckCircleIcon className="text-green-500 h-6 w-6 animate-pulse" />
+            <h1 className="text-3xl font-bold">Practice Complete!</h1>
+          </div>
           <p className="text-lg mb-6">
             We are evaluating your session. Please hold tight!
           </p>

@@ -65,8 +65,6 @@ export async function POST(req: NextRequest) {
     headers.set('Cache-Control', 'no-cache');
     headers.set('Connection', 'keep-alive');
 
-    // Pump tokens from openAiStream → writable
-
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {

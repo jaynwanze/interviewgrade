@@ -571,15 +571,28 @@ export const retriveStripeCheckoutSessionPurchaseDetails = async (
   //   throw new Error('No product found');
   // }
 
+  if (!session.metadata) {
+    throw new Error('No metadata found');
+  }
+  if (!session.amount_total) {
+    throw new Error('No amount total found');
+  }
+  if (!session.metadata.product_type) {
+    throw new Error('No product name found');
+  }
+  if (!session.metadata.quantity) {
+    throw new Error('No quantity found');
+  }
+
   return {
     customer_details: {
       name: customerDetails?.name || '',
     },
-    // product: {
-    //   name: product.custom.name,
-    //   price: product.amount_total / 100,
-    //   quantity: product.quantity,
-    // },
+    product: {
+      type: session.metadata?.product_type || '',
+      price: session.amount_total || 0,
+      quantity: Number(session.metadata?.quantity) || 0,
+    },
   };
 };
 

@@ -61,7 +61,7 @@ export type StripeCheckoutSessionDetails = {
     name: string;
   };
   product?: {
-    name: string;
+    type: string;
     price: number;
     quantity: number;
   };

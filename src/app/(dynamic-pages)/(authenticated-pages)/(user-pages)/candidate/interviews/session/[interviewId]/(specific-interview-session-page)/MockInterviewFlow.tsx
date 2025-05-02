@@ -15,6 +15,7 @@ import type {
   FeedbackData,
   Interview,
   InterviewAnswerDetail,
+  InterviewEvaluation,
   InterviewQuestion,
 } from '@/types';
 import { CheckCircle, ChevronLeft } from 'lucide-react';
@@ -108,11 +109,25 @@ export function MockInterviewFlow({
     }));
 
     try {
-      const feedback: FeedbackData | null = await getInterviewFeedback(
-        interview,
-        interview.evaluation_criterias ?? [],
-        answerDetails,
-      );
+      const res = await fetch('/api/interview/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          interview,
+          criteria: interview.evaluation_criterias ?? [],
+          answers: answerDetails,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
+      }
+
+      // The route returns { status:'ok', feedback:{…} }
+      const { feedback } = (await res.json()) as {
+        status: 'ok';
+        feedback: InterviewEvaluation;
+      };
 
       if (feedback) {
         addNotification({

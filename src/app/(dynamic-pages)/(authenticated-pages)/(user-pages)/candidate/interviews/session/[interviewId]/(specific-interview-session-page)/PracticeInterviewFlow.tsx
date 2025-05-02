@@ -11,18 +11,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { markTutorialAsDoneAction } from '@/data/user/candidate';
 import {
-  getInterviewAnalytics,
   insertInterviewAnswer,
-  updateInterview,
+  updateInterview
 } from '@/data/user/interviews';
 import type {
-  FeedbackData,
   Interview,
   InterviewAnswerDetail,
+  InterviewEvaluation,
   InterviewQuestion,
-  specificFeedbackType,
+  specificFeedbackType
 } from '@/types';
-import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   CheckCircle,
@@ -273,24 +271,26 @@ export function PracticeInterviewFlow({
       evaluation_criteria_name: q.evaluation_criteria.name,
     }));
 
-    // const candidateProfile = await candidateProfile(interview.candidate_id);
-
-    const interviewAnalytics = await getInterviewAnalytics(
-      interview.candidate_id,
-      interview.template_id,
-      'practice',
-    );
-
-    // if (interviewAnalytics.current avg > candidateProfile.practice_skill_avg) {
-    //   candidateProfile._prev_avg = candidateProfile.practice_skill_avg
-    // update candidateProfile.practice_skill_avg = interviewAnalytics.current avg
-
     try {
-      const feedback: FeedbackData | null = await getInterviewFeedback(
-        interview,
-        interview.evaluation_criterias ?? [],
-        answerDetails.splice(0, currentQuestionIndex + 1),
-      );
+      const res = await fetch('/api/interview/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          interview,
+          criteria: interview.evaluation_criterias ?? [],
+          answers: answerDetails.splice(0, currentQuestionIndex + 1),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
+      }
+
+      // The route returns { status:'ok', feedback:{…} }
+      const { feedback } = (await res.json()) as {
+        status: 'ok';
+        feedback: InterviewEvaluation;
+      };
 
       if (feedback) {
         // Notify the user or redirect

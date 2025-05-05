@@ -394,7 +394,7 @@ export default function CandidatesListPage({ organizationId }) {
                   <TableCell>{c.industry}</TableCell>
                   <TableCell>
                     {filterView === 'performance' && top ? (
-                      <span className="items-center text-center flex gap-1">
+                      <span className="items-center text-center flex gap-2">
                         <Badge variant="outline" className="">
                           <Star className="h-4 w-4 text-yellow-500" />{' '}
                           {top.skill}

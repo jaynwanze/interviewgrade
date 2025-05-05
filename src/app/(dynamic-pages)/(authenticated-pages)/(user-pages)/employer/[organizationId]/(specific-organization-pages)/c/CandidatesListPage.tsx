@@ -393,13 +393,17 @@ export default function CandidatesListPage({ organizationId }) {
                   </TableCell>
                   <TableCell>{c.industry}</TableCell>
                   <TableCell>
-                    {filterView === 'performance' && top ? (
-                      <span className="items-center text-center flex gap-2">
-                        <Badge variant="outline" className="">
-                          <Star className="h-4 w-4 text-yellow-500" />{' '}
-                          {top.skill}
-                        </Badge>
-                      </span>
+                    {filterView === 'performance' ? (
+                      top ? (
+                        <span className="flex justify-center items-center text-center  gap-2">
+                          <Badge variant="outline" className="">
+                            <Star className="h-4 w-4 text-yellow-500 mr-1" />{' '}
+                            {top.skill}
+                          </Badge>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">N/A</span>
+                      )
                     ) : filterView === 'resume' ? (
                       <Badge variant="outline">
                         {kwCount} / {filters.keywords.length}

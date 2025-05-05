@@ -41,6 +41,23 @@ function computeYears(start: string, end?: string | null) {
   return e.diff(s, 'year', true);
 }
 
+function getShortName(fullName: string): string {
+  if (!fullName) return '';
+
+  // Split by spaces, ignoring empty strings
+  const parts = fullName.split(' ').filter(Boolean);
+
+  // If there's only one name part (e.g. "Cher" or "Madonna"), just return that
+  if (parts.length === 1) {
+    return parts[0];
+  }
+
+  // Otherwise, use the first part in full + the first letter of the *last* part
+  const firstName = parts[0];
+  const lastName = parts[parts.length - 1]; // handle middle names gracefully
+  return `${firstName} ${lastName.charAt(0).toUpperCase()}.`;
+}
+
 export default function CandidatesListPage({ organizationId }) {
   const router = useRouter();
 
@@ -356,7 +373,10 @@ export default function CandidatesListPage({ organizationId }) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={c.avatar_url} alt={c.full_name} />
+                        <AvatarImage
+                          src={c.avatar_url}
+                          alt={getShortName(c.full_name)}
+                        />
                         <AvatarFallback>
                           {c.full_name
                             .split(' ')
@@ -364,7 +384,7 @@ export default function CandidatesListPage({ organizationId }) {
                             .join('')}
                         </AvatarFallback>
                       </Avatar>
-                      {c.full_name}
+                      {getShortName(c.full_name)}
                     </div>
                   </TableCell>
                   <TableCell>{c.role}</TableCell>

@@ -26,12 +26,9 @@ import {
   uploadPublicUserAvatar,
 } from '@/data/user/user';
 import {
-  availableCountries,
   availableCountriesCandidates,
-  availableIndustries,
   availableIndustriesCandidates,
-  availableRoles,
-  availableRolesCandidates,
+  availableRolesCandidates
 } from '@/utils/filterOptions';
 
 import {
@@ -452,7 +449,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
               )}
             </div>
             <div className="flex-1">
-            <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">Role</Label>
               <RHFSelect
                 control={control}
                 name="role"
@@ -468,7 +465,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
           {/* Industry & Summary */}
           <div className="flex gap-3">
             <div className="flex-1">
-            <Label htmlFor="industry">Industry</Label>
+              <Label htmlFor="industry">Industry</Label>
               <RHFSelect
                 control={control}
                 name="industry"
@@ -511,7 +508,7 @@ export function CandidateDetailsForm({ onSuccess }: { onSuccess: () => void }) {
 
           {/* Resume Preview & Confirmation */}
           {resumePreview && (
-            <div className="mt-4">
+            <div className="mt-4 gap-2 flex items-center">
               <Label>Resume Preview</Label>
               <Dialog>
                 <DialogTrigger asChild>

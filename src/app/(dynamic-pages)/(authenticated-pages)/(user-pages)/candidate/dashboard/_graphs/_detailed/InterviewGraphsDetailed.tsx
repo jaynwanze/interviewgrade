@@ -54,7 +54,7 @@ export function InterviewGraphsDetailed({
         )}
 
         <motion.div
-          className="md:col-span-1 lg:col-span-2 "
+          className={`md:col-span-1 lg:col-span-${sentimentAnalysis ? 2 : 3} `}
           variants={itemVariants}
         >
           <RadialChartEvaluationsScoreAverages

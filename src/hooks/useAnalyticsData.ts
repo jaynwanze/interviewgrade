@@ -46,9 +46,19 @@ export const useAnalyticsData = () => {
         return;
       }
 
+      // Filter interviews based on the selected mode
+      const filteredInterviews = completedInterviews.filter((interview) => {
+        if (mode === 'Practice Mode') {
+          return interview.template_id !== null; // Only include practice interviews
+        } else if (mode === 'Interview Mode') {
+          return interview.interview_template_id !== null; // Only include real interviews
+        }
+        return false;
+      });
+
       // Filter unique templates with at least one completed interview
       const uniqueTemplates = new Set<string>();
-      const filteredTemplates = completedInterviews.filter((interview) => {
+      const filteredTemplates = filteredInterviews.filter((interview) => {
         if (uniqueTemplates.has(interview.template_id)) {
           return false;
         }
@@ -60,11 +70,7 @@ export const useAnalyticsData = () => {
       const interviewAnalytics = (
         await Promise.all(
           filteredTemplates.map((interview) =>
-            getInterviewAnalytics(
-              user.id,
-              interview.template_id,
-              'Practice Mode',
-            ),
+            getInterviewAnalytics(user.id, interview.template_id, mode),
           ),
         )
       ).filter(
@@ -80,7 +86,7 @@ export const useAnalyticsData = () => {
 
       // Update the overview state
       setOverview({
-        completedInterviews,
+        completedInterviews: filteredInterviews,
         interviewAnalytics,
       });
       setLoadingOverview(false);

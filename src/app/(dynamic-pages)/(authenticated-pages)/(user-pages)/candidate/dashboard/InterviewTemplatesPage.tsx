@@ -40,7 +40,7 @@ export default function InterviewAnalyticsPage() {
 
   useEffect(() => {
     fetchOverviewData(activeSwitch);
-  }, []);
+  }, [activeSwitch]);
 
   // Debounce the search query
   useEffect(() => {

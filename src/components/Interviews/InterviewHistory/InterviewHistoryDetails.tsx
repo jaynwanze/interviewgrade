@@ -63,13 +63,14 @@ export async function fetchSentiment(
     }
 
     const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0 || !Array.isArray(data[0])) {
-      throw new Error('Unexpected response format');
-    }
+    const scores = Array.isArray(data[0]) // legacy shape
+      ? (data[0] as SentimentScore[])
+      : (data as SentimentScore[]); // new flat shape
 
+    if (scores.length === 0) throw new Error('Empty sentiment result');
     // handle typical HF output
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sorted = data[0].sort((a: any, b: any) => b.score - a.score);
+    const sorted = scores.sort((a, b) => b.score - a.score);
     let predicted_label = sorted[0].label;
     if (predicted_label.startsWith('LABEL_')) {
       const id = parseInt(predicted_label.split('_')[1], 10);

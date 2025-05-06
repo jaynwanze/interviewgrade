@@ -188,12 +188,12 @@ export type InterviewEvaluationCriteriaType = {
   created_at: string;
 };
 
-export type ChatRow  = {
+export type ChatRow = {
   id: string;
   sender: 'user' | 'assistant';
   text: string;
   created_at: string;
-}
+};
 
 export type PracticeTemplate = Table<'templates'> & {
   isComingSoon?: boolean;
@@ -534,24 +534,18 @@ export const mockCandidates: CandidateRow[] = [
   },
   {
     id: 'c4',
-    city: 'Remote',
-    country: 'Remote',
+    city: ' Dublin',
+    country: 'Ireland',
     phone_number: '(555) 999-9999',
     summary:
-      'Product Manager working remotely with expertise in Conflict Resolution (avg. 87) and Problem Solving (avg. 60). Shows consistent performance in Conflict Resolution with a previous average score of 86. Candidate excels in leading cross-functional teams and delivering impactful products.',
-    role: 'Product Manager',
+      'Software Engineer working in Dublin Ireland with expertise in Conflict Resolution (avg. 87) and Problem Solving (avg. 60). Shows consistent performance in Conflict Resolution with a previous average score of 86. Candidate excels in leading cross-functional teams and delivering impactful products.',
+    role: 'Software Engineer',
     industry: 'Information Technology & Software',
     practice_skill_stats: [
       {
-        template_id: '8',
-        skill: 'Problem Solving',
-        avg_score: 60,
-        previous_avg: 85,
-      },
-      {
         template_id: '9',
         skill: 'Conflict Resolution',
-        avg_score: 87,
+        avg_score: 55,
         previous_avg: 86,
       },
     ],

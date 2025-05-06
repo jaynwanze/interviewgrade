@@ -73,58 +73,65 @@ export function TopThreeCandidatesBarChart({
     fill: `hsl(var(--chart-${i + 1}))`, // for a quick color approach
   }));
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Top Candidates</CardTitle>
-        <CardDescription>
-          Comparision of average scores among matched candidates
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {chartData && chartData.length === 0 ? (
-          <p>No candidates to display</p>
-        ) : (
-          <ChartContainer config={chartConfig}>
-            <BarChart accessibilityLayer data={chartData}>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="name"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(value) =>
-                  chartConfig[value as keyof typeof chartConfig]?.label || value
-                }
-              />
-              <YAxis domain={[0, 100]} axisLine={false} />
+    <div className="flex flex-col items-center justify-center">
+      <Card className="w-3/4 ">
+        <CardHeader>
+          <CardTitle>Top Candidates</CardTitle>
+          <CardDescription>
+            Comparision of average scores among matched candidates
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {chartData && chartData.length === 0 ? (
+            <p>No candidates to display</p>
+          ) : (
+            <ChartContainer config={chartConfig}>
+              <BarChart
+                accessibilityLayer
+                data={chartData}
+                className="max-h-[200px]"
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) =>
+                    chartConfig[value as keyof typeof chartConfig]?.label ||
+                    value
+                  }
+                />
+                <YAxis domain={[0, 100]} axisLine={false} />
 
-              {/* Show tooltip on hover */}
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
+                {/* Show tooltip on hover */}
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
 
-              <Bar
-                dataKey="score"
-                strokeWidth={2}
-                radius={8}
-                // highlight the highest bar
-                activeIndex={highestIndex}
-                // "activeBar" draws a custom rect for that bar
-                activeBar={({ ...props }) => (
-                  <Rectangle
-                    {...props}
-                    fillOpacity={0.8}
-                    stroke={props.payload.fill}
-                    strokeDasharray={4}
-                    strokeDashoffset={4}
-                  />
-                )}
-              />
-            </BarChart>
-          </ChartContainer>
-        )}
-      </CardContent>
-    </Card>
+                <Bar
+                  dataKey="score"
+                  strokeWidth={2}
+                  radius={8}
+                  // highlight the highest bar
+                  activeIndex={highestIndex}
+                  // "activeBar" draws a custom rect for that bar
+                  activeBar={({ ...props }) => (
+                    <Rectangle
+                      {...props}
+                      fillOpacity={0.8}
+                      stroke={props.payload.fill}
+                      strokeDasharray={4}
+                      strokeDashoffset={4}
+                    />
+                  )}
+                />
+              </BarChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -418,112 +418,112 @@ export default function EmployerDashboard({
               </p>
             </div>
           </span>
-        </div>
-        <Separator className="my-4" />
-        <div className="space-y-6">
-          {/* Show different filter panels based on matchView */}
-          {matchView === 'performance' ? (
-            <>
-              <span className="flex justify-end space-x-2 items-center text-sm mt-3">
-                <Label htmlFor="filter-mode">
-                  {matchView === 'performance'
-                    ? 'Performance Filter'
-                    : 'Resume Filter'}
-                </Label>
-                <Switch
-                  id="filter-mode"
-                  checked={
-                    matchView === ('performance' as FilterStatisticsType)
-                  }
-                  onCheckedChange={() =>
-                    setMatchView((prev) =>
-                      prev === 'performance' ? 'resume' : 'performance',
-                    )
-                  }
-                />
-              </span>
-              <FilterBar fields={performanceFields} />
-              <h1 className="text-2xl font-bold">
-                Matched Candidate Statistics
-              </h1>
-              <Separator className="my-4" />
-              <Tabs
-                defaultValue="practice"
-                onValueChange={(value) =>
-                  setMode(value as 'interview' | 'practice')
-                }
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="practice">
-                    Practice Statistics
-                  </TabsTrigger>
-                  <TabsTrigger value="interview">
-                    Interview Statistics
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-
-              {/* Render Matches */}
-              {employerPrefs && (
-                <MatchedCandidatesView
-                  skillGapMessage={skillGapMessage}
-                  topThree={topThree}
-                  topProspect={topProspect}
-                  matched={matched}
-                  top3Worldwide={top3Worldwide}
-                  mode={mode}
-                  selectedSkill={skillFilter}
-                  organizationId={organizationId}
-                />
-              )}
-            </>
-          ) : (
-            // Resume Matches Filter Panel
-            <>
-              <span className="flex justify-end space-x-2 items-center text-sm mt-3">
-                <Label htmlFor="filter-mode">
-                  {matchView === ('performance' as FilterStatisticsType)
-                    ? 'Performance Filter'
-                    : 'Resume Filter'}
-                </Label>
-                <Switch
-                  id="filter-mode"
-                  checked={
-                    matchView === ('performance' as FilterStatisticsType)
-                  }
-                  onCheckedChange={(checked) =>
-                    setMatchView(checked ? 'performance' : 'resume')
-                  }
-                />
-              </span>
-              <div className="flex flex-wrap justify-start gap-2">
-                <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[350px]">
-                  <label className="block text-sm mb-1">
-                    Resume Skill Keywords
-                  </label>
-                  <KeywordInput
-                    value={selectedResumeKeywords}
-                    onChange={setSelectedResumeKeywords}
-                    components={{
-                      ...components,
-                      MultiValue: createLimitedMultiValue(3),
-                    }}
+          <Separator className="my-4" />
+          <div className="space-y-6">
+            {/* Show different filter panels based on matchView */}
+            {matchView === 'performance' ? (
+              <>
+                <span className="flex justify-end space-x-2 items-center text-sm mt-3">
+                  <Label htmlFor="filter-mode">
+                    {matchView === 'performance'
+                      ? 'Performance Filter'
+                      : 'Resume Filter'}
+                  </Label>
+                  <Switch
+                    id="filter-mode"
+                    checked={
+                      matchView === ('performance' as FilterStatisticsType)
+                    }
+                    onCheckedChange={() =>
+                      setMatchView((prev) =>
+                        prev === 'performance' ? 'resume' : 'performance',
+                      )
+                    }
                   />
+                </span>
+                <FilterBar fields={performanceFields} />
+                <h1 className="text-2xl font-bold">
+                  Matched Candidate Statistics
+                </h1>
+                <Separator className="my-4" />
+                <Tabs
+                  defaultValue="practice"
+                  onValueChange={(value) =>
+                    setMode(value as 'interview' | 'practice')
+                  }
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="practice">
+                      Practice Statistics
+                    </TabsTrigger>
+                    <TabsTrigger value="interview">
+                      Interview Statistics
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {/* Render Matches */}
+                {employerPrefs && (
+                  <MatchedCandidatesView
+                    skillGapMessage={skillGapMessage}
+                    topThree={topThree}
+                    topProspect={topProspect}
+                    matched={matched}
+                    top3Worldwide={top3Worldwide}
+                    mode={mode}
+                    selectedSkill={skillFilter}
+                    organizationId={organizationId}
+                  />
+                )}
+              </>
+            ) : (
+              // Resume Matches Filter Panel
+              <>
+                <span className="flex justify-end space-x-2 items-center text-sm mt-3">
+                  <Label htmlFor="filter-mode">
+                    {matchView === ('performance' as FilterStatisticsType)
+                      ? 'Performance Filter'
+                      : 'Resume Filter'}
+                  </Label>
+                  <Switch
+                    id="filter-mode"
+                    checked={
+                      matchView === ('performance' as FilterStatisticsType)
+                    }
+                    onCheckedChange={(checked) =>
+                      setMatchView(checked ? 'performance' : 'resume')
+                    }
+                  />
+                </span>
+                <div className="flex flex-wrap justify-start gap-2">
+                  <div className="flex flex-col text-sm text-slate-500 w-full sm:w-[350px]">
+                    <label className="block text-sm mb-1">
+                      Resume Skill Keywords
+                    </label>
+                    <KeywordInput
+                      value={selectedResumeKeywords}
+                      onChange={setSelectedResumeKeywords}
+                      components={{
+                        ...components,
+                        MultiValue: createLimitedMultiValue(3),
+                      }}
+                    />
+                  </div>
+                  <FilterBar fields={resumeFields} />
                 </div>
-                <FilterBar fields={resumeFields} />
-              </div>
-              {employerPrefs && (
-                <ResumeMatchedCandidatesView
-                  matchedByResume={matchedByResume}
-                  skillGapMessage={resumeSkillGapMessage}
-                  selectedKeywords={selectedResumeKeywords}
-                  employerPrefs={employerPrefs}
-                />
-              )}
-            </>
-          )}
+                {employerPrefs && (
+                  <ResumeMatchedCandidatesView
+                    matchedByResume={matchedByResume}
+                    skillGapMessage={resumeSkillGapMessage}
+                    selectedKeywords={selectedResumeKeywords}
+                    employerPrefs={employerPrefs}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </TooltipProvider >
+      </TooltipProvider>
     );
 }

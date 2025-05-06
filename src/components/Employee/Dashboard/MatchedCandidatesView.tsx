@@ -187,7 +187,7 @@ export function MatchedCandidatesView({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="shadow-md border rounded-xl">
+          <Card className="shadow-md border rounded-xl h-full">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrophyIcon className="text-yellow-300 h-6 w-6 mr-2" />{' '}

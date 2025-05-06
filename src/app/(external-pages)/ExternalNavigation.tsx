@@ -1,8 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import logo from '@public/logos/InterviewGrade.png';
-import { Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -45,8 +44,8 @@ export function ExternalNavigation() {
           </Link>
         </div>
         <div className="flex items-center lg:-mr-2">
-          {/* <ThemeToggle /> */}
-          {isHome && (
+          <ThemeToggle />
+          {/* {isHome && (
             <>
               <div className="ml-6 hidden lg:block space-x-2">
                 <Link href="/c/login">
@@ -96,14 +95,14 @@ export function ExternalNavigation() {
                 </Link>
               </div>
             </>
-          )}
+          )} */}
         </div>
-        <Menu
+        {/* <Menu
           onClick={() => setMobileMenuOpen((prev) => !prev)}
           className="hover:cursor-pointer lg:hidden -mr-2"
-        />
+        /> */}
       </nav>
-      {mobileMenuOpen && (
+      {/* {mobileMenuOpen && (
         <ul className="md:hidden w-full shadow-2xl py-2 flex flex-col items-start font-medium pb-2">
           <hr className="w-full h-2" />
           <div className="flex flex-col items-start w-full space-y-4 ">
@@ -152,7 +151,7 @@ export function ExternalNavigation() {
             </Link>
           </div>
         </ul>
-      )}
+      )} */}
     </header>
   );
 }

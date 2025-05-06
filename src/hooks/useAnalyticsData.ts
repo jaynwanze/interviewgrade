@@ -59,10 +59,20 @@ export const useAnalyticsData = () => {
       // Filter unique templates with at least one completed interview
       const uniqueTemplates = new Set<string>();
       const filteredTemplates = filteredInterviews.filter((interview) => {
-        if (uniqueTemplates.has(interview.template_id)) {
+        if (
+          uniqueTemplates.has(
+            mode === 'Practice Mode'
+              ? interview.template_id
+              : interview.interview_template_id,
+          )
+        ) {
           return false;
         }
-        uniqueTemplates.add(interview.template_id);
+        uniqueTemplates.add(
+          mode === 'Practice Mode'
+            ? interview.template_id
+            : interview.interview_template_id,
+        );
         return true;
       });
 
@@ -70,7 +80,13 @@ export const useAnalyticsData = () => {
       const interviewAnalytics = (
         await Promise.all(
           filteredTemplates.map((interview) =>
-            getInterviewAnalytics(user.id, interview.template_id, mode),
+            getInterviewAnalytics(
+              user.id,
+              mode === 'Practice Mode'
+                ? interview.template_id
+                : interview.interview_template_id,
+              mode,
+            ),
           ),
         )
       ).filter(

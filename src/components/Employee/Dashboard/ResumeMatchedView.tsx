@@ -22,6 +22,7 @@ interface ResumeMatchedCandidatesViewProps {
   skillGapMessage: string;
   selectedKeywords: string[];
   employerPrefs: EmployerCandidatePreferences | null;
+  organizationId: string;
 }
 
 /**
@@ -32,6 +33,8 @@ export function ResumeMatchedCandidatesView({
   skillGapMessage,
   selectedKeywords,
   employerPrefs,
+  organizationId,
+
 }: ResumeMatchedCandidatesViewProps) {
   const router = useRouter();
 
@@ -45,7 +48,7 @@ export function ResumeMatchedCandidatesView({
 
   // Navigate to the candidate’s detail page (prompting the token usage).
   function handleViewProfile(candidateId: string) {
-    router.push(`/candidate/${candidateId}`);
+    router.push(`/employer/${organizationId}/c/${candidateId}`);
   }
 
   /**

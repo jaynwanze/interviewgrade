@@ -518,6 +518,7 @@ export default function EmployerDashboard({
                     skillGapMessage={resumeSkillGapMessage}
                     selectedKeywords={selectedResumeKeywords}
                     employerPrefs={employerPrefs}
+                    organizationId={organizationId}
                   />
                 )}
               </>

@@ -28,12 +28,12 @@
 - **Tailored Feedback**: Get personalized feedback on key areas such as communication, problem-solving, and technical proficiency.
 - **Analytics Dashboard**: Track progress over time and identify areas of improvement.
 - **Employer Interests**: Candidates receive notifications when an employer unlocks there profile.
-- 
+  
 ### For Employers:
 - **Access to talented Candidate pool**: Fine-grained search / filter on scores & resume
 - **Analytics Dashboard**: Automated matchmaking candidate performance/resume based off candidate preferences to make better hiring decisions.
-- **Deeper Camdidate analytics**: Employers can view deeper analytics about a desired candidate and pay a token to reach out to them.
-- **Stripe Integration**: Employer can purcahse different token bundles which will be used to unlock candidates of their choice.
+- **Deeper Camdidate analytics**: Employers can view deeper analytics about a desired candidate and pay one token(1 euro) to reach out to them.
+- **Stripe Integration**: Recruiters can purchase different token bundles which will be used to unlock candidates of their choice.
 
 
 ## 🏗️ Tech stack

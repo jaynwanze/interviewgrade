@@ -1,6 +1,25 @@
+<div align="center">
+
+<img src="public/logos/InterviewGrade.png" height="120" alt="InterviewGrade logo" />
+
+# InterviewGrade
+**AI-powered mock interviews & data-driven hiring – built with Next 14, Supabase & GPT-4o**
+
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)  👉
+<br>
+
+</div>
+
+---
+
 # InterviewGrade
 
 **InterviewGrade** is an advanced AI-driven mock interview platform designed to simulate real-world interviews and provide candidates with personalized feedback. It also offers tools for employers to streamline their hiring processes using data-driven insights.
+
+## ✨ What does it do?
+- **Candidates** run real-time practice or mock interviews, get instant AI feedback and long-term skill analytics.  
+- **Employers** filter talent by verified soft-skill scores, unlock detailed reports with pay-as-you-go tokens.  
+- All grading is handled by **GPT-4o + DistilRoBERTa sentiment**, streamed back to the UI in seconds.
 
 ## Features
 
@@ -8,29 +27,37 @@
 - **AI-Powered Mock Interviews**: Simulate real-world interviews with AI-generated questions and receive real-time feedback.
 - **Tailored Feedback**: Get personalized feedback on key areas such as communication, problem-solving, and technical proficiency.
 - **Analytics Dashboard**: Track progress over time and identify areas of improvement.
-- **Job Tracker**: Manage your job applications and track your interview progress.
-
+- **Employer Interests**: Candidates receive notifications when an employer unlocks there profile.
+- 
 ### For Employers:
-- **Customized Interview Templates**: Create tailored interview templates to streamline the hiring process.
-- **Candidate Analysis**: Evaluate candidate performance with data-driven insights and benchmarking tools.
-- **Analytics Dashboard**: Access key metrics on candidate performance to make better hiring decisions.
+- **Access to talented Candidate pool**: Fine-grained search / filter on scores & resume
+- **Analytics Dashboard**: Automated matchmaking candidate performance/resume based off candidate preferences to make better hiring decisions.
+- **Deeper Camdidate analytics**: Employers can view deeper analytics about a desired candidate and pay a token to reach out to them.
+- **Stripe Integration**: Employer can purcahse different token bundles which will be used to unlock candidates of their choice.
 
-## Technologies Used
-- **Frontend**: Next.js (React) – Modern web framework for server-rendered applications.
-- **Backend**: Supabase – Open-source Firebase alternative for authentication, real-time databases, and APIs.
-- **AI Integration**: OpenAI – Provides AI-generated interview questions and feedback.
-- **Database**: PostgreSQL – Relational database for structured data management.
-- **Testing**: Cypress – End-to-end testing framework for ensuring quality.
+
+## 🏗️ Tech stack
+
+| Layer | Main tech | Why |
+| ----- | --------- | --- |
+| **Frontend** | Next 14 (App Router) · React 18 · Tailwind CSS · shadcn/ui | Edge streaming, typed RSC & Client Components |
+| **Backend** | Next API Routes & Server Actions · Node 20 | Runs inside Vercel serverless / edge |
+| **Database** | Supabase (Postgres + RLS) | SQL + JSONB, auth & storage bundled |
+| **AI** | OpenAI GPT-4o, Whisper • Hugging Face DistilRoBERTa | Grading, feedback & sentiment |
+| **Payments** | Stripe Checkout + webhooks | PCI-compliant token bundles |
+| **DevOps** | Vercel, Docker (local Supabase) | Push-to-deploy, zero infra mgmt |
+| **Tooling** | TypeScript • Zod • ESLint / Prettier • GitHub Actions | End-to-end type safety & CI |
+
+---
 
 ## Project Structure
 The project is organized as follows:
 
-## Getting Started
+---
 
-### Prerequisites
-- Node.js >= 14.x
-- Supabase account and project setup
-- PostgreSQL database
+## 🚀 Getting started (local)
+
+> Prereqs: **Node ≥ 20**, **pnpm** (or npm), **Docker Desktop**.
 
 ### Installation
 
@@ -47,11 +74,23 @@ The project is organized as follows:
    ```bash
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=…
+   OPENAI_API_KEY=…
+   STRIPE_SECRET_KEY=…
+   STRIPE_WEBHOOK_SECRET=…
    
-4. Run the development server:
+4. Download and start docker engine:
+   Start Docker Desktop - Ensuring docker engine is running
+
+5. Run the local db in docker env:
+   ```bash
+   pnpm supabase start
+   
+6. Run the development server:
    ```bash
    pnpm run dev
 
-5. Open the application in your browser:
+7. Open the application in your browser:
    ```bash
    http://localhost:3000
+

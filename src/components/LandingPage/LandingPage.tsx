@@ -13,14 +13,14 @@ export const LandingPage = () => {
   return (
     <main>
       <HeroSection />
-      {/* <LogoCloud />
+      {/* <LogoCloud /> */}
       <Features />
-      <Quotetion />
-      <Integration />
-      <Testimonials />
+      {/* <Quotetion /> */}
+      {/* <Integration /> */}
+      {/* <Testimonials /> */}
       <Pricing />
-      <FAQ />
-      <CTA /> */}
+      {/* <FAQ /> */}
+      {/* <CTA /> */}
       <Footer />
     </main>
   );

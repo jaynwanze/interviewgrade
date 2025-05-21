@@ -1,6 +1,4 @@
 import { AnimatedBeamMultiple } from '@/components/animated-beam-multiple';
-import Marquee from '@/components/magicui/marquee';
-
 import { Calendar } from '@/components/ui/calendar';
 import {
   Command,
@@ -10,37 +8,12 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { cn } from '@/lib/utils';
-import { Globe } from 'lucide-react';
-
-const files = [
-  {
-    name: 'bitcoin.pdf',
-    body: 'Bitcoin is a cryptocurrency invented in 2008 by an unknown person or group of people using the name Satoshi Nakamoto.',
-  },
-  {
-    name: 'finances.xlsx',
-    body: 'A spreadsheet or worksheet is a file made of rows and columns that help sort data, arrange data easily, and calculate numerical data.',
-  },
-  {
-    name: 'logo.svg',
-    body: 'Scalable Vector Graphics is an Extensible Markup Language-based vector image format for two-dimensional graphics with support for interactivity and animation.',
-  },
-  {
-    name: 'keys.gpg',
-    body: 'GPG keys are used to encrypt and decrypt email, files, directories, and whole disk partitions and to authenticate messages.',
-  },
-  {
-    name: 'seed.txt',
-    body: 'A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover Bitcoin funds on-chain.',
-  },
-];
 
 export const featuresData = [
   {
-    name: 'Save your files',
+    name: 'Realistic Mock Interviews',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit,sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      'Practice behavioral and technical questions with our virtual interviewer named Avery. No scheduling, unlimited retries!',
     background: (
       <Command
         value="0"
@@ -48,81 +21,73 @@ export const featuresData = [
       >
         <CommandInput
           className="border-none focus:ring-0"
-          placeholder="Type a command or search..."
+          placeholder="Answer in your own words…"
         />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup className="pointer-events-none" heading="Suggestions">
-            <CommandItem>screenshot.png</CommandItem>
-            <CommandItem>bitcoin.pdf</CommandItem>
-            <CommandItem>finances.xlsx</CommandItem>
-            <CommandItem>logo.svg</CommandItem>
-            <CommandItem>keys.gpg</CommandItem>
-            <CommandItem>seed.txt</CommandItem>
+          <CommandGroup
+            heading="Sample questions"
+            className="pointer-events-none"
+          >
+            <CommandItem>“Tell me about yourself”</CommandItem>
+            <CommandItem>“Describe a conflict you resolved”</CommandItem>
+            <CommandItem>“Where do you see yourself in 5 years?”</CommandItem>
           </CommandGroup>
         </CommandList>
       </Command>
     ),
   },
-
   {
-    name: 'Sit Amet Consectetur',
+    name: 'Instant AI Grading & Feedback',
     description:
-      'Ut enim ad minim veniam, quis nostrud exercitationullamco laboris nisi ut aliquip ex ea commodo consequat.',
-
+      'Receive rubric-based scores, visual skill comparisions and actionable improvement tips seconds after each answer.',
     background: (
       <AnimatedBeamMultiple className="absolute right-2 top-4 h-full pt-0 border-none transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_100%)] group-hover:scale-105" />
     ),
   },
   {
-    name: 'Adipiscing Elit Sed',
+    name: 'Skill Progress Dashboard',
     description:
-      'Duis aute irure dolor in reprehenderit in voluptate velitesse cillum dolore eu fugiat nulla pariatur.',
-    background: (
-      <Marquee
-        pauseOnHover
-        className="absolute top-10 [--duration:20s] [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] "
-      >
-        {files.map((f, idx) => (
-          <figure
-            key={idx}
-            className={cn(
-              'relative w-32 cursor-pointer overflow-hidden rounded-xl border p-4',
-              'border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]',
-              'dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]',
-              'transform-gpu blur-[1px] transition-all duration-300 ease-out hover:blur-none',
-            )}
-          >
-            <div className="flex flex-row items-center gap-2">
-              <div className="flex flex-col">
-                <figcaption className="text-sm font-medium dark:text-white ">
-                  {f.name}
-                </figcaption>
-              </div>
-            </div>
-            <blockquote className="mt-2 text-xs">{f.body}</blockquote>
-          </figure>
-        ))}
-      </Marquee>
-    ),
-  },
-
-  {
-    name: 'Eiusmod Tempor Incididunt',
-    description:
-      'Excepteur sint occaecat cupidatat non proident, sunt in culpa qofficia deserunt mollit anim id e',
+      'Track your growth with radar charts, weekly trends, and peer benchmarks. Switch between Practice and Interview modes.',
     background: (
       <Calendar
         mode="single"
-        selected={new Date(2022, 4, 11, 0, 0, 0)}
+        selected={new Date()}
         className="absolute right-0 top-10 origin-top rounded-md border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:scale-105"
       />
     ),
   },
   {
-    name: 'Magna Aliqua Ut',
+    name: 'AI Coach Chat',
     description:
-      'Duis aute irure dolor in reprehenderit in voluptate velitesse cillum dolore eu fugiat nulla pariatur.',
-    background: <Globe className=" h-full " />,
+      'Ask follow-up questions and get personalized strategy advice from your always-on AI interview coach.',
+    background: (
+      <div className="absolute -right-5 top-10 w-[70%] origin-top border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:-translate-x-10 bg-white dark:bg-gray-900 rounded-lg shadow-md p-4 flex flex-col gap-2">
+        <div className="flex items-start gap-2">
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900 w-8 h-8 flex items-center justify-center font-bold text-blue-700 dark:text-blue-300">
+            AI
+          </div>
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm max-w-[70%]">
+            Hi! I’m your virtual interviewer. Do you want any advice?
+          </div>
+        </div>
+        <div className="flex items-start gap-2 self-end">
+          <div className="bg-blue-500 text-white rounded-lg px-3 py-2 text-sm max-w-[70%]">
+            Yes, let’s go!
+          </div>
+          <div className="rounded-full bg-gray-200 dark:bg-gray-700 w-8 h-8 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300">
+            You
+          </div>
+        </div>
+        <div className="flex items-start gap-2">
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900 w-8 h-8 flex items-center justify-center font-bold text-blue-700 dark:text-blue-300">
+            AI
+          </div>
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm max-w-[70%]">
+            Tell me about yourself.
+          </div>
+        </div>
+      </div>
+    ),
   },
-];
+] as const;

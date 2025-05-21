@@ -1,6 +1,5 @@
 'use client';
 
-import { ThemeToggle } from '@/components/ThemeToggle';
 import logo from '@public/logos/InterviewGrade.png';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -44,7 +43,7 @@ export function ExternalNavigation() {
           </Link>
         </div>
         <div className="flex items-center lg:-mr-2">
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           {/* {isHome && (
             <>
               <div className="ml-6 hidden lg:block space-x-2">

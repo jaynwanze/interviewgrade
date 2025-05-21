@@ -1,7 +1,13 @@
-type Pricing = {
+// InterviewGrade ‑ candidate‑side pricing data
+// -------------------------------------------------
+// Three public tiers: Free, Basic, Pro
+// Monthly prices are chosen to hit the psychological €9.99 / €19.99 anchors.
+// Annual = 2 months free (×10).
+
+export type Pricing = {
   title: string;
-  price: string;
-  annualPrice: string;
+  price: string; // monthly price in EUR
+  annualPrice: string; // annual price in EUR
   features: string[];
   description: string;
   isHighlighted?: boolean;
@@ -9,63 +15,45 @@ type Pricing = {
 
 export const pricing: Pricing[] = [
   {
-    title: 'Basic',
-    price: '99',
-    annualPrice: '990',
-    description: 'Best for small projects',
+    title: 'Free',
+    price: '0',
+    annualPrice: '0',
+    description: 'Test‑drive InterviewGrade with core features',
     features: [
-      'Custom Domain Registration',
-      'Basic Website Hosting',
-      'Standard Security Features',
-      'Mobile-Responsive Design',
-      'Basic SEO Optimization',
-      'Content Management System (CMS)',
-      'Contact Form Integration',
-      'Social Media Integration',
+      '2 mock‑interview sessions per month',
+      'Overall score + Quick tips',
+      // 'Local transcript download',
+      'AI coach chat (1 question per session)',
     ],
   },
   {
-    title: 'Standard',
-    price: '299',
-    annualPrice: '2990',
-    description: 'Best for large projects',
+    title: 'Pro',
+    price: '9.99',
+    annualPrice: '99',
+    description: 'Level‑up feedback & unlimited practice',
     features: [
-      'Everything in Basic Plan',
-      'Advanced Security Features',
-      'Enhanced SEO Optimization',
-      'Blog Setup and Management',
-      'E-commerce Integration',
-      'Up to 10 Pages',
-      'Custom Email Accounts',
-      'Monthly Performance Reports',
-      'Priority Email Support',
-      'Bi-Weekly Backups',
-      'Social Media Management Tools',
+      'Everything in Free',
+      'Unlimited mock & practice sessions',
+      'Full rubric breakdown & sentiment graph',
+      'Skill‑progress dashboard & radar chart',
+      'AI coach chat (10 questions per session)',
+      // 'Resume keyword gap analysis',
+      'Downloadable PDF reports',
     ],
     isHighlighted: true,
   },
-  {
-    title: 'Premium',
-    price: '399',
-    annualPrice: '3990',
-    description: 'Best for organizations',
-    features: [
-      'Everything in Standard Plan',
-      'Custom Web Application Development',
-      'Advanced E-commerce Features',
-      'Unlimited Pages',
-      'Dedicated Account Manager',
-      '24/7 Phone and Email Support',
-      'Weekly Backups',
-      'Advanced Analytics and Reporting',
-      'End to End Integration test suite',
-      'Custom API Integrations',
-      'Personalized SEO Strategy',
-      'Transcend Framer template ↗',
-      'PowerSaas Framer template ↗',
-      'Personalized SEO Strategy',
-      'Premium CDN Services',
-      'Ongoing Website Maintenance and Updates',
-    ],
-  },
+  // {
+  //   title: 'Pro',
+  //   price: '19.99',
+  //   annualPrice: '199',
+  //   description: 'Deep personalisation & career branding',
+  //   features: [
+  //     'Everything in Basic',
+  //     'Custom interview templates from job description',
+  //     'Unlimited AI‑coach follow‑ups',
+  //     'Voice‑clone feedback playback',
+  //     'Shareable public profile & portfolio',
+  //     'Priority email support',
+  //   ],
+  // },
 ];

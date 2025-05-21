@@ -10,17 +10,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { pricing } from '@/data/anon/pricing';
 import { cn } from '@/lib/utils';
-import { CheckCircle2Icon, DollarSign } from 'lucide-react';
+import { CheckCircle2Icon, EuroIcon } from 'lucide-react';
 import TitleBlock from '../title-block';
 
 const Pricing = () => {
   return (
     <section className="py-16 max-w-6xl flex flex-col justify-center items-center  mx-auto space-y-10 overflow-hidden px-6">
       <TitleBlock
-        icon={<DollarSign size={16} />}
+        icon={<EuroIcon size={16} />}
         title="Quality without any compromise"
         section="Pricing"
-        subtitle="CI/CD streamlines feature delivery, scalable infrastructure ensures global edge optimization and app monitoring capabilities for peak site performance."
+        subtitle="Simple, transparent pricing for every hiring team. Unlock powerful interview insights and candidate evaluation with InterviewGrade."
       />
 
       <Tabs
@@ -36,14 +36,14 @@ const Pricing = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="monthly" className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full ">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full ">
             {pricing.map((item, i) => (
               <PricingCard key={i} {...item} />
             ))}
           </div>
         </TabsContent>
         <TabsContent value="annual" className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full ">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full ">
             {pricing.map((item, i) => (
               <PricingCard key={i} {...item} price={item.annualPrice} />
             ))}
@@ -81,9 +81,9 @@ const PricingCard = ({
               {description}
             </CardDescription>
           </div>
-          {isHighlighted && <Badge>Most Popular</Badge>}
+          {isHighlighted && <Badge className="text-center">Most Popular</Badge>}
         </div>
-        <h3 className="text-4xl font-bold py-3 tracking-tighter">${price}</h3>
+        <h3 className="text-4xl font-bold py-3 tracking-tighter">€{price}</h3>
         <Button>Get Started</Button>
       </CardHeader>
 

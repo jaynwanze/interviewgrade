@@ -76,6 +76,7 @@ CREATE TABLE "public"."candidates" (
   "resume_metadata" "jsonb",
   "interview_skill_stats" "jsonb",
   "practice_skill_stats" "jsonb",
+  "stripe_customer_id" character varying,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
   );
 ALTER TABLE "public"."candidates" OWNER TO "postgres";
@@ -110,6 +111,7 @@ ALTER TABLE "public"."employee_candidate_unlocks" OWNER TO "postgres";
 
 CREATE TABLE "public"."products" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  'price_id' character varying,
   "product_type" "public"."product_type",
   "title" character varying NOT NULL,
   "description" text,

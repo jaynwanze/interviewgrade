@@ -2,28 +2,21 @@
 
 import { T } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/button';
+import { createCandidateSessionAction } from '@/data/user/candidate';
 // import {
 //   createCheckoutSessionAction
 // } from '@/data/user/organizations';
 import { createCustomerEmployeePortalLinkAction } from '@/data/user/employee';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { getStripe } from '@/utils/stripe-client';
-import { url } from 'inspector';
 import { ExternalLink } from 'lucide-react';
 
-export function CreateSubscriptionButton({
-  organizationId,
-  priceId,
-}: {
-  organizationId: string;
-  priceId: string;
-}) {
+export function CreateSubscriptionButton({ priceId }: { priceId: string }) {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      // return await createCheckoutSessionAction({
-      //   organizationId: organizationId,
-      //   priceId: priceId,
-      // });
+      return await createCandidateSessionAction({
+        priceId: priceId,
+      });
     },
     {
       loadingMessage: 'Please wait...',
@@ -31,7 +24,7 @@ export function CreateSubscriptionButton({
       successMessage: 'Redirecting...',
       onSuccess: async (sessionId) => {
         const stripe = await getStripe();
-        stripe?.redirectToCheckout({ sessionId: 'TO:DO' });
+        stripe?.redirectToCheckout({ sessionId: sessionId });
       },
     },
   );

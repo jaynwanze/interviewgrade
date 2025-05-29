@@ -1,6 +1,8 @@
 'use server';
 import { PageHeading } from '@/components/PageHeading';
+import Overline from '@/components/Text/Overline';
 import { T } from '@/components/ui/Typography';
+import { H3 } from '@/components/ui/Typography/H3';
 import { getActiveProductsByType } from '@/data/user/employee';
 import { NormalizedSubscription, Product, UnwrapPromise } from '@/types';
 import { cn } from '@/utils/cn';
@@ -47,8 +49,8 @@ async function ChoosePricingTable() {
 
   return (
     <div className="max-w-7xl space-y-4">
-      {/* <Overline>Pricing table</Overline> */}
-      {/* <H3 className='border-none mt-3 mb-0'>Pricing table</H3> */}
+      <Overline>Pricing table</Overline>
+      <H3 className="border-none mt-3 mb-0">Pricing table</H3>
       <div className="space-y-2">
         {/* <PricingModeToggle mode={pricingMode} onChange={setPricingMode} /> */}
         <div className="flex space-x-6 w-full">
@@ -65,7 +67,7 @@ async function ChoosePricingTable() {
             ) {
               return null;
             }
-            const priceId = product.id;
+            const priceId = product.price_id;
             return (
               <>
                 <div

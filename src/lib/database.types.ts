@@ -153,6 +153,7 @@ export type Database = {
           resume_metadata: ResumeMetadata
           interview_skill_stats: CandidateSkillsStats[]
           practice_skill_stats: CandidateSkillsStats[]
+          stripe_customer_id?: string
           created_at: string
 
         }
@@ -168,6 +169,7 @@ export type Database = {
           resume_metadata?: ResumeMetadata
           interview_skill_stats: CandidateSkillsStats[]
           practice_skill_stats: CandidateSkillsStats[]
+          stripe_customer_id?: string
           created_at: string
         }
         Update: {
@@ -183,6 +185,7 @@ export type Database = {
           resume_metadata?: ResumeMetadata
           interview_skill_stats?: CandidateSkillsStats[]
           practice_skill_stats?: CandidateSkillsStats[]
+          stripe_customer_id?: string
           created_at?: string
         }
         Relationships: [
@@ -380,6 +383,7 @@ export type Database = {
       products: {
         Row: {
           id: string
+          price_id: string
           product_type: Database["public"]["Enums"]["product_type"]
           title: string
           description: string
@@ -397,6 +401,7 @@ export type Database = {
 
         }
         Insert: {
+          price_id: string
           product_type: Database["public"]["Enums"]["product_type"]
           title: string
           description: string
@@ -414,6 +419,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          price_id?: string
           product_type?: Database["public"]["Enums"]["product_type"]
           title?: string
           description?: string

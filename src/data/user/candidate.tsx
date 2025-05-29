@@ -4,16 +4,20 @@ import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/cr
 import type {
   JobTracker,
   SAPayload,
+  StripeCheckoutSessionDetails,
   SupabaseFileUploadOptions,
   Table,
 } from '@/types';
 import { extractResumeMetadataFromUrl } from '@/utils/extractResumeMetadata';
+import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { stripe } from '@/utils/stripe';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { User } from '@supabase/supabase-js';
 import { console } from 'inspector';
 import slugify from 'slugify';
 import urlJoin from 'url-join';
+import { createOrRetrieveCandidateCustomer } from '../admin/stripe';
 import { refreshSessionAction } from './session';
 
 export async function updateCandidateProfileDetailsAction({
@@ -444,3 +448,124 @@ export async function deleteJobTrackerApplication(
     throw new Error(`Failed to delete job application: ${error.message}`);
   }
 }
+
+// For subscriptions only for now
+export async function createCandidateSessionAction({
+  priceId,
+  isTrial = false,
+}: {
+  priceId: string;
+  isTrial?: boolean;
+}) {
+  const TRIAL_DAYS = 14;
+  const user = await serverGetLoggedInUser();
+  if (!user) throw Error('Could not get user');
+  const { user_metadata } = user;
+  if (user_metadata.userType !== 'candidate')
+    throw Error('Logged in user is not a candidate');
+  if (!user.email) throw Error('User email not found');
+
+  const customer = await createOrRetrieveCandidateCustomer({
+    candidate_id: user.id,
+    email: user.email || '',
+  });
+  if (!customer) throw Error('Could not get customer');
+
+  // } else if (isTrial) {
+  //   const stripeSession = await stripe.checkout.sessions.create({
+  //     payment_method_types: ['card'],
+  //     billing_address_collection: 'required',
+  //     customer,
+  //     line_items: [
+  //       {
+  //         price: priceId,
+  //         quantity: 1,
+  //       },
+  //     ],
+  //     mode: 'subscription',
+  //     allow_promotion_codes: true,
+  //     subscription_data: {
+  //       trial_period_days: TRIAL_DAYS,
+  //       trial_settings: {
+  //         end_behavior: {
+  //           missing_payment_method: 'cancel',
+  //         },
+  //       },
+  //       metadata: {},
+  //     },
+  //     success_url: toSiteURL(
+  //       `/employer/${organizationId}/settings/billing`,
+  //     ),
+  //     cancel_url: toSiteURL(`/employer/${organizationId}/settings/billing`),
+  //   });
+
+  //   return stripeSession.id;
+
+  const stripeSession = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    billing_address_collection: 'required',
+    customer,
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    mode: 'subscription',
+    allow_promotion_codes: true,
+    subscription_data: {
+      trial_from_plan: true,
+      metadata: {},
+    },
+    success_url: toSiteURL(`/candidate/settings/billing`),
+    cancel_url: toSiteURL(`/candidate/settings/billing`),
+  });
+
+  return stripeSession.id;
+}
+
+export const retriveStripeCheckoutSessionPurchaseDetails = async (
+  checkoutSessionId: string,
+): Promise<StripeCheckoutSessionDetails> => {
+  const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+  if (!session) {
+    throw new Error('No session found');
+  }
+
+  const customerDetails = session.customer_details;
+  if (!customerDetails) {
+    throw new Error('No customer details found');
+  }
+
+  // if (!session.line_items) {
+  //   throw new Error('No line items found');
+  // }
+  // const product = session.line_items[0];
+  // if (!product) {
+  //   throw new Error('No product found');
+  // }
+
+  if (!session.metadata) {
+    throw new Error('No metadata found');
+  }
+  if (!session.amount_total) {
+    throw new Error('No amount total found');
+  }
+  if (!session.metadata.product_type) {
+    throw new Error('No product name found');
+  }
+  if (!session.metadata.quantity) {
+    throw new Error('No quantity found');
+  }
+
+  return {
+    customer_details: {
+      name: customerDetails?.name || '',
+    },
+    product: {
+      type: session.metadata?.product_type || '',
+      price: session.amount_total || 0,
+      quantity: Number(session.metadata?.quantity) || 0,
+    },
+  };
+};

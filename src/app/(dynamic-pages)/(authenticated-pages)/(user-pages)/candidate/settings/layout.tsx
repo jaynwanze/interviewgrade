@@ -1,7 +1,7 @@
 'use client';
 import { PageHeading } from '@/components/PageHeading';
 import { TabsNavigation } from '@/components/TabsNavigation';
-import { Lock, User } from 'lucide-react';
+import { CreditCard, Lock, User } from 'lucide-react';
 import { useMemo } from 'react';
 
 export default function UserSettingsClientLayout({
@@ -21,11 +21,11 @@ export default function UserSettingsClientLayout({
         href: `/candidate/settings/security`,
         icon: <Lock />,
       },
-      // {
-      //   label: 'Billing',
-      //   href: `/candidate/settings/billing`,
-      //   icon: <CreditCard />,
-      // },
+      {
+        label: 'Billing',
+        href: `/candidate/settings/billing`,
+        icon: <CreditCard />,
+      },
     ];
   }, []);
 

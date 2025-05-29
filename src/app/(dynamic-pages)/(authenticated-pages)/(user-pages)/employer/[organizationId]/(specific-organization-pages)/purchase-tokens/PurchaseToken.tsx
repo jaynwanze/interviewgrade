@@ -34,7 +34,6 @@ export default function PurchaseTokens({
       try {
         const activeProducts = await getActiveProductsByType('token_bundle');
         setProducts(activeProducts);
-        setProducts(activeProducts);
       } catch (err) {
         console.error('Error fetching products:', err);
         setError('Failed to load products');

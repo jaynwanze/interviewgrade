@@ -1,8 +1,7 @@
-'use client';
+'use server';
 
 import { T } from '@/components/ui/Typography';
 import { NormalizedSubscription } from '@/types';
-import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { Suspense } from 'react';
 import { CandidateSubscriptionDetails } from './CandidateSubscripionDetails';
 

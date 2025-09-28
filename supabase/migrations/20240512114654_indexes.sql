@@ -84,7 +84,9 @@ CREATE INDEX idx_organizations_private_info_id ON "public"."organizations_privat
 
 -- Indexes for subscription
 CREATE INDEX idx_subscriptions_id ON "public"."subscriptions" ("id");
-CREATE INDEX idx_subscriptions_organization_id ON "public"."subscriptions" ("organization_id");
+-- CREATE INDEX idx_subscriptions_organization_id ON "public"."subscriptions" ("organization_id");
+CREATE INDEX idx_subscriptions_candidate_id ON "public"."subscriptions" ("candidate_id");
+CREATE INDEX idx_subscriptions_product_id ON "public"."subscriptions" ("product_id");
 
 -- Indexes for employees
 CREATE INDEX idx_employees_id ON "public"."employees" ("id");

@@ -16,7 +16,7 @@ CREATE TABLE "public"."organizations" (
   "created_by" "uuid" NOT NULL,
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL
   );
-  
+
 ALTER TABLE "public"."organizations" OWNER TO "postgres";
 
 --
@@ -27,7 +27,7 @@ CREATE TABLE "public"."organization_join_invitations" (
   "created_at" timestamp WITH time zone DEFAULT "now"() NOT NULL,
   "inviter_user_id" "uuid" NOT NULL,
   "status" "public"."organization_join_invitation_link_status" DEFAULT 'active'::"public"."organization_join_invitation_link_status" NOT NULL,
-  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL, 
+  "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
   "invitee_user_email" character varying NOT NULL,
   "organization_id" "uuid" NOT NULL,
   "invitee_organization_role" "public"."organization_member_role" NOT NULL DEFAULT 'member'::organization_member_role,
@@ -135,6 +135,7 @@ ALTER TABLE "public"."products" OWNER TO "postgres";
 
 CREATE TABLE "public"."subscriptions" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+  "candidate_id" "uuid" NOT NULL,
   "product_id" "uuid" NOT NULL,
   "status" "public"."subscription_status",
   "quantity" bigint,
@@ -542,10 +543,24 @@ ALTER TABLE ONLY "public"."organizations_private_info"
 ADD CONSTRAINT "organizations_private_info_id_fkey" FOREIGN KEY ("id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
 --
 -- Name: subscriptions subscriptions_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- --
+
+-- ALTER TABLE ONLY "public"."subscriptions"
+-- ADD CONSTRAINT "subscriptions_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
+
+--
+-- Name: subscriptions subscriptions_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY "public"."subscriptions"
-ADD CONSTRAINT "subscriptions_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
+ADD CONSTRAINT "subscriptions_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "public"."candidates"("id") ON DELETE CASCADE;
+
+--
+-- Name: subscriptions subscriptions_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "public"."subscriptions"
+ADD CONSTRAINT "subscriptions_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
 
 --
 -- Name: user_profiles user_profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -764,32 +779,32 @@ ADD CONSTRAINT "interview_questions_type_check" CHECK ("type" = ANY (ARRAY['Gene
 
 ALTER TABLE ONLY "public"."templates"
 ADD CONSTRAINT "templates_category_check" CHECK ("category" = ANY (ARRAY[
-  'General Skills-Based'::template_category, 
+  'General Skills-Based'::template_category,
   'General Job-Based'::template_category,
   'Soft Skills'::template_category,
-  'Accounting'::template_category, 
-  'Finance'::template_category, 
-  'Admin'::template_category, 
-  'Customer Service'::template_category, 
-  'IT'::template_category, 
-  'HR'::template_category, 
-  'Legal'::template_category, 
-  'Education'::template_category, 
-  'Training'::template_category, 
-  'Real Estate'::template_category, 
-  'Engineering'::template_category, 
-  'Construction'::template_category, 
-  'Healthcare'::template_category, 
-  'Pharma'::template_category, 
-  'Hospitality'::template_category, 
-  'Travel'::template_category, 
-  'Law Enforcement'::template_category, 
-  'Security'::template_category, 
-  'Logistics'::template_category, 
-  'Marketing'::template_category, 
-  'PR'::template_category, 
-  'Media'::template_category, 
-  'Sales'::template_category, 
+  'Accounting'::template_category,
+  'Finance'::template_category,
+  'Admin'::template_category,
+  'Customer Service'::template_category,
+  'IT'::template_category,
+  'HR'::template_category,
+  'Legal'::template_category,
+  'Education'::template_category,
+  'Training'::template_category,
+  'Real Estate'::template_category,
+  'Engineering'::template_category,
+  'Construction'::template_category,
+  'Healthcare'::template_category,
+  'Pharma'::template_category,
+  'Hospitality'::template_category,
+  'Travel'::template_category,
+  'Law Enforcement'::template_category,
+  'Security'::template_category,
+  'Logistics'::template_category,
+  'Marketing'::template_category,
+  'PR'::template_category,
+  'Media'::template_category,
+  'Sales'::template_category,
   'Retail'::template_category,
   'Other'::template_category
 ]));

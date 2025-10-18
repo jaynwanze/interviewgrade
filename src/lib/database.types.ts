@@ -1,4 +1,4 @@
-import { CandidateSkillsStats, ChatRow, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback } from '@/types'
+import { CandidateSkillsStats, ChatRow, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, ProductMetadata, QuestionAnswerFeedback } from '@/types'
 import { ResumeMetadata } from '@/utils/zod-schemas/resumeMetaDataSchema'
 export type Json =
   | string
@@ -397,7 +397,7 @@ export type Database = {
           pricing_plan_interval_count: number
           trial_period_days: number | null
           img_url: string
-          metadata: JSON | null
+          metadata: ProductMetadata | null
 
         }
         Insert: {
@@ -415,7 +415,7 @@ export type Database = {
           pricing_plan_interval_count?: number
           trial_period_days?: number
           img_url: string
-          metadata: JSON | null
+          metadata: ProductMetadata | null
         }
         Update: {
           id?: string
@@ -433,7 +433,7 @@ export type Database = {
           pricing_plan_interval_count?: number
           trial_period_days?: number
           img_url?: string
-          metadata?: JSON | null
+          metadata?: ProductMetadata | null
         }
       }
       tokens: {

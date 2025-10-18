@@ -16,9 +16,9 @@ export function formatNormalizedSubscription(
   switch (subscription.type) {
     case 'no-subscription':
       return {
-        title: '',
+        title: 'Free Tier',
         sidenote: 'Upgrade to Pro',
-        description: 'Activate your free trial now and enjoy all our features!',
+        description: 'Activate your the Pro now and enjoy all our features!',
       };
     // case 'trialing':
     //   description = `Your ${

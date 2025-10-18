@@ -7,7 +7,7 @@ import { getActiveProductsByType } from '@/data/user/employee';
 import { NormalizedSubscription, Product, UnwrapPromise } from '@/types';
 import { cn } from '@/utils/cn';
 import { formatNormalizedSubscription } from '@/utils/formatNormalizedSubscription';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import {
   CreateSubscriptionButton,
   ManageSubscriptionButton,
@@ -49,7 +49,7 @@ async function ChoosePricingTable() {
 
   return (
     <div className="max-w-7xl space-y-4">
-      <Overline>Pricing table</Overline>
+      {/* <Overline>Pricing table</Overline> */}
       <H3 className="border-none mt-3 mb-0">Pricing table</H3>
       <div className="space-y-2">
         {/* <PricingModeToggle mode={pricingMode} onChange={setPricingMode} /> */}
@@ -102,32 +102,24 @@ async function ChoosePricingTable() {
 
                     <div className="px-5 pl-6 pt-0 mb-8">
                       <ul className="font-medium text-muted-foreground">
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          <Check className="text-green-600 w-6 h-6" />
-                          <T.P className="leading-6 ml-3">
-                            {product.description}
-                          </T.P>
-                        </li>
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          <Check className="text-green-600 w-6 h-6" />
-                          <T.P className="leading-6 ml-3">A nice feature</T.P>
-                        </li>
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          <Check className="text-green-600 w-6 h-6" />
-                          <T.P className="leading-6 ml-3">
-                            Another nice feature
-                          </T.P>
-                        </li>
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
+                        {product.metadata?.features && (
+                          product.metadata.features.map((feature, index) => (
+                            <li key={index} className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
+                              <Check className="text-green-600 w-6 h-6" />
+                              <T.P className="leading-6 ml-3">
+                                {feature}
+                              </T.P>
+                            </li>
+                          ))
+                        )}
+                        {/* <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
                           {product.price_unit_amount > 0 ? (
                             <Check className="text-green-600 w-6 h-6" />
                           ) : (
                             <X className="text-destructive" />
                           )}
-                          <T.P className="leading-6 ml-3">
-                            A premium feature
-                          </T.P>
-                        </li>
+
+                        </li> */}
                       </ul>
                     </div>
                   </div>
@@ -175,10 +167,16 @@ export async function CandidateSubscriptionDetails({
   ) {
     return (
       <>
-        <PageHeading
-          title="Subscription"
-          subTitle="This user doesn't have any plan at the moment"
-        />
+          <div className="space-y-1">
+            <T.H3 className="text-gray-900 dark:text-slate-100 ">Subscription</T.H3>
+            <T.P className="text-muted-foreground">
+              You are currently on the{' '}
+              <span className="text-blue-500 dark:text-blue-400">
+                {subscriptionDetails.title}{' '}.
+              </span>
+            </T.P>
+            <T.Subtle>{subscriptionDetails.description}</T.Subtle>
+          </div>
         <ChoosePricingTable />
       </>
     );

@@ -481,8 +481,11 @@ export type Database = {
           current_period_end: string
           ended_at: string
           cancel_at: string
+          canceled_at: string
           sidenote: string
           metadata: JSON
+          trial_start?: string
+          trial_end?: string
           updated_at: string
         }
         Insert: {
@@ -495,8 +498,11 @@ export type Database = {
           current_period_end: string
           ended_at: string
           cancel_at: string
+          canceled_at: string
           sidenote: string
           metadata: JSON
+          trial_start?: string
+          trial_end?: string
           updated_at: string
         },
         Update: {
@@ -509,8 +515,11 @@ export type Database = {
           current_period_end?: string
           ended_at?: string
           cancel_at?: string
+          canceled_at?: string
           sidenote?: string
           metadata?: JSON
+          trial_start?: string
+          trial_end?: string
           updated_at?: string
         },
         Relationships: [

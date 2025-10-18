@@ -1,14 +1,15 @@
+import { SubscriptionCardSmall } from '@/components/SubscriptionCardSmall';
+import { T } from '@/components/ui/Typography';
 import { cn } from '@/utils/cn';
 import {
   BarChart3Icon,
   LucideHistory,
   NotepadText,
   Settings,
-  TableProperties,
 } from 'lucide-react';
+import { Suspense } from 'react';
 import { SidebarLink } from './SidebarLink';
 import { SidebarLogoAndToggle } from './_components/SidebarLogo';
-import { ChartBarIcon } from '@heroicons/react/solid';
 
 export async function UserSidebar() {
   return (
@@ -37,30 +38,30 @@ export async function UserSidebar() {
           href="/candidate/interview-history"
           icon={<LucideHistory className="h-5 w-5" />}
         />
-        <SidebarLink
+        {/* <SidebarLink
           label="Employer Interests"
           href="/candidate/employer-interests"
           icon={<TableProperties className="h-5 w-5" />}
-        />
-        <SidebarLink
+        /> */}
+        {/* <SidebarLink
           label="Skill Development"
           href="/candidate/skill-development"
           icon={<ChartBarIcon className="h-5 w-5" />}
-        />
+        /> */}
         <SidebarLink
           label="Account Settings"
           href="/candidate/settings"
           icon={<Settings className="h-5 w-5" />}
         />
       </div>
-      {/* <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <p className="text-sm font-normal text-muted-foreground">
           Subscription Details
         </p>
         <Suspense fallback={<T.P>Loading Subscription Details details...</T.P>}>
-          <SubscriptionCardSmall organizationId={'organizationId'} />
+          <SubscriptionCardSmall />
         </Suspense>{' '}
-      </div> */}
+      </div>
     </div>
   );
 }

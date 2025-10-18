@@ -3,6 +3,8 @@
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import type {
   JobTracker,
+  NormalizedSubscription,
+  Product,
   SAPayload,
   StripeCheckoutSessionDetails,
   SupabaseFileUploadOptions,
@@ -19,6 +21,7 @@ import slugify from 'slugify';
 import urlJoin from 'url-join';
 import { createOrRetrieveCandidateCustomer } from '../admin/stripe';
 import { refreshSessionAction } from './session';
+import { getCandidateUserProfile } from './user';
 
 export async function updateCandidateProfileDetailsAction({
   currentUser,
@@ -108,6 +111,86 @@ async function extractAndSaveMetadata(candidateId: string, resumeUrl: string) {
 
 //     return data;
 // }
+
+
+export const getCurrentCandidateSubscription = async (
+): Promise<NormalizedSubscription> => {
+  const user = await serverGetLoggedInUser();
+  const candidate = await getCandidateUserProfile(user.id);
+
+  if (!candidate) {
+    return {
+      type: 'no-subscription',
+    };
+  }
+
+  const { data: subscriptionData, error } =
+    await createSupabaseUserServerActionClient()
+      .from('subscriptions')
+      .select('*, products(*)')
+      .eq('candidate_id', candidate.id)
+      .in('status', ['trialing', 'active'])
+      .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching subscription:', error);
+    throw error;
+  }
+
+  if (!subscriptionData) {
+    return {
+      type: 'no-subscription',
+    };
+  }
+
+  try {
+    const subscription = subscriptionData as Table<'subscriptions'> & {
+      products: Product;
+    };
+
+    const product = subscription.products;
+
+    if (!product) {
+      throw new Error('No product found for the subscription');
+    }
+
+    // if (subscription.status === 'trialing') {
+    //   if (!subscription.trial_start || !subscription.trial_end) {
+    //     throw new Error('No trial start or end found');
+    //   }
+    //   return {
+    //     type: 'trialing',
+    //     trialStart: subscription.trial_start,
+    //     trialEnd: subscription.trial_end,
+    //     product: product,
+    //     subscription,
+    //   };
+    // } else
+    if (subscription.status) {
+      return {
+        type: subscription.status as
+          | 'active'
+          | 'past_due'
+          | 'canceled'
+          | 'paused'
+          | 'incomplete'
+          | 'incomplete_expired'
+          | 'unpaid',
+        product: product,
+        subscription,
+      };
+    } else {
+      return {
+        type: 'no-subscription',
+      };
+    }
+  } catch (err) {
+    console.error('Error processing subscription:', err);
+    return {
+      type: 'no-subscription',
+    };
+  }
+};
 
 export const updateCandidateDetails = async (
   {

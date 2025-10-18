@@ -142,14 +142,14 @@ CREATE TABLE "public"."subscriptions" (
   "cancel_at_period_end" boolean,
   "created" timestamp WITH time zone NOT NULL,
   "current_period_start" timestamp WITH time zone NOT NULL,
-  "current_period_end" timestamp WITH time zone NOT NULL,
+  "current_period_end" timestamp WITH time zone,
   "metadata" "json",
   "ended_at" timestamp WITH time zone,
   "cancel_at" timestamp WITH time zone,
   "canceled_at" timestamp WITH time zone,
   "trial_start" timestamp WITH time zone,
   "trial_end" timestamp WITH time zone,
-  "organization_id" "uuid"
+  -- "organization_id" "uuid"
 );
 ALTER TABLE "public"."subscriptions" OWNER TO "postgres";
 --

@@ -535,10 +535,10 @@ export async function deleteJobTrackerApplication(
 // For subscriptions only for now
 export async function createCandidateSessionAction({
   priceId,
-  isTrial = false,
+  // isTrial = false,
 }: {
   priceId: string;
-  isTrial?: boolean;
+  // isTrial?: boolean;
 }) {
   const TRIAL_DAYS = 14;
   const user = await serverGetLoggedInUser();

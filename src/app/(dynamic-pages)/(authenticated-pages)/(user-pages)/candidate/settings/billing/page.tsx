@@ -6,10 +6,6 @@ import { Suspense } from 'react';
 import { CandidateSubscriptionDetails } from './CandidateSubscripionDetails';
 import { getCurrentCandidateSubscription } from '@/data/user/candidate';
 
-const activeSubscription: NormalizedSubscription = {
-  type: 'no-subscription',
-};
-
 async function Subscription() {
   const normalizedSubscription = await getCurrentCandidateSubscription();
 

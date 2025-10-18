@@ -271,9 +271,13 @@ export type DropzoneFile = File & {
 export type DropzoneFileWithDuration = DropzoneFile & {
   duration: number;
 };
-// src/types/index.ts
 
 export type Product = Table<'products'>;
+
+export type ProductMetadata = {
+    features?: string[];
+};
+
 
 export type Subscription = Table<'subscriptions'>;
 

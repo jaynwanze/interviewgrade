@@ -229,6 +229,7 @@ export type Database = {
           current_period_end: string
           ended_at: string
           cancel_at: string
+          canceled_at: string
           sidenote: string
           metadata: JSON
           updated_at: string
@@ -243,6 +244,7 @@ export type Database = {
           current_period_end: string
           ended_at: string
           cancel_at: string
+          canceled_at: string
           sidenote: string
           metadata: JSON
           updated_at: string
@@ -257,6 +259,7 @@ export type Database = {
           current_period_end?: string
           ended_at?: string
           cancel_at?: string
+          canceled_at?: string
           sidenote?: string
           metadata?: JSON
           updated_at?: string

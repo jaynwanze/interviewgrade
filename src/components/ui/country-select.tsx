@@ -6,7 +6,6 @@ import {
     SelectValue,
   } from "@/components/ui/select";
   import { filterCountries } from "@/lib/address-helpers";
-  //@ts-expect-error: country-region-data does not have TypeScript definitions
   import countryRegionData from "country-region-data/dist/data-umd";
   import { useEffect, useState } from "react";
   

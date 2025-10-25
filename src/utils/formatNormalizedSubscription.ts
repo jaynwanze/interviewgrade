@@ -93,6 +93,7 @@ export function formatNormalizedSubscription(
       if (subscription.subscription.canceled_at) {
         return {
           title: `${subscription.product.title} Plan`,
+          title: `${subscription.product.title} Plan`,
           sidenote: `(Canceled)`,
           description: `Your ${subscription.product.title
             } Plan was canceled on ${moment(
@@ -107,6 +108,7 @@ export function formatNormalizedSubscription(
       ) {
         return {
           title: `${subscription.product.title} Plan`,
+          title: `${subscription.product.title} Plan`,
           sidenote: `(Cancels end of period)`,
           description: `Your ${subscription.product.title
             } Plan started on ${moment(
@@ -120,12 +122,14 @@ export function formatNormalizedSubscription(
       } else {
         return {
           title: `${subscription.product.title} Plan`,
+          title: `${subscription.product.title} Plan`,
           sidenote: '',
           description,
         };
       }
     case 'past_due':
       return {
+        title: `${subscription.product.title} Plan`,
         title: `${subscription.product.title} Plan`,
         sidenote: '(Past due)',
         description: `Your ${subscription.product.title
@@ -161,18 +165,23 @@ export function formatNormalizedSubscription(
     case 'paused':
       return {
         title: `${subscription.product.title} Plan`,
+        title: `${subscription.product.title} Plan`,
         sidenote: '(Paused)',
+        description: `Your ${subscription.product.title} Plan is currently paused. You can resume it anytime to continue enjoying the features.`,
         description: `Your ${subscription.product.title} Plan is currently paused. You can resume it anytime to continue enjoying the features.`,
       };
     case 'incomplete':
     case 'incomplete_expired':
       return {
         title: `${subscription.product.title} Plan`,
+        title: `${subscription.product.title} Plan`,
         sidenote: '(Incomplete)',
+        description: `Your ${subscription.product.title} Plan setup is incomplete. Please complete the setup to enjoy all the features.`,
         description: `Your ${subscription.product.title} Plan setup is incomplete. Please complete the setup to enjoy all the features.`,
       };
     case 'unpaid':
       return {
+        title: `${subscription.product.title} Plan`,
         title: `${subscription.product.title} Plan`,
         sidenote: '(Unpaid)',
         description: `Your ${subscription.product.title

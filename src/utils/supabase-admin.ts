@@ -1,5 +1,145 @@
+import { Database } from '@/lib/database.types';
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
+import Stripe from 'stripe';
+import { toDateTime } from './helpers';
+import { stripe } from './stripe';
 
+const updateProductRecord = async (
+  product: Stripe.Product,
+  price: Stripe.Price,
+) => {
+  const { error } = await supabaseAdminClient
+    .from('products')
+    .update({
+      stripe_product_id: product.id,
+      price_id: price.id,
+      status: product.active ? 'active' : 'inactive',
+      title: product.name,
+      description: product.description ?? undefined,
+      currency: price.currency,
+      price_unit_amount: price.unit_amount ?? undefined,
+      price_type: price.type,
+      pricing_plan_interval: price.recurring?.interval,
+      pricing_plan_interval_count: price.recurring?.interval_count,
+      trial_period_days: price.recurring?.trial_period_days ?? undefined,
+      image_url: product.images?.[0] ?? undefined,
+      metadata: product.metadata,
+    })
+    .eq('stripe_product_id', product.id).eq('price_id', price.id);
+  if (error) throw error;
+  console.log(`Product inserted/updated: ${product.id}`);
+};
+
+const updatePriceRecord = async (
+  product: Stripe.Product,
+  price: Stripe.Price,
+) => {
+  const { error } = await supabaseAdminClient.from('products').update({
+    stripe_product_id: price.product === 'string' ? price.product : '',
+    price_id: price.id,
+    active: price.active,
+    currency: price.currency,
+    description: price.nickname ?? undefined,
+    type: price.type,
+    unit_amount: price.unit_amount ?? undefined,
+    interval: price.recurring?.interval,
+    interval_count: price.recurring?.interval_count,
+    trial_period_days: price.recurring?.trial_period_days,
+    metadata: price.metadata,
+  });
+  if (error) throw error;
+  console.log(`Price inserted/updated: ${price.id}`);
+};
+
+const createOrRetrieveCustomer = async ({
+  email,
+  organizationId,
+  organizationTitle,
+}: {
+  email?: string;
+  organizationId: string;
+  organizationTitle?: string;
+}) => {
+  const { data, error } = await supabaseAdminClient
+    .from('customers')
+    .select('stripe_customer_id')
+    .eq('organization_id', organizationId)
+    .single();
+  if (error || !data?.stripe_customer_id) {
+    // No customer record found, let's create one.
+    const customerData: {
+      metadata: { supabaseOrganizationId: string };
+      email?: string;
+      description?: string;
+    } = {
+      metadata: {
+        supabaseOrganizationId: organizationId,
+      },
+    };
+    if (email) customerData.email = email;
+    if (organizationTitle) customerData.description = organizationTitle;
+    const customer = await stripe.customers.create(customerData);
+    // Now insert the customer ID into our Supabase mapping table.
+    const { error: supabaseError } = await supabaseAdminClient
+      .from('customers')
+      .insert([
+        { organization_id: organizationId, stripe_customer_id: customer.id },
+      ]);
+    if (supabaseError) throw supabaseError;
+    console.log(`New customer created and inserted for ${organizationId}.`);
+    return customer.id;
+  }
+  return data.stripe_customer_id;
+};
+
+/**
+ * Copies the billing details from the payment method to the customer object.
+ */
+const copyBillingDetailsToCustomer = async (
+  organizationId: string,
+  payment_method: Stripe.PaymentMethod,
+) => {
+  //Todo: check this assertion
+  const customer = payment_method.customer as string;
+  const {
+    name: _name,
+    phone: _phone,
+    address: _address,
+  } = payment_method.billing_details;
+  const name = _name ?? undefined;
+  const phone = _phone ?? undefined;
+  const address = _address ?? undefined;
+
+  const addressParam: Stripe.AddressParam = {
+    country: address?.country ?? undefined,
+    line1: address?.line1 ?? undefined,
+    line2: address?.line2 ?? undefined,
+    postal_code: address?.postal_code ?? undefined,
+    state: address?.state ?? undefined,
+    city: address?.city ?? undefined,
+  };
+  await stripe.customers.update(customer, {
+    name,
+    phone,
+    address: addressParam,
+  });
+  const { error } = await supabaseAdminClient
+    .from('organizations_private_info')
+    .update({
+      billing_address: { ...address },
+      payment_method: { ...payment_method[payment_method.type] },
+    })
+    .eq('id', organizationId);
+  if (error) throw error;
+};
+
+const manageSubscriptionStatusChange = async (
+  subscriptionId: string,
+  customerId: string,
+  createAction = false,
+) => {
+  // Get organizations's UUID from mapping table.
+  const { data: customerData, error: noCustomerError } =
 export const manageTokenBundlePurchase = async (
   quantity: number,
   stripeCustomer: string,
@@ -45,6 +185,15 @@ export const manageTokenBundlePurchase = async (
     })
     .eq('id', tokenId);
   if (error) throw error;
+};
+
+export {
+export {
+  createOrRetrieveCustomer,
+  manageSubscriptionStatusChange,
+  upsertPriceRecord,
+  upsertProductRecord
+};
   console.log(
     `Token bundle of [${quantity}] purchased for employee with token id:[${tokenId}]`,
   );

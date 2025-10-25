@@ -1,5 +1,5 @@
 'use client';
-import { CreateOrganizationDialog } from '@/components/CreateOrganizationDialog';
+// import { CreateOrganizationDialog } from '@/components/CreateOrganizationDialog';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -87,7 +87,7 @@ export function OrganizationSwitcher({
         align="end"
         className="w-[238px] border -ml-1 my-2 rounded-lg p-0 bg-background"
       >
-        <Command>
+        {/* <Command>
           <CommandList>
             <CommandEmpty>No Organization found.</CommandEmpty>
             <CommandGroup heading="Organizations">
@@ -101,7 +101,7 @@ export function OrganizationSwitcher({
                   className="text-sm flex items-start"
                 >
                   {/* <UsersIcon className="mr-2 h-4 w-4 mt-0.5" /> */}
-                  {organization.title}
+                  {/* {organization.title}
                   <Check
                     className={cn(
                       'ml-auto h-4 w-4',
@@ -118,8 +118,8 @@ export function OrganizationSwitcher({
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              <CommandItem className="px-1 py-0 w-full">
-                <CreateOrganizationDialog
+              <CommandItem className="px-1 py-0 w-full"> */}
+                {/* <CreateOrganizationDialog
                   isLoading={isLoading}
                   onConfirm={onConfirm}
                   variant="ghost"
@@ -129,11 +129,11 @@ export function OrganizationSwitcher({
                     setIsDialogOpen(isCurrentOpen);
                     setIsPopoverOpen(isCurrentOpen);
                   }}
-                />
-              </CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </Command>
+                /> */}
+              {/* </CommandItem>
+            </CommandGroup> */}
+          {/* </CommandList>
+        </Command> */} 
       </PopoverContent>
     </Popover>
   );

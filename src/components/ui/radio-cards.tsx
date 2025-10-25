@@ -1,5 +1,6 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { LucideIcon, User } from 'lucide-react';
+import { User } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface RadioCardProps {
   label: string;
@@ -7,11 +8,13 @@ interface RadioCardProps {
 }
 
 const RadioCard = function RadioCard({ label, icon }: RadioCardProps) {
-  return (
-    <div className="flex items-center p-4 border rounded-lg">
-      <span>{label}</span>
-    </div>
-  );
+    const Icon = icon;
+    return (
+        <div className="flex items-center p-4 border rounded-lg">
+            <Icon className="mr-2" />
+            <span>{label}</span>
+        </div>
+    );
 };
 
 const RadioCards = function RadioCards() {

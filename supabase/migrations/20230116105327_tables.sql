@@ -127,6 +127,7 @@ CREATE TABLE "public"."products" (
   "trial_period_days" bigint,
   "img_url" text NOT NULL,
   "metadata" "jsonb"
+  'stripe_metadata' "jsonb"
   );
 ALTER TABLE "public"."products" OWNER TO "postgres";
 

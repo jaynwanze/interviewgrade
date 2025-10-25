@@ -1,4 +1,4 @@
-import { ChatRow, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, QuestionAnswerFeedback, EmployerCandidatePreferences, CandidateSkillsStats } from '@/types'
+import { CandidateSkillsStats, ChatRow, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, ProductMetadata, QuestionAnswerFeedback } from '@/types';
 import { ResumeMetadata } from '../utils/zod-schemas/resumeMetaDataSchema';
 
 import Stripe from 'stripe';
@@ -400,8 +400,9 @@ export type Database = {
           pricing_plan_interval: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count: number
           trial_period_days: number | null
-          image_url: string | null
-          metadata:  Stripe.Metadata | null
+          img_url: string
+          metadata: ProductMetadata | null
+          stripe_metadata:  Stripe.Metadata | null
 
         }
         Insert: {
@@ -419,8 +420,9 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          image_url?: string | null
-          metadata:  Stripe.Metadata | null
+          img_url?: string
+          metadata: ProductMetadata | null
+          stripe_metadata:  Stripe.Metadata | null
         }
         Update: {
           id?: string
@@ -438,9 +440,10 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          image_url?: string | null
-          metadata?: Stripe.Metadata | null
-        }
+          img_url?: string
+          metadata?: ProductMetadata | null
+          stripe_metadata?:  Stripe.Metadata | null   
+            }
       }
       tokens: {
         Row: {

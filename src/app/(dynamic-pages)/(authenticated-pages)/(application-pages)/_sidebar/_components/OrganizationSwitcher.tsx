@@ -1,6 +1,6 @@
 'use client';
 // import { CreateOrganizationDialog } from '@/components/CreateOrganizationDialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '/src/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -9,8 +9,8 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { createOrganization } from '@/data/user/organizations';
-import { useSAToastMutation } from '@/hooks/useSAToastMutation';
+import { createOrganization } from 'src/data/user/organizations';
+import { useSAToastMutation } from 'src/hooks/useSAToastMutation';
 import { cn } from '@/utils/cn';
 import {
   Popover,

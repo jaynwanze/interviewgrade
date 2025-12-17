@@ -1,5 +1,8 @@
-import { CandidateSkillsStats, ChatRow, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, ProductMetadata, QuestionAnswerFeedback } from '@/types'
-import { ResumeMetadata } from '@/utils/zod-schemas/resumeMetaDataSchema'
+import { CandidateSkillsStats, ChatRow, EmployerCandidatePreferences, EvaluationCriteriaType, EvaluationRubricType, EvaluationScores, ProductMetadata, QuestionAnswerFeedback } from '@/types';
+import { ResumeMetadata } from '../utils/zod-schemas/resumeMetaDataSchema';
+
+import Stripe from 'stripe';
+
 export type Json =
   | string
   | number
@@ -383,7 +386,8 @@ export type Database = {
       products: {
         Row: {
           id: string
-          price_id: string
+          stripe_product_id: string | null
+          price_id: string | null
           product_type: Database["public"]["Enums"]["product_type"]
           title: string
           description: string
@@ -398,10 +402,12 @@ export type Database = {
           trial_period_days: number | null
           img_url: string
           metadata: ProductMetadata | null
+          stripe_metadata:  Stripe.Metadata | null
 
         }
         Insert: {
-          price_id: string
+          price_id: string | null
+          stripe_product_id: string | null
           product_type: Database["public"]["Enums"]["product_type"]
           title: string
           description: string
@@ -414,12 +420,14 @@ export type Database = {
           pricing_plan_interval?: Database["public"]["Enums"]["pricing_plan_interval_type"]
           pricing_plan_interval_count?: number
           trial_period_days?: number
-          img_url: string
+          img_url?: string
           metadata: ProductMetadata | null
+          stripe_metadata:  Stripe.Metadata | null
         }
         Update: {
           id?: string
-          price_id?: string
+          stripe_product_id?: string | null
+          price_id?: string | null
           product_type?: Database["public"]["Enums"]["product_type"]
           title?: string
           description?: string
@@ -434,7 +442,8 @@ export type Database = {
           trial_period_days?: number
           img_url?: string
           metadata?: ProductMetadata | null
-        }
+          stripe_metadata?:  Stripe.Metadata | null   
+            }
       }
       tokens: {
         Row: {

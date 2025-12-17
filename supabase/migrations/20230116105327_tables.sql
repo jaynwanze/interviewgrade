@@ -111,7 +111,8 @@ ALTER TABLE "public"."employee_candidate_unlocks" OWNER TO "postgres";
 
 CREATE TABLE "public"."products" (
   "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
-  'price_id' character varying,
+  "stripe_product_id" character varying,
+  "price_id" character varying,
   "product_type" "public"."product_type",
   "title" character varying NOT NULL,
   "description" text,
@@ -126,6 +127,7 @@ CREATE TABLE "public"."products" (
   "trial_period_days" bigint,
   "img_url" text NOT NULL,
   "metadata" "jsonb"
+  'stripe_metadata' "jsonb"
   );
 ALTER TABLE "public"."products" OWNER TO "postgres";
 

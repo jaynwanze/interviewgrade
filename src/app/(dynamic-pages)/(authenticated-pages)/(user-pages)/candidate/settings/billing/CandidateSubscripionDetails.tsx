@@ -61,6 +61,8 @@ async function ChoosePricingTable() {
             if (
               product.id === null ||
               product.id === undefined ||
+              product.price_id === null ||
+              product.price_id === undefined ||
               product.price_unit_amount === null ||
               product.price_unit_amount === undefined
             ) {

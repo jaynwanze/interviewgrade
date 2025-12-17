@@ -212,6 +212,7 @@
     "jsdom": "^22.1.0",
     "lodash": "^4.17.21",
     "postcss": "^8.5.6",
+    "postcss-nesting": "^13.0.2",
     "prettier": "^3.7.4",
     "react-spring": "^9.7.5",
     "style-loader": "^4.0.0",

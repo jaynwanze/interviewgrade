@@ -200,7 +200,6 @@ export function PracticeInterviewFlow({
               try {
                 const token = JSON.parse(data) as string;
                 accumulatedText += token;
-                console.log('Accumulated text:', accumulatedText);
 
                 // 1) Update partial text for the user
                 setPartialText(accumulatedText);

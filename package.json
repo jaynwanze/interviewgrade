@@ -161,7 +161,7 @@
     "start": "next start",
     "generate:types:local": "supabase gen types typescript --local > src/lib/database.types.ts",
     "build": "next build",
-    "vercel-build": "pnpm install --no-frozen-lockfile && next build",
+    "vercel-build": "next build",
     "test:e2e": "cross-env NODE_ENV=test playwright test",
     "test": "vitest --root src",
     "lint:eslint": "pnpm eslint --fix src",

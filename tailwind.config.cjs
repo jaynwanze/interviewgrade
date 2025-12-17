@@ -1,13 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 const defaultTheme = require('tailwindcss/defaultTheme');
+const colors = require('tailwindcss/colors');
 
 module.exports = {
   darkMode: ['class'],
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   prefix: '',
   theme: {
-    transparent: 'transparent',
-    current: 'currentColor',
+    // Move gray to the base theme instead of extend
+    colors: {
+      ...defaultTheme.colors, // Keep all default colors
+      gray: colors.gray, // Explicitly add gray
+      transparent: 'transparent',
+      current: 'currentColor',
+    },
     container: {
       center: true,
       padding: '2rem',
@@ -17,6 +23,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Your custom colors stay in extend
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

@@ -29,7 +29,6 @@ const openai = new OpenAI({
   apiKey: openAiKey,
 });
 
-// // deepSeekKey OpenAI Client
 // const deepSeekKey = process.env.DEEPSEEK_API_KEY;
 
 // if (!deepSeekKey) {
@@ -59,7 +58,7 @@ function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
   const formattedCriteria = evaluationCriterias
     .map(
       (criterion, index) =>
-        `${index + 1}. **${criterion.name}**: ${criterion.description}\n   
+        `${index + 1}. **${criterion.name}**: ${criterion.description}\n
 | Percentage Range | Description |
 |------------------|-------------|
 ${formatRubrics(criterion.rubrics)}`,
@@ -68,7 +67,7 @@ ${formatRubrics(criterion.rubrics)}`,
   return {
     role: 'system' as const,
     content: `
-You are an AI interviewer providing short JSON feedback. 
+You are an AI interviewer providing short JSON feedback.
 Rubric (score out of 100):
 ${formattedCriteria}
 

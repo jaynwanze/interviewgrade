@@ -403,7 +403,7 @@ export const getActiveProductsWithPrices = async () => {
 
 export const getPendingInvitationsInOrganization = async (
   organizationId: string,
-) => {
+): Promise<Table<'organization_join_invitations'>[]> => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('organization_join_invitations')
@@ -430,7 +430,7 @@ export const getTeamMembersInOrganization = async (organizationId: string) => {
     throw error;
   }
 
-  return data.map((member) => {
+  return data?.map((member: any) => {
     const { user_profiles, ...rest } = member;
     if (!user_profiles) {
       throw new Error('No user profile found for member');
@@ -439,17 +439,17 @@ export const getTeamMembersInOrganization = async (organizationId: string) => {
       ...rest,
       user_profiles: user_profiles,
     };
-  });
+  }) || [];
 };
 
-export const getDefaultOrganization = async () => {
+export const getDefaultOrganization = async (): Promise<string> => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const user = await serverGetLoggedInUser();
   const { data: preferences, error } = await supabaseClient
     .from('employees')
     .select('id, default_organization')
     .eq('id', user.id)
-    .single();
+    .single<{ id: string; default_organization: string }>();
 
   if (error) {
     throw error;

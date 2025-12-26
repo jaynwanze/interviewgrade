@@ -1,4 +1,5 @@
-import { User, createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { User } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { match } from 'path-to-regexp';
@@ -101,42 +102,90 @@ export async function middleware(req: NextRequest) {
     });
   }
 
-  const res = NextResponse.next();
+  let supabaseResponse = NextResponse.next({
+    request: req,
+  });
 
-  // Add CORS headers for all responses
-  res.headers.set('Access-Control-Allow-Origin', '*');
-  res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.headers.set(
+  // Create Supabase client with proper cookie handling for middleware
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return req.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request: req,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // Add CORS headers
+  supabaseResponse.headers.set('Access-Control-Allow-Origin', '*');
+  supabaseResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  supabaseResponse.headers.set(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
 
-  const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
 
   // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {
-    return NextResponse.redirect(toSiteURL('/c/login'));
+    const redirectResponse = NextResponse.redirect(toSiteURL('/c/login'));
+    // Copy cookies to redirect response
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value);
+    });
+    return redirectResponse;
   }
 
   // If user is present, parse their user type
   if (maybeUser) {
     const userMetadata = authUserMetadataSchema.parse(maybeUser.user_metadata);
     const userType = userMetadata.userType; // 'candidate' or 'employer', etc.
+
     if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
-      return NextResponse.redirect(toSiteURL('/onboarding'));
+      const redirectResponse = NextResponse.redirect(toSiteURL('/onboarding'));
+      // Copy cookies to redirect response
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return redirectResponse;
     }
-    // If it’s a candidate route but user is employer => redirect
+
+    // If it's a candidate route but user is employer => redirect
     if (isCandidateRoute(req.nextUrl.pathname) && userType !== 'candidate') {
-      return NextResponse.redirect(toSiteURL('/employer'));
+      const redirectResponse = NextResponse.redirect(toSiteURL('/employer'));
+      // Copy cookies to redirect response
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return redirectResponse;
     }
-    // If it’s an employer route but user is candidate => redirect
+
+    // If it's an employer route but user is candidate => redirect
     if (isEmployerRoute(req.nextUrl.pathname) && userType !== 'employer') {
-      return NextResponse.redirect(toSiteURL('/candidate'));
+      const redirectResponse = NextResponse.redirect(toSiteURL('/candidate'));
+      // Copy cookies to redirect response
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return redirectResponse;
     }
-    return res;
   }
+
+  // IMPORTANT: Return the supabaseResponse to ensure cookies are set
+  return supabaseResponse;
 }
 
 export const config = {

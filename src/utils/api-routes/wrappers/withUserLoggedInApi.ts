@@ -1,6 +1,6 @@
 import { createSupabaseUserServerPagesClient } from '@/supabase-clients/user/createSupabaseUserServerPagesClient';
 import { AppSupabaseClient } from '@/types';
-import { Session, User } from '@supabase/auth-helpers-nextjs';
+import { Session, User } from '@supabase/supabase-js';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { enableCors } from '../enable-cors';
 

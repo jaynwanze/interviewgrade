@@ -430,7 +430,7 @@ export const getTeamMembersInOrganization = async (organizationId: string) => {
     throw error;
   }
 
-  return data?.map((member: any) => {
+  return data?.map((member) => {
     const { user_profiles, ...rest } = member;
     if (!user_profiles) {
       throw new Error('No user profile found for member');

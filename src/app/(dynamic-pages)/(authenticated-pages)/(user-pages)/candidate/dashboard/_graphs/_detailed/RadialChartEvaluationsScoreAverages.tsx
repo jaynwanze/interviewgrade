@@ -17,6 +17,7 @@ import {
 import { AvgEvaluationScores } from '@/types';
 import { useMemo } from 'react';
 import { LabelList, PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts';
+import  { truncateText } from '@/utils/textManipulation';
 
 export type EvaluationCriteriaChartData = {
   eval_name: string;
@@ -34,13 +35,6 @@ export type ChartConfigType = {
 function normalizeKey(name: string) {
   return name.toLowerCase().replace(/\s+/g, '_');
 }
-
-// Helper function to truncate text
-function truncateText(text: string, maxLength: number = 30): string {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
-}
-
 
 export function RadialChartEvaluationsScoreAverages({
   avgEvaluationCriteriaScores,
@@ -129,7 +123,7 @@ export function RadialChartEvaluationsScoreAverages({
             <ChartLegend
               verticalAlign="bottom"
               payload={chartData.map((d) => ({
-                value: truncateText(d.eval_name, 23), // e.g. "Decision Making"
+                value: truncateText(d.eval_name, 15), // e.g. "Decision Making"
                 color: d.fill, // wedge color
                 dataKey: d.eval_name,
                 type: 'square',

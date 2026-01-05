@@ -7,13 +7,6 @@ module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   prefix: '',
   theme: {
-    // Move gray to the base theme instead of extend
-    colors: {
-      ...defaultTheme.colors, // Keep all default colors
-      gray: colors.gray, // Explicitly add gray
-      transparent: 'transparent',
-      current: 'currentColor',
-    },
     container: {
       center: true,
       padding: '2rem',
@@ -23,7 +16,30 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Your custom colors stay in extend
+        // Add all standard Tailwind colors
+        gray: colors.gray,
+        slate: colors.slate,
+        zinc: colors.zinc,
+        neutral: colors.neutral,
+        stone: colors.stone,
+        red: colors.red,
+        orange: colors.orange,
+        amber: colors.amber,
+        yellow: colors.yellow,
+        lime: colors.lime,
+        green: colors.green,
+        emerald: colors.emerald,
+        teal: colors.teal,
+        cyan: colors.cyan,
+        sky: colors.sky,
+        blue: colors.blue,
+        indigo: colors.indigo,
+        violet: colors.violet,
+        purple: colors.purple,
+        fuchsia: colors.fuchsia,
+        pink: colors.pink,
+        rose: colors.rose,
+        // Your custom colors
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

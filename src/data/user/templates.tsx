@@ -98,7 +98,7 @@ export const getPracticeTemplateEvaluationsByTemplateId = async (
     `,
     )
     .eq('template_id', templateId)
-    .limit(3);
+    .limit(5);
 
   if (error) {
     throw error;

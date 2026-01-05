@@ -54,7 +54,7 @@ export function RadarChartEvaluationsCriteriaScores({
   // Transform evaluation scores into chart data.
   // Here we use the criterion name directly. The custom tick handles spaces.
   const chartData = evaluation.evaluation_scores.map((score) => ({
-    criterion: truncateText(score.name, 15)|| 'N/A',
+    criterion: truncateText(score.name, 18)|| 'N/A',
     score: score.score,
   }));
 

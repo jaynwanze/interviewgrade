@@ -64,7 +64,7 @@ export function RadialChartEvaluationsScoreAverages({
     return avgEvaluationCriteriaScores.map((item) => {
       const key = normalizeKey(item.name);
       return {
-        eval_name: item.name,
+        eval_name: truncateText(item.name, 18),
         score: item.avg_score,
         fill: config[key]?.color, // each wedge gets its color from the config
       };
@@ -123,7 +123,7 @@ export function RadialChartEvaluationsScoreAverages({
             <ChartLegend
               verticalAlign="bottom"
               payload={chartData.map((d) => ({
-                value: truncateText(d.eval_name, 15), // e.g. "Decision Making"
+                value: d.eval_name, // e.g. "Decision Making"
                 color: d.fill, // wedge color
                 dataKey: d.eval_name,
                 type: 'square',

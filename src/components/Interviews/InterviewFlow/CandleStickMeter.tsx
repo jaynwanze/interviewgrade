@@ -19,7 +19,7 @@ export const CandlestickMeter: React.FC<CandlestickMeterProps> = ({
   const animationRef = useRef<number | null>(null);
   const meterRef = useRef<HTMLDivElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const dataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
 
   useEffect(() => {
     // Initialize AnalyserNode for time-domain data

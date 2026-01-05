@@ -136,8 +136,7 @@ export async function middleware(req: NextRequest) {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
 
-  const sessionResponse = await supabase.auth.getSession();
-  const maybeUser = sessionResponse?.data.session?.user;
+  const { data: { user: maybeUser } } = await supabase.auth.getUser();
 
   // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {

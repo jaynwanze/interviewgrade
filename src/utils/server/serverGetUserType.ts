@@ -7,9 +7,10 @@ import { cache } from 'react';
 export const serverGetUserType = cache(async () => {
   const supabase = createSupabaseUserServerComponentClient();
   const {
-    data: { session },
+    data: {  user } ,
     error: sessionError,
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getUser();
+  const session = user ? { user } : null; //session object
 
   if (sessionError) {
     throw sessionError;

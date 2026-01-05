@@ -26,9 +26,8 @@ export const withSupabase = (
       return res.status(200).end();
     }
 
-    const sessionInfo = await supabaseClient.auth.getSession();
-    const session = sessionInfo?.data.session ?? null;
-    const user = session?.user ?? null;
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const session = user ? { user } as Session : null;
     return cb(req, res, supabaseClient, session, user);
   };
 };

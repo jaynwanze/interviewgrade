@@ -437,6 +437,7 @@ export async function addJobTrackerApplication(
 
   return data[0];
 }
+// ...existing code...
 
 export async function getEmployersInterestedInCandidate() {
   const user = await serverGetLoggedInUser();
@@ -468,13 +469,29 @@ export async function getEmployersInterestedInCandidate() {
   }
 
   return (
-    data?.map((entry) => ({
-      employer_id: entry.employee_id,
-      employer_name: entry.employees?.user_profiles?.full_name ?? 'Unknown',
-      logo_url: entry.employees?.user_profiles?.avatar_url ?? '',
-      organization_title:
-        entry.employees?.organizations?.title ?? 'Unknown Org',
-    })) ?? []
+    data?.map((entry) => {
+      // Handle employees as array or single object
+      const employee = Array.isArray(entry.employees)
+        ? entry.employees[0]
+        : entry.employees;
+
+      // Handle array or single object for user_profiles
+      const userProfile = Array.isArray(employee?.user_profiles)
+        ? employee.user_profiles[0]
+        : employee?.user_profiles;
+
+      // Handle array or single object for organizations
+      const organization = Array.isArray(employee?.organizations)
+        ? employee.organizations[0]
+        : employee?.organizations;
+
+      return {
+        employer_id: entry.employee_id,
+        employer_name: userProfile?.full_name ?? 'Unknown',
+        logo_url: userProfile?.avatar_url ?? '',
+        organization_title: organization?.title ?? 'Unknown Org',
+      };
+    }) ?? []
   );
 }
 

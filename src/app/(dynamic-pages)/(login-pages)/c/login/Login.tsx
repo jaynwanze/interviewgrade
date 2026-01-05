@@ -137,7 +137,7 @@ export function Login({
         <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
           <header className="text-center space-y-1">
             <h1
-              className="text-3xl font-semibold tracking-tight 
+              className="text-3xl font-semibold tracking-tight
                bg-gradient-to-r
                bg-clip-text "
             >

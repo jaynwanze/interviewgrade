@@ -5,7 +5,12 @@ import { cache } from 'react';
 
 export const getSession = cache(async () => {
   const supabase = createSupabaseUserServerComponentClient();
-  return await supabase.auth.getSession();
+  const {
+    data: {  user } ,
+    error: sessionError,
+  } = await supabase.auth.getUser();
+  const session = user ? { user } : null; //session object
+  return { data: { session }, error: sessionError };
 });
 
 // This is a server-side function that verifies the session of the user.

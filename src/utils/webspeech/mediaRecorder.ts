@@ -61,9 +61,18 @@ export class MediaRecorderHandler {
       // Read the converted file from the virtual file system
       const data = await this.ffmpeg.readFile('audio.wav');
 
-      // Create a new Blob for the WAV file
-      const wavBlob = new Blob([data], { type: 'audio/wav' });
-      return wavBlob; // Return the converted audio blob
+      let blobData: BlobPart;
+      if (data instanceof Uint8Array) {
+        // Create a new ArrayBuffer and copy the data to avoid SharedArrayBuffer issues
+        const buffer = new ArrayBuffer(data.byteLength);
+        new Uint8Array(buffer).set(data);
+        blobData = buffer;
+      } else {
+        blobData = data;
+      }
+
+      const wavBlob = new Blob([blobData], { type: 'audio/wav' });
+      return wavBlob;
     } catch (error) {
       console.error('Error converting audio format:', error);
     } finally {

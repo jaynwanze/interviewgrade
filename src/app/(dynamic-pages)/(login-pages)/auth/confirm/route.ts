@@ -1,34 +1,41 @@
-import { createSupabaseUserServerPagesClient } from '@/supabase-clients/user/createSupabaseUserServerPagesClient';
-import { AppSupabaseClient } from '@/types';
-import { Session, User } from '@supabase/supabase-js';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { enableCors } from '@/utils/api-routes/enable-cors';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * This is a wrapper for API routes that simply passes
- * the Supabase client, the session and the user object to the wrapped function.
- */
-export const withSupabase = (
-  cb: (
-    req: NextApiRequest,
-    res: NextApiResponse,
-    supabaseClient: AppSupabaseClient,
-    session: Session | null,
-    user: User | null,
-  ) => void,
-) => {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
-    const supabaseClient = createSupabaseUserServerPagesClient({ req, res });
-    enableCors(req, res);
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const token_hash = searchParams.get('token_hash');
+  const next = searchParams.get('next') ?? '/auth/callback';
 
-    // return ok if options request
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end();
+  if (token_hash) {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
+    const { error } = await supabase.auth.verifyOtp({
+      type: 'magiclink',
+      token_hash,
+    });
+
+    if (!error) {
+      return NextResponse.redirect(new URL(`/${next.slice(1)}`, req.url));
     }
+  }
 
-    const sessionInfo = await supabaseClient.auth.getSession();
-    const session = sessionInfo?.data.session ?? null;
-    const user = session?.user ?? null;
-    return cb(req, res, supabaseClient, session, user);
-  };
-};
+  // return the user to an error page with some instructions
+  return NextResponse.redirect(new URL('/auth/auth-code-error', req.url));
+}

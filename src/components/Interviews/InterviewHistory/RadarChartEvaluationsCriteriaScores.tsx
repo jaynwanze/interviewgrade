@@ -47,13 +47,19 @@ const CustomizedTick = (props: any) => {
   );
 };
 
+// Helper function to truncate text
+function truncateText(text: string, maxLength: number = 30): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
 export function RadarChartEvaluationsCriteriaScores({
   evaluation,
 }: EvaluationRadarChartProps) {
   // Transform evaluation scores into chart data.
   // Here we use the criterion name directly. The custom tick handles spaces.
   const chartData = evaluation.evaluation_scores.map((score) => ({
-    criterion: score.name || 'N/A',
+    criterion: truncateText(score.name,23)|| 'N/A',
     score: score.score,
   }));
 

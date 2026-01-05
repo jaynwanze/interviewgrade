@@ -35,6 +35,13 @@ function normalizeKey(name: string) {
   return name.toLowerCase().replace(/\s+/g, '_');
 }
 
+// Helper function to truncate text
+function truncateText(text: string, maxLength: number = 30): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
+
 export function RadialChartEvaluationsScoreAverages({
   avgEvaluationCriteriaScores,
 }: {
@@ -122,7 +129,7 @@ export function RadialChartEvaluationsScoreAverages({
             <ChartLegend
               verticalAlign="bottom"
               payload={chartData.map((d) => ({
-                value: d.eval_name, // e.g. "Decision Making"
+                value: truncateText(d.eval_name, 23), // e.g. "Decision Making"
                 color: d.fill, // wedge color
                 dataKey: d.eval_name,
                 type: 'square',
@@ -147,7 +154,7 @@ export function RadialChartEvaluationsScoreAverages({
         </ChartContainer>
       </CardContent>
 
-      <CardFooter className="flex-col gap-2 text-sm">
+      <CardFooter className="flex-col gap-5 text-sm">
         <div className="leading-none text-muted-foreground">
           Showing average scores for your sub-skills
         </div>

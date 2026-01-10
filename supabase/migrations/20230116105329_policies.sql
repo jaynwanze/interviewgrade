@@ -194,7 +194,7 @@ DELETE TO "authenticated" USING (
 CREATE POLICY "candidates_can_view_own_interview_answers" ON "public"."interview_answers" FOR
 SELECT TO "authenticated" USING (
     EXISTS (
-        SELECT 1 FROM "public"."interview_questions" 
+        SELECT 1 FROM "public"."interview_questions"
         JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
         WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
           AND "interviews"."candidate_id" = "auth"."uid"()
@@ -207,7 +207,7 @@ SELECT TO "authenticated" USING (
 CREATE POLICY "candidates_can_manage_own_interview_answers_insert" ON "public"."interview_answers" FOR
 INSERT TO "authenticated" WITH CHECK (
     EXISTS (
-        SELECT 1 FROM "public"."interview_questions" 
+        SELECT 1 FROM "public"."interview_questions"
         JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
         WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
           AND "interviews"."candidate_id" = "auth"."uid"()
@@ -220,7 +220,7 @@ INSERT TO "authenticated" WITH CHECK (
 CREATE POLICY "candidates_can_manage_own_interview_answers_update" ON "public"."interview_answers" FOR
 UPDATE TO "authenticated" USING (
     EXISTS (
-        SELECT 1 FROM "public"."interview_questions" 
+        SELECT 1 FROM "public"."interview_questions"
         JOIN "public"."interviews" ON "interviews"."id" = "interview_questions"."interview_id"
         WHERE "interview_questions"."id" = "interview_answers"."interview_question_id"
           AND "interviews"."candidate_id" = "auth"."uid"()
@@ -304,7 +304,7 @@ SELECT TO "authenticated" USING (
 );
 --
 -- Name: template_evaluation_criteria Only users can insert their own template evaluation criteria; Type: POLICY; Schema: public; Owner: supabase_admin
---  
+--
 
 CREATE POLICY "users_can_manage_own_template_evaluation_criteria_insert" ON "public"."template_evaluation_criteria" FOR
 INSERT TO "authenticated" WITH CHECK (
@@ -682,6 +682,12 @@ SELECT TO "authenticated" USING (
 --
 CREATE POLICY "Anyone can view" ON "public"."organization_join_invitations" FOR
 SELECT USING (TRUE);
+
+-- Name: subscriptions Candidates can view own subscriptions; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Candidate can view the subscription their own subscription" ON "public"."subscriptions" FOR
+SELECT TO "authenticated" USING (("auth"."uid"() = "candidate_id"));
 
 --
 -- Name: subscriptions Everyone organization member can view the subscription on  organization; Type: POLICY; Schema: public; Owner: postgres

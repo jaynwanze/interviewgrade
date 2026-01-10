@@ -87,7 +87,7 @@ async function manageSubscriptionStatusChange(
 ) {
   // Get the full subscription details from Stripe
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  console.log('Stripe subscription status:', subscription.status);
+  // console.log('Stripe subscription status:', subscription.status);
 
   // Get the candidate_id from the Stripe customer metadata
   const customer = await stripe.customers.retrieve(customerId);
@@ -95,7 +95,6 @@ async function manageSubscriptionStatusChange(
     throw new Error('Customer was deleted');
   }
 
-  // Use candidateId from metadata (matches createOrRetrieveCandidateCustomer)
   const candidateId = customer.metadata?.candidateId;
 
   if (!candidateId) {
@@ -103,14 +102,29 @@ async function manageSubscriptionStatusChange(
     throw new Error('No candidateId found in customer metadata');
   }
 
-  // Get the price ID from the subscription
+  // Handle canceled/deleted subscriptions
+  if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
+    const { error } = await supabaseAdminClient
+      .from('subscriptions')
+      .update({
+        status: subscription.status,
+        ended_at: new Date().toISOString(),
+      })
+      .eq('candidate_id', candidateId);
+
+    if (error) {
+      console.error('Error updating canceled subscription:', error);
+      throw error;
+    }
+    console.log(`Subscription canceled for candidate ${candidateId}`);
+    return;
+  }
+
   const priceId = subscription.items.data[0]?.price.id;
   if (!priceId) {
     throw new Error('No price found in subscription');
   }
-  console.log('Price ID:', priceId);
 
-  // Find the product in our database by price_id
   const { data: product, error: productError } = await supabaseAdminClient
     .from('products')
     .select('id')
@@ -121,7 +135,6 @@ async function manageSubscriptionStatusChange(
     console.error('Product not found for price_id:', priceId, productError);
     throw new Error(`Product not found for price_id: ${priceId}`);
   }
-  console.log('Found product:', product.id);
 
   const subscriptionData = {
     candidate_id: candidateId,
@@ -153,7 +166,6 @@ async function manageSubscriptionStatusChange(
     },
   };
 
-  // Upsert based on candidate_id
   const { data, error } = await supabaseAdminClient
     .from('subscriptions')
     .upsert(subscriptionData, {
@@ -168,7 +180,6 @@ async function manageSubscriptionStatusChange(
   }
   return data;
 }
-
 export { manageTokenBundlePurchase, updateProductRecord, manageSubscriptionStatusChange };
 
 // const createOrRetrieveCustomer = async ({
@@ -424,81 +435,6 @@ export { manageTokenBundlePurchase, updateProductRecord, manageSubscriptionStatu
 //     })
 //     .eq('id', organizationId);
 //   if (error) throw error;
-// };
-
-// const manageSubscriptionStatusChange = async (
-//   subscriptionId: string,
-//   customerId: string,
-//   createAction = false,
-// ) => {
-//   // Get organizations's UUID from mapping table.
-//   const { data: customerData, error: noCustomerError } =
-//     await supabaseAdminClient
-//       .from('customers')
-//       .select('*')
-//       .eq('stripe_customer_id', customerId)
-//       .single();
-//   if (noCustomerError) throw noCustomerError;
-//   if (!customerData) {
-//     throw new Error('No customer data');
-//   }
-//   const { organization_id: organizationId } = customerData;
-
-//   const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-//     expand: ['default_payment_method'],
-//   });
-// Upsert the latest status of the subscription object.
-/* eslint-disable prettier/prettier */
-//   const subscriptionData: Database['public']['Tables']['subscriptions']['Insert'] =
-//     {
-//       id: subscription.id,
-//       organization_id: organizationId,
-//       metadata: subscription.metadata,
-//       status: subscription.status,
-//       price_id: subscription.items.data[0].price.id,
-//       //TODO check quantity on subscription
-//       quantity: subscription.items.data[0].quantity,
-//       cancel_at_period_end: subscription.cancel_at_period_end,
-//       cancel_at: subscription.cancel_at
-//         ? toDateTime(subscription.cancel_at).toISOString()
-//         : null,
-//       canceled_at: subscription.canceled_at
-//         ? toDateTime(subscription.canceled_at).toISOString()
-//         : null,
-//       current_period_start: toDateTime(
-//         subscription.current_period_start,
-//       ).toISOString(),
-//       current_period_end: toDateTime(
-//         subscription.current_period_end,
-//       ).toISOString(),
-//       created: toDateTime(subscription.created).toISOString(),
-//       ended_at: subscription.ended_at
-//         ? toDateTime(subscription.ended_at).toISOString()
-//         : null,
-//       trial_start: subscription.trial_start
-//         ? toDateTime(subscription.trial_start).toISOString()
-//         : null,
-//       trial_end: subscription.trial_end
-//         ? toDateTime(subscription.trial_end).toISOString()
-//         : null,
-//     };
-//   /* eslint-enable prettier/prettier */
-
-//   const { error } = await supabaseAdminClient
-//     .from('subscriptions')
-//     .upsert([subscriptionData]);
-//   if (error) throw error;
-//   console.log(
-//     `Inserted/updated subscription [${subscription.id}] for organization [${organizationId}]`,
-//   );
-
-//   // For a new subscription copy the billing details to the customer object.
-//   // NOTE: This is a costly operation and should happen at the very end.
-//   if (subscription.default_payment_method && organizationId)
-//     await copyBillingDetailsToCustomer(
-//       organizationId,
-//       subscription.default_payment_method as Stripe.PaymentMethod,
-//     );
 // };
 
 // export const updatePaymentMethod = async (

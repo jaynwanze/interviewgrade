@@ -13,13 +13,14 @@ export function formatNormalizedSubscription(
   const currentDate = moment();
   const threeDaysFromNow = moment().add(3, 'days');
   let description = '';
+
   switch (subscription.type) {
     case 'no-subscription':
       return {
-        title: 'Free Tier',
-        sidenote: 'Upgrade to Pro',
-        description: 'Activate your the Pro now and enjoy all our features!',
-      };
+          title: 'Free Plan',
+          description: 'Subscribe to unlock premium features.',
+          sidenote: '',
+        };
     // case 'trialing':
     //   description = `Your ${
     //     subscription.product.ti
@@ -91,7 +92,21 @@ export function formatNormalizedSubscription(
       } Plan, and your subscription will renew on ${moment(
         subscription.subscription.current_period_end,
       ).format('MMMM Do, YYYY')}. `;
-      if (subscription.subscription.canceled_at) {
+
+      // Check cancel_at_period_end first (user canceled but still has access)
+      if (subscription.subscription.cancel_at_period_end) {
+        return {
+          title: `${subscription.product.title} Plan`,
+          sidenote: `(Cancels end of period)`,
+          description: `Your ${
+            subscription.product.title
+          } Plan has been canceled. You still have access until ${moment(
+            subscription.subscription.current_period_end,
+          ).format(
+            'MMMM Do, YYYY',
+          )}, after which you'll be moved to the Free Plan.`,
+        };
+      } else if (subscription.subscription.canceled_at) {
         return {
           title: `${subscription.product.title} Plan`,
           sidenote: `(Canceled)`,
@@ -127,6 +142,7 @@ export function formatNormalizedSubscription(
           description,
         };
       }
+
     case 'past_due':
       return {
         title: `${subscription.product.title} Plan`,
@@ -190,7 +206,8 @@ export function formatNormalizedSubscription(
       };
     default:
       return {
-        title: 'Unknown Subscription Plan',
+        title: 'Free Plan',
+        description: 'Subscribe to unlock premium features.',
         sidenote: '',
         description:
           'The status of your subscription plan is currently unknown. Please check back later or contact customer support.',

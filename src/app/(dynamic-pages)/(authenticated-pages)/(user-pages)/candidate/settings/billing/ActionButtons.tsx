@@ -6,10 +6,12 @@ import { createCandidateSessionAction } from '@/data/user/candidate';
 // import {
 //   createCheckoutSessionAction
 // } from '@/data/user/organizations';
-import { createCustomerEmployeePortalLinkAction } from '@/data/user/employee';
+import { createCustomerEmployeePortalLinkAction, } from '@/data/user/employee';
+import { createCandidatePortalSessionAction, } from '@/data/user/candidate';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { getStripe } from '@/utils/stripe-client';
 import { ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 
 export function CreateSubscriptionButton({ priceId }: { priceId: string }) {
   const { mutate, isLoading } = useToastMutation(
@@ -84,14 +86,14 @@ export function CreateSubscriptionButton({ priceId }: { priceId: string }) {
 export function ManageSubscriptionButton() {
   const { mutate, isLoading } = useToastMutation(
     async () => {
-      return await createCustomerEmployeePortalLinkAction('TO:DO');
+      return await createCandidatePortalSessionAction();
     },
     {
-      loadingMessage: 'Please wait...',
-      errorMessage: 'Failed to get customer portal link',
+      loadingMessage: 'Opening subscription portal...',
+      errorMessage: 'Failed to open subscription management',
       successMessage: 'Redirecting...',
-      onSuccess: (portalLink) => {
-        window.location.assign(portalLink);
+      onSuccess: async (portalUrl) => {
+        window.location.href = portalUrl;
       },
     },
   );
@@ -105,8 +107,8 @@ export function ManageSubscriptionButton() {
           mutate();
         }}
       >
-        <span>{isLoading ? 'Loading...' : 'Manage Subscription'} </span>
-        <ExternalLink aria-hidden="true" className="ml-2 w-5 h-5" />{' '}
+        <span>{isLoading ? 'Loading...' : 'Manage Subscription'}</span>
+        <ExternalLink aria-hidden="true" className="ml-2 w-5 h-5" />
       </Button>
       <T.P className="text-muted-foreground text-sm">
         Manage your subscription. You can modify, upgrade or cancel your

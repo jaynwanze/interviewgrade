@@ -94,6 +94,28 @@ async function extractAndSaveMetadata(candidateId: string, resumeUrl: string) {
   }
 }
 
+export async function createCandidatePortalSessionAction(): Promise<string> {
+  const user = await serverGetLoggedInUser();
+  if (!user) throw Error('Could not get user');
+  const { user_metadata } = user;
+  if (user_metadata.userType !== 'candidate')
+    throw Error('Logged in user is not a candidate');
+
+  const candidate = await getCandidateUserProfile(user.id);
+  if (!candidate) throw Error('Could not get candidate profile');
+
+  if (!candidate.stripe_customer_id) {
+    throw Error('No Stripe customer ID found for this candidate');
+  }
+
+  const portalSession = await stripe.billingPortal.sessions.create({
+    customer: candidate.stripe_customer_id,
+    return_url: toSiteURL('/candidate/settings/billing'),
+  });
+
+  return portalSession.url;
+}
+
 // export async function updateCandidateSkillStatsAction({
 //     candidateId,
 //     newCandidateSkillStats,

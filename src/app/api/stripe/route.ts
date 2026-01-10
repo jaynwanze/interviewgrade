@@ -1,7 +1,7 @@
 // app/api/stripe-webhook/route.ts
 import { errors } from '@/utils/errors';
 import { stripe } from '@/utils/stripe';
-import { manageTokenBundlePurchase } from '@/utils/supabase-admin';
+import { manageTokenBundlePurchase, manageSubscriptionStatusChange } from '@/utils/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
@@ -33,20 +33,13 @@ export async function POST(req: NextRequest) {
 
     let event: Stripe.Event;
 
-    // 2. Verify Stripe signature
+    // Verify Stripe signature
     try {
-      if (!sig || !webhookSecret) {
-        return NextResponse.json(
-          { message: 'Missing Stripe signature or webhook secret.' },
-          { status: 400 },
-        );
-      }
-
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
-      // If signature verification fails, you’ll see the “No signatures found…” error
+      const message = err instanceof Error ? err.message : 'Unknown error';
       return NextResponse.json(
-        { error: `Webhook error: ${err.message}` },
+        { error: `Webhook error: ${message}` },
         { status: 400 },
       );
     }
@@ -58,23 +51,22 @@ export async function POST(req: NextRequest) {
           case 'product.created':
           case 'product.updated':
             // TODO: upsert the product record in your database
-            // Example:
-            // await upsertProductRecord(event.data.object as Stripe.Product);
             break;
 
           case 'customer.subscription.created':
           case 'customer.subscription.updated':
           case 'customer.subscription.deleted': {
             const subscription = event.data.object as Stripe.Subscription;
-            // TODO: update the subscription status in your database
-            // Example:
-            // await manageSubscriptionStatusChange(subscription.id, subscription.customer as string, event.type === 'customer.subscription.created');
+            await manageSubscriptionStatusChange(
+              subscription.id,
+              subscription.customer as string,
+              event.type === 'customer.subscription.created'
+            );
             break;
           }
 
           case 'checkout.session.completed': {
-            const checkoutSession = event.data
-              .object as Stripe.Checkout.Session;
+            const checkoutSession = event.data.object as Stripe.Checkout.Session;
             const productType = checkoutSession.metadata?.product_type;
             const quantity = parseInt(
               checkoutSession.metadata?.quantity ?? '0',
@@ -82,16 +74,21 @@ export async function POST(req: NextRequest) {
             );
             console.log('Checkout session completed:', checkoutSession.id);
             console.log('Product type:', productType);
-            console.log('Quantity:', quantity);
+            console.log('Mode:', checkoutSession.mode);
+
             if (checkoutSession.mode === 'subscription') {
-              const subscriptionId = checkoutSession.subscription;
-              // TODO: update subscription status if needed
-              // Example:
-              // await manageSubscriptionStatusChange(subscriptionId as string, checkoutSession.customer as string, true);
+              const subscriptionId = checkoutSession.subscription as string;
+              const customerId = checkoutSession.customer as string;
+
+              // Handle subscription creation
+              await manageSubscriptionStatusChange(
+                subscriptionId,
+                customerId,
+                true // isNewSubscription
+              );
             } else if (checkoutSession.mode === 'payment') {
               if (productType === 'token_bundle') {
                 console.log('Token bundle purchase detected');
-                // handle awarding tokens
                 await manageTokenBundlePurchase(
                   quantity,
                   checkoutSession.customer as string,
@@ -102,9 +99,10 @@ export async function POST(req: NextRequest) {
           }
 
           default:
-            throw new Error('Unhandled relevant event!');
+            console.log('Unhandled event type:', event.type);
         }
       } catch (error) {
+        console.error('Webhook handler error:', error);
         errors.add(error);
         return NextResponse.json(
           { message: 'Webhook handler failed. View logs.' },
@@ -113,7 +111,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Return a 200 response to acknowledge receipt of the event.
     return NextResponse.json({ received: true });
   } catch (error) {
     errors.add(error);

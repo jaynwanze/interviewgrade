@@ -1,4 +1,5 @@
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
+import { stripe } from '@/utils/stripe';
 import Stripe from 'stripe';
 
 const updateProductRecord = async (
@@ -79,7 +80,96 @@ const manageTokenBundlePurchase = async (
   );
 };
 
-export { manageTokenBundlePurchase, updateProductRecord };
+async function manageSubscriptionStatusChange(
+  subscriptionId: string,
+  customerId: string,
+  isNewSubscription: boolean
+) {
+  // Get the full subscription details from Stripe
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  console.log('Stripe subscription status:', subscription.status);
+
+  // Get the candidate_id from the Stripe customer metadata
+  const customer = await stripe.customers.retrieve(customerId);
+  if (customer.deleted) {
+    throw new Error('Customer was deleted');
+  }
+
+  // Use candidateId from metadata (matches createOrRetrieveCandidateCustomer)
+  const candidateId = customer.metadata?.candidateId;
+
+  if (!candidateId) {
+    console.error('No candidateId found in customer metadata for customer:', customerId);
+    throw new Error('No candidateId found in customer metadata');
+  }
+
+  // Get the price ID from the subscription
+  const priceId = subscription.items.data[0]?.price.id;
+  if (!priceId) {
+    throw new Error('No price found in subscription');
+  }
+  console.log('Price ID:', priceId);
+
+  // Find the product in our database by price_id
+  const { data: product, error: productError } = await supabaseAdminClient
+    .from('products')
+    .select('id')
+    .eq('price_id', priceId)
+    .single();
+
+  if (productError || !product) {
+    console.error('Product not found for price_id:', priceId, productError);
+    throw new Error(`Product not found for price_id: ${priceId}`);
+  }
+  console.log('Found product:', product.id);
+
+  const subscriptionData = {
+    candidate_id: candidateId,
+    product_id: product.id,
+    status: subscription.status,
+    quantity: subscription.items.data[0]?.quantity || 1,
+    cancel_at_period_end: subscription.cancel_at_period_end,
+    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+    created: new Date(subscription.created * 1000).toISOString(),
+    ended_at: subscription.ended_at
+      ? new Date(subscription.ended_at * 1000).toISOString()
+      : null,
+    cancel_at: subscription.cancel_at
+      ? new Date(subscription.cancel_at * 1000).toISOString()
+      : null,
+    canceled_at: subscription.canceled_at
+      ? new Date(subscription.canceled_at * 1000).toISOString()
+      : null,
+    trial_start: subscription.trial_start
+      ? new Date(subscription.trial_start * 1000).toISOString()
+      : null,
+    trial_end: subscription.trial_end
+      ? new Date(subscription.trial_end * 1000).toISOString()
+      : null,
+    metadata: {
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscriptionId,
+    },
+  };
+
+  // Upsert based on candidate_id
+  const { data, error } = await supabaseAdminClient
+    .from('subscriptions')
+    .upsert(subscriptionData, {
+      onConflict: 'candidate_id',
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error upserting subscription:', error);
+    throw error;
+  }
+  return data;
+}
+
+export { manageTokenBundlePurchase, updateProductRecord, manageSubscriptionStatusChange };
 
 // const createOrRetrieveCustomer = async ({
 //   email,

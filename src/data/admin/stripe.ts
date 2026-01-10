@@ -93,11 +93,11 @@ export const createOrRetrieveCandidateCustomer = async ({
   if (error || !data?.stripe_customer_id) {
     // No customer record found, let's create one.
     const customerData: {
-      metadata: { employee_id: string };
+      metadata: { candidateId: string };
       email?: string;
     } = {
       metadata: {
-        employee_id: candidateId,
+        candidateId: candidateId,
       },
     };
     if (email) customerData.email = email;

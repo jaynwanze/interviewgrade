@@ -70,7 +70,7 @@ async function ChoosePricingTable() {
             }
             const priceId = product.price_id;
             return (
-              <>
+
                 <div
                   key={priceId}
                   className={cn(
@@ -136,7 +136,6 @@ async function ChoosePricingTable() {
                     </>
                   </div>
                 </div>
-              </>
             );
           })}
         </div>

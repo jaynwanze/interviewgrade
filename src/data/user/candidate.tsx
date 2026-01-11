@@ -255,7 +255,6 @@ async function autoSyncSubscriptionFromStripe(
       .from('subscriptions')
       .upsert(subscriptionData, { onConflict: 'candidate_id' });
 
-    console.log(`Auto-synced subscription for candidate: ${candidateId}`);
   } catch (error) {
     console.error('Auto-sync failed:', error);
     // Don't throw - this is a background operation

@@ -1,36 +1,48 @@
-'use client';
-
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { useEffect, useState } from 'react';
+import { canStartSession } from '@/data/user/candidate';
+import { getInterviewById } from '@/data/user/interviews';
+import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import InterviewFlow from './InterviewFlow';
 import InterviewFlowWrapper from './InterviewFlowWrapper';
 
 const paramsSchema = z.object({
   interviewId: z.string(),
 });
 
-export default function InterviewSessionPage({
+export default async function InterviewSessionPage({
   params,
 }: {
   params: { interviewId: string };
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [interviewId, setInterviewId] = useState<string>('');
+  // Validate params
+  const parsedParams = paramsSchema.safeParse(params);
 
-  useEffect(() => {
-    try {
-      const parsedParams = paramsSchema.parse(params);
-      setInterviewId(parsedParams.interviewId);
-    } catch (error) {
-      console.error('Invalid parameters:', error);
-    } finally {
-      setIsLoading(false);
+  if (!parsedParams.success) {
+    redirect('/candidate/interviews');
+  }
+
+  const interviewId = parsedParams.data.interviewId;
+
+  // Get the interview to check its mode
+  const interview = await getInterviewById(interviewId);
+
+  if (!interview) {
+    redirect('/candidate/interviews');
+  }
+
+  // Check if this is a new/pending interview (not already started/completed)
+  const isNewInterview = interview.status === 'pending' || !interview.status;
+
+  if (isNewInterview) {
+    // Check usage limits
+    const mode = interview.mode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
+    const access = await canStartSession(mode);
+
+    if (!access.allowed) {
+      // Redirect to billing page
+      redirect('/candidate/settings/billing');
     }
-  }, [params]);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
   }
 
   return <InterviewFlowWrapper interviewId={interviewId} />;

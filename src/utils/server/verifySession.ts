@@ -4,13 +4,27 @@ import { redirect } from 'next/navigation';
 import { cache } from 'react';
 
 export const getSession = cache(async () => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const {
-    data: {  user } ,
-    error: sessionError,
-  } = await supabase.auth.getUser();
-  const session = user ? { user } : null; //session object
-  return { data: { session }, error: sessionError };
+  try {
+    const supabase = createSupabaseUserServerComponentClient();
+    const {
+      data: { user },
+      error: sessionError,
+    } = await supabase.auth.getUser();
+
+    // Handle AuthSessionMissingError gracefully
+    if (sessionError) {
+      // Log the error but don't throw - return null session
+      console.error('getSession: Auth error', sessionError.message);
+      return { data: { session: null }, error: null };
+    }
+
+    const session = user ? { user } : null;
+    return { data: { session }, error: null };
+  } catch (error) {
+    // Catch any unexpected errors and return null session
+    console.error('getSession: Unexpected error', error);
+    return { data: { session: null }, error: null };
+  }
 });
 
 // This is a server-side function that verifies the session of the user.
@@ -18,12 +32,7 @@ export const getSession = cache(async () => {
 export const verifySession = cache(async () => {
   const {
     data: { session },
-    error: sessionError,
   } = await getSession();
-
-  if (sessionError) {
-    throw sessionError;
-  }
 
   if (!session?.user) {
     redirect('/c/login');

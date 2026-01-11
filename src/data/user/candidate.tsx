@@ -21,6 +21,8 @@ import urlJoin from 'url-join';
 import { createOrRetrieveCandidateCustomer } from '../admin/stripe';
 import { refreshSessionAction } from './session';
 import { getCandidateUserProfile } from './user';
+import { TemplateMode } from '@/utils/constants';
+import { getSubscriptionLimits, checkFeatureAccess } from '@/utils/checkAccess';
 
 export async function updateCandidateProfileDetailsAction({
   currentUser,
@@ -132,6 +134,54 @@ export async function createCandidatePortalSessionAction(): Promise<string> {
 
 //     return data;
 // }
+
+export async function getMonthlyUsage(TemplateMode: TemplateMode): Promise<number> {
+  const user = await serverGetLoggedInUser();
+  const supabase = createSupabaseUserServerActionClient();
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const { count, error } = await supabase
+    .from('interviews')
+    .select('*', { count: 'exact', head: true })
+    .eq('candidate_id', user.id)
+    .eq('mode', TemplateMode)
+    .gte('created_at', startOfMonth.toISOString());
+
+  if (error) {
+    console.error('Error getting usage:', error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+export async function canStartSession(mode: TempelateMode): Promise<{
+  allowed: boolean;
+  remaining: number;
+  limit: number;
+  isPro: boolean;
+}> {
+  const limits = await getSubscriptionLimits();
+  const currentUsage = await getMonthlyUsage(mode);
+  console.log(currentUsage)
+
+  const limit =
+    TemplateMode === 'practice'
+      ? limits.practiceSessionsPerMonth
+      : limits.mockInterviewsPerMonth;
+
+  const isPro = limit === Infinity;
+  const remaining = Math.max(0, limit - currentUsage);
+
+  return {
+    allowed: remaining > 0 || isPro,
+    remaining: isPro ? Infinity : remaining,
+    limit: isPro ? Infinity : limit,
+    isPro,
+  };
+}
 
 /**
  * Auto-sync subscription from Stripe if database is out of sync

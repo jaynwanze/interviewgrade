@@ -3,6 +3,8 @@
 import InterviewDetailsDialog from '@/components/Interviews/InterviewLibrary/InterviewDetailsDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { canStartSession } from '@/data/user/candidate';
+import { INTERVIEW_PRACTICE_MODE } from '@/utils/constants';
 import type {
   InterviewModeType,
   InterviewTemplate,
@@ -11,6 +13,8 @@ import type {
 import { motion } from 'framer-motion';
 import { Clock, ListOrdered } from 'lucide-react';
 import { useState } from 'react';
+import { UpgradePrompt } from '@/components/ProFeatureGateDialog';
+// import { UpgradePrompt } from '@/components/ProGateFeatureV2';
 
 interface ExtendedTemplate extends PracticeTemplate {
   isComingSoon?: boolean;
@@ -25,12 +29,42 @@ function isComingSoonTemplate(
 export const InterviewCardTemplate = ({
   selectedTemplate,
   interviewMode,
+  access
 }: {
   selectedTemplate: PracticeTemplate | InterviewTemplate;
   interviewMode: InterviewModeType;
+  access: {
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+    isPro: boolean;
+  };
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const handleClick = () => setIsDialogOpen(true);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const handleClick = async () => {
+    setIsChecking(true);
+    try {
+      const mode = interviewMode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
+
+      if (!access.allowed) {
+        // User has hit their limit - show upgrade dialog
+        setShowUpgradePrompt(true);
+      } else {
+        // User can start session - show details dialog
+        setIsDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error checking session access:', error);
+      // On error, still allow them to try (fail gracefully)
+      setIsDialogOpen(true);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   const handleClose = () => setIsDialogOpen(false);
 
   const isComingSoon = isComingSoonTemplate(selectedTemplate);
@@ -69,36 +103,42 @@ export const InterviewCardTemplate = ({
   }
 
   return (
-    <Card
-      key={selectedTemplate.id}
-      className="flex flex-col justify-center items-center border rounded-lg shadow-lg hover:shadow-xl transition duration-200 text-center max-w-80 h-full"
-    >
-      <CardHeader className="flex flex-col items-center">
-        <motion.h2
-          className="text-xl font-bold text-gray-800 dark:text-gray-50"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          {selectedTemplate.title}
-        </motion.h2>
-      </CardHeader>
-      <CardContent className="space-y-3 text-gray-600">
-        <p className="text-sm">{selectedTemplate.description}</p>
-        <div className="flex justify-center items-center space-x-3 text-sm text-gray-700">
-          <div className="flex items-center space-x-1">
-            <ListOrdered className="w-4 h-4 text-blue-500" />
-            <span>Max {selectedTemplate.question_count} Qs</span>
+    <>
+      <Card
+        key={selectedTemplate.id}
+        className="flex flex-col justify-center items-center border rounded-lg shadow-lg hover:shadow-xl transition duration-200 text-center max-w-80 h-full"
+      >
+        <CardHeader className="flex flex-col items-center">
+          <motion.h2
+            className="text-xl font-bold text-gray-800 dark:text-gray-50"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {selectedTemplate.title}
+          </motion.h2>
+        </CardHeader>
+        <CardContent className="space-y-3 text-gray-600">
+          <p className="text-sm">{selectedTemplate.description}</p>
+          <div className="flex justify-center items-center space-x-3 text-sm text-gray-700">
+            <div className="flex items-center space-x-1">
+              <ListOrdered className="w-4 h-4 text-blue-500" />
+              <span>Max {selectedTemplate.question_count} Qs</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Clock className="w-4 h-4 text-purple-500" />
+              <span>{selectedTemplate.duration} min</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <Clock className="w-4 h-4 text-purple-500" />
-            <span>{selectedTemplate.duration} min</span>
-          </div>
-        </div>
-        <Button className="w-full mt-3" onClick={handleClick}>
-          Start Session
-        </Button>
-      </CardContent>
+          <Button
+            className="w-full mt-3"
+            onClick={handleClick}
+            disabled={isChecking}
+          >
+            {isChecking ? 'Checking...' : 'Start Session'}
+          </Button>
+        </CardContent>
+      </Card>
 
       {isDialogOpen && (
         <InterviewDetailsDialog
@@ -108,6 +148,12 @@ export const InterviewCardTemplate = ({
           interviewMode={interviewMode}
         />
       )}
-    </Card>
+      <UpgradePrompt
+        open={showUpgradePrompt}
+        onOpenChange={setShowUpgradePrompt}
+        feature="Unlimited Sessions"
+        description="You've used all your free sessions this month. Upgrade to Pro for unlimited practice and mock interviews."
+      />
+    </>
   );
 };

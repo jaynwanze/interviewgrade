@@ -22,6 +22,9 @@ import {
 } from '@/utils/constants';
 import { ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { canStartSession } from '@/data/user/candidate';
+import { UpgradePrompt } from '@/components/ProGateFeatureV2';
+import { UsageDisplay } from '@/components/UsageDisplay';
 
 export function InterviewTemplates({
   interviewMode,
@@ -34,6 +37,13 @@ export function InterviewTemplates({
   const [interviewTemplates, setInterviewTemplates] = useState<
     InterviewTemplate[]
   >([]);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+ const [sessionAccess, setSessionAccess] = useState<{
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+    isPro: boolean;
+  } | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -77,6 +87,18 @@ export function InterviewTemplates({
     fetchInterviews();
   }, [interviewMode]);
 
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      const mode = interviewMode === INTERVIEW_PRACTICE_MODE
+        ? 'practice'
+        : 'interview';
+      const access = await canStartSession(mode);
+      setSessionAccess(access);
+    };
+    checkAccess();
+  }, [interviewMode]);
+
   // Filter templates based on search query
   let filteredTemplates: (PracticeTemplate | InterviewTemplate)[] = [];
   if (interviewMode === INTERVIEW_PRACTICE_MODE) {
@@ -113,6 +135,17 @@ export function InterviewTemplates({
             skill focus.
           </p>
         </div>
+         {/* Usage Display */}
+      {sessionAccess && (
+        <div className="mb-4 p-4 border rounded-lg bg-muted/50">
+          <UsageDisplay
+            label={interviewMode === INTERVIEW_PRACTICE_MODE ? 'Practice Sessions' : 'Mock Interviews'}
+            used={sessionAccess.limit - sessionAccess.remaining}
+            limit={sessionAccess.limit}
+            isPro={sessionAccess.isPro}
+          />
+        </div>
+      )}
       </div>
       <Separator className="my-6" />
       <div className="flex justify-center items-center space-x-4">
@@ -134,6 +167,7 @@ export function InterviewTemplates({
               key={template.id}
               selectedTemplate={template}
               interviewMode={interviewMode as InterviewModeType}
+              access={sessionAccess!}
             />
           ))}
         </div>

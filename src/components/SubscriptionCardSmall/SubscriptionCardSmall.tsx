@@ -24,7 +24,7 @@ export async function SubscriptionCardSmall() {
         <HoverCardTrigger asChild>
           <Link href={`/candidate/settings/billing`}>
             <div className="group cursor-pointer flex flex-col gap-1 items-start p-2 py-2 pb-3 border w-full rounded-lg">
-              <T.P className="font-semibold ">{title} Pro</T.P>
+              <T.P className="font-semibold ">{title}</T.P>
               {sidenote ? (
                 <T.Small className=" font-normal  group-hover:underline underline-offset-4">
                   {sidenote}

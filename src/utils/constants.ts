@@ -8,4 +8,5 @@ export const INTERVIEW_MODE_PRACTICE_DESCRIPTION =
   'Practice answering questions to improve your skills.';
 export const INTERVIEW_MODE_INTERVIEW_DESCRIPTION =
   'Take a mock interview simualting a real life situations.';
-export type TempelateMode = INTERVIEW_PRACTICE_MODE[keyof typeof INTERVIEW_PRACTICE_MODE] | INTERVIEW_INTERVIEW_MODE[keyof typeof INTERVIEW_INTERVIEW_MODE];
+
+export type TemplateMode = 'practice' | 'interview';

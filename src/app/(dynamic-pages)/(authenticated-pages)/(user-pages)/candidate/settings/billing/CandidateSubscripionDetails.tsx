@@ -1,13 +1,12 @@
-'use server';
-import { PageHeading } from '@/components/PageHeading';
-import Overline from '@/components/Text/Overline';
 import { T } from '@/components/ui/Typography';
 import { H3 } from '@/components/ui/Typography/H3';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getActiveProductsByType } from '@/data/user/employee';
 import { NormalizedSubscription, Product, UnwrapPromise } from '@/types';
 import { cn } from '@/utils/cn';
 import { formatNormalizedSubscription } from '@/utils/formatNormalizedSubscription';
-import { Check } from 'lucide-react';
+import { Check, Crown, Sparkles, Zap, Calendar, CreditCard, Shield } from 'lucide-react';
 import {
   CreateSubscriptionButton,
   ManageSubscriptionButton,
@@ -44,7 +43,6 @@ async function ChoosePricingTable() {
     );
   }
 
-  // supabase cannot sort by foreign table, so we do it here
   const productsSortedByPrice = getProductsSortedByPrice(activeProducts);
 
   return (
@@ -151,35 +149,36 @@ export async function CandidateSubscriptionDetails({
 }) {
   if (!normalizedSubscription) {
     return (
-      <PageHeading
-        title="Subscription"
-        subTitle="No subscription data available."
-      />
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <T.H3>Subscription</T.H3>
+          <T.Subtle>No subscription data available.</T.Subtle>
+        </div>
+      </div>
     );
   }
 
-  const subscriptionDetails = formatNormalizedSubscription(
-    normalizedSubscription,
-  );
+  const subscriptionDetails = formatNormalizedSubscription(normalizedSubscription);
+  const hasActiveSubscription =
+    normalizedSubscription.type === 'active' ||
+    normalizedSubscription.type === 'trialing';
 
-  if (
-    !subscriptionDetails.title ||
-    normalizedSubscription.type === 'no-subscription'
-  ) {
+  if (!hasActiveSubscription) {
     return (
-      <>
-          <div className="space-y-1">
-            <T.H3 className="text-gray-900 dark:text-slate-100 ">Subscription</T.H3>
-            <T.P className="text-muted-foreground">
-              You are currently on the{' '}
-              <span className="text-blue-500 dark:text-blue-400">
-                {subscriptionDetails.title}{' '}.
-              </span>
-            </T.P>
-            <T.Subtle>{subscriptionDetails.description}</T.Subtle>
-          </div>
+      <div className="space-y-8">
+        <div className="space-y-1">
+          <T.H3 className="flex items-center gap-2">
+            Subscription
+          </T.H3>
+          <T.Subtle>
+            You're currently on the free plan. Upgrade to unlock all features.
+          </T.Subtle>
+        </div>
+
+        <FreeSubscriptionCard subscriptionDetails={subscriptionDetails} />
+
         <ChoosePricingTable />
-      </>
+      </div>
     );
   }
 

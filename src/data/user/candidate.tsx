@@ -16,7 +16,6 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { stripe } from '@/utils/stripe';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { User } from '@supabase/supabase-js';
-import { console } from 'inspector';
 import slugify from 'slugify';
 import urlJoin from 'url-join';
 import { createOrRetrieveCandidateCustomer } from '../admin/stripe';
@@ -134,6 +133,85 @@ export async function createCandidatePortalSessionAction(): Promise<string> {
 //     return data;
 // }
 
+/**
+ * Auto-sync subscription from Stripe if database is out of sync
+ */
+async function autoSyncSubscriptionFromStripe(
+  stripeCustomerId: string,
+  candidateId: string
+): Promise<void> {
+  try {
+    // Get active subscription from Stripe
+    const subscriptions = await stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      status: 'all',
+      limit: 1,
+    });
+    const supabaseAdminClient = createSupabaseUserServerActionClient();
+    if (subscriptions.data.length === 0) {
+      // No subscription in Stripe - make sure DB is clear
+      await supabaseAdminClient
+        .from('subscriptions')
+        .delete()
+        .eq('candidate_id', candidateId);
+      return;
+    }
+
+    const stripeSubscription = subscriptions.data[0];
+    const priceId = stripeSubscription.items.data[0]?.price.id;
+
+    if (!priceId) return;
+
+    // Find the product in our database
+    const { data: product } = await supabaseAdminClient
+      .from('products')
+      .select('id')
+      .eq('price_id', priceId)
+      .single();
+
+    if (!product) return;
+
+    const subscriptionData = {
+      candidate_id: candidateId,
+      product_id: product.id,
+      status: stripeSubscription.status,
+      quantity: stripeSubscription.items.data[0]?.quantity || 1,
+      cancel_at_period_end: stripeSubscription.cancel_at_period_end,
+      current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
+      current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+      created: new Date(stripeSubscription.created * 1000).toISOString(),
+      ended_at: stripeSubscription.ended_at
+        ? new Date(stripeSubscription.ended_at * 1000).toISOString()
+        : null,
+      cancel_at: stripeSubscription.cancel_at
+        ? new Date(stripeSubscription.cancel_at * 1000).toISOString()
+        : null,
+      canceled_at: stripeSubscription.canceled_at
+        ? new Date(stripeSubscription.canceled_at * 1000).toISOString()
+        : null,
+      trial_start: stripeSubscription.trial_start
+        ? new Date(stripeSubscription.trial_start * 1000).toISOString()
+        : null,
+      trial_end: stripeSubscription.trial_end
+        ? new Date(stripeSubscription.trial_end * 1000).toISOString()
+        : null,
+      metadata: {
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: stripeSubscription.id,
+      },
+    };
+
+    await supabaseAdminClient
+      .from('subscriptions')
+      .upsert(subscriptionData, { onConflict: 'candidate_id' });
+
+    console.log(`Auto-synced subscription for candidate: ${candidateId}`);
+  } catch (error) {
+    console.error('Auto-sync failed:', error);
+    // Don't throw - this is a background operation
+  }
+}
+
 
 export const getCurrentCandidateSubscription = async (
 ): Promise<NormalizedSubscription> => {
@@ -145,26 +223,74 @@ export const getCurrentCandidateSubscription = async (
       type: 'no-subscription',
     };
   }
+  const supabase = createSupabaseUserServerActionClient();
 
-  const { data: subscriptionData, error } =
-    await createSupabaseUserServerActionClient()
-      .from('subscriptions')
-      .select('*, products(*)')
-      .eq('candidate_id', candidate.id)
-      .in('status', ['trialing', 'active'])
-      .maybeSingle();
+  let { data: subscriptionData, error } = await supabase
+    .from('subscriptions')
+    .select('*, products(*)')
+    .eq('candidate_id', candidate.id)
+    .in('status', ['trialing', 'active'])
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching subscription:', error);
     throw error;
   }
+ // If we have a Stripe customer, verify sync with Stripe
+  if (candidate.stripe_customer_id) {
+    // Case 1: No subscription in DB but customer exists - try to sync
+    if (!subscriptionData) {
+      await autoSyncSubscriptionFromStripe(candidate.stripe_customer_id, candidate.id);
 
-  if (!subscriptionData) {
-    return {
-      type: 'no-subscription',
-    };
+      // Re-fetch after sync
+      const { data: syncedData } = await supabase
+        .from('subscriptions')
+        .select('*, products(*)')
+        .eq('candidate_id', candidate.id)
+        .in('status', ['trialing', 'active'])
+        .maybeSingle();
+
+      subscriptionData = syncedData;
+    }
+    // Case 2: Subscription exists - verify it's in sync
+    else if (subscriptionData.metadata?.stripe_subscription_id) {
+      try {
+        const stripeSubscription = await stripe.subscriptions.retrieve(
+          subscriptionData.metadata.stripe_subscription_id as string
+        );
+
+        // Check if key fields are out of sync
+        const isOutOfSync =
+          subscriptionData.status !== stripeSubscription.status ||
+          subscriptionData.cancel_at_period_end !== stripeSubscription.cancel_at_period_end;
+
+        if (isOutOfSync) {
+          console.log('Subscription out of sync, auto-syncing...');
+          await autoSyncSubscriptionFromStripe(candidate.stripe_customer_id, candidate.id);
+
+          // Re-fetch after sync
+          const { data: syncedData } = await supabase
+            .from('subscriptions')
+            .select('*, products(*)')
+            .eq('candidate_id', candidate.id)
+            .in('status', ['trialing', 'active'])
+            .maybeSingle();
+
+          subscriptionData = syncedData;
+        }
+      } catch (stripeError) {
+        console.error('Error verifying with Stripe:', stripeError);
+        // Continue with database data if Stripe check fails
+      }
+    }
   }
 
+  // No subscription found
+  if (!subscriptionData) {
+    return { type: 'no-subscription' };
+  }
+
+  // Process the subscription data
   try {
     const subscription = subscriptionData as Table<'subscriptions'> & {
       products: Product;
@@ -173,21 +299,10 @@ export const getCurrentCandidateSubscription = async (
     const product = subscription.products;
 
     if (!product) {
-      throw new Error('No product found for the subscription');
+      console.error('No product found for the subscription');
+      return { type: 'no-subscription' };
     }
 
-    // if (subscription.status === 'trialing') {
-    //   if (!subscription.trial_start || !subscription.trial_end) {
-    //     throw new Error('No trial start or end found');
-    //   }
-    //   return {
-    //     type: 'trialing',
-    //     trialStart: subscription.trial_start,
-    //     trialEnd: subscription.trial_end,
-    //     product: product,
-    //     subscription,
-    //   };
-    // } else
     if (subscription.status) {
       return {
         type: subscription.status as
@@ -202,15 +317,11 @@ export const getCurrentCandidateSubscription = async (
         subscription,
       };
     } else {
-      return {
-        type: 'no-subscription',
-      };
+      return { type: 'no-subscription' };
     }
   } catch (err) {
     console.error('Error processing subscription:', err);
-    return {
-      type: 'no-subscription',
-    };
+    return { type: 'no-subscription' };
   }
 };
 

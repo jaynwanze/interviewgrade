@@ -3,6 +3,7 @@
 import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -20,11 +21,12 @@ import {
   INTERVIEW_INTERVIEW_MODE,
   INTERVIEW_PRACTICE_MODE,
 } from '@/utils/constants';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Plus, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { canStartSession } from '@/data/user/candidate';
-import { UpgradePrompt } from '@/components/ProGateFeatureV2';
+import { UpgradePrompt, ProBadge } from '@/components/ProFeatureGateDialog';
 import { UsageDisplay } from '@/components/UsageDisplay';
+import { CreateCustomInterviewDialog } from '@/components/Interviews/CreateCustomInterviewDialog';
 
 export function InterviewTemplates({
   interviewMode,
@@ -38,7 +40,8 @@ export function InterviewTemplates({
     InterviewTemplate[]
   >([]);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
- const [sessionAccess, setSessionAccess] = useState<{
+  const [showCustomInterviewDialog, setShowCustomInterviewDialog] = useState(false);
+  const [sessionAccess, setSessionAccess] = useState<{
     allowed: boolean;
     remaining: number;
     limit: number;
@@ -58,6 +61,14 @@ export function InterviewTemplates({
     interviewMode === INTERVIEW_INTERVIEW_MODE
       ? 'bg-blue-500 text-white'
       : 'bg-green-500 text-white';
+
+ const handleCreateCustomInterviewClick = () => {
+    if (!sessionAccess?.isPro) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    setShowCustomInterviewDialog(true);
+  };
 
   const fetchInterviews = async () => {
     setIsLoading(true);
@@ -87,12 +98,10 @@ export function InterviewTemplates({
     fetchInterviews();
   }, [interviewMode]);
 
-
   useEffect(() => {
     const checkAccess = async () => {
-      const mode = interviewMode === INTERVIEW_PRACTICE_MODE
-        ? 'practice'
-        : 'interview';
+      const mode =
+        interviewMode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
       const access = await canStartSession(mode);
       setSessionAccess(access);
     };
@@ -135,18 +144,49 @@ export function InterviewTemplates({
             skill focus.
           </p>
         </div>
-         {/* Usage Display */}
+      </div>
+
+      {/* Usage Display & Custom Interview Button */}
       {sessionAccess && (
         <div className="mb-4 p-4 border rounded-lg bg-muted/50">
-          <UsageDisplay
-            label={interviewMode === INTERVIEW_PRACTICE_MODE ? 'Practice Sessions' : 'Mock Interviews'}
-            used={sessionAccess.limit - sessionAccess.remaining}
-            limit={sessionAccess.limit}
-            isPro={sessionAccess.isPro}
-          />
+          <div className="flex items-center justify-between">
+            <UsageDisplay
+              label={
+                interviewMode === INTERVIEW_PRACTICE_MODE
+                  ? 'Practice Sessions'
+                  : 'Mock Interviews'
+              }
+              used={sessionAccess.limit - sessionAccess.remaining}
+              limit={sessionAccess.limit}
+              isPro={sessionAccess.isPro}
+            />
+
+            <Button
+              onClick={handleCreateCustomInterviewClick}
+              variant={sessionAccess.isPro ? 'default' : 'outline'}
+              className={
+                sessionAccess.isPro
+                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+                  : ''
+              }
+            >
+              {sessionAccess.isPro ? (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Custom Interview
+                </>
+              ) : (
+                <>
+                  <Lock className="mr-2 h-4 w-4" />
+                  Custom Interview
+                  <ProBadge className="ml-2" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       )}
-      </div>
+
       <Separator className="my-6" />
       <div className="flex justify-center items-center space-x-4">
         <Badge className={`bg-black text-sm ${modeBadge}`}>
@@ -179,6 +219,22 @@ export function InterviewTemplates({
           </p>
         </div>
       )}
+
+      {/* Custom Interview Dialog (Pro only) */}
+      {sessionAccess && sessionAccess.isPro && (
+        <CreateCustomInterviewDialog
+          open={showCustomInterviewDialog}
+          onOpenChange={setShowCustomInterviewDialog}
+        />
+      )}
+
+      {/* Upgrade Prompt (Free users) */}
+      <UpgradePrompt
+        open={showUpgradePrompt}
+        onOpenChange={setShowUpgradePrompt}
+        feature="Custom Interview Builder"
+        description="Paste any job description and get a tailored mock interview with role-specific questions. Your resume will be analyzed to create personalized questions."
+      />
     </div>
   );
 }

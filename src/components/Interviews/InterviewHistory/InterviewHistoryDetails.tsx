@@ -1,5 +1,12 @@
 'use client';
-
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { CalendarIcon, ChevronLeft, ClockIcon, FileDown, Lock, Crown } from 'lucide-react';
+import { getCurrentCandidateSubscription } from '@/data/user/candidate';
+import { Button } from '@/components/Button';
+import { ProBadge, UpgradePrompt, LockedFeature } from '@/components/ProFeatureGateDialog';
 import { ChatInterface } from '@/components/Interviews/InterviewHistory/InterviewHistoryChatInterface';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
@@ -26,11 +33,7 @@ import {
   getInterviewQuestions,
 } from '@/data/user/interviews';
 import { Interview, InterviewAnswerDetail, InterviewEvaluation } from '@/types';
-import { motion } from 'framer-motion';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { CalendarIcon, ChevronLeft, ClockIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { isPro, FREE_LIMITS } from '@/utils/checkAccess';
 import { RadarChartEvaluationsCriteriaScores } from './RadarChartEvaluationsCriteriaScores';
 
 export type SentimentScore = {
@@ -38,14 +41,15 @@ export type SentimentScore = {
   score: number;
   aggregated_scores?: Record<string, number>;
 };
+
 export async function fetchSentiment(
   answers: string[],
   attempt = 1,
 ): Promise<SentimentScore | null> {
+
   try {
     const inputText = answers.join('\n').trim();
     if (!inputText) {
-      // If there's nothing to analyze, default to neutral
       return null;
     }
 
@@ -63,13 +67,11 @@ export async function fetchSentiment(
     }
 
     const data = await res.json();
-    const scores = Array.isArray(data[0]) // legacy shape
+    const scores = Array.isArray(data[0])
       ? (data[0] as SentimentScore[])
-      : (data as SentimentScore[]); // new flat shape
+      : (data as SentimentScore[]);
 
     if (scores.length === 0) throw new Error('Empty sentiment result');
-    // handle typical HF output
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sorted = scores.sort((a, b) => b.score - a.score);
     let predicted_label = sorted[0].label;
     if (predicted_label.startsWith('LABEL_')) {
@@ -87,7 +89,6 @@ export async function fetchSentiment(
       return fetchSentiment(answers, 2);
     }
 
-    // if second attempt also fails, fallback:
     return null;
   }
 }
@@ -98,22 +99,31 @@ export const InterviewHistoryDetails = ({
   interviewId: string;
 }) => {
   const [interview, setInterview] = useState<Interview | null>(null);
-  const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(
-    null,
-  );
-  const [sentimentDetails, setSentimentDetails] =
-    useState<SentimentDetails | null>(null);
-  const [dynamicDescription, setDynamicDescription] = useState<string | null>(
-    null,
-  );
-  const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(
-    null,
-  );
+  const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(null);
+  const [sentimentDetails, setSentimentDetails] = useState<SentimentDetails | null>(null);
+  const [dynamicDescription, setDynamicDescription] = useState<string | null>(null);
+  const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('overview');
   const [isFetchingFeedback, setIsFetchingFeedback] = useState<boolean>(false);
   const hasFetched = useRef(false);
+  const [isProUser, setProUser] = useState<boolean>(false);
+  const [showPdfUpgrade, setShowPdfUpgrade] = useState(false);
+  const [showCoachUpgrade, setShowCoachUpgrade] = useState(false);
+
+  useEffect(() => {
+    const checkProStatus = async () => {
+      try {
+        const subscription = await getCurrentCandidateSubscription();
+        const proStatus = isPro(subscription);
+        setProUser(false);
+      } catch (error) {
+        setProUser(false);
+      }
+    };
+    checkProStatus();
+  }, []);
 
   const retryFeedbackFetch = async (interview: Interview) => {
     setIsFetchingFeedback(true);
@@ -153,16 +163,10 @@ export const InterviewHistoryDetails = ({
         throw new Error(`API returned ${res.status}`);
       }
 
-      // The route returns { status:'ok', feedback:{…} }
-      const { feedback } = (await res.json()) as {
-        status: 'ok';
-        feedback: InterviewEvaluation;
-      };
       const interviewEvaluation = await getInterviewEvaluation(interviewId);
       setEvaluation(interviewEvaluation);
     } catch (error) {
       console.error('Error fetching interview feedback:', error);
-      setIsFetchingFeedback(false);
     } finally {
       setIsFetchingFeedback(false);
     }
@@ -199,61 +203,114 @@ export const InterviewHistoryDetails = ({
     }
   }, [interviewId]);
 
-  // Once interview details are loaded, run sentiment analysis
   useEffect(() => {
     if (evaluation && evaluation.question_answer_feedback) {
-      // Extract feedback strings from evaluation (adjust property names as needed)
-      // Extract candidate answers from evaluation
       const candidateAnswers = evaluation.question_answer_feedback.map(
         (qa) => qa.answer,
       );
-      fetchSentiment(candidateAnswers).then((data) => {
-        if (data) return setSentimentScore(data);
-        return null;
-      });
+      // fetchSentiment(candidateAnswers).then((data) => {
+      //   if (data) return setSentimentScore(data);
+      //   return null;
+      // });
     }
   }, [evaluation]);
-
-  useEffect(() => {
-    if (sentimentScore) {
-      const sentiment =
-        SENTIMENT_DETAILS[sentimentScore?.label] ||
-        SENTIMENT_DETAILS['neutral'];
-      setSentimentDetails(sentiment);
-
-      const dynamicDescription = getDynamicDescription(
-        sentimentScore?.label,
-        sentimentScore?.score,
-      );
-      setDynamicDescription(dynamicDescription);
-    }
-  }, [sentimentScore]);
 
   useEffect(() => {
     if (interviewId) {
       fetchInterviewDetails();
     }
-  }, [interviewId]);
+  }, [interviewId, fetchInterviewDetails]);
 
-  if (loading) {
+  const getScoreColor = (score: number): string => {
+    if (score >= 70) return 'bg-green-500 text-white';
+    if (score >= 60) return 'bg-lime-500 text-white';
+    if (score >= 50) return 'bg-yellow-500 text-white';
+    if (score >= 40) return 'bg-orange-500 text-white';
+    return 'bg-red-500 text-white';
+  };
+
+  const handleCoachTabClick = () => {
+    if (!isProUser) {
+      setShowCoachUpgrade(true);
+      return;
+    }
+    setSelectedTab('coach');
+  };
+
+  const generatePDF = () => {
+    if (!isProUser) {
+      setShowPdfUpgrade(true);
+      return;
+    }
+
+    if (!interview || !evaluation) return;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Interview Report', 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Title: ${interview.title}`, 14, 32);
+    doc.text(
+      `Date: ${new Date(interview.start_time).toLocaleString()}`,
+      14,
+      42,
+    );
+    doc.text(`Duration: ${interview.duration} mins`, 14, 52);
+    autoTable(doc, {
+      startY: 62,
+      head: [['Criteria', 'Score', 'Feedback']],
+      body: evaluation.evaluation_scores.map((score) => [
+        score.name || 'N/A',
+        `${score.score}/10`,
+        score.feedback,
+      ]),
+    });
+    doc.save('interview_report.pdf');
+  };
+const renderCoach = (evaluationData: InterviewEvaluation) => {
+    if (!isProUser) {
+      return (
+        <div className="relative p-6 border rounded-lg mt-5">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-10">
+            <Lock className="h-8 w-8 text-muted-foreground mb-3" />
+            <h3 className="font-semibold mb-1">AI Coach</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-xs mb-4">
+              Get personalized advice and ask questions about your interview performance
+            </p>
+            <Button
+              onClick={() => setShowCoachUpgrade(true)}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500"
+            >
+              <Crown className="mr-2 h-4 w-4" />
+              Unlock AI Coach
+            </Button>
+          </div>
+
+          <div className="blur-sm pointer-events-none">
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm">How can I improve my communication score?</p>
+              </div>
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <p className="text-sm">Based on your interview, here are 3 specific ways...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex justify-center items-center">
-        <LoadingSpinner />
+      <div className="w-full max-w-4xl mx-auto mt-5">
+        <ChatInterface interview={interview!} evaluation={evaluationData} />
       </div>
     );
-  }
-
-  if (isFetchingFeedback) {
-    return (
-      <div className="text-center p-4">
-        <span>Fetching interview feedback...</span>
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  };
 
   if (error) {
     return <div className="text-center p-4">{error}</div>;
+  }
+ if (loading) {
+    return <LoadingSpinner />;
   }
 
   if (!interview) {
@@ -263,14 +320,6 @@ export const InterviewHistoryDetails = ({
   if (interview.status === 'not_started') {
     return <div className="text-center p-4">Session has not started yet.</div>;
   }
-
-  const renderCoach = (evaluation: InterviewEvaluation) => {
-    return (
-      <div className="w-full max-w-4xl mx-auto">
-        <ChatInterface interview={interview} evaluation={evaluation} />
-      </div>
-    );
-  };
 
   const renderDetailed = (evaluation: InterviewEvaluation) => {
     if (!evaluation.question_answer_feedback?.length) {
@@ -305,9 +354,7 @@ export const InterviewHistoryDetails = ({
                   <span className="font-semibold">Score:</span>
                   <Badge className="text-white bg-green-600">
                     {qa.mark}/
-                    {Math.floor(
-                      100 / evaluation.question_answer_feedback.length,
-                    )}
+                    {Math.floor(100 / evaluation.question_answer_feedback.length)}
                   </Badge>
                 </div>
               </CardContent>
@@ -319,13 +366,7 @@ export const InterviewHistoryDetails = ({
   };
 
   const renderOverview = (evaluation: InterviewEvaluation) => {
-    const getScoreColor = (score: number): string => {
-      if (score >= 70) return 'bg-green-500 text-white'; // 70% - 100%
-      if (score >= 60) return 'bg-lime-500 text-white'; // 60% - 69%
-      if (score >= 50) return 'bg-yellow-500 text-white'; // 50% - 59%
-      if (score >= 40) return 'bg-orange-500 text-white'; // 40% - 49%
-      return 'bg-red-500 text-white'; // 0%  - 39%
-    };
+    const rubricLimit = isProUser ? Infinity : FREE_LIMITS.rubricCriteriaShown;
     return (
       <div className="shadow-lg mt-5 p-6 rounded-lg border">
         <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -391,17 +432,15 @@ export const InterviewHistoryDetails = ({
                 </div>
               </div>
               <Separator />
-              <div className="flex flex-col justify-between space-y-6">
-                <CardTitle className="text-xl font-semibold">
-                  Strengths
-                </CardTitle>
-                <span className="text-gray-700">
-                  {evaluation.strengths || 'No strengths identified.'}
-                </span>
-              </div>
-              <Separator />
             </>
           )}
+          <div className="flex flex-col justify-between space-y-6">
+            <CardTitle className="text-xl font-semibold">Strengths</CardTitle>
+            <span className="text-gray-700">
+              {evaluation.strengths || 'No strengths identified.'}
+            </span>
+          </div>
+          <Separator />
           <div className="flex flex-col justify-between space-y-6">
             <CardTitle className="text-xl font-semibold">
               Areas for Improvement
@@ -425,14 +464,26 @@ export const InterviewHistoryDetails = ({
               Skill Breakdown
             </CardTitle>
             <span>
+              {isProUser ? (
               <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
+            ) : (
+              LockedFeature
+              // <LockedFeature
+              //   feature="Skill Breakdown Chart"
+              //   description="Visualize your performance across different skill areas with our radar chart."
+              //   className="w-full h-64 flex items-center justify-center border rounded-lg"
+              // />
+            )}
             </span>
           </div>
           <Separator />
           <div className="flex flex-col justify-between space-y-6">
-            <CardTitle className="text-xl font-semibold">
-              Evaluation Scores
-            </CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-xl font-semibold">
+                Evaluation Scores
+              </CardTitle>
+              {!isProUser && <ProBadge />}
+            </div>
             <Table className="w-full border rounded-sm">
               <TableHeader>
                 <TableRow className="bg-gray-100 dark:bg-gray-900/5 font-bold">
@@ -448,54 +499,67 @@ export const InterviewHistoryDetails = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {evaluation.evaluation_scores.map((score) => (
-                  <TableRow key={score.id} className="border-b">
-                    <TableCell className="px-4 py-2 font-semibold">
-                      {score.name || 'N/A'}
-                    </TableCell>
-                    <TableCell className="px-4 py-2 text-center">
-                      <Badge
-                        className={`text-white ${getScoreColor(score.score * 10)}`}
-                      >
-                        {score.score}/10
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-4 py-2 text-gray-600">
-                      {score.feedback}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {evaluation.evaluation_scores.map((score, index) => {
+                  const isLocked = index >= rubricLimit;
+                  if (isLocked) {
+                    return (
+                      <TableRow key={score.id} className="border-b relative">
+                        <TableCell
+                          colSpan={3}
+                          className="px-4 py-2 text-center"
+                        >
+                          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                            <Lock className="h-4 w-4" />
+                            <span className="text-sm">
+                              Upgrade to Pro to see all criteria
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  return (
+                    <TableRow key={score.id} className="border-b">
+                      <TableCell className="px-4 py-2 font-semibold">
+                        {score.name || 'N/A'}
+                      </TableCell>
+                      <TableCell className="px-4 py-2 text-center">
+                        <Badge
+                          className={`text-white ${getScoreColor(score.score * 10)}`}
+                        >
+                          {score.score}/10
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-4 py-2 text-gray-600">
+                        {score.feedback}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
+
+          {!isProUser && evaluation.evaluation_scores.length > rubricLimit && (
+            <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-center">
+                <span className="font-medium">
+                  +{evaluation.evaluation_scores.length - rubricLimit} more
+                  criteria hidden
+                </span>
+                <br />
+                <span className="text-muted-foreground">
+                  Upgrade to Pro to see your complete breakdown
+                </span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
   };
 
-  const generatePDF = () => {
-    if (!interview || !evaluation) return;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Interview Report', 14, 22);
-    doc.setFontSize(12);
-    doc.text(`Title: ${interview.title}`, 14, 32);
-    doc.text(
-      `Date: ${new Date(interview.start_time).toLocaleString()}`,
-      14,
-      42,
-    );
-    doc.text(`Duration: ${interview.duration} mins`, 14, 52);
-    autoTable(doc, {
-      startY: 62,
-      body: evaluation.evaluation_scores.map((score) => [
-        score.name || 'N/A',
-        `${score.score}/10`,
-        score.feedback,
-      ]),
-    });
-    doc.save('interview_report.pdf');
-  };
 
   return (
     <div className="p-2 max-w-5xl mx-auto">
@@ -508,6 +572,26 @@ export const InterviewHistoryDetails = ({
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
+
+            <Button
+              variant="outline"
+              onClick={generatePDF}
+              className={!isProUser ? 'opacity-75' : ''}
+            >
+              {isProUser ? (
+                <>
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Download PDF
+                </>
+              ) : (
+                <>
+                  <Lock className="mr-2 h-4 w-4" />
+                  Download PDF
+                  <ProBadge className="ml-2" />
+                </>
+              )}
+            </Button>
+
             <div className="flex-1 text-left space-y-2">
               <div className="flex items-center space-x-2">
                 <Badge className="bg-black dark:bg-slate-600 text-white text-sm px-3 py-1">
@@ -532,10 +616,17 @@ export const InterviewHistoryDetails = ({
                 </div>
               </div>
             </div>
+
             <Tabs
               defaultValue="overview"
               className="p-4"
-              onValueChange={(value) => setSelectedTab(value)}
+              onValueChange={(value) => {
+                if (value === 'coach') {
+                  handleCoachTabClick();
+                } else {
+                  setSelectedTab(value);
+                }
+              }}
             >
               <TabsList
                 className={`grid grid-cols-${interview.mode === 'interview' ? 3 : 2} w-full mx-auto`}
@@ -544,11 +635,16 @@ export const InterviewHistoryDetails = ({
                 {interview.mode === 'interview' && (
                   <TabsTrigger value="details">Detailed</TabsTrigger>
                 )}
-                <TabsTrigger value="coach">AI Interview Coach</TabsTrigger>
+                <TabsTrigger value="coach" className="relative">
+                  AI Interview Coach
+                  {!isProUser && <ProBadge className="ml-1" />}
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
+
           <Separator className="my-4" />
+
           {selectedTab === 'overview' && renderOverview(evaluation)}
           {selectedTab === 'details' &&
             interview.mode === 'interview' &&
@@ -568,6 +664,20 @@ export const InterviewHistoryDetails = ({
           </div>
         </>
       )}
+
+      {/* Upgrade Prompts */}
+      <UpgradePrompt
+        open={showPdfUpgrade}
+        onOpenChange={setShowPdfUpgrade}
+        feature="PDF Reports"
+        description="Download detailed interview reports to track your progress and share with mentors."
+      />
+      <UpgradePrompt
+        open={showCoachUpgrade}
+        onOpenChange={setShowCoachUpgrade}
+        feature="AI Coach"
+        description="Chat with your AI interview coach to get personalized improvement tips and ask follow-up questions about your performance."
+      />
     </div>
   );
 };

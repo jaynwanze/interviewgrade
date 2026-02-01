@@ -136,8 +136,7 @@ export async function createCandidatePortalSessionAction(): Promise<string> {
 
 //     return data;
 // }
-
-export async function getMonthlyUsage(TemplateMode: TemplateMode): Promise<number> {
+export async function getMonthlyUsage(templateMode: TemplateMode): Promise<number> {
   const user = await serverGetLoggedInUser();
   const supabase = createSupabaseUserServerActionClient();
   const startOfMonth = new Date();
@@ -148,7 +147,7 @@ export async function getMonthlyUsage(TemplateMode: TemplateMode): Promise<numbe
     .from('interviews')
     .select('*', { count: 'exact', head: true })
     .eq('candidate_id', user.id)
-    .eq('mode', TemplateMode)
+    .eq('mode', templateMode)
     .gte('created_at', startOfMonth.toISOString());
 
   if (error) {
@@ -159,7 +158,7 @@ export async function getMonthlyUsage(TemplateMode: TemplateMode): Promise<numbe
   return count || 0;
 }
 
-export async function canStartSession(mode: TempelateMode): Promise<{
+export async function canStartSession(mode: TemplateMode): Promise<{
   allowed: boolean;
   remaining: number;
   limit: number;
@@ -167,10 +166,9 @@ export async function canStartSession(mode: TempelateMode): Promise<{
 }> {
   const limits = await getSubscriptionLimits();
   const currentUsage = await getMonthlyUsage(mode);
-  console.log(currentUsage)
 
   const limit =
-    TemplateMode === 'practice'
+    mode === 'practice'
       ? limits.practiceSessionsPerMonth
       : limits.mockInterviewsPerMonth;
 
@@ -184,10 +182,6 @@ export async function canStartSession(mode: TempelateMode): Promise<{
     isPro,
   };
 }
-
-/**
- * Auto-sync subscription from Stripe if database is out of sync
- */
 
 /**
  * Auto-sync subscription from Stripe if database is out of sync

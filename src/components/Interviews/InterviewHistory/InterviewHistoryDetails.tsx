@@ -117,7 +117,7 @@ export const InterviewHistoryDetails = ({
       try {
         const subscription = await getCurrentCandidateSubscription();
         const proStatus = isPro(subscription);
-        setProUser(false);
+        setProUser(proStatus);
       } catch (error) {
         setProUser(false);
       }

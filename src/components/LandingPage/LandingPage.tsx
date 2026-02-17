@@ -1,10 +1,10 @@
 import { Footer } from './Footer';
 import HeroSection from './HeroSection';
 import HowItWorks from './HowItWorks';
-import Features from './Features';
+import Features from './features';
 import SocialProof from './SocialProof';
-import Pricing from './Pricing';
-import FAQ from './FAQ';
+import Pricing from './pricing';
+import FAQ from './faq';
 import FinalCTA from './FinalCTA';
 
 export const LandingPage = () => {

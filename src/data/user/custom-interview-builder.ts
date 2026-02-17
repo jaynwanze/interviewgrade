@@ -411,7 +411,7 @@ function parseJobDescriptionForCriteria(jobDescription: string): {
 export async function createInterviewFromJobDescription(
   jobTitle: string,
   jobDescription: string,
-  company?: string
+  company?: string,
 ): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
   // Parse common skills/requirements from job description
   const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);

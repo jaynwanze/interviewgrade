@@ -302,7 +302,7 @@ export const getCurrentCandidateSubscription =
 
       const supabase = createSupabaseUserServerActionClient();
 
-      let { data: subscriptionData, error } = await supabase
+      const { data: subscriptionData, error } = await supabase
         .from('subscriptions')
         .select('*, products(*)')
         .eq('candidate_id', candidate.id)
@@ -313,6 +313,7 @@ export const getCurrentCandidateSubscription =
         console.error('Error fetching subscription:', error);
         // Don't throw, try to continue
       }
+      let currentSubscription = subscriptionData;
 
       // If we have a Stripe customer, verify sync with Stripe
       if (candidate.stripe_customer_id) {
@@ -335,7 +336,7 @@ export const getCurrentCandidateSubscription =
           if (syncError) {
             console.error('Error fetching synced subscription:', syncError);
           }
-          subscriptionData = syncedData;
+          currentSubscription = syncedData;
         }
         // Case 2: Subscription exists - verify it's in sync (but don't block on this)
         else if (subscriptionData.metadata?.stripe_subscription_id) {
@@ -365,9 +366,9 @@ export const getCurrentCandidateSubscription =
                 .in('status', ['trialing', 'active'])
                 .maybeSingle();
 
-              subscriptionData = syncedData;
+              currentSubscription = syncedData;
             }
-          } catch (stripeError: any) {
+          } catch (stripeError) {
             // If subscription not found in Stripe, it may have been deleted
             if (stripeError?.statusCode === 404) {
               console.log(
@@ -377,7 +378,7 @@ export const getCurrentCandidateSubscription =
                 candidate.stripe_customer_id,
                 candidate.id,
               );
-              subscriptionData = null;
+              currentSubscription = null;
             } else {
               console.error('Error verifying with Stripe:', stripeError);
             }
@@ -387,12 +388,12 @@ export const getCurrentCandidateSubscription =
       }
 
       // No subscription found
-      if (!subscriptionData) {
+      if (!currentSubscription) {
         return { type: 'no-subscription' };
       }
 
       // Process the subscription data
-      const subscription = subscriptionData as Table<'subscriptions'> & {
+      const subscription = currentSubscription as Table<'subscriptions'> & {
         products: Product;
       };
 

@@ -26,14 +26,14 @@ import {
   createInterviewFromJobDescription,
   type CustomInterviewInput,
 } from '@/data/user/custom-interview-builder';
-import { Plus, Trash2, Wand2 } from 'lucide-react';
+import type { Database } from '@/lib/database.types';
+import { Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import type { Database } from '@/lib/database.types';
 
 // Array of valid categories from your database enum
-const templateCategories: TemplateCategory[] = [
+const templateCategories: Database["public"]["Enums"]["template_category"][] = [
   'Soft Skills',
   'IT',
   'General Job-Based',
@@ -45,11 +45,11 @@ const templateCategories: TemplateCategory[] = [
   'Other',
 ];
 
-interface Question {
+type Question = {
   text: string;
-  type: QuestionType;
+  type: 'Behavioral' | 'Technical' | 'Role-Specific' | 'Situational';
   sampleAnswer?: string;
-}
+};
 
 interface EvaluationCriteria {
   name: string;

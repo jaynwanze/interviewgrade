@@ -1,13 +1,9 @@
 'use server';
 
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
-import type {
-  EvaluationRubricType,
-  SAPayload,
-  Table,
-} from '@/types';
+import type { EvaluationRubricType, SAPayload, Table } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import type { Database } from './lib/database.types';
+import type { Database } from '@/lib/database.types';
 
 // Default rubrics for evaluation criteria
 const DEFAULT_RUBRICS: EvaluationRubricType[] = [
@@ -52,7 +48,7 @@ export type CustomInterviewInput = {
   title: string;
   description: string;
   role: string;
-  category: Database["public"]["Enums"]["template_category"];
+  category: Database['public']['Enums']['template_category'];
   difficulty: 'Easy' | 'Medium' | 'Hard';
   evaluationCriteria: {
     name: string;
@@ -81,7 +77,7 @@ export type GeneratedInterviewFromJob = {
  * 4. Creating questions for each evaluation criteria
  */
 export async function createCustomMockInterview(
-  input: CustomInterviewInput
+  input: CustomInterviewInput,
 ): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
   try {
     const user = await serverGetLoggedInUser();
@@ -126,11 +122,11 @@ export async function createCustomMockInterview(
         difficulty: input.difficulty,
         duration: input.evaluationCriteria.reduce(
           (acc, c) => acc + c.questions.length * 3,
-          0
+          0,
         ), // ~3 min per question
         question_count: input.evaluationCriteria.reduce(
           (acc, c) => acc + c.questions.length,
-          0
+          0,
         ),
         is_company_specific: false,
         is_industry_specific: false,
@@ -289,7 +285,8 @@ function parseJobDescriptionForCriteria(jobDescription: string): {
   ) {
     criteria.push({
       name: 'Problem Solving',
-      description: 'Ability to analyze problems and develop effective solutions',
+      description:
+        'Ability to analyze problems and develop effective solutions',
       questions: [
         {
           text: 'Describe a complex problem you solved in your previous role.',
@@ -400,7 +397,7 @@ function parseJobDescriptionForCriteria(jobDescription: string): {
             type: 'Situational',
           },
         ],
-      }
+      },
     );
   }
 
@@ -411,60 +408,31 @@ function parseJobDescriptionForCriteria(jobDescription: string): {
  * Quick create interview from a job description
  * Generates suggested evaluation criteria based on the job
  */
-// export async function createInterviewFromJobDescription(
-//   jobTitle: string,
-//   jobDescription: string,
-//   company?: string
-// ): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
-//   // Parse common skills/requirements from job description
-//   const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);
-//   //grab resume content from user profile and tailor questions based on that as well (e.g. if they have a lot of experience in leadership, generate more leadership questions, if they are junior, generate more foundational questions)
-//   // For a more advanced implementation, we could also use an LLM to generate tailored questions based on the job description
+export async function createInterviewFromJobDescription(
+  jobTitle: string,
+  jobDescription: string,
+  company?: string
+): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
+  // Parse common skills/requirements from job description
+  const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);
+  //grab resume content from user profile and tailor questions based on that as well (e.g. if they have a lot of experience in leadership, generate more leadership questions, if they are junior, generate more foundational questions)
+  // For a more advanced implementation, we could also use an LLM to generate tailored questions based on the job description
 
-//   const input: CustomInterviewInput = {
-//     title: `${jobTitle}${company ? ` at ${company}` : ''} Interview`,
-//     description: `Custom interview preparation for ${jobTitle} role. ${jobDescription.substring(0, 200)}...`,
-//     role: jobTitle,
-//     category: 'Role Specific',
-//     difficulty: 'Medium',
-//     evaluationCriteria: suggestedCriteria.map((criteria) => ({
-//       name: criteria.name,
-//       description: criteria.description,
-//       questions: criteria.questions,
-//     })),
-//   };
+  const input: CustomInterviewInput = {
+    title: `${jobTitle}${company ? ` at ${company}` : ''} Interview`,
+    description: `Custom interview preparation for ${jobTitle} role. ${jobDescription.substring(0, 200)}...`,
+    role: jobTitle,
+    category: 'Soft Skills', // For simplicity, we can categorize all as "Soft Skills" for now. In a more advanced version, we could categorize based on the criteria (e.g. if it has technical questions, categorize as "Technical").
+    difficulty: 'Medium',
+    evaluationCriteria: suggestedCriteria.map((criteria) => ({
+      name: criteria.name,
+      description: criteria.description,
+      questions: criteria.questions,
+    })),
+  };
 
-//   return createCustomMockInterview(input);
-// }
-
-// /**
-//  * Quick create interview from a job description with resume analysis
-//  * Generates suggested evaluation criteria based on the job
-//  */
-// export async function createInterviewFromJobDescriptionWithResume(
-//   jobTitle: string,
-//   jobDescription: string,
-//   company?: string
-// ): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
-//   // Parse common skills/requirements from job description
-//   const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);
-//   // get resume
-// // For a more advanced implementation, we could also use an LLM to generate tailored questions based on the job description and the user's resume content (which we would fetch from their profile). This would allow us to create a more personalized interview experience that focuses on areas where the user may need more practice or improvement.
-//   const input: CustomInterviewInput = {
-//     title: `${jobTitle}${company ? ` at ${company}` : ''} Interview`,
-//     description: `Custom interview preparation for ${jobTitle} role. ${jobDescription.substring(0, 200)}...`,
-//     role: jobTitle,
-//     category: 'Role Specific',
-//     difficulty: 'Medium',
-//     evaluationCriteria: suggestedCriteria.map((criteria) => ({
-//       name: criteria.name,
-//       description: criteria.description,
-//       questions: criteria.questions,
-//     })),
-//   };
-
-//   return createCustomMockInterview(input);
-// }
+  return createCustomMockInterview(input);
+}
 
 /**
  * Get all custom templates created by the current user
@@ -505,7 +473,7 @@ export async function getUserCustomTemplates(): Promise<
  * Delete a custom template and all related data
  */
 export async function deleteCustomTemplate(
-  templateId: string
+  templateId: string,
 ): Promise<SAPayload<void>> {
   try {
     const user = await serverGetLoggedInUser();

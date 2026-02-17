@@ -1,7 +1,10 @@
 // app/api/stripe-webhook/route.ts
 import { errors } from '@/utils/errors';
 import { stripe } from '@/utils/stripe';
-import { manageTokenBundlePurchase, manageSubscriptionStatusChange } from '@/utils/supabase-admin';
+import {
+  manageTokenBundlePurchase,
+  manageSubscriptionStatusChange,
+} from '@/utils/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
@@ -60,13 +63,14 @@ export async function POST(req: NextRequest) {
             await manageSubscriptionStatusChange(
               subscription.id,
               subscription.customer as string,
-              event.type === 'customer.subscription.created'
+              event.type === 'customer.subscription.created',
             );
             break;
           }
 
           case 'checkout.session.completed': {
-            const checkoutSession = event.data.object as Stripe.Checkout.Session;
+            const checkoutSession = event.data
+              .object as Stripe.Checkout.Session;
             const productType = checkoutSession.metadata?.product_type;
             const quantity = parseInt(
               checkoutSession.metadata?.quantity ?? '0',
@@ -84,7 +88,7 @@ export async function POST(req: NextRequest) {
               await manageSubscriptionStatusChange(
                 subscriptionId,
                 customerId,
-                true // isNewSubscription
+                true, // isNewSubscription
               );
             } else if (checkoutSession.mode === 'payment') {
               if (productType === 'token_bundle') {

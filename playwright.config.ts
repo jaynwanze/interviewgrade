@@ -1,12 +1,11 @@
 import { PlaywrightTestConfig, devices } from '@playwright/test';
 import path from 'path';
 
-
 // Use process.env.PORT by default and fallback to port 3000
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 
 // Set webServer.url and use.baseURL with the location of the WebServer respecting the correct set port
-const baseURL = `http://localhost:${PORT}`
+const baseURL = `http://localhost:${PORT}`;
 
 // Reference: https://playwright.dev/docs/test-configuration
 const config: PlaywrightTestConfig = {
@@ -29,7 +28,6 @@ const config: PlaywrightTestConfig = {
   },
 
   use: {
-
     // Use baseURL so to make navigations relative.
     // More information: https://playwright.dev/docs/api/class-testoptions#test-options-base-url
     baseURL,
@@ -50,7 +48,6 @@ const config: PlaywrightTestConfig = {
     {
       name: 'with-auth',
       testMatch: 'auth/**/*.setup.ts',
-
     },
     {
       name: 'Logged In Users (Desktop Chrome)',
@@ -69,8 +66,7 @@ const config: PlaywrightTestConfig = {
         ...devices['Desktop Chrome'],
       },
     },
-
   ],
   globalSetup: './playwright/global-setup.ts',
-}
-export default config
+};
+export default config;

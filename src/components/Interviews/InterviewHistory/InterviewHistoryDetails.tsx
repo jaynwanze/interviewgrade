@@ -3,10 +3,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { CalendarIcon, ChevronLeft, ClockIcon, FileDown, Lock, Crown } from 'lucide-react';
+import {
+  CalendarIcon,
+  ChevronLeft,
+  ClockIcon,
+  FileDown,
+  Lock,
+  Crown,
+} from 'lucide-react';
 import { getCurrentCandidateSubscription } from '@/data/user/candidate';
 import { Button } from '@/components/Button';
-import { ProBadge, UpgradePrompt, LockedFeature } from '@/components/ProFeatureGateDialog';
+import {
+  ProBadge,
+  UpgradePrompt,
+  LockedFeature,
+} from '@/components/ProFeatureGateDialog';
 import { ChatInterface } from '@/components/Interviews/InterviewHistory/InterviewHistoryChatInterface';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import {
@@ -46,7 +57,6 @@ export async function fetchSentiment(
   answers: string[],
   attempt = 1,
 ): Promise<SentimentScore | null> {
-
   try {
     const inputText = answers.join('\n').trim();
     if (!inputText) {
@@ -99,10 +109,17 @@ export const InterviewHistoryDetails = ({
   interviewId: string;
 }) => {
   const [interview, setInterview] = useState<Interview | null>(null);
-  const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(null);
-  const [sentimentDetails, setSentimentDetails] = useState<SentimentDetails | null>(null);
-  const [dynamicDescription, setDynamicDescription] = useState<string | null>(null);
-  const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(null);
+  const [evaluation, setEvaluation] = useState<InterviewEvaluation | null>(
+    null,
+  );
+  const [sentimentDetails, setSentimentDetails] =
+    useState<SentimentDetails | null>(null);
+  const [dynamicDescription, setDynamicDescription] = useState<string | null>(
+    null,
+  );
+  const [sentimentScore, setSentimentScore] = useState<SentimentScore | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('overview');
@@ -266,7 +283,7 @@ export const InterviewHistoryDetails = ({
     });
     doc.save('interview_report.pdf');
   };
-const renderCoach = (evaluationData: InterviewEvaluation) => {
+  const renderCoach = (evaluationData: InterviewEvaluation) => {
     if (!isProUser) {
       return (
         <div className="relative p-6 border rounded-lg mt-5">
@@ -274,7 +291,8 @@ const renderCoach = (evaluationData: InterviewEvaluation) => {
             <Lock className="h-8 w-8 text-muted-foreground mb-3" />
             <h3 className="font-semibold mb-1">AI Coach</h3>
             <p className="text-sm text-muted-foreground text-center max-w-xs mb-4">
-              Get personalized advice and ask questions about your interview performance
+              Get personalized advice and ask questions about your interview
+              performance
             </p>
             <Button
               onClick={() => setShowCoachUpgrade(true)}
@@ -288,10 +306,14 @@ const renderCoach = (evaluationData: InterviewEvaluation) => {
           <div className="blur-sm pointer-events-none">
             <div className="space-y-4">
               <div className="p-3 bg-muted rounded-lg">
-                <p className="text-sm">How can I improve my communication score?</p>
+                <p className="text-sm">
+                  How can I improve my communication score?
+                </p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
-                <p className="text-sm">Based on your interview, here are 3 specific ways...</p>
+                <p className="text-sm">
+                  Based on your interview, here are 3 specific ways...
+                </p>
               </div>
             </div>
           </div>
@@ -309,7 +331,7 @@ const renderCoach = (evaluationData: InterviewEvaluation) => {
   if (error) {
     return <div className="text-center p-4">{error}</div>;
   }
- if (loading) {
+  if (loading) {
     return <LoadingSpinner />;
   }
 
@@ -354,7 +376,9 @@ const renderCoach = (evaluationData: InterviewEvaluation) => {
                   <span className="font-semibold">Score:</span>
                   <Badge className="text-white bg-green-600">
                     {qa.mark}/
-                    {Math.floor(100 / evaluation.question_answer_feedback.length)}
+                    {Math.floor(
+                      100 / evaluation.question_answer_feedback.length,
+                    )}
                   </Badge>
                 </div>
               </CardContent>
@@ -465,15 +489,15 @@ const renderCoach = (evaluationData: InterviewEvaluation) => {
             </CardTitle>
             <span>
               {isProUser ? (
-              <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
-            ) : (
-              LockedFeature
-              // <LockedFeature
-              //   feature="Skill Breakdown Chart"
-              //   description="Visualize your performance across different skill areas with our radar chart."
-              //   className="w-full h-64 flex items-center justify-center border rounded-lg"
-              // />
-            )}
+                <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
+              ) : (
+                LockedFeature
+                // <LockedFeature
+                //   feature="Skill Breakdown Chart"
+                //   description="Visualize your performance across different skill areas with our radar chart."
+                //   className="w-full h-64 flex items-center justify-center border rounded-lg"
+                // />
+              )}
             </span>
           </div>
           <Separator />
@@ -559,7 +583,6 @@ const renderCoach = (evaluationData: InterviewEvaluation) => {
       </div>
     );
   };
-
 
   return (
     <div className="p-2 max-w-5xl mx-auto">

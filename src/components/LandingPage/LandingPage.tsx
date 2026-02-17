@@ -1,26 +1,22 @@
 import { Footer } from './Footer';
 import HeroSection from './HeroSection';
-import CTA from './cta';
-import FAQ from './faq';
-import Features from './features';
-import Integration from './integration';
-import LogoCloud from './logo-cloud';
-import Pricing from './pricing';
-import Quotetion from './quotetion';
-import Testimonials from './testimonials';
+import HowItWorks from './HowItWorks';
+import Features from './Features';
+import SocialProof from './SocialProof';
+import Pricing from './Pricing';
+import FAQ from './FAQ';
+import FinalCTA from './FinalCTA';
 
 export const LandingPage = () => {
   return (
-    <main>
+    <main className="overflow-hidden">
       <HeroSection />
-      {/* <LogoCloud /> */}
+      <SocialProof />
+      <HowItWorks />
       <Features />
-      {/* <Quotetion /> */}
-      {/* <Integration /> */}
-      {/* <Testimonials /> */}
       <Pricing />
-      {/* <FAQ /> */}
-      {/* <CTA /> */}
+      <FAQ />
+      <FinalCTA />
       <Footer />
     </main>
   );

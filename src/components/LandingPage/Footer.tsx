@@ -1,74 +1,88 @@
-import logo from '@public/logos/InterviewGrade.png';
-import Image from 'next/image';
 import Link from 'next/link';
-import { footerItems, footerSocialItems } from './footer-items';
+import { Crown } from 'lucide-react';
+
+const footerLinks = {
+  Product: [
+    { name: 'Features', href: '#features' },
+    { name: 'Pricing', href: '#pricing' },
+    { name: 'FAQ', href: '#faq' },
+  ],
+  Company: [
+    { name: 'About', href: '/about' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Careers', href: '/careers' },
+  ],
+  Legal: [
+    { name: 'Privacy', href: '/privacy' },
+    { name: 'Terms', href: '/terms' },
+  ],
+  Support: [
+    { name: 'Help Center', href: '/help' },
+    { name: 'Contact', href: '/contact' },
+  ],
+};
 
 export function Footer() {
   return (
-    <footer className="bg-secondary/50 min-h-[200px]  text-foreground border-y-2 border-border">
-      <div className="max-w-6xl mx-auto pt-28 px-8 lg:px-6 xl:px-0">
-        <div className="flex flex-col">
-          <div className="flex flex-col lg:flex-row items-center gap-y-6 pb-28 ">
-            <div className="flex flex-col w-full gap-8 lg:gap-4 ">
-              <Link href="/">
-                <div className="relative flex gap-2 items-center text-black dark:text-white ">
-                  <Image
-                    src={logo}
-                    alt="logo"
-                    className="dark:block hidden h-8 w-8"
-                  />
-                  <Image
-                    src={logo}
-                    alt="logo"
-                    className="block dark:hidden h-8 w-8"
-                  />
-                  <span className=" font-medium text-2xl text-foreground sm:inline-block">
-                    InterviewGrade
-                  </span>
-                </div>
-              </Link>
-              <p className="max-w-[350px] dark:font-light">
-                InterviewGrade. Dublin, Ireland
-              </p>
-            </div>
-            <div className="flex lg:justify-end  w-full items-start gap-10 lg:gap-20 flex-wrap">
-              {footerItems.map((item) => (
-                <div className="space-y-4 lg:space-y-6" key={item.title}>
-                  <h3 className="font-semibold uppercase text-sm">
-                    {item.title}
-                  </h3>
-                  <ul className="space-y-4 mt-5">
-                    {item.items.map((link) => (
-                      <li className="dark:font-light" key={link.name}>
-                        <Link href={link.url}>{link.name}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="w-full h-[1px] bg-slate-200 dark:bg-slate-800"></div>
-          <div className="flex flex-col gap-8 lg:flex-row justify-between items-center py-16 w-full">
-            <p className="text-slate-500  w-full dark:text-slate-400 text-sm">
-              © 2024
-              <a
-                href="https://interviewgrade.io/"
-                className="underline mx-2 decoration-slate-500 dark:decoration-slate-400 underline-offset-1 dec"
-                target="_blank"
-              >
-                InterviewGrade Limited.
-              </a>
-              All Rights Reserved
+    <footer className="border-t bg-muted/30 py-12">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          {/* Logo & Description */}
+          <div className="col-span-2 md:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
+                <Crown className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-bold">InterviewGrade</span>
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              AI-powered interview preparation to help you land your dream job.
             </p>
-            <div className="flex  lg:justify-end  gap-6 w-full">
-              {footerSocialItems.map((item) => (
-                <Link key={item.name} href={item.url}>
-                  <item.icon />{' '}
-                  {/* Using External Icon since brand icons are deprecated in Lucide Icons */}
-                </Link>
-              ))}
+          </div>
+
+          {/* Links */}
+          {Object.entries(footerLinks).map(([category, links]) => (
+            <div key={category}>
+              <h4 className="font-semibold mb-3">{category}</h4>
+              <ul className="space-y-2">
+                {links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          ))}
+        </div>
+
+        <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} InterviewGrade. All rights reserved.
+          </p>
+          <div className="flex gap-4">
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Twitter
+            </Link>
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              LinkedIn
+            </Link>
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              GitHub
+            </Link>
           </div>
         </div>
       </div>

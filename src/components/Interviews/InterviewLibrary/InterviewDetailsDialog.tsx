@@ -80,59 +80,57 @@ export default function InterviewDetailsDialog({
       {isStarting ? (
         <LoadingOverlay />
       ) : (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl">
+                How it Works
+              </DialogTitle>
+              <DialogDescription className="text-center text-muted-foreground">
+                Prepare yourself for the session flow.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogDescription>
+              <div className="justify-items-center text-center mb-2">
+                <div className="mb-1">
+                  <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                    Questions
+                  </span>
+                </div>
+                <p className="text-base">
+                  Current{' '}
+                  {interviewMode === 'practice' ? 'practice' : 'interview'}{' '}
+                  questions on the container to the left.
+                </p>
+              </div>
 
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-center text-2xl">
-              How it Works
-            </DialogTitle>
-            <DialogDescription className="text-center text-muted-foreground">
-              Prepare yourself for the session flow.
+              <div className="justify-items-center text-center mb-2">
+                <div className="mb-1">
+                  <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                    Get Ready
+                  </span>
+                </div>
+                <p className="text-base">
+                  You will get 5 seconds before recording, once you receive the
+                  question.
+                </p>
+              </div>
+
+              <div className="justify-items-center text-center mb-1">
+                <div className="mb-1">
+                  <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                    Feedback
+                  </span>
+                </div>
+                <p className="text-base">
+                  {feedbackStringPrefix} overall report once you finish.
+                </p>
+              </div>
             </DialogDescription>
-          </DialogHeader>
-          <DialogDescription>
-            <div className="justify-items-center text-center mb-2">
-              <div className="mb-1">
-                <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                  Questions
-                </span>
-              </div>
-              <p className="text-base">
-                Current{' '}
-                {interviewMode === 'practice' ? 'practice' : 'interview'}{' '}
-                questions on the container to the left.
-              </p>
-            </div>
-
-            <div className="justify-items-center text-center mb-2">
-              <div className="mb-1">
-                <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                  Get Ready
-                </span>
-              </div>
-              <p className="text-base">
-                You will get 5 seconds before recording, once you receive the
-                question.
-              </p>
-            </div>
-
-            <div className="justify-items-center text-center mb-1">
-              <div className="mb-1">
-                <span className="bg-gray-100 text-gray-800 text-lg font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                  Feedback
-                </span>
-              </div>
-              <p className="text-base">
-                {feedbackStringPrefix} overall report once you finish.
-              </p>
-            </div>
-          </DialogDescription>
-          <Button onClick={() => handleClick()}>Start Session</Button>
-        </DialogContent>
-      </Dialog>
+            <Button onClick={() => handleClick()}>Start Session</Button>
+          </DialogContent>
+        </Dialog>
       )}
-
     </>
   );
 }

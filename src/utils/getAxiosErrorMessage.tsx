@@ -4,8 +4,8 @@ function isAxiosError(error: unknown): error is AxiosError<Error> {
   const axiosError = error as AxiosError<Error>;
   return Boolean(
     axiosError.isAxiosError &&
-      axiosError.response &&
-      'message' in axiosError.response.data,
+    axiosError.response &&
+    'message' in axiosError.response.data,
   );
 }
 export function getPossibleAxiosErrorMessage(error: unknown): string {

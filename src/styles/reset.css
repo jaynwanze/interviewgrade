@@ -104,7 +104,7 @@ mark {
  * curly quotes to quotes within quotes.
  */
 q {
-  quotes: "“" "”" "‘" "’";
+  quotes: '“' '”' '‘' '’';
 }
 
 q::before {
@@ -176,9 +176,9 @@ select {
  * Otherwise browsers will automatically center the text, but forget to add a
  * pointer on hover.
  */
-input[type="button"],
-input[type="reset"],
-input[type="submit"] {
+input[type='button'],
+input[type='reset'],
+input[type='submit'] {
   text-align: inherit;
   cursor: pointer;
 }

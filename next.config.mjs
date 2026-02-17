@@ -47,36 +47,38 @@ export default {
   async headers() {
     return [
       {
-        source: "/onboarding/:path*", // Match all `/onboarding` routes
+        source: '/onboarding/:path*', // Match all `/onboarding` routes
         headers: [
           {
-            key: "Access-Control-Allow-Origin",
-            value: "*",
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
           },
           {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, OPTIONS",
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, OPTIONS',
           },
           {
-            key: "Access-Control-Allow-Headers",
-            value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+            key: 'Access-Control-Allow-Headers',
+            value:
+              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
         ],
       },
       {
-        source: "/api/:path*", // Match all `/api` routes
+        source: '/api/:path*', // Match all `/api` routes
         headers: [
           {
-            key: "Access-Control-Allow-Origin",
-            value: "*",
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
           },
           {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, OPTIONS",
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, OPTIONS',
           },
           {
-            key: "Access-Control-Allow-Headers",
-            value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+            key: 'Access-Control-Allow-Headers',
+            value:
+              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
         ],
       },

@@ -43,7 +43,8 @@ export function UsageDisplay({ label, used, limit, isPro }: UsageDisplayProps) {
       />
       {isAtLimit && (
         <p className="text-xs text-red-500">
-          You've reached your monthly limit. Upgrade to Pro for unlimited access.
+          You've reached your monthly limit. Upgrade to Pro for unlimited
+          access.
         </p>
       )}
     </div>

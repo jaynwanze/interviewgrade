@@ -275,9 +275,8 @@ export type DropzoneFileWithDuration = DropzoneFile & {
 export type Product = Table<'products'>;
 
 export type ProductMetadata = {
-    features?: string[];
+  features?: string[];
 };
-
 
 export type Subscription = Table<'subscriptions'>;
 

@@ -9,5 +9,5 @@ export const supabaseAdminClient = createClient<Database>(
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
+  },
 );

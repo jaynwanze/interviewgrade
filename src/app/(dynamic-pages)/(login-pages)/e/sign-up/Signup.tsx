@@ -140,14 +140,14 @@ export function SignUp({
           <header className="text-center space-y-1">
             <div className="inline-flex items-center space-x-2">
               <span
-              className="text-3xl font-semibold tracking-tight 
+                className="text-3xl font-semibold tracking-tight 
                bg-gradient-to-r
                bg-clip-text"
               >
-              Employer Signup
+                Employer Signup
               </span>
               <span className="px-2 py-1 text-sm font-medium text-white bg-blue-500 rounded-full">
-              New
+                New
               </span>
             </div>
           </header>

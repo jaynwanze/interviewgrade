@@ -22,10 +22,13 @@ export const createSupabaseUserServerPagesClient = ({
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            res.setHeader('Set-Cookie', `${name}=${value}; Path=/; HttpOnly; SameSite=Lax${options?.maxAge ? `; Max-Age=${options.maxAge}` : ''}`);
+            res.setHeader(
+              'Set-Cookie',
+              `${name}=${value}; Path=/; HttpOnly; SameSite=Lax${options?.maxAge ? `; Max-Age=${options.maxAge}` : ''}`,
+            );
           });
         },
       },
-    }
+    },
   );
 };

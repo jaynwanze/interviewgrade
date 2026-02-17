@@ -273,65 +273,65 @@ export default function CandidatesListPage({ organizationId }) {
           fields={
             filterView === 'performance'
               ? [
-                {
-                  label: 'Role',
-                  placeholder: 'All Roles…',
-                  options: availableRoles,
-                  value: filters.role,
-                  onChange: (v) => setFilters((f) => ({ ...f, role: v })),
-                },
-                {
-                  label: 'Industry',
-                  placeholder: 'All Industries…',
-                  options: availableIndustries,
-                  value: filters.industry,
-                  onChange: (v) => setFilters((f) => ({ ...f, industry: v })),
-                },
-                {
-                  label: 'Skill',
-                  placeholder: 'All Skills…',
-                  options: availableSkills,
-                  value: filters.skill,
-                  onChange: (v) => setFilters((f) => ({ ...f, skill: v })),
-                },
-                {
-                  label: 'Location',
-                  placeholder: 'All Locations…',
-                  options: availableCountries,
-                  value: filters.location,
-                  onChange: (v) => setFilters((f) => ({ ...f, location: v })),
-                },
-              ]
-              : [
-                {
-                  label: 'Role',
-                  placeholder: 'All Roles…',
-                  options: availableRoles,
-                  value: filters.resumeRole,
-                  onChange: (v) =>
-                    setFilters((f) => ({ ...f, resumeRole: v })),
-                },
-                {
-                  label: 'Location',
-                  placeholder: 'All Locations…',
-                  options: availableCountries,
-                  value: filters.resumeLoc,
-                  onChange: (v) =>
-                    setFilters((f) => ({ ...f, resumeLoc: v })),
-                },
-                {
-                  label: 'Experience',
-                  placeholder: 'All Experience…',
-                  options: experienceRanges.map((r) => r.label),
-                  value: filters.resumeExp.label,
-                  onChange: (lbl) => {
-                    const rng = experienceRanges.find(
-                      (r) => r.label === lbl,
-                    )!;
-                    setFilters((f) => ({ ...f, resumeExp: rng }));
+                  {
+                    label: 'Role',
+                    placeholder: 'All Roles…',
+                    options: availableRoles,
+                    value: filters.role,
+                    onChange: (v) => setFilters((f) => ({ ...f, role: v })),
                   },
-                },
-              ]
+                  {
+                    label: 'Industry',
+                    placeholder: 'All Industries…',
+                    options: availableIndustries,
+                    value: filters.industry,
+                    onChange: (v) => setFilters((f) => ({ ...f, industry: v })),
+                  },
+                  {
+                    label: 'Skill',
+                    placeholder: 'All Skills…',
+                    options: availableSkills,
+                    value: filters.skill,
+                    onChange: (v) => setFilters((f) => ({ ...f, skill: v })),
+                  },
+                  {
+                    label: 'Location',
+                    placeholder: 'All Locations…',
+                    options: availableCountries,
+                    value: filters.location,
+                    onChange: (v) => setFilters((f) => ({ ...f, location: v })),
+                  },
+                ]
+              : [
+                  {
+                    label: 'Role',
+                    placeholder: 'All Roles…',
+                    options: availableRoles,
+                    value: filters.resumeRole,
+                    onChange: (v) =>
+                      setFilters((f) => ({ ...f, resumeRole: v })),
+                  },
+                  {
+                    label: 'Location',
+                    placeholder: 'All Locations…',
+                    options: availableCountries,
+                    value: filters.resumeLoc,
+                    onChange: (v) =>
+                      setFilters((f) => ({ ...f, resumeLoc: v })),
+                  },
+                  {
+                    label: 'Experience',
+                    placeholder: 'All Experience…',
+                    options: experienceRanges.map((r) => r.label),
+                    value: filters.resumeExp.label,
+                    onChange: (lbl) => {
+                      const rng = experienceRanges.find(
+                        (r) => r.label === lbl,
+                      )!;
+                      setFilters((f) => ({ ...f, resumeExp: rng }));
+                    },
+                  },
+                ]
           }
         />
 

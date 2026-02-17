@@ -25,7 +25,6 @@ import { TemplateMode } from '@/utils/constants';
 import { getSubscriptionLimits, checkFeatureAccess } from '@/utils/checkAccess';
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 
-
 export async function updateCandidateProfileDetailsAction({
   currentUser,
   city,
@@ -136,7 +135,9 @@ export async function createCandidatePortalSessionAction(): Promise<string> {
 
 //     return data;
 // }
-export async function getMonthlyUsage(templateMode: TemplateMode): Promise<number> {
+export async function getMonthlyUsage(
+  templateMode: TemplateMode,
+): Promise<number> {
   const user = await serverGetLoggedInUser();
   const supabase = createSupabaseUserServerActionClient();
   const startOfMonth = new Date();
@@ -188,7 +189,7 @@ export async function canStartSession(mode: TemplateMode): Promise<{
  */
 async function autoSyncSubscriptionFromStripe(
   stripeCustomerId: string,
-  candidateId: string
+  candidateId: string,
 ): Promise<void> {
   try {
     console.log(`Auto-syncing subscription for candidate: ${candidateId}`);
@@ -216,7 +217,9 @@ async function autoSyncSubscriptionFromStripe(
 
     // Skip if subscription is not active or trialing
     if (!['active', 'trialing'].includes(stripeSubscription.status)) {
-      console.log(`Subscription status is ${stripeSubscription.status}, skipping sync`);
+      console.log(
+        `Subscription status is ${stripeSubscription.status}, skipping sync`,
+      );
       return;
     }
 
@@ -245,8 +248,12 @@ async function autoSyncSubscriptionFromStripe(
       status: stripeSubscription.status,
       quantity: stripeSubscription.items.data[0]?.quantity || 1,
       cancel_at_period_end: stripeSubscription.cancel_at_period_end,
-      current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+      current_period_start: new Date(
+        stripeSubscription.current_period_start * 1000,
+      ).toISOString(),
+      current_period_end: new Date(
+        stripeSubscription.current_period_end * 1000,
+      ).toISOString(),
       created: new Date(stripeSubscription.created * 1000).toISOString(),
       ended_at: stripeSubscription.ended_at
         ? new Date(stripeSubscription.ended_at * 1000).toISOString()
@@ -283,129 +290,141 @@ async function autoSyncSubscriptionFromStripe(
     // Don't throw - this is a background operation
   }
 }
-export const getCurrentCandidateSubscription = async (): Promise<NormalizedSubscription> => {
-  try {
-    const user = await serverGetLoggedInUser();
-    const candidate = await getCandidateUserProfile(user.id);
+export const getCurrentCandidateSubscription =
+  async (): Promise<NormalizedSubscription> => {
+    try {
+      const user = await serverGetLoggedInUser();
+      const candidate = await getCandidateUserProfile(user.id);
 
-    if (!candidate) {
-      return { type: 'no-subscription' };
-    }
-
-    const supabase = createSupabaseUserServerActionClient();
-
-    let { data: subscriptionData, error } = await supabase
-      .from('subscriptions')
-      .select('*, products(*)')
-      .eq('candidate_id', candidate.id)
-      .in('status', ['trialing', 'active'])
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error fetching subscription:', error);
-      // Don't throw, try to continue
-    }
-
-    // If we have a Stripe customer, verify sync with Stripe
-    if (candidate.stripe_customer_id) {
-      // Case 1: No subscription in DB but customer exists - try to sync
-      if (!subscriptionData) {
-        console.log('No subscription in DB, attempting sync...');
-        await autoSyncSubscriptionFromStripe(candidate.stripe_customer_id, candidate.id);
-
-        // Re-fetch after sync
-        const { data: syncedData, error: syncError } = await supabase
-          .from('subscriptions')
-          .select('*, products(*)')
-          .eq('candidate_id', candidate.id)
-          .in('status', ['trialing', 'active'])
-          .maybeSingle();
-
-        if (syncError) {
-          console.error('Error fetching synced subscription:', syncError);
-        }
-        subscriptionData = syncedData;
+      if (!candidate) {
+        return { type: 'no-subscription' };
       }
-      // Case 2: Subscription exists - verify it's in sync (but don't block on this)
-      else if (subscriptionData.metadata?.stripe_subscription_id) {
-        try {
-          const stripeSubscription = await stripe.subscriptions.retrieve(
-            subscriptionData.metadata.stripe_subscription_id as string
+
+      const supabase = createSupabaseUserServerActionClient();
+
+      let { data: subscriptionData, error } = await supabase
+        .from('subscriptions')
+        .select('*, products(*)')
+        .eq('candidate_id', candidate.id)
+        .in('status', ['trialing', 'active'])
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching subscription:', error);
+        // Don't throw, try to continue
+      }
+
+      // If we have a Stripe customer, verify sync with Stripe
+      if (candidate.stripe_customer_id) {
+        // Case 1: No subscription in DB but customer exists - try to sync
+        if (!subscriptionData) {
+          console.log('No subscription in DB, attempting sync...');
+          await autoSyncSubscriptionFromStripe(
+            candidate.stripe_customer_id,
+            candidate.id,
           );
 
-          // Check if key fields are out of sync
-          const isOutOfSync =
-            subscriptionData.status !== stripeSubscription.status ||
-            subscriptionData.cancel_at_period_end !== stripeSubscription.cancel_at_period_end;
+          // Re-fetch after sync
+          const { data: syncedData, error: syncError } = await supabase
+            .from('subscriptions')
+            .select('*, products(*)')
+            .eq('candidate_id', candidate.id)
+            .in('status', ['trialing', 'active'])
+            .maybeSingle();
 
-          if (isOutOfSync) {
-            console.log('Subscription out of sync, auto-syncing...');
-            await autoSyncSubscriptionFromStripe(candidate.stripe_customer_id, candidate.id);
-
-            // Re-fetch after sync
-            const { data: syncedData } = await supabase
-              .from('subscriptions')
-              .select('*, products(*)')
-              .eq('candidate_id', candidate.id)
-              .in('status', ['trialing', 'active'])
-              .maybeSingle();
-
-            subscriptionData = syncedData;
+          if (syncError) {
+            console.error('Error fetching synced subscription:', syncError);
           }
-        } catch (stripeError: any) {
-          // If subscription not found in Stripe, it may have been deleted
-          if (stripeError?.statusCode === 404) {
-            console.log('Subscription not found in Stripe, clearing local data...');
-            await autoSyncSubscriptionFromStripe(candidate.stripe_customer_id, candidate.id);
-            subscriptionData = null;
-          } else {
-            console.error('Error verifying with Stripe:', stripeError);
+          subscriptionData = syncedData;
+        }
+        // Case 2: Subscription exists - verify it's in sync (but don't block on this)
+        else if (subscriptionData.metadata?.stripe_subscription_id) {
+          try {
+            const stripeSubscription = await stripe.subscriptions.retrieve(
+              subscriptionData.metadata.stripe_subscription_id as string,
+            );
+
+            // Check if key fields are out of sync
+            const isOutOfSync =
+              subscriptionData.status !== stripeSubscription.status ||
+              subscriptionData.cancel_at_period_end !==
+                stripeSubscription.cancel_at_period_end;
+
+            if (isOutOfSync) {
+              console.log('Subscription out of sync, auto-syncing...');
+              await autoSyncSubscriptionFromStripe(
+                candidate.stripe_customer_id,
+                candidate.id,
+              );
+
+              // Re-fetch after sync
+              const { data: syncedData } = await supabase
+                .from('subscriptions')
+                .select('*, products(*)')
+                .eq('candidate_id', candidate.id)
+                .in('status', ['trialing', 'active'])
+                .maybeSingle();
+
+              subscriptionData = syncedData;
+            }
+          } catch (stripeError: any) {
+            // If subscription not found in Stripe, it may have been deleted
+            if (stripeError?.statusCode === 404) {
+              console.log(
+                'Subscription not found in Stripe, clearing local data...',
+              );
+              await autoSyncSubscriptionFromStripe(
+                candidate.stripe_customer_id,
+                candidate.id,
+              );
+              subscriptionData = null;
+            } else {
+              console.error('Error verifying with Stripe:', stripeError);
+            }
+            // Continue with database data if Stripe check fails
           }
-          // Continue with database data if Stripe check fails
         }
       }
-    }
 
-    // No subscription found
-    if (!subscriptionData) {
-      return { type: 'no-subscription' };
-    }
+      // No subscription found
+      if (!subscriptionData) {
+        return { type: 'no-subscription' };
+      }
 
-    // Process the subscription data
-    const subscription = subscriptionData as Table<'subscriptions'> & {
-      products: Product;
-    };
-
-    const product = subscription.products;
-
-    if (!product) {
-      console.error('No product found for the subscription');
-      return { type: 'no-subscription' };
-    }
-
-    if (subscription.status) {
-      return {
-        type: subscription.status as
-          | 'active'
-          | 'trialing'
-          | 'past_due'
-          | 'canceled'
-          | 'paused'
-          | 'incomplete'
-          | 'incomplete_expired'
-          | 'unpaid',
-        product: product,
-        subscription,
+      // Process the subscription data
+      const subscription = subscriptionData as Table<'subscriptions'> & {
+        products: Product;
       };
+
+      const product = subscription.products;
+
+      if (!product) {
+        console.error('No product found for the subscription');
+        return { type: 'no-subscription' };
+      }
+
+      if (subscription.status) {
+        return {
+          type: subscription.status as
+            | 'active'
+            | 'trialing'
+            | 'past_due'
+            | 'canceled'
+            | 'paused'
+            | 'incomplete'
+            | 'incomplete_expired'
+            | 'unpaid',
+          product: product,
+          subscription,
+        };
+      }
+
+      return { type: 'no-subscription' };
+    } catch (error) {
+      console.error('Error in getCurrentCandidateSubscription:', error);
+      return { type: 'no-subscription' };
     }
-
-    return { type: 'no-subscription' };
-
-  } catch (error) {
-    console.error('Error in getCurrentCandidateSubscription:', error);
-    return { type: 'no-subscription' };
-  }
-};
+  };
 
 export const updateCandidateDetails = async (
   {

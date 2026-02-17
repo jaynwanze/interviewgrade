@@ -17,7 +17,7 @@ import {
 import { AvgEvaluationScores } from '@/types';
 import { useMemo } from 'react';
 import { LabelList, PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts';
-import  { truncateText } from '@/utils/textManipulation';
+import { truncateText } from '@/utils/textManipulation';
 
 export type EvaluationCriteriaChartData = {
   eval_name: string;

@@ -117,9 +117,11 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         audioStreamRef.current = mediaStream;
 
         // Initialize AudioContext and resume it if needed.
-        audioContextRef.current = new (window.AudioContext ||
+        audioContextRef.current = new (
+          window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext })
-            .webkitAudioContext)();
+            .webkitAudioContext
+        )();
         if (audioContextRef.current.state === 'suspended') {
           await audioContextRef.current.resume();
         }

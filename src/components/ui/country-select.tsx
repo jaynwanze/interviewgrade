@@ -34,7 +34,7 @@ function CountrySelect({
   priorityOptions = [],
   whitelist = [],
   blacklist = [],
-  onChange = () => { },
+  onChange = () => {},
   className,
   placeholder = 'Country',
 }: CountrySelectProps) {

@@ -52,7 +52,6 @@ export function TutorialPracticeStep() {
   const [picking, setPicking] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null);
-  
 
   useEffect(() => {
     getPracticeTemplatesByCategoryAndMode(

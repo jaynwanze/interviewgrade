@@ -89,8 +89,6 @@ export function UserNavDropDownMenu({
   userId: string;
   userType: string;
 }) {
-
-  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>

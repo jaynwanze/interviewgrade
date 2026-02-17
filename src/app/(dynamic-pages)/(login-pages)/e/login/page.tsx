@@ -13,7 +13,11 @@ export default function LoginPage({ searchParams }: { searchParams: unknown }) {
   const userType: UserType = 'employer';
   return (
     <>
-      <AuthLayout link="/c/login" text="Log In as Candidate" userType={userType}>
+      <AuthLayout
+        link="/c/login"
+        text="Log In as Candidate"
+        userType={userType}
+      >
         <Login
           next={next}
           nextActionType={nextActionType}

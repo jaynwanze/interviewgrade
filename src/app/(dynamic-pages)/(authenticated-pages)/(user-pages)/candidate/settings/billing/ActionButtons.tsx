@@ -6,8 +6,8 @@ import { createCandidateSessionAction } from '@/data/user/candidate';
 // import {
 //   createCheckoutSessionAction
 // } from '@/data/user/organizations';
-import { createCustomerEmployeePortalLinkAction, } from '@/data/user/employee';
-import { createCandidatePortalSessionAction, } from '@/data/user/candidate';
+import { createCustomerEmployeePortalLinkAction } from '@/data/user/employee';
+import { createCandidatePortalSessionAction } from '@/data/user/candidate';
 import { useToastMutation } from '@/hooks/useToastMutation';
 import { getStripe } from '@/utils/stripe-client';
 import { ExternalLink } from 'lucide-react';

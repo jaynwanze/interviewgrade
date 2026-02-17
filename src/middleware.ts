@@ -116,27 +116,34 @@ export async function middleware(req: NextRequest) {
           return req.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            req.cookies.set(name, value),
+          );
           supabaseResponse = NextResponse.next({
             request: req,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Add CORS headers
   supabaseResponse.headers.set('Access-Control-Allow-Origin', '*');
-  supabaseResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  supabaseResponse.headers.set(
+    'Access-Control-Allow-Methods',
+    'GET, POST, OPTIONS',
+  );
   supabaseResponse.headers.set(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
   );
 
-  const { data: { user: maybeUser } } = await supabase.auth.getUser();
+  const {
+    data: { user: maybeUser },
+  } = await supabase.auth.getUser();
 
   // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {

@@ -31,10 +31,6 @@ export interface FilterSelectProps<T extends string = string> {
   onChange: (v: T) => void;
   /** width classes (Tailwind) */
   className?: string;
-
-  
-
-
 }
 
 /* ---------- component -------------------------------------------------- */
@@ -71,7 +67,9 @@ export const FilterSelect = <T extends string>({
 
         <PopoverContent className="w-full min-w-[160px] max-w-[300px] p-0 z-40 mt-2">
           <Command>
-            <CommandInput placeholder={`${!label ? placeholder : `Search ${label}…`}`} />
+            <CommandInput
+              placeholder={`${!label ? placeholder : `Search ${label}…`}`}
+            />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup heading={label}>

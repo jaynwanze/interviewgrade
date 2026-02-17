@@ -318,7 +318,7 @@ export default function InterviewFlow({
       const score = Math.round(
         ((questionFeedback[currentQuestionIndex]?.mark ?? 0) /
           maxScorePerQuestion) *
-        100,
+          100,
       );
       if (score >= 80) {
         setScoreStringColour('text-green-600');

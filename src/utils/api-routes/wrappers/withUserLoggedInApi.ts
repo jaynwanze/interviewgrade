@@ -26,8 +26,10 @@ export const withUserLoggedInApi = (
       return res.status(200).end();
     }
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    const session = user ? { user } as Session : null;
+    const {
+      data: { user },
+    } = await supabaseClient.auth.getUser();
+    const session = user ? ({ user } as Session) : null;
 
     if (!session || !session.user) {
       return res.status(401).json({

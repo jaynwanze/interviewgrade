@@ -8,13 +8,13 @@ interface RadioCardProps {
 }
 
 const RadioCard = function RadioCard({ label, icon }: RadioCardProps) {
-    const Icon = icon;
-    return (
-        <div className="flex items-center p-4 border rounded-lg">
-            <Icon className="mr-2" />
-            <span>{label}</span>
-        </div>
-    );
+  const Icon = icon;
+  return (
+    <div className="flex items-center p-4 border rounded-lg">
+      <Icon className="mr-2" />
+      <span>{label}</span>
+    </div>
+  );
 };
 
 const RadioCards = function RadioCards() {

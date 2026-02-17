@@ -28,7 +28,7 @@ import {
 import {
   availableCountriesCandidates,
   availableIndustriesCandidates,
-  availableRolesCandidates
+  availableRolesCandidates,
 } from '@/utils/filterOptions';
 
 import {
@@ -224,10 +224,10 @@ export function ProfileUpdate({
                         hasImageLoaded
                           ? undefined
                           : {
-                            duration: 0.5,
-                            repeat: Number.POSITIVE_INFINITY,
-                            repeatType: 'reverse',
-                          }
+                              duration: 0.5,
+                              repeat: Number.POSITIVE_INFINITY,
+                              repeatType: 'reverse',
+                            }
                       }
                       onLoad={() => {
                         setHasImageLoaded(true);

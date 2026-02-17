@@ -1,12 +1,26 @@
 import { T } from '@/components/ui/Typography';
 import { H3 } from '@/components/ui/Typography/H3';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { getActiveProductsByType } from '@/data/user/employee';
 import { NormalizedSubscription, Product, UnwrapPromise } from '@/types';
 import { cn } from '@/utils/cn';
 import { formatNormalizedSubscription } from '@/utils/formatNormalizedSubscription';
-import { Check, Crown, Sparkles, Zap, Calendar, CreditCard, Shield } from 'lucide-react';
+import {
+  Check,
+  Crown,
+  Sparkles,
+  Zap,
+  Calendar,
+  CreditCard,
+  Shield,
+} from 'lucide-react';
 import {
   CreateSubscriptionButton,
   ManageSubscriptionButton,
@@ -68,51 +82,50 @@ async function ChoosePricingTable() {
             }
             const priceId = product.price_id;
             return (
-
-                <div
-                  key={priceId}
-                  className={cn(
-                    'w-full',
-                    'flex flex-col justify-between',
-                    'mt-3 order-2 shadow-none overflow-hidden rounded-xl',
-                    'hover:shadow-xl transition',
-                    'sm:w-96 lg:w-full lg:order-1',
-                    'border mb-2',
-                  )}
-                >
-                  <div>
-                    <div className="mb-6 p-7 pt-6 flex items-center border-b">
-                      <div>
-                        <T.H4 className="mt-0 mb-4 text-foreground">
+              <div
+                key={priceId}
+                className={cn(
+                  'w-full',
+                  'flex flex-col justify-between',
+                  'mt-3 order-2 shadow-none overflow-hidden rounded-xl',
+                  'hover:shadow-xl transition',
+                  'sm:w-96 lg:w-full lg:order-1',
+                  'border mb-2',
+                )}
+              >
+                <div>
+                  <div className="mb-6 p-7 pt-6 flex items-center border-b">
+                    <div>
+                      <T.H4 className="mt-0 mb-4 text-foreground">
+                        {' '}
+                        {product.title}
+                      </T.H4>
+                      <span>
+                        <T.H1 className="text-foreground" key={priceId}>
                           {' '}
-                          {product.title}
-                        </T.H4>
-                        <span>
-                          <T.H1 className="text-foreground" key={priceId}>
+                          {product.price}
+                          <span className="text-base tracking-normal text-muted-foreground font-medium">
                             {' '}
-                            {product.price}
-                            <span className="text-base tracking-normal text-muted-foreground font-medium">
-                              {' '}
-                              per {product.pricing_plan_interval}
-                            </span>
-                          </T.H1>
-                        </span>
-                      </div>
+                            per {product.pricing_plan_interval}
+                          </span>
+                        </T.H1>
+                      </span>
                     </div>
+                  </div>
 
-                    <div className="px-5 pl-6 pt-0 mb-8">
-                      <ul className="font-medium text-muted-foreground">
-                        {product.metadata?.features && (
-                          product.metadata.features.map((feature, index) => (
-                            <li key={index} className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                              <Check className="text-green-600 w-6 h-6" />
-                              <T.P className="leading-6 ml-3">
-                                {feature}
-                              </T.P>
-                            </li>
-                          ))
-                        )}
-                        {/* <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
+                  <div className="px-5 pl-6 pt-0 mb-8">
+                    <ul className="font-medium text-muted-foreground">
+                      {product.metadata?.features &&
+                        product.metadata.features.map((feature, index) => (
+                          <li
+                            key={index}
+                            className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2"
+                          >
+                            <Check className="text-green-600 w-6 h-6" />
+                            <T.P className="leading-6 ml-3">{feature}</T.P>
+                          </li>
+                        ))}
+                      {/* <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
                           {product.price_unit_amount > 0 ? (
                             <Check className="text-green-600 w-6 h-6" />
                           ) : (
@@ -120,20 +133,20 @@ async function ChoosePricingTable() {
                           )}
 
                         </li> */}
-                      </ul>
-                    </div>
+                    </ul>
                   </div>
+                </div>
 
-                  <div className="rounded-xl py-1 mb-5 mx-5 mt-4 text-center text-foreground text-xl space-y-2">
-                    <>
-                      {/* <StartFreeTrialButton
+                <div className="rounded-xl py-1 mb-5 mx-5 mt-4 text-center text-foreground text-xl space-y-2">
+                  <>
+                    {/* <StartFreeTrialButton
                         organizationId={organizationId}
                         priceId={priceId}
                       /> */}
-                      <CreateSubscriptionButton priceId={priceId} />
-                    </>
-                  </div>
+                    <CreateSubscriptionButton priceId={priceId} />
+                  </>
                 </div>
+              </div>
             );
           })}
         </div>
@@ -158,7 +171,9 @@ export async function CandidateSubscriptionDetails({
     );
   }
 
-  const subscriptionDetails = formatNormalizedSubscription(normalizedSubscription);
+  const subscriptionDetails = formatNormalizedSubscription(
+    normalizedSubscription,
+  );
   const hasActiveSubscription =
     normalizedSubscription.type === 'active' ||
     normalizedSubscription.type === 'trialing';
@@ -167,9 +182,7 @@ export async function CandidateSubscriptionDetails({
     return (
       <div className="space-y-8">
         <div className="space-y-1">
-          <T.H3 className="flex items-center gap-2">
-            Subscription
-          </T.H3>
+          <T.H3 className="flex items-center gap-2">Subscription</T.H3>
           <T.Subtle>
             You're currently on the free plan. Upgrade to unlock all features.
           </T.Subtle>

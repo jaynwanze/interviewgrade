@@ -1,5 +1,5 @@
 import { TabsNavigation } from '@/components/TabsNavigation';
-import { DollarSign, SquarePen, UserRound,Lock} from 'lucide-react';
+import { DollarSign, SquarePen, UserRound, Lock } from 'lucide-react';
 import { z } from 'zod';
 
 const paramsSchema = z.object({

@@ -26,7 +26,7 @@ export async function GET(
 
   const supabaseClient = createSupabaseUserRouteHandlerClient();
   const {
-    data: { user } ,
+    data: { user },
     error: error,
   } = await supabaseClient.auth.getUser();
   const session = user ? { user } : null; //session object

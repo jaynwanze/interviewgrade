@@ -34,20 +34,20 @@ import { MultiValueProps, components } from 'react-select';
 // 1) curry the component so it captures maxVisible
 const createLimitedMultiValue =
   (maxVisible: number) =>
-    <Option,>(props: MultiValueProps<Option, true>) => {
-      const { index, getValue } = props;
-      const values = getValue();
+  <Option,>(props: MultiValueProps<Option, true>) => {
+    const { index, getValue } = props;
+    const values = getValue();
 
-      if (index >= maxVisible) return null;
-      if (index === maxVisible - 1 && values.length > maxVisible) {
-        return (
-          <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-            {values.length - maxVisible} more
-          </div>
-        );
-      }
-      return <components.MultiValue {...props} />;
-    };
+    if (index >= maxVisible) return null;
+    if (index === maxVisible - 1 && values.length > maxVisible) {
+      return (
+        <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+          {values.length - maxVisible} more
+        </div>
+      );
+    }
+    return <components.MultiValue {...props} />;
+  };
 
 function computeExperienceYears(startDate: string, endDate?: string | null) {
   const start = dayjs(startDate);

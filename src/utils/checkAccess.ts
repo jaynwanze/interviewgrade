@@ -53,11 +53,14 @@ export const PRO_FEATURES_DISPLAY = [
 ];
 
 // Feature info for upgrade prompts
-export const FEATURE_INFO: Record<FeatureKey, {
-  name: string;
-  description: string;
-  upgradeMessage: string;
-}> = {
+export const FEATURE_INFO: Record<
+  FeatureKey,
+  {
+    name: string;
+    description: string;
+    upgradeMessage: string;
+  }
+> = {
   unlimited_practice: {
     name: 'Unlimited Practice Sessions',
     description: 'Practice as much as you want with no monthly limits',
@@ -136,15 +139,12 @@ export const PRO_FEATURES: FeatureKey[] = [
 ];
 
 export function isPro(subscription: NormalizedSubscription): boolean {
-  return (
-    subscription.type === 'active' ||
-    subscription.type === 'trialing'
-  );
+  return subscription.type === 'active' || subscription.type === 'trialing';
 }
 
 export function hasFeatureAccess(
   subscription: NormalizedSubscription,
-  feature: FeatureKey
+  feature: FeatureKey,
 ): boolean {
   if (isPro(subscription)) {
     return true;
@@ -153,7 +153,9 @@ export function hasFeatureAccess(
   return !PRO_FEATURES.includes(feature);
 }
 
-export function getPlanLimits(subscription: NormalizedSubscription): PlanLimits {
+export function getPlanLimits(
+  subscription: NormalizedSubscription,
+): PlanLimits {
   return isPro(subscription) ? PRO_LIMITS : FREE_LIMITS;
 }
 
@@ -162,7 +164,9 @@ export function getFeatureInfo(feature: FeatureKey) {
 }
 
 // Server-side helper to check access
-export async function checkFeatureAccess(feature: FeatureKey): Promise<boolean> {
+export async function checkFeatureAccess(
+  feature: FeatureKey,
+): Promise<boolean> {
   const subscription = await getCurrentCandidateSubscription();
   return hasFeatureAccess(subscription, feature);
 }

@@ -40,7 +40,8 @@ export function InterviewTemplates({
     InterviewTemplate[]
   >([]);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-  const [showCustomInterviewDialog, setShowCustomInterviewDialog] = useState(false);
+  const [showCustomInterviewDialog, setShowCustomInterviewDialog] =
+    useState(false);
   const [sessionAccess, setSessionAccess] = useState<{
     allowed: boolean;
     remaining: number;
@@ -62,7 +63,7 @@ export function InterviewTemplates({
       ? 'bg-blue-500 text-white'
       : 'bg-green-500 text-white';
 
- const handleCreateCustomInterviewClick = () => {
+  const handleCreateCustomInterviewClick = () => {
     if (!sessionAccess?.isPro) {
       setShowUpgradePrompt(true);
       return;
@@ -171,12 +172,12 @@ export function InterviewTemplates({
               // }
             >
               {sessionAccess.isPro ? (
-               <>
-                <CreateCustomInterviewDialog
-                  open={showCustomInterviewDialog}
-                  onOpenChange={setShowCustomInterviewDialog}
-                />
-              </>
+                <>
+                  <CreateCustomInterviewDialog
+                    open={showCustomInterviewDialog}
+                    onOpenChange={setShowCustomInterviewDialog}
+                  />
+                </>
               ) : (
                 <>
                   <Lock className="mr-2 h-4 w-4" />
@@ -221,7 +222,6 @@ export function InterviewTemplates({
           </p>
         </div>
       )}
-
 
       {/* Upgrade Prompt (Free users) */}
       <UpgradePrompt

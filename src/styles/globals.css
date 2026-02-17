@@ -83,7 +83,7 @@ body {
   }
 }
 
-.hide-dialog-close>.absolute.right-4.top-4 {
+.hide-dialog-close > .absolute.right-4.top-4 {
   /* Adjust selector based on actual rendered classes of DialogClose */
   display: none;
   /* This assumes you know the classes applied to DialogClose, adjust selector accordingly */

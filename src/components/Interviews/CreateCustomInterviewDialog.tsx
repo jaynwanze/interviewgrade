@@ -117,7 +117,7 @@ export function CreateCustomInterviewDialog({
       const result = await createInterviewFromJobDescription(
         jobTitle,
         jobDescription,
-        company || undefined
+        company || undefined,
       );
 
       if (result.status === 'success') {
@@ -147,12 +147,12 @@ export function CreateCustomInterviewDialog({
       (c) =>
         c.name.trim() &&
         c.description.trim() &&
-        c.questions.some((q) => q.text.trim())
+        c.questions.some((q) => q.text.trim()),
     );
 
     if (validCriteria.length === 0) {
       toast.error(
-        'Please add at least one evaluation criteria with a question'
+        'Please add at least one evaluation criteria with a question',
       );
       return;
     }
@@ -216,7 +216,7 @@ export function CreateCustomInterviewDialog({
   const updateCriteria = (
     index: number,
     field: keyof EvaluationCriteria,
-    value: string | Question[]
+    value: string | Question[],
   ) => {
     const updated = [...evaluationCriteria];
     updated[index] = { ...updated[index], [field]: value };
@@ -243,7 +243,7 @@ export function CreateCustomInterviewDialog({
     criteriaIndex: number,
     questionIndex: number,
     field: keyof Question,
-    value: string
+    value: string,
   ) => {
     const updated = [...evaluationCriteria];
     updated[criteriaIndex].questions[questionIndex] = {
@@ -402,7 +402,12 @@ export function CreateCustomInterviewDialog({
                 <Label className="text-base font-semibold">
                   Evaluation Criteria
                 </Label>
-                <Button type="button" variant="outline" size="sm" onClick={addCriteria}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addCriteria}
+                >
                   <Plus className="mr-1 h-4 w-4" />
                   Add Criteria
                 </Button>
@@ -425,7 +430,7 @@ export function CreateCustomInterviewDialog({
                               updateCriteria(
                                 criteriaIndex,
                                 'name',
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -439,7 +444,7 @@ export function CreateCustomInterviewDialog({
                               updateCriteria(
                                 criteriaIndex,
                                 'description',
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -475,7 +480,7 @@ export function CreateCustomInterviewDialog({
                                     criteriaIndex,
                                     questionIndex,
                                     'text',
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                               />
@@ -486,7 +491,7 @@ export function CreateCustomInterviewDialog({
                                     criteriaIndex,
                                     questionIndex,
                                     'type',
-                                    v
+                                    v,
                                   )
                                 }
                               >
@@ -548,7 +553,9 @@ export function CreateCustomInterviewDialog({
             Cancel
           </Button>
           <Button
-            onClick={activeTab === 'quick' ? handleQuickCreate : handleCustomCreate}
+            onClick={
+              activeTab === 'quick' ? handleQuickCreate : handleCustomCreate
+            }
             disabled={loading}
           >
             {loading ? 'Creating...' : 'Create Interview'}

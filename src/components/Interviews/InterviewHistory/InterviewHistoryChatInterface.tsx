@@ -116,14 +116,16 @@ export const ChatInterface = ({
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+            className={`flex ${
+              msg.sender === 'user' ? 'justify-end' : 'justify-start'
+            }`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${msg.sender === 'user'
+              className={`max-w-[80%] p-3 rounded-lg ${
+                msg.sender === 'user'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-                }`}
+              }`}
             >
               {msg.text}
             </div>

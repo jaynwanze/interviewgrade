@@ -430,16 +430,18 @@ export const getTeamMembersInOrganization = async (organizationId: string) => {
     throw error;
   }
 
-  return data?.map((member) => {
-    const { user_profiles, ...rest } = member;
-    if (!user_profiles) {
-      throw new Error('No user profile found for member');
-    }
-    return {
-      ...rest,
-      user_profiles: user_profiles,
-    };
-  }) || [];
+  return (
+    data?.map((member) => {
+      const { user_profiles, ...rest } = member;
+      if (!user_profiles) {
+        throw new Error('No user profile found for member');
+      }
+      return {
+        ...rest,
+        user_profiles: user_profiles,
+      };
+    }) || []
+  );
 };
 
 export const getDefaultOrganization = async (): Promise<string> => {

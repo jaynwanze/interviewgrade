@@ -34,7 +34,6 @@ export function ResumeMatchedCandidatesView({
   selectedKeywords,
   employerPrefs,
   organizationId,
-
 }: ResumeMatchedCandidatesViewProps) {
   const router = useRouter();
 

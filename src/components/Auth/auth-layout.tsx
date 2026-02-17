@@ -26,7 +26,7 @@ function AuthImages() {
         width={1280} // Set appropriate width
         height={843} // Set appropriate height
         style={{ objectFit: 'cover' }}
-      // Show on medium screens and up
+        // Show on medium screens and up
       />
     </div>
   );

@@ -119,7 +119,10 @@ export async function SubscriptionCardSmall() {
               Detailed feedback & more
             </li>
           </ul>
-          <Button size="sm" className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+          <Button
+            size="sm"
+            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+          >
             <Crown className="h-3 w-3 mr-1.5" />
             Upgrade Now
           </Button>

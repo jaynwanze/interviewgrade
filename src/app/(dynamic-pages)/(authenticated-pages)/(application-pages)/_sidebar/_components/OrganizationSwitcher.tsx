@@ -101,7 +101,7 @@ export function OrganizationSwitcher({
                   className="text-sm flex items-start"
                 >
                   {/* <UsersIcon className="mr-2 h-4 w-4 mt-0.5" /> */}
-                  {/* {organization.title}
+        {/* {organization.title}
                   <Check
                     className={cn(
                       'ml-auto h-4 w-4',
@@ -119,7 +119,7 @@ export function OrganizationSwitcher({
           <CommandList>
             <CommandGroup>
               <CommandItem className="px-1 py-0 w-full"> */}
-                {/* <CreateOrganizationDialog
+        {/* <CreateOrganizationDialog
                   isLoading={isLoading}
                   onConfirm={onConfirm}
                   variant="ghost"
@@ -130,10 +130,10 @@ export function OrganizationSwitcher({
                     setIsPopoverOpen(isCurrentOpen);
                   }}
                 /> */}
-              {/* </CommandItem>
+        {/* </CommandItem>
             </CommandGroup> */}
-          {/* </CommandList>
-        </Command> */} 
+        {/* </CommandList>
+        </Command> */}
       </PopoverContent>
     </Popover>
   );

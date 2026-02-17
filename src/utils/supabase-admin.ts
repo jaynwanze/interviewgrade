@@ -83,7 +83,7 @@ const manageTokenBundlePurchase = async (
 async function manageSubscriptionStatusChange(
   subscriptionId: string,
   customerId: string,
-  isNewSubscription: boolean
+  isNewSubscription: boolean,
 ) {
   // Get the full subscription details from Stripe
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -98,7 +98,10 @@ async function manageSubscriptionStatusChange(
   const candidateId = customer.metadata?.candidateId;
 
   if (!candidateId) {
-    console.error('No candidateId found in customer metadata for customer:', customerId);
+    console.error(
+      'No candidateId found in customer metadata for customer:',
+      customerId,
+    );
     throw new Error('No candidateId found in customer metadata');
   }
 
@@ -142,8 +145,12 @@ async function manageSubscriptionStatusChange(
     status: subscription.status,
     quantity: subscription.items.data[0]?.quantity || 1,
     cancel_at_period_end: subscription.cancel_at_period_end,
-    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+    current_period_start: new Date(
+      subscription.current_period_start * 1000,
+    ).toISOString(),
+    current_period_end: new Date(
+      subscription.current_period_end * 1000,
+    ).toISOString(),
     created: new Date(subscription.created * 1000).toISOString(),
     ended_at: subscription.ended_at
       ? new Date(subscription.ended_at * 1000).toISOString()
@@ -180,7 +187,11 @@ async function manageSubscriptionStatusChange(
   }
   return data;
 }
-export { manageTokenBundlePurchase, updateProductRecord, manageSubscriptionStatusChange };
+export {
+  manageTokenBundlePurchase,
+  updateProductRecord,
+  manageSubscriptionStatusChange,
+};
 
 // const createOrRetrieveCustomer = async ({
 //   email,

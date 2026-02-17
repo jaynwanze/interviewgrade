@@ -76,15 +76,15 @@ export default function PurchaseTokensSuccess({
         <p className="font-medium">Quantity:</p>
         <p className="text-lg font-bold">
           {session?.product?.price
-              ? `${(session.product.quantity).toFixed(2)}`
-              : 'N/A'}
+            ? `${session.product.quantity.toFixed(2)}`
+            : 'N/A'}
         </p>
 
         <div className="my-6 text-sm">
           <p className="font-medium">Amount Paid:</p>
           <p className="text-lg font-bold">
             {session?.product?.price
-              ? `€${(session.product.price/100).toFixed(2)}`
+              ? `€${(session.product.price / 100).toFixed(2)}`
               : 'N/A'}
           </p>
         </div>

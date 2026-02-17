@@ -36,7 +36,8 @@ export default async function InterviewSessionPage({
 
   if (isNewInterview) {
     // Check usage limits
-    const mode = interview.mode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
+    const mode =
+      interview.mode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
     const access = await canStartSession(mode);
 
     if (!access.allowed) {

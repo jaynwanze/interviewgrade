@@ -29,7 +29,7 @@ function isComingSoonTemplate(
 export const InterviewCardTemplate = ({
   selectedTemplate,
   interviewMode,
-  access
+  access,
 }: {
   selectedTemplate: PracticeTemplate | InterviewTemplate;
   interviewMode: InterviewModeType;
@@ -47,7 +47,8 @@ export const InterviewCardTemplate = ({
   const handleClick = async () => {
     setIsChecking(true);
     try {
-      const mode = interviewMode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
+      const mode =
+        interviewMode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
 
       if (!access.allowed) {
         // User has hit their limit - show upgrade dialog

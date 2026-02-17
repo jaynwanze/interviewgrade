@@ -10,8 +10,11 @@ import { toast } from 'sonner';
 
 type MutationFn<TData, TVariables> = MutationFunction<TData, TVariables>;
 
-interface ToastMutationOptions<TData, TError, TVariables>
-  extends UseMutationOptions<TData, TError, TVariables> {
+interface ToastMutationOptions<
+  TData,
+  TError,
+  TVariables,
+> extends UseMutationOptions<TData, TError, TVariables> {
   loadingMessage?: string | ((variables: TVariables) => string);
   successMessage?: string | ((data: TData, variables: TVariables) => string);
   errorMessage?: string | ((error: TError, variables: TVariables) => string);

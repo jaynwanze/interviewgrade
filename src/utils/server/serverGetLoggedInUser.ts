@@ -10,9 +10,9 @@ export const serverGetLoggedInUser = cache(async () => {
       error: sessionError,
     } = await getSession();
 
-  if (sessionError) {
-    throw sessionError;
-  }
+    if (sessionError) {
+      throw sessionError;
+    }
 
     if (!session?.user) {
       redirect('/c/login');

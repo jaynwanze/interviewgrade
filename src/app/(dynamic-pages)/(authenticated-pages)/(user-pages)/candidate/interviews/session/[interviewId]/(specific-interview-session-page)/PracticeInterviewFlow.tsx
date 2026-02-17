@@ -454,21 +454,21 @@ export function PracticeInterviewFlow({
                         <div className="text-left mt-4 space-y-3">
                           {questionFeedback[currentQuestionIndex]?.mark !==
                             undefined && (
-                              <div className="text-center">
-                                <strong className="block text-base">
-                                  Score (%):
-                                </strong>
-                                <p
-                                  className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
-                                >
-                                  {Math.round(
-                                    questionFeedback[currentQuestionIndex]
-                                      ?.mark ?? 0,
-                                  )}
-                                  /100%
-                                </p>
-                              </div>
-                            )}
+                            <div className="text-center">
+                              <strong className="block text-base">
+                                Score (%):
+                              </strong>
+                              <p
+                                className={`text-3xl font-bold mt-1 ${scoreStringColour}`}
+                              >
+                                {Math.round(
+                                  questionFeedback[currentQuestionIndex]
+                                    ?.mark ?? 0,
+                                )}
+                                /100%
+                              </p>
+                            </div>
+                          )}
 
                           {questionFeedback[currentQuestionIndex]?.summary && (
                             <div>

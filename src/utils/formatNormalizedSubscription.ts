@@ -87,33 +87,36 @@ export function formatNormalizedSubscription(
     //     };
     //   }
     case 'active':
-      description = `You are currently subscribed to the ${subscription.product.title
-        } Plan, and your subscription will renew on ${moment(
-          subscription.subscription.current_period_end,
-        ).format('MMMM Do, YYYY')}. `;
+      description = `You are currently subscribed to the ${
+        subscription.product.title
+      } Plan, and your subscription will renew on ${moment(
+        subscription.subscription.current_period_end,
+      ).format('MMMM Do, YYYY')}. `;
 
       // Check cancel_at_period_end first (user canceled but still has access)
       if (subscription.subscription.cancel_at_period_end) {
         return {
           title: `${subscription.product.title} Plan`,
           sidenote: `(Cancels end of period)`,
-          description: `Your ${subscription.product.title
-            } Plan has been canceled. You still have access until ${moment(
-              subscription.subscription.current_period_end,
-            ).format(
-              'MMMM Do, YYYY',
-            )}, after which you'll be moved to the Free Plan.`,
+          description: `Your ${
+            subscription.product.title
+          } Plan has been canceled. You still have access until ${moment(
+            subscription.subscription.current_period_end,
+          ).format(
+            'MMMM Do, YYYY',
+          )}, after which you'll be moved to the Free Plan.`,
         };
       } else if (subscription.subscription.canceled_at) {
         return {
           title: `${subscription.product.title} Plan`,
           sidenote: `(Canceled)`,
-          description: `Your ${subscription.product.title
-            } Plan was canceled on ${moment(
-              subscription.subscription.canceled_at,
-            ).format(
-              'MMMM Do, YYYY',
-            )}. You can reactivate your plan at any time to continue enjoying our features.`,
+          description: `Your ${
+            subscription.product.title
+          } Plan was canceled on ${moment(
+            subscription.subscription.canceled_at,
+          ).format(
+            'MMMM Do, YYYY',
+          )}. You can reactivate your plan at any time to continue enjoying our features.`,
         };
       } else if (
         subscription.subscription.cancel_at &&
@@ -122,14 +125,15 @@ export function formatNormalizedSubscription(
         return {
           title: `${subscription.product.title} Plan`,
           sidenote: `(Cancels end of period)`,
-          description: `Your ${subscription.product.title
-            } Plan started on ${moment(
-              subscription.subscription.current_period_start,
-            ).format('MMMM Do, YYYY')} and cancels on ${moment(
-              subscription.subscription.cancel_at,
-            ).format(
-              'MMMM Do, YYYY',
-            )}. You can continue enjoying all the features until then.`,
+          description: `Your ${
+            subscription.product.title
+          } Plan started on ${moment(
+            subscription.subscription.current_period_start,
+          ).format('MMMM Do, YYYY')} and cancels on ${moment(
+            subscription.subscription.cancel_at,
+          ).format(
+            'MMMM Do, YYYY',
+          )}. You can continue enjoying all the features until then.`,
         };
       } else {
         return {
@@ -143,20 +147,22 @@ export function formatNormalizedSubscription(
       return {
         title: `${subscription.product.title} Plan`,
         sidenote: '(Past due)',
-        description: `Your ${subscription.product.title
-          } Plan payment is past due since ${moment(
-            subscription.subscription.current_period_end,
-          ).format(
-            'MMMM Do, YYYY',
-          )}. Please update your payment information to continue enjoying the features.`,
-      };
-    case 'canceled':
-      description = `Your ${subscription.product.title
-        } Plan was canceled on ${moment(
-          subscription.subscription.canceled_at,
+        description: `Your ${
+          subscription.product.title
+        } Plan payment is past due since ${moment(
+          subscription.subscription.current_period_end,
         ).format(
           'MMMM Do, YYYY',
-        )}. You can reactivate your plan at any time to continue enjoying our features.`;
+        )}. Please update your payment information to continue enjoying the features.`,
+      };
+    case 'canceled':
+      description = `Your ${
+        subscription.product.title
+      } Plan was canceled on ${moment(
+        subscription.subscription.canceled_at,
+      ).format(
+        'MMMM Do, YYYY',
+      )}. You can reactivate your plan at any time to continue enjoying our features.`;
       // if (
       //   subscription.subscription.trial_end &&
       //   moment(subscription.subscription.trial_end).isAfter(currentDate)
@@ -190,12 +196,13 @@ export function formatNormalizedSubscription(
       return {
         title: `${subscription.product.title} Plan`,
         sidenote: '(Unpaid)',
-        description: `Your ${subscription.product.title
-          } Plan payment is due since ${moment(
-            subscription.subscription.current_period_end,
-          ).format(
-            'MMMM Do, YYYY',
-          )}. Please pay the due amount to continue enjoying the features.`,
+        description: `Your ${
+          subscription.product.title
+        } Plan payment is due since ${moment(
+          subscription.subscription.current_period_end,
+        ).format(
+          'MMMM Do, YYYY',
+        )}. Please pay the due amount to continue enjoying the features.`,
       };
     default:
       return {

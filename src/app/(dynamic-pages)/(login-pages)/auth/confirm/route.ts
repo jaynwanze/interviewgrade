@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
             });
           },
         },
-      }
+      },
     );
 
     const { error } = await supabase.auth.verifyOtp({

@@ -72,7 +72,8 @@ export function UpgradePrompt({
         </div>
 
         <Typography.P className="text-muted-foreground text-center">
-          {description || `Unlock ${feature} and enjoy all our premium features.`}
+          {description ||
+            `Unlock ${feature} and enjoy all our premium features.`}
         </Typography.P>
 
         {/* Pro Features List */}
@@ -132,7 +133,9 @@ export function LockedFeature({
 
   return (
     <div className="relative">
-      <div className="opacity-50 pointer-events-none blur-[1px]">{children}</div>
+      <div className="opacity-50 pointer-events-none blur-[1px]">
+        {children}
+      </div>
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
         <Lock className="h-8 w-8 text-muted-foreground mb-2" />
         <p className="text-sm text-muted-foreground mb-2">{feature}</p>

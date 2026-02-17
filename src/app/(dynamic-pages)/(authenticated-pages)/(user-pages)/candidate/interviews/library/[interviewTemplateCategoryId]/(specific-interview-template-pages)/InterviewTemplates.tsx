@@ -164,17 +164,19 @@ export function InterviewTemplates({
             <Button
               onClick={handleCreateCustomInterviewClick}
               variant={sessionAccess.isPro ? 'default' : 'outline'}
-              className={
-                sessionAccess.isPro
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-                  : ''
-              }
+              // className={
+              //   sessionAccess.isPro
+              //     ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
+              //     : ''
+              // }
             >
               {sessionAccess.isPro ? (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Custom Interview
-                </>
+               <>
+                <CreateCustomInterviewDialog
+                  open={showCustomInterviewDialog}
+                  onOpenChange={setShowCustomInterviewDialog}
+                />
+              </>
               ) : (
                 <>
                   <Lock className="mr-2 h-4 w-4" />
@@ -220,13 +222,6 @@ export function InterviewTemplates({
         </div>
       )}
 
-      {/* Custom Interview Dialog (Pro only) */}
-      {sessionAccess && sessionAccess.isPro && (
-        <CreateCustomInterviewDialog
-          open={showCustomInterviewDialog}
-          onOpenChange={setShowCustomInterviewDialog}
-        />
-      )}
 
       {/* Upgrade Prompt (Free users) */}
       <UpgradePrompt

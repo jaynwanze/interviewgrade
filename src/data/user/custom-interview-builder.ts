@@ -2,12 +2,12 @@
 
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import type {
-  EvaluationCriteriaType,
   EvaluationRubricType,
   SAPayload,
   Table,
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import type { Database } from './lib/database.types';
 
 // Default rubrics for evaluation criteria
 const DEFAULT_RUBRICS: EvaluationRubricType[] = [
@@ -52,7 +52,7 @@ export type CustomInterviewInput = {
   title: string;
   description: string;
   role: string;
-  category: 'Soft Skills' | 'Technical' | 'Role Specific' | 'Custom';
+  category: Database["public"]["Enums"]["template_category"];
   difficulty: 'Easy' | 'Medium' | 'Hard';
   evaluationCriteria: {
     name: string;
@@ -119,7 +119,8 @@ export async function createCustomMockInterview(
         user_id: user.id,
         title: input.title,
         description: input.description,
-        role: input.role,
+        // role: input.role,
+        // skill for now until sperate by role/skill/other categories
         skill: input.evaluationCriteria[0]?.name || 'General',
         category: input.category,
         difficulty: input.difficulty,
@@ -133,7 +134,7 @@ export async function createCustomMockInterview(
         ),
         is_company_specific: false,
         is_industry_specific: false,
-        is_general: true,
+        is_general: false,
         is_system_defined: false,
         created_at: new Date().toISOString(),
       })
@@ -147,6 +148,15 @@ export async function createCustomMockInterview(
 
     const templateId = templateData.id;
 
+    // 3. Link template to evaluation criteria
+
+    // TODO: Fix RLS policy for template_evaluation_criteria.
+    // The current implementation requires RLS to be disabled for inserts on this table.
+    // A long-term fix involves either:
+    // 1. Adding a `user_id` column to the `template_evaluation_criteria` table
+    //    and updating the RLS policy to check for ownership.
+    // 2. Creating a `SECURITY DEFINER` RPC function that verifies the user owns both
+    //    the template and the criteria before creating the link.
     // 3. Link template to evaluation criteria
     for (const criteriaId of createdCriteriaIds) {
       const { error: linkError } = await supabase
@@ -202,35 +212,6 @@ export async function createCustomMockInterview(
           : 'Failed to create custom interview',
     };
   }
-}
-
-/**
- * Quick create interview from a job description
- * Generates suggested evaluation criteria based on the job
- */
-export async function createInterviewFromJobDescriptionWithResume(
-  jobTitle: string,
-  jobDescription: string,
-  company?: string
-): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
-  // Parse common skills/requirements from job description
-  const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);
-  const userResume = ''; // In a real implementation, fetch the user's resume content here
-
-  const input: CustomInterviewInput = {
-    title: `${jobTitle}${company ? ` at ${company}` : ''} Interview`,
-    description: `Custom interview preparation for ${jobTitle} role. ${jobDescription.substring(0, 200)}...`,
-    role: jobTitle,
-    category: 'Role Specific',
-    difficulty: 'Medium',
-    evaluationCriteria: suggestedCriteria.map((criteria) => ({
-      name: criteria.name,
-      description: criteria.description,
-      questions: criteria.questions,
-    })),
-  };
-
-  return createCustomMockInterview(input);
 }
 
 /**
@@ -425,6 +406,65 @@ function parseJobDescriptionForCriteria(jobDescription: string): {
 
   return criteria;
 }
+
+/**
+ * Quick create interview from a job description
+ * Generates suggested evaluation criteria based on the job
+ */
+// export async function createInterviewFromJobDescription(
+//   jobTitle: string,
+//   jobDescription: string,
+//   company?: string
+// ): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
+//   // Parse common skills/requirements from job description
+//   const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);
+//   //grab resume content from user profile and tailor questions based on that as well (e.g. if they have a lot of experience in leadership, generate more leadership questions, if they are junior, generate more foundational questions)
+//   // For a more advanced implementation, we could also use an LLM to generate tailored questions based on the job description
+
+//   const input: CustomInterviewInput = {
+//     title: `${jobTitle}${company ? ` at ${company}` : ''} Interview`,
+//     description: `Custom interview preparation for ${jobTitle} role. ${jobDescription.substring(0, 200)}...`,
+//     role: jobTitle,
+//     category: 'Role Specific',
+//     difficulty: 'Medium',
+//     evaluationCriteria: suggestedCriteria.map((criteria) => ({
+//       name: criteria.name,
+//       description: criteria.description,
+//       questions: criteria.questions,
+//     })),
+//   };
+
+//   return createCustomMockInterview(input);
+// }
+
+// /**
+//  * Quick create interview from a job description with resume analysis
+//  * Generates suggested evaluation criteria based on the job
+//  */
+// export async function createInterviewFromJobDescriptionWithResume(
+//   jobTitle: string,
+//   jobDescription: string,
+//   company?: string
+// ): Promise<SAPayload<{ templateId: string; evaluationCriteriaIds: string[] }>> {
+//   // Parse common skills/requirements from job description
+//   const suggestedCriteria = parseJobDescriptionForCriteria(jobDescription);
+//   // get resume
+// // For a more advanced implementation, we could also use an LLM to generate tailored questions based on the job description and the user's resume content (which we would fetch from their profile). This would allow us to create a more personalized interview experience that focuses on areas where the user may need more practice or improvement.
+//   const input: CustomInterviewInput = {
+//     title: `${jobTitle}${company ? ` at ${company}` : ''} Interview`,
+//     description: `Custom interview preparation for ${jobTitle} role. ${jobDescription.substring(0, 200)}...`,
+//     role: jobTitle,
+//     category: 'Role Specific',
+//     difficulty: 'Medium',
+//     evaluationCriteria: suggestedCriteria.map((criteria) => ({
+//       name: criteria.name,
+//       description: criteria.description,
+//       questions: criteria.questions,
+//     })),
+//   };
+
+//   return createCustomMockInterview(input);
+// }
 
 /**
  * Get all custom templates created by the current user

@@ -30,10 +30,20 @@ import { Plus, Trash2, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import type { Database } from '@/lib/database.types';
 
-type QuestionType = 'Behavioral' | 'Technical' | 'Role-Specific' | 'Situational';
-type Category = 'Soft Skills' | 'Technical' | 'Role Specific' | 'Custom';
-type Difficulty = 'Easy' | 'Medium' | 'Hard';
+// Array of valid categories from your database enum
+const templateCategories: TemplateCategory[] = [
+  'Soft Skills',
+  'IT',
+  'General Job-Based',
+  'Finance',
+  'Sales',
+  'Marketing',
+  'Healthcare',
+  'Education',
+  'Other',
+];
 
 interface Question {
   text: string;
@@ -66,7 +76,7 @@ export function CreateCustomInterviewDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [role, setRole] = useState('');
-  const [category, setCategory] = useState<Category>('Role Specific');
+  const [category, setCategory] = useState<Category>('Soft Skills');
   const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
   const [evaluationCriteria, setEvaluationCriteria] = useState<
     EvaluationCriteria[]
@@ -85,7 +95,7 @@ export function CreateCustomInterviewDialog({
     setTitle('');
     setDescription('');
     setRole('');
-    setCategory('Role Specific');
+    setCategory('Soft Skills');
     setDifficulty('Medium');
     setEvaluationCriteria([
       {
@@ -359,10 +369,11 @@ export function CreateCustomInterviewDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Soft Skills">Soft Skills</SelectItem>
-                    <SelectItem value="Technical">Technical</SelectItem>
-                    <SelectItem value="Role Specific">Role Specific</SelectItem>
-                    <SelectItem value="Custom">Custom</SelectItem>
+                    {templateCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

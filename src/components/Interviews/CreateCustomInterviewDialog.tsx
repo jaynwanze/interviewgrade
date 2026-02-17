@@ -276,11 +276,11 @@ export function CreateCustomInterviewDialog({
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as 'quick' | 'custom')}
         >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="quick">
+          <TabsList className="grid w-full grid-cols-1">
+            {/* <TabsTrigger value="quick">
               <Wand2 className="mr-2 h-4 w-4" />
               Quick Create
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="custom">Custom Build</TabsTrigger>
           </TabsList>
 

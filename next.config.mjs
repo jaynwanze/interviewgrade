@@ -10,6 +10,8 @@ export default {
     },
     serverComponentsExternalPackages: ['pdf-parse'],
   },
+  eslint:{
+  },
   images: {
     domains: ['localhost', 'interviewgrade.com'],
     remotePatterns: [

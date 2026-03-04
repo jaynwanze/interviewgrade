@@ -45,6 +45,9 @@ const templateCategories: Database["public"]["Enums"]["template_category"][] = [
   'Other',
 ];
 
+type Category = Database['public']['Enums']['template_category'];
+type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
 type Question = {
   text: string;
   type: 'Behavioral' | 'Technical' | 'Role-Specific' | 'Situational';

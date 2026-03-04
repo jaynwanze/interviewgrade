@@ -10,12 +10,6 @@ export default {
     },
     serverComponentsExternalPackages: ['pdf-parse'],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     domains: ['localhost', 'interviewgrade.com'],
     remotePatterns: [

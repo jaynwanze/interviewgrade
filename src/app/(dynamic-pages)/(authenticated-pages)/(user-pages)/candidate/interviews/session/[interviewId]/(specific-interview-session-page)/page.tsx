@@ -32,7 +32,8 @@ export default async function InterviewSessionPage({
   }
 
   // Check if this is a new/pending interview (not already started/completed)
-  const isNewInterview = interview.status === 'not_started' || !interview.status;
+  const isNewInterview =
+    interview.status === 'not_started' || !interview.status;
 
   if (isNewInterview) {
     // Check usage limits

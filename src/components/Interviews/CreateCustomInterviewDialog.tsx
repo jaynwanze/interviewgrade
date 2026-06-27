@@ -33,7 +33,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 // Array of valid categories from your database enum
-const templateCategories: Database["public"]["Enums"]["template_category"][] = [
+const templateCategories: Database['public']['Enums']['template_category'][] = [
   'Soft Skills',
   'IT',
   'General Job-Based',

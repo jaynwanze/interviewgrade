@@ -12,7 +12,7 @@ import {
   Crown,
 } from 'lucide-react';
 import { getCurrentCandidateSubscription } from '@/data/user/candidate';
-import { Button } from '@/components/Button';
+import { Button } from '@/components/ui/button';
 import {
   ProBadge,
   UpgradePrompt,
@@ -491,12 +491,9 @@ export const InterviewHistoryDetails = ({
               {isProUser ? (
                 <RadarChartEvaluationsCriteriaScores evaluation={evaluation} />
               ) : (
-                LockedFeature
-                // <LockedFeature
-                //   feature="Skill Breakdown Chart"
-                //   description="Visualize your performance across different skill areas with our radar chart."
-                //   className="w-full h-64 flex items-center justify-center border rounded-lg"
-                // />
+                <LockedFeature feature="Skill Breakdown Chart">
+                  <div className="w-full h-64 flex items-center justify-center border rounded-lg" />
+                </LockedFeature>
               )}
             </span>
           </div>

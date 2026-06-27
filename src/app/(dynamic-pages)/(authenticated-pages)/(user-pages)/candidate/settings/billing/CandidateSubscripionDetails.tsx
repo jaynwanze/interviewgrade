@@ -155,6 +155,48 @@ async function ChoosePricingTable() {
   );
 }
 
+function FreeSubscriptionCard({
+  subscriptionDetails,
+}: {
+  subscriptionDetails: ReturnType<typeof formatNormalizedSubscription>;
+}) {
+  const freePlanFeatures = [
+    '3 practice interviews per month',
+    'Basic AI feedback',
+    'Standard interview templates',
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-muted-foreground" />
+              {subscriptionDetails.title || 'Free Plan'}
+            </CardTitle>
+            <CardDescription>
+              {subscriptionDetails.description ||
+                'Get a feel for InterviewGrade with limited monthly usage.'}
+            </CardDescription>
+          </div>
+          <Badge variant="secondary">Free</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {freePlanFeatures.map((feature) => (
+            <li key={feature} className="flex items-start gap-2 text-sm">
+              <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 export async function CandidateSubscriptionDetails({
   normalizedSubscription,
 }: {

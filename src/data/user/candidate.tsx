@@ -417,7 +417,7 @@ export const getCurrentCandidateSubscription =
             | 'unpaid',
           product: product,
           subscription,
-        };
+        } as NormalizedSubscription;
       }
 
       return { type: 'no-subscription' };

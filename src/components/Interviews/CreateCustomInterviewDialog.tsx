@@ -45,6 +45,9 @@ const templateCategories: Database["public"]["Enums"]["template_category"][] = [
   'Other',
 ];
 
+type Category = Database['public']['Enums']['template_category'];
+type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
 type Question = {
   text: string;
   type: 'Behavioral' | 'Technical' | 'Role-Specific' | 'Situational';
@@ -59,11 +62,21 @@ interface EvaluationCriteria {
 
 export function CreateCustomInterviewDialog({
   trigger,
+  open: openProp,
+  onOpenChange,
 }: {
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [openInternal, setOpenInternal] = useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : openInternal;
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setOpenInternal(next);
+    onOpenChange?.(next);
+  };
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'quick' | 'custom'>('quick');
 

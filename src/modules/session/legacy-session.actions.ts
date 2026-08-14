@@ -4,9 +4,15 @@ import {
   getInterview,
   getInterviewQuestions,
   insertInterviewAnswer,
+  startInterviewAction,
   updateInterview,
 } from '@/data/user/interviews';
-import type { Table } from '@/types';
+import type {
+  InterviewModeType,
+  InterviewTemplate,
+  PracticeTemplate,
+  Table,
+} from '@/types';
 
 export type LegacySessionSnapshot = {
   interview: Table<'interviews'>;
@@ -30,6 +36,13 @@ export type SubmitLegacySessionResponseInput = {
  * swap Supabase persistence for the v2 SessionRepository without redesigning
  * the interview screen.
  */
+export async function startLegacySessionAction(
+  template: PracticeTemplate | InterviewTemplate,
+  interviewMode: InterviewModeType,
+): Promise<Table<'interviews'>> {
+  return startInterviewAction(template, interviewMode);
+}
+
 export async function loadLegacySessionAction(
   sessionId: string,
 ): Promise<LegacySessionSnapshot | null> {
@@ -58,7 +71,10 @@ export async function submitLegacySessionResponseAction(
     throw new Error('A session response cannot be empty.');
   }
 
-  if (input.nextQuestionIndex < 0 || input.nextQuestionIndex > input.questionCount) {
+  if (
+    input.nextQuestionIndex < 0 ||
+    input.nextQuestionIndex > input.questionCount
+  ) {
     throw new Error('Invalid session progress.');
   }
 

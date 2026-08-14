@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
-// Import the data-fetching helpers, types, etc.
-import { getInterview, getInterviewQuestions } from '@/data/user/interviews';
-import { PracticeInterviewFlow } from './PracticeInterviewFlow';
-import { MockInterviewFlow } from './MockInterviewFlow';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-
+import { loadLegacySessionAction } from '@/modules/session/legacy-session.actions';
 import type { Interview, InterviewQuestion } from '@/types';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { MockInterviewFlow } from './MockInterviewFlow';
+import { PracticeInterviewFlow } from './PracticeInterviewFlow';
 
-// This wrapper decides which flow to show based on interview mode
+// This wrapper decides which flow to show based on interview mode.
+// Session persistence is intentionally hidden behind the session module so the
+// UI can stay stable while the underlying repository is migrated later.
 export default function InterviewFlowWrapper({
   interviewId,
 }: {
@@ -33,13 +33,19 @@ export default function InterviewFlowWrapper({
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const fetchedInterview = await getInterview(interviewId);
-      if (!fetchedInterview) {
+      const session = await loadLegacySessionAction(interviewId);
+      if (!session) {
         console.error('Interview not found.');
         setInterview(null);
         setIsLoading(false);
         return;
       }
+
+      const {
+        interview: fetchedInterview,
+        questions: interviewQuestions,
+      } = session;
+
       // If the interview is already completed
       if (fetchedInterview.status === 'completed') {
         setCompletionMessage(
@@ -49,8 +55,6 @@ export default function InterviewFlowWrapper({
         setIsLoading(false);
         return;
       }
-
-      const interviewQuestions = await getInterviewQuestions(interviewId);
 
       setInterview(fetchedInterview);
       setQuestions(interviewQuestions);
@@ -74,7 +78,6 @@ export default function InterviewFlowWrapper({
   }
 
   if (!interview) {
-    // At this point, if we still have no interview, show an error
     return (
       <div className="flex justify-center items-center min-h-screen">
         <h1 className="text-2xl font-bold text-center">
@@ -84,7 +87,6 @@ export default function InterviewFlowWrapper({
     );
   }
 
-  // Conditionally render the flow based on interview.mode, e.g. 'practice' vs 'live'
   if (interview.mode === 'practice') {
     return (
       <PracticeInterviewFlow
@@ -93,7 +95,7 @@ export default function InterviewFlowWrapper({
         isTutorialMode={tutorialParam === '1'}
       />
     );
-  } else {
-    return <MockInterviewFlow interview={interview} questions={questions} />;
   }
+
+  return <MockInterviewFlow interview={interview} questions={questions} />;
 }

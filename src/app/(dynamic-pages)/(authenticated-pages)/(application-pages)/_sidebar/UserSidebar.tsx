@@ -3,6 +3,7 @@ import { T } from '@/components/ui/Typography';
 import { cn } from '@/utils/cn';
 import {
   BarChart3Icon,
+  ListChecks,
   LucideHistory,
   NotepadText,
   Settings,
@@ -27,6 +28,11 @@ export async function UserSidebar() {
           label="Dashboard"
           href="/candidate/dashboard"
           icon={<BarChart3Icon className="h-5 w-5" />}
+        />
+        <SidebarLink
+          label="My Practices"
+          href="/candidate/practices"
+          icon={<ListChecks className="h-5 w-5" />}
         />
         <SidebarLink
           label="Mock Interviews"

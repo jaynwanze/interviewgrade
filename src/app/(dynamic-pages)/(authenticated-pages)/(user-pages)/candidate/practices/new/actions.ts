@@ -32,7 +32,7 @@ export async function createPracticeAction(formData: FormData) {
     redirect('/candidate/practices/new?error=invalid');
   }
 
-  let created = false;
+  let createdPracticeId: string | null = null;
 
   try {
     // Dynamic import keeps the existing candidate shell buildable in an
@@ -42,7 +42,7 @@ export async function createPracticeAction(formData: FormData) {
     );
     const service = await createAuthenticatedPracticeService();
 
-    await service.create({
+    const created = await service.create({
       title: parsed.data.title,
       description: parsed.data.description,
       scenario: parsed.data.scenario,
@@ -68,15 +68,15 @@ export async function createPracticeAction(formData: FormData) {
       ],
     });
 
-    created = true;
+    createdPracticeId = created.id;
   } catch (error) {
     console.error('createPracticeAction: v2 practice persistence unavailable', error);
   }
 
-  if (!created) {
+  if (!createdPracticeId) {
     redirect('/candidate/practices/new?error=unavailable');
   }
 
   revalidatePath('/candidate/practices');
-  redirect('/candidate/practices?created=1');
+  redirect(`/candidate/practices/${createdPracticeId}?created=1`);
 }

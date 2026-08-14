@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileQuestion, Plus, Sparkles } from 'lucide-react';
+import { FileQuestion, Pencil, Plus, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -153,6 +153,12 @@ function PracticeCard({ practice }: { practice: Practice }) {
         <div className="border-t pt-4 text-xs text-muted-foreground">
           Updated {formatUpdatedAt(practice.updatedAt)}
         </div>
+        <Button asChild variant="outline" className="w-full">
+          <Link href={`/candidate/practices/${practice.id}`}>
+            <Pencil className="mr-2 h-4 w-4" />
+            {practice.status === 'archived' ? 'View practice' : 'Edit practice'}
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );

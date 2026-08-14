@@ -50,20 +50,24 @@ create table public.practice_versions (
     (state = 'draft' and published_at is null)
     or (state = 'published' and published_at is not null)
   ),
-  constraint practice_versions_practice_version_unique unique (practice_id, version)
+  constraint practice_versions_practice_version_unique unique (practice_id, version),
+  constraint practice_versions_practice_id_id_unique unique (practice_id, id)
 );
 
+-- Composite FKs guarantee that a practice cannot point at another practice's
+-- draft/published version. Current pointers must be cleared before explicitly
+-- deleting a pointed-to version.
 alter table public.practices
   add constraint practices_current_draft_version_fk
-  foreign key (current_draft_version_id)
-  references public.practice_versions(id)
-  on delete set null;
+  foreign key (id, current_draft_version_id)
+  references public.practice_versions(practice_id, id)
+  deferrable initially deferred;
 
 alter table public.practices
   add constraint practices_current_published_version_fk
-  foreign key (current_published_version_id)
-  references public.practice_versions(id)
-  on delete set null;
+  foreign key (id, current_published_version_id)
+  references public.practice_versions(practice_id, id)
+  deferrable initially deferred;
 
 create table public.practice_questions (
   id uuid primary key default gen_random_uuid(),
@@ -111,7 +115,7 @@ create table public.question_rubric_criteria (
 create table public.sessions (
   id uuid primary key default gen_random_uuid(),
   practice_id uuid not null references public.practices(id) on delete restrict,
-  practice_version_id uuid not null references public.practice_versions(id) on delete restrict,
+  practice_version_id uuid not null,
   participant_user_id uuid references public.user_profiles(id) on delete set null,
   participant_name text,
   participant_email text,
@@ -122,6 +126,10 @@ create table public.sessions (
   metadata jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  constraint sessions_practice_version_fk
+    foreign key (practice_id, practice_version_id)
+    references public.practice_versions(practice_id, id)
+    on delete restrict,
   constraint sessions_status_check check (
     status in ('created', 'in_progress', 'completed', 'abandoned')
   ),

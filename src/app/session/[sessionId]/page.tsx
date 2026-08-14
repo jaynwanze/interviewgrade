@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import type { SessionContext } from '@/modules/session/session.service';
 
+import { V2SessionPlayer } from './V2SessionPlayer';
 import { beginPracticeSessionAction } from './actions';
 
 type PracticeSessionPageProps = {
@@ -56,10 +57,6 @@ export default async function PracticeSessionPage({
 
   const { session, practiceVersion, responses } = result.context;
   const snapshot = practiceVersion.snapshot;
-  const currentQuestion =
-    snapshot.questions.find(
-      (question) => question.order === session.currentQuestionOrder,
-    ) ?? snapshot.questions[0];
   const beginAction = beginPracticeSessionAction.bind(null, session.id);
   const startError = searchParams?.error === 'start';
 
@@ -67,7 +64,7 @@ export default async function PracticeSessionPage({
     return (
       <SessionStateCard
         title="Practice complete"
-        description="This session has already been completed."
+        description={`This session has been completed with ${responses.length} saved response${responses.length === 1 ? '' : 's'}.`}
       />
     );
   }
@@ -83,7 +80,7 @@ export default async function PracticeSessionPage({
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-8 sm:px-6">
-      <div className="mx-auto w-full max-w-5xl space-y-6">
+      <div className="mx-auto w-full max-w-7xl space-y-6">
         <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
@@ -165,8 +162,8 @@ export default async function PracticeSessionPage({
                 <CardHeader>
                   <CardTitle>Begin when you’re ready</CardTitle>
                   <CardDescription>
-                    Starting changes the session to in progress and locks your
-                    progress to this version.
+                    Starting changes the session to in progress. The player will
+                    use your camera and microphone to capture each response.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -181,84 +178,15 @@ export default async function PracticeSessionPage({
             </aside>
           </div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-            <section className="space-y-6">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-sm font-medium text-primary">
-                    Question {session.currentQuestionOrder + 1} of{' '}
-                    {snapshot.questions.length}
-                  </div>
-                  <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-                    Your current question
-                  </h2>
-                </div>
-                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                  In progress
-                </span>
-              </div>
-
-              {currentQuestion ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-2xl leading-snug">
-                      {currentQuestion.prompt}
-                    </CardTitle>
-                    {currentQuestion.guidance && (
-                      <CardDescription className="text-sm leading-6">
-                        {currentQuestion.guidance}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <Metric
-                        icon={<Clock3 className="h-4 w-4" />}
-                        label="Preparation"
-                        value={
-                          currentQuestion.preparationSeconds != null
-                            ? `${currentQuestion.preparationSeconds}s`
-                            : 'No timer'
-                        }
-                      />
-                      <Metric
-                        icon={<Clock3 className="h-4 w-4" />}
-                        label="Response"
-                        value={
-                          currentQuestion.responseSeconds != null
-                            ? `${currentQuestion.responseSeconds}s max`
-                            : 'Flexible'
-                        }
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Question unavailable</CardTitle>
-                    <CardDescription>
-                      The current question could not be resolved from this published
-                      version.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              )}
-            </section>
-
-            <aside>
-              <Card className="border-dashed">
-                <CardHeader>
-                  <CardTitle className="text-lg">Voice response</CardTitle>
-                  <CardDescription>
-                    This session is now running on the new v2 persistence model.
-                    Recording and transcription will connect here without changing
-                    the immutable session version.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </aside>
-          </div>
+          <V2SessionPlayer
+            sessionId={session.id}
+            practiceTitle={snapshot.title}
+            scenario={snapshot.scenario}
+            initialQuestionOrder={session.currentQuestionOrder}
+            initialResponseCount={responses.length}
+            questions={snapshot.questions}
+            rubricCriteria={snapshot.rubricCriteria}
+          />
         )}
       </div>
     </main>

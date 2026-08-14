@@ -14,7 +14,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { startInterviewAction } from '@/data/user/interviews';
+import { startLegacySessionAction } from '@/modules/session/legacy-session.actions';
 import {
   getPracticeTemplatesByCategoryAndMode,
   getRandomPracticeTemplate,
@@ -116,7 +116,7 @@ export function TutorialPracticeStep() {
       const tmpl = await getRandomPracticeTemplate();
       if (!tmpl) throw new Error('No template returned');
 
-      const intv = await startInterviewAction(tmpl, 'practice');
+      const intv = await startLegacySessionAction(tmpl, 'practice');
       if (!intv?.id) throw new Error('Failed to start interview');
 
       router.push(`/candidate/interviews/session/${intv.id}?tutorial=1`);
@@ -129,7 +129,7 @@ export function TutorialPracticeStep() {
   const startWithTemplate = async (tpl: PracticeTemplate) => {
     setIsStarting(true);
     try {
-      const intv = await startInterviewAction(tpl, 'practice');
+      const intv = await startLegacySessionAction(tpl, 'practice');
       router.push(`/candidate/interviews/session/${intv.id}?tutorial=1`);
     } catch (e) {
       setError(e.message || 'Failed to start tutorial');

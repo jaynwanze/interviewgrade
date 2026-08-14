@@ -204,9 +204,13 @@ export function V2SessionPlayer({
     let accumulated = '';
     let buffer = '';
 
-    while (true) {
+    let streamComplete = false;
+    while (!streamComplete) {
       const { value, done } = await reader.read();
-      if (done) break;
+      if (done) {
+        streamComplete = true;
+        continue;
+      }
 
       buffer += decoder.decode(value, { stream: true });
       const events = buffer.split('\n\n');

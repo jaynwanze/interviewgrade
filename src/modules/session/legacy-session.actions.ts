@@ -1,12 +1,9 @@
 'use server';
 
 import {
-  getInterview,
-  getInterviewQuestions,
-  insertInterviewAnswer,
-  startInterviewAction,
-  updateInterview,
-} from '@/data/user/interviews';
+  legacySessionRepository,
+  type LegacySessionSnapshot,
+} from '@/modules/session/legacy-session.repository';
 import type {
   InterviewModeType,
   InterviewTemplate,
@@ -14,10 +11,7 @@ import type {
   Table,
 } from '@/types';
 
-export type LegacySessionSnapshot = {
-  interview: Table<'interviews'>;
-  questions: Table<'interview_questions'>[];
-};
+export type { LegacySessionSnapshot };
 
 export type SaveLegacySessionResponseInput = {
   questionId: string;
@@ -41,33 +35,21 @@ export type SubmitLegacySessionResponseInput = {
 /**
  * Transitional application boundary for the current InterviewGrade runtime.
  *
- * The legacy UI still speaks in terms of interviews and interview_questions,
- * but it should not need to know how those records are loaded or updated.
- * Keeping that knowledge here gives the refactor a stable seam that can later
- * swap Supabase persistence for the v2 SessionRepository without redesigning
- * the interview screen.
+ * The UI depends on these actions, while persistence is isolated behind the
+ * legacy session repository adapter. When the v2 schema lands, the adapter can
+ * be replaced incrementally without changing the active interview screens.
  */
 export async function startLegacySessionAction(
   template: PracticeTemplate | InterviewTemplate,
   interviewMode: InterviewModeType,
 ): Promise<Table<'interviews'>> {
-  return startInterviewAction(template, interviewMode);
+  return legacySessionRepository.start(template, interviewMode);
 }
 
 export async function loadLegacySessionAction(
   sessionId: string,
 ): Promise<LegacySessionSnapshot | null> {
-  const interview = await getInterview(sessionId);
-  if (!interview) {
-    return null;
-  }
-
-  const questions = await getInterviewQuestions(sessionId);
-
-  return {
-    interview,
-    questions,
-  };
+  return legacySessionRepository.getSnapshot(sessionId);
 }
 
 /**
@@ -83,7 +65,7 @@ export async function saveLegacySessionResponseAction(
     throw new Error('A session response cannot be empty.');
   }
 
-  return insertInterviewAnswer(input.questionId, input.transcript);
+  return legacySessionRepository.saveResponse(input.questionId, input.transcript);
 }
 
 /**
@@ -97,14 +79,7 @@ export async function updateLegacySessionProgressAction(
     throw new Error('Invalid session progress.');
   }
 
-  return updateInterview({
-    id: input.sessionId,
-    status: input.status,
-    current_question_index: input.nextQuestionIndex,
-    ...(input.status === 'completed' && {
-      end_time: new Date().toISOString(),
-    }),
-  });
+  return legacySessionRepository.updateProgress(input);
 }
 
 /**

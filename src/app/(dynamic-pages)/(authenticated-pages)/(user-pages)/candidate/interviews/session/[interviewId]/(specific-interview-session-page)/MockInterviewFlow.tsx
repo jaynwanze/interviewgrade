@@ -8,7 +8,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { useNotifications } from '@/contexts/NotificationsContext';
-import { insertInterviewAnswer, updateInterview } from '@/data/user/interviews';
+import {
+  saveLegacySessionResponseAction,
+  updateLegacySessionProgressAction,
+} from '@/modules/session/legacy-session.actions';
 import { getInterviewFeedback } from '@/utils/openai/getInterviewFeedback';
 
 import type {
@@ -66,16 +69,18 @@ export function MockInterviewFlow({
       return;
     }
     try {
-      // Insert into DB
-      await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+      await saveLegacySessionResponseAction({
+        questionId: questions[currentQuestionIndex].id,
+        transcript: answer,
+      });
       answers.current.push(answer);
 
       // Move to the next question
       if (currentQuestionIndex < questions.length - 1) {
-        await updateInterview({
-          id: interview.id,
+        await updateLegacySessionProgressAction({
+          sessionId: interview.id,
           status: 'in_progress',
-          current_question_index: currentQuestionIndex + 1,
+          nextQuestionIndex: currentQuestionIndex + 1,
         });
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
@@ -91,12 +96,10 @@ export function MockInterviewFlow({
     stopTimer();
     setIsInterviewComplete(true);
 
-    // Mark the interview as completed
-    await updateInterview({
-      id: interview.id,
+    await updateLegacySessionProgressAction({
+      sessionId: interview.id,
       status: 'completed',
-      current_question_index: currentQuestionIndex + 1,
-      end_time: new Date().toISOString(),
+      nextQuestionIndex: currentQuestionIndex + 1,
     });
 
     // Possibly get overall feedback for the entire interview

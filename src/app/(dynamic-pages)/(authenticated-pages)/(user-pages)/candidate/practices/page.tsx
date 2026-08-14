@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileQuestion, Pencil, Plus, Sparkles } from 'lucide-react';
+import { ExternalLink, FileQuestion, Pencil, Plus, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -126,6 +126,8 @@ function PracticeCard({ practice }: { practice: Practice }) {
       : practice.status === 'archived'
         ? 'Archived'
         : 'Draft';
+  const hasPublicLink =
+    practice.status === 'published' && Boolean(practice.shareSlug);
 
   return (
     <Card className="flex h-full flex-col">
@@ -153,12 +155,23 @@ function PracticeCard({ practice }: { practice: Practice }) {
         <div className="border-t pt-4 text-xs text-muted-foreground">
           Updated {formatUpdatedAt(practice.updatedAt)}
         </div>
-        <Button asChild variant="outline" className="w-full">
-          <Link href={`/candidate/practices/${practice.id}`}>
-            <Pencil className="mr-2 h-4 w-4" />
-            {practice.status === 'archived' ? 'View practice' : 'Edit practice'}
-          </Link>
-        </Button>
+        <div className="grid gap-2">
+          <Button asChild variant="outline" className="w-full">
+            <Link href={`/candidate/practices/${practice.id}`}>
+              <Pencil className="mr-2 h-4 w-4" />
+              {practice.status === 'archived' ? 'View practice' : 'Edit practice'}
+            </Link>
+          </Button>
+
+          {hasPublicLink && practice.shareSlug && (
+            <Button asChild className="w-full">
+              <Link href={`/p/${practice.shareSlug}`} target="_blank">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open shared practice
+              </Link>
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { startInterviewAction } from '@/data/user/interviews';
 import { useToastMutation } from '@/hooks/useToastMutation';
+import { startLegacySessionAction } from '@/modules/session/legacy-session.actions';
 import {
   InterviewModeType,
   InterviewTemplate,
@@ -55,7 +55,7 @@ export default function InterviewDetailsDialog({
     async () => {
       setIsStarting(true);
       // Start the interview
-      const interview = await startInterviewAction(
+      const interview = await startLegacySessionAction(
         selectedTemplate,
         interviewMode,
       );

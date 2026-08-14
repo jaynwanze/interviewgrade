@@ -16,6 +16,8 @@ interface UserCameraProps {
   onRecordEnd: null | (() => void);
   isFetchingSpecificFeedback?: (isFetching: boolean) => void;
   interviewMode: string | null;
+  disabled?: boolean;
+  maxRecordingSeconds?: number;
 }
 
 const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
@@ -54,6 +56,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   onRecordEnd,
   isFetchingSpecificFeedback,
   interviewMode,
+  disabled = false,
+  maxRecordingSeconds = 120,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -76,7 +80,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     useSpeechRecognition();
   const pathname = usePathname();
 
-  // Check microphone permission using the Permissions API.
+  // Keep the existing media implementation intact while allowing newer
+  // session players to control when another recording may begin.
+  void interviewMode;
+  void showPermissionDialog;
+  void isLoadingFFmpeg;
+
   useEffect(() => {
     async function checkMicPermission() {
       try {
@@ -116,7 +125,6 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           await navigator.mediaDevices.getUserMedia(constraints);
         audioStreamRef.current = mediaStream;
 
-        // Initialize AudioContext and resume it if needed.
         audioContextRef.current = new (
           window.AudioContext ||
           (window as unknown as { webkitAudioContext: typeof AudioContext })
@@ -126,7 +134,6 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           await audioContextRef.current.resume();
         }
 
-        // Check and log audio tracks.
         const audioTracks = mediaStream.getAudioTracks();
         if (audioTracks.length > 0) {
           setIsMicMuted(audioTracks[0].muted);
@@ -175,6 +182,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   };
 
   const handleRecord = () => {
+    if (disabled) return;
     if (micPermissionState === 'denied') {
       setShowPermissionDialog(true);
       return;
@@ -196,7 +204,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     }
     timerRef.current = window.setInterval(() => {
       setRecordingTime((prev) => {
-        if (prev + 1 >= 120) {
+        if (prev + 1 >= maxRecordingSeconds) {
           handleEndRecord();
         }
         return prev + 1;
@@ -247,20 +255,18 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   ]);
 
   return (
-    <div className="flex flex-col items-center space-y-4 w-full">
-      {/* Video Stream */}
+    <div className="flex w-full flex-col items-center space-y-4">
       <div className="w-full">
         <video
           ref={videoRef}
           muted
           playsInline
-          className="max-w-full w-full h-auto object-cover rounded-md border-4 border-blue-300 shadow-sm"
+          className="h-auto w-full max-w-full rounded-md border-4 border-blue-300 object-cover shadow-sm"
         />
       </div>
 
-      {/* Buttons */}
-      <div className="flex justify-center items-center space-x-4">
-        <Button onClick={handleRecord} disabled={isRecording}>
+      <div className="flex items-center justify-center space-x-4">
+        <Button onClick={handleRecord} disabled={isRecording || disabled}>
           <MicrophoneIcon className="h-6 w-6" />
         </Button>
         <Button
@@ -272,10 +278,9 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </Button>
       </div>
 
-      {/* Sound Meter */}
       {isRecording && audioStreamRef.current && audioContextRef.current && (
-        <div className="w-full flex justify-center items-center">
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-2 shadow-sm">
+        <div className="flex w-full items-center justify-center">
+          <div className="rounded-xl bg-gray-100 p-2 shadow-sm dark:bg-gray-800">
             <Meter
               audioContext={audioContextRef.current}
               stream={audioStreamRef.current}
@@ -285,16 +290,14 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </div>
       )}
 
-      {/* Recording Status */}
       {isRecording && (
         <p className="text-sm text-muted-foreground">
           Recording for {recordingTime} seconds...
         </p>
       )}
 
-      {/* Mic Warning */}
       {isMicMuted && (
-        <p className="text-red-500 text-center text-sm">
+        <p className="text-center text-sm text-red-500">
           Your microphone is muted. Please unmute to record audio.
         </p>
       )}

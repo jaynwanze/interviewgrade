@@ -8,7 +8,7 @@ begin;
 -- depend on legacy candidate/interview-template tables.
 
 create table public.practices (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   organization_id uuid not null references public.organizations(id) on delete restrict,
   created_by uuid not null references public.user_profiles(id) on delete restrict,
   title text not null,
@@ -24,7 +24,7 @@ create table public.practices (
 );
 
 create table public.practice_versions (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   practice_id uuid not null references public.practices(id) on delete cascade,
   version integer not null,
   state text not null,
@@ -70,7 +70,7 @@ alter table public.practices
   deferrable initially deferred;
 
 create table public.practice_questions (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   practice_version_id uuid not null references public.practice_versions(id) on delete cascade,
   position integer not null,
   prompt text not null,
@@ -91,7 +91,7 @@ create table public.practice_questions (
 );
 
 create table public.rubric_criteria (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   practice_version_id uuid not null references public.practice_versions(id) on delete cascade,
   name text not null,
   description text not null,
@@ -113,7 +113,7 @@ create table public.question_rubric_criteria (
 );
 
 create table public.sessions (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   practice_id uuid not null references public.practices(id) on delete restrict,
   practice_version_id uuid not null,
   participant_user_id uuid references public.user_profiles(id) on delete set null,
@@ -141,7 +141,7 @@ create table public.sessions (
 );
 
 create table public.session_responses (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   session_id uuid not null references public.sessions(id) on delete cascade,
   question_id uuid not null references public.practice_questions(id) on delete restrict,
   question_position integer not null,
@@ -161,7 +161,7 @@ create table public.session_responses (
 );
 
 create table public.response_evaluations (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   response_id uuid not null references public.session_responses(id) on delete cascade,
   overall_score numeric(5,2) not null,
   criterion_scores jsonb not null default '[]'::jsonb,
@@ -178,7 +178,7 @@ create table public.response_evaluations (
 );
 
 create table public.session_evaluations (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.uuid_generate_v4(),
   session_id uuid not null references public.sessions(id) on delete cascade,
   overall_score numeric(5,2) not null,
   criterion_scores jsonb not null default '[]'::jsonb,

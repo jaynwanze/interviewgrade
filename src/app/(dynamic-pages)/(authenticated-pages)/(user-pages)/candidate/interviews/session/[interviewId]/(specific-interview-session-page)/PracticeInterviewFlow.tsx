@@ -10,7 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { markTutorialAsDoneAction } from '@/data/user/candidate';
-import { insertInterviewAnswer, updateInterview } from '@/data/user/interviews';
+import {
+  saveLegacySessionResponseAction,
+  updateLegacySessionProgressAction,
+} from '@/modules/session/legacy-session.actions';
 import type {
   Interview,
   InterviewAnswerDetail,
@@ -126,8 +129,10 @@ export function PracticeInterviewFlow({
       return;
     }
     try {
-      // DB insert
-      await insertInterviewAnswer(questions[currentQuestionIndex].id, answer);
+      await saveLegacySessionResponseAction({
+        questionId: questions[currentQuestionIndex].id,
+        transcript: answer,
+      });
       answers.current.push(answer);
 
       // For practice mode, fetch immediate feedback
@@ -135,11 +140,10 @@ export function PracticeInterviewFlow({
 
       // Move to the next question or complete
       if (currentQuestionIndex < questions.length - 1) {
-        // Update DB so we persist question index
-        await updateInterview({
-          id: interview.id,
+        await updateLegacySessionProgressAction({
+          sessionId: interview.id,
           status: 'in_progress',
-          current_question_index: currentQuestionIndex + 1,
+          nextQuestionIndex: currentQuestionIndex + 1,
         });
       }
     } catch (error) {
@@ -252,12 +256,10 @@ export function PracticeInterviewFlow({
     setIsInterviewComplete(true);
     setIsCameraOn(false);
 
-    // Mark interview as “completed” in DB
-    await updateInterview({
-      id: interview.id,
+    await updateLegacySessionProgressAction({
+      sessionId: interview.id,
       status: 'completed',
-      current_question_index: currentQuestionIndex + 1,
-      end_time: new Date().toISOString(),
+      nextQuestionIndex: currentQuestionIndex + 1,
     });
 
     const answerDetails: InterviewAnswerDetail[] = questions.map((q, idx) => ({

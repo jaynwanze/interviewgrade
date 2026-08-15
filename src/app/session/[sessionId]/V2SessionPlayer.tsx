@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
   ChevronRight,
@@ -71,6 +71,7 @@ export function V2SessionPlayer({
   const [speaking, setSpeaking] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastAutoSpokenQuestionRef = useRef<string | null>(null);
 
   const orderedQuestions = useMemo(
     () => [...questions].sort((a, b) => a.order - b.order),
@@ -86,45 +87,74 @@ export function V2SessionPlayer({
     ? ((safeIndex + 1) / orderedQuestions.length) * 100
     : 0;
 
-  async function speakCurrentQuestion() {
-    if (!currentQuestion || speaking) return;
+  const speakCurrentQuestion = useCallback(
+    async (automatic = false) => {
+      if (!currentQuestion || speaking) return;
 
-    try {
-      setSpeaking(true);
-      setError(null);
+      try {
+        setSpeaking(true);
+        setError(null);
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+
+        const intro =
+          safeIndex === 0
+            ? "Welcome to your InterviewGrade practice session. Answer each question naturally, then review your feedback. Let's begin. "
+            : '';
+        const audioUrl = await generateTTS(
+          `${intro}Question ${safeIndex + 1}. ${currentQuestion.prompt}`,
+          'tts-1',
+          'alloy',
+        );
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        audio.onended = () => setSpeaking(false);
+        audio.onerror = () => setSpeaking(false);
+        await audio.play();
+      } catch (cause) {
+        console.error('V2SessionPlayer: question TTS failed', cause);
+        setSpeaking(false);
+        setError(
+          automatic
+            ? 'Automatic question audio could not play. Click Listen to hear the question.'
+            : 'The question audio could not be played. You can continue normally.',
+        );
+      }
+    },
+    [currentQuestion, safeIndex, speaking],
+  );
+
+  useEffect(() => {
+    if (!currentQuestion) return;
+
+    const questionKey = currentQuestion.id ?? `order-${currentQuestion.order}`;
+    if (lastAutoSpokenQuestionRef.current === questionKey) return;
+
+    lastAutoSpokenQuestionRef.current = questionKey;
+    void speakCurrentQuestion(true);
+  }, [currentQuestion, speakCurrentQuestion]);
+
+  useEffect(
+    () => () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
-
-      const audioUrl = await generateTTS(
-        `Question ${safeIndex + 1}. ${currentQuestion.prompt}`,
-        'tts-1',
-        'alloy',
-      );
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      audio.onended = () => setSpeaking(false);
-      audio.onerror = () => setSpeaking(false);
-      await audio.play();
-    } catch (cause) {
-      console.error('V2SessionPlayer: question TTS failed', cause);
-      setSpeaking(false);
-      setError('The question audio could not be played. You can continue normally.');
-    }
-  }
+    },
+    [],
+  );
 
   async function handleTranscript(transcript: string) {
     if (busy) return;
 
     if (!transcript.trim()) {
-      setBusy(false);
       setError('No speech was detected. Record your answer again.');
       return;
     }
 
     if (!currentQuestion?.id) {
-      setBusy(false);
       setError('This published question is missing its runtime identifier.');
       return;
     }
@@ -199,6 +229,9 @@ export function V2SessionPlayer({
       throw new Error(`Feedback API returned ${response.status}.`);
     }
 
+    const feedbackStatus = response.headers.get(
+      'X-InterviewGrade-Feedback-Status',
+    );
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let accumulated = '';
@@ -244,6 +277,12 @@ export function V2SessionPlayer({
         setFeedbackText(accumulated);
         setFeedback(parseFeedback(accumulated));
       }
+    }
+
+    if (feedbackStatus === 'fallback') {
+      setError(
+        'Your answer was saved, but the live AI feedback service is currently unavailable.',
+      );
     }
   }
 
@@ -349,7 +388,7 @@ export function V2SessionPlayer({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={speakCurrentQuestion}
+                onClick={() => void speakCurrentQuestion(false)}
                 disabled={speaking || busy}
               >
                 {speaking ? (
@@ -404,7 +443,6 @@ export function V2SessionPlayer({
               answerCallback={handleTranscript}
               isCameraOn={cameraOn}
               onRecordEnd={null}
-              isFetchingSpecificFeedback={setBusy}
               interviewMode="Practice"
               disabled={busy}
               maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
@@ -427,7 +465,7 @@ export function V2SessionPlayer({
               <div className="flex flex-col items-center gap-3 text-center">
                 <Loader2 className="h-7 w-7 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">
-                  Transcribing, saving, and preparing feedback…
+                  Saving your answer and preparing feedback…
                 </p>
               </div>
             ) : hasFeedback ? (

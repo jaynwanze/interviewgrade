@@ -1,5 +1,5 @@
+import { createOpenAIClient, hasOpenAIApiKey } from '@/utils/openai/config';
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { z } from 'zod';
 
 const feedbackRequestSchema = z.object({
@@ -27,6 +27,7 @@ const feedbackRequestSchema = z.object({
 });
 
 const FEEDBACK_MODEL = 'gpt-5-mini';
+const FEEDBACK_STATUS_HEADER = 'X-InterviewGrade-Feedback-Status';
 
 export async function POST(request: NextRequest) {
   const parsed = feedbackRequestSchema.safeParse(await request.json());
@@ -37,8 +38,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const apiKey = process.env.OPENAI_SECRET_KEY;
-  if (!apiKey) {
+  if (!hasOpenAIApiKey()) {
+    console.error(
+      'v2 practice feedback unavailable: OPENAI_API_KEY/OPENAI_SECRET_KEY is not configured',
+    );
     return feedbackUnavailableStream(parsed.data.nextQuestion != null);
   }
 
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
   const prompt = `Practice: ${input.practiceTitle}\n\nScenario:\n${input.scenario}\n\nWeighted rubric:\n${rubric}\n\nCurrent question:\n${input.currentQuestion.prompt}\n\nQuestion guidance:\n${input.currentQuestion.guidance ?? 'None'}\n\nCandidate answer:\n${input.currentAnswer}\n\nNext question:\n${input.nextQuestion?.prompt ?? 'N/A'}`;
 
   try {
-    const openai = new OpenAI({ apiKey });
+    const openai = createOpenAIClient();
     const stream = await openai.responses.create({
       model: FEEDBACK_MODEL,
       instructions,
@@ -89,7 +92,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return new NextResponse(body, { headers: streamHeaders() });
+    return new NextResponse(body, {
+      headers: streamHeaders('ready'),
+    });
   } catch (error) {
     console.error('v2 practice feedback request failed', error);
     return feedbackUnavailableStream(input.nextQuestion != null);
@@ -109,17 +114,20 @@ function feedbackUnavailableStream(hasNextQuestion: boolean) {
     },
   });
 
-  return new NextResponse(body, { headers: streamHeaders() });
+  return new NextResponse(body, {
+    headers: streamHeaders('fallback'),
+  });
 }
 
 function buildUnavailableFeedback(hasNextQuestion: boolean) {
   return `Practice Feedback\n\nSummary: Your answer was saved successfully, but immediate AI feedback is temporarily unavailable.\nAdvice for Next Question: ${hasNextQuestion ? 'Continue to the next question and focus on a clear, specific response.' : 'N/A'}`;
 }
 
-function streamHeaders() {
+function streamHeaders(status: 'ready' | 'fallback') {
   return {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache, no-transform',
     Connection: 'keep-alive',
+    [FEEDBACK_STATUS_HEADER]: status,
   };
 }

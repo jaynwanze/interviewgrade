@@ -1,19 +1,7 @@
 import { EvaluationCriteriaType, InterviewQuestion } from '@/types';
+import { createOpenAIClient } from '@/utils/openai/config';
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 
-// Initialize OpenAI Client
-const openAiKey = process.env.OPENAI_SECRET_KEY;
-
-if (!openAiKey) {
-  throw new Error(
-    'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
-  );
-}
-
-const openai = new OpenAI({
-  apiKey: openAiKey,
-});
 /**
  * Handles the POST request
  */
@@ -32,6 +20,7 @@ export async function POST(req: NextRequest) {
   } = await req.json();
 
   try {
+    const openai = createOpenAIClient();
     const systemMsg = buildSystemMessage(interview_evaluation_criterias);
     const userMsg = constructQuestionFeedbackPrompt(
       skill,
@@ -42,16 +31,15 @@ export async function POST(req: NextRequest) {
       interview_evaluation_criterias,
     );
 
-    const streamPromise = openai.chat.completions.create({
-      model: 'gpt-4o-mini', // or gpt-3.5-turbo
+    const stream = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
       messages: [systemMsg, userMsg],
-      max_tokens: 150, //
+      max_tokens: 150,
       temperature: 0.5,
       store: true,
       stream: true,
     });
 
-    const stream = await streamPromise;
     if (!stream) {
       console.error('No content from AI');
       return NextResponse.json(
@@ -82,7 +70,10 @@ export async function POST(req: NextRequest) {
     });
     return new NextResponse(readableStream, { headers });
   } catch (error) {
-    console.error('Error fetching feedback:', error.message || error);
+    console.error(
+      'Error fetching feedback:',
+      error instanceof Error ? error.message : error,
+    );
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },
@@ -101,7 +92,6 @@ function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
       .map((rubric) => `| ${rubric.percentage_range} | ${rubric.description} |`)
       .join('\n');
 
-  // Format the evaluation criteria
   const formattedCriteria = evaluationCriterias
     .map(
       (criterion, index) =>
@@ -162,6 +152,10 @@ function constructQuestionFeedbackPrompt(
   interview_question_count: number,
   intervieEvaluationsCriterias: EvaluationCriteriaType[],
 ) {
+  void skill;
+  void interview_question_count;
+  void intervieEvaluationsCriterias;
+
   return {
     role: 'system' as const,
     content: `

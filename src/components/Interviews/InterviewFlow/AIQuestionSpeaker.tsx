@@ -10,7 +10,11 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { InterviewQuestion } from '@/types';
-import { generateTTS } from '@/utils/openai/textToSpeech';
+import {
+  speakWithBrowserVoice,
+  stopBrowserVoice,
+} from '@/utils/openai/clientSpeechFallback';
+import { generateTTS, releaseTTSUrl } from '@/utils/openai/textToSpeech';
 import Lottie from 'lottie-react';
 import talkingInterviewer from 'public/assets/animations/AnimationSpeakingRings.json';
 import { useEffect, useRef, useState } from 'react';
@@ -51,17 +55,18 @@ export const AIQuestionSpeaker = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lottieRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [randomColor, setRandomColor] = useState<string>(getRandomColor());
   const [randomDarkColor, setRandomDarkColor] =
     useState<string>(getRandomDarkColor());
   const prevQuestionIndexRef = useRef<number | null>(null);
+
   useEffect(() => {
     setRandomColor(getRandomColor());
     setRandomDarkColor(getRandomDarkColor());
   }, [question]);
 
-  // Control Lottie animation based solely on isSpeaking.
   useEffect(() => {
     if (lottieRef.current) {
       if (isSpeaking) {
@@ -74,7 +79,6 @@ export const AIQuestionSpeaker = ({
   }, [isSpeaking]);
 
   useEffect(() => {
-    // Only speak when the current question index is different from the previous one.
     if (prevQuestionIndexRef.current === currentIndex) {
       return;
     }
@@ -89,41 +93,63 @@ export const AIQuestionSpeaker = ({
         ? introText + ' ' + questionSpeechText
         : questionSpeechText;
 
-    const speak = async () => {
+    const stopCurrentSpeech = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+      releaseTTSUrl(audioUrlRef.current);
+      audioUrlRef.current = null;
+      stopBrowserVoice();
+      setIsSpeaking(false);
+    };
+
+    const speakWithFallback = async () => {
+      stopCurrentSpeech();
+
       try {
-        // Stop any previous audio
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
         const audioUrl = await generateTTS(speechText, 'tts-1', 'alloy');
+        audioUrlRef.current = audioUrl;
         const audio = new Audio(audioUrl);
         audioRef.current = audio;
         audio.onended = () => {
           setIsSpeaking(false);
-          console.log('Speech has finished.');
+          releaseTTSUrl(audioUrlRef.current);
+          audioUrlRef.current = null;
         };
-        audio.onerror = (error) => {
-          console.error('Audio playback error:', error);
-          setIsSpeaking(false);
+        audio.onerror = () => {
+          console.warn('OpenAI TTS audio playback failed; using browser voice.');
+          releaseTTSUrl(audioUrlRef.current);
+          audioUrlRef.current = null;
+          audioRef.current = null;
+          const started = speakWithBrowserVoice(
+            speechText,
+            () => setIsSpeaking(true),
+            () => setIsSpeaking(false),
+          );
+          if (!started) setIsSpeaking(false);
         };
-        audio.play();
         setIsSpeaking(true);
+        await audio.play();
       } catch (error) {
-        console.error('TTS error:', error);
-        setIsSpeaking(false);
+        console.warn('OpenAI TTS unavailable; using browser voice fallback:', error);
+        const started = speakWithBrowserVoice(
+          speechText,
+          () => setIsSpeaking(true),
+          () => setIsSpeaking(false),
+        );
+        if (!started) {
+          console.error('No text-to-speech fallback is available in this browser.');
+          setIsSpeaking(false);
+        }
       }
     };
 
-    speak();
+    void speakWithFallback();
 
-    // Cleanup: stop any audio when question changes.
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      setIsSpeaking(false);
+      stopCurrentSpeech();
     };
   }, [question, currentIndex]);
 

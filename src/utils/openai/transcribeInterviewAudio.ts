@@ -1,30 +1,47 @@
-'use server';
+'use client';
 
-import { createOpenAIClient } from './config';
+type TranscriptionResponse = {
+  text?: string;
+  error?: string;
+};
 
-// Function to transcribe audio using the server-side OpenAI audio endpoint.
 export const transcribeInterviewAudio = async (
   formData: FormData,
 ): Promise<string> => {
-  const file = formData.get('file');
-
-  if (!(file instanceof File)) {
-    throw new Error('File is missing in the form data.');
-  }
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 55_000);
 
   try {
-    // whisper-1 remains supported and accepts browser-native WebM directly.
-    const openai = createOpenAIClient();
-    const transcription = await openai.audio.transcriptions.create({
-      file,
-      model: 'whisper-1',
-      response_format: 'text',
+    const response = await fetch('/api/transcribe', {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
     });
 
-    return transcription;
+    let payload: TranscriptionResponse = {};
+    try {
+      payload = (await response.json()) as TranscriptionResponse;
+    } catch {
+      // Keep the safe default below when a proxy returns a non-JSON error.
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        payload.error || `Transcription failed with status ${response.status}.`,
+      );
+    }
+
+    if (typeof payload.text !== 'string' || !payload.text.trim()) {
+      throw new Error('No speech was detected in the recording.');
+    }
+
+    return payload.text.trim();
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Transcription failed';
-    console.error('Error transcribing audio:', message);
-    throw new Error('Transcription failed. Please try recording your answer again.');
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Transcription timed out.');
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
   }
 };

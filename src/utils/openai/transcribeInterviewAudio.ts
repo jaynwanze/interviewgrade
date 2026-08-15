@@ -1,42 +1,30 @@
 'use server';
 
-import OpenAI from 'openai';
+import { createOpenAIClient } from './config';
 
-const openAiKey = process.env.OPENAI_SECRET_KEY;
-
-if (!openAiKey) {
-  throw new Error(
-    'OpenAI API key is missing. Please set OPENAI_SECRET_KEY in your environment variables.',
-  );
-}
-
-const openai = new OpenAI({
-  apiKey: openAiKey,
-});
-// Function to transcribe audio using the server-side API route
+// Function to transcribe audio using the server-side OpenAI audio endpoint.
 export const transcribeInterviewAudio = async (
   formData: FormData,
 ): Promise<string> => {
-  const file = formData.get('file') as File;
+  const file = formData.get('file');
 
-  if (!file) {
+  if (!(file instanceof File)) {
     throw new Error('File is missing in the form data.');
   }
 
   try {
+    // whisper-1 remains supported and accepts browser-native WebM directly.
+    const openai = createOpenAIClient();
     const transcription = await openai.audio.transcriptions.create({
-      file: file,
+      file,
       model: 'whisper-1',
       response_format: 'text',
     });
-    return transcription; // Return the transcription
+
+    return transcription;
   } catch (error) {
-    console.error(
-      'Error transcribing audio:',
-      error.response?.data || error.message,
-    );
-    throw new Error(
-      error.response?.data?.error?.message || 'Transcription failed',
-    );
+    const message = error instanceof Error ? error.message : 'Transcription failed';
+    console.error('Error transcribing audio:', message);
+    throw new Error('Transcription failed. Please try recording your answer again.');
   }
 };

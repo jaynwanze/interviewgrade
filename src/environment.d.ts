@@ -22,7 +22,8 @@ declare global {
       GOCARDLESS_SECRET_ID: string;
       GOCARDLESS_SECRET_KEY: string;
       RESEND_API_KEY: string;
-      OPENAI_SECRET_KEY: string;
+      OPENAI_API_KEY?: string;
+      OPENAI_SECRET_KEY?: string;
       DEEPSEEK_API_KEY: string;
       HUGGING_FACE_API_KEY: string;
       INTERVIEW_ANSWERS_SENTIMENT_MODEL_URL: string;

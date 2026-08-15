@@ -1,127 +1,90 @@
 'use client';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+
+const preferredAudioMimeTypes = [
+  'audio/webm;codecs=opus',
+  'audio/webm',
+  'audio/mp4',
+  'audio/ogg;codecs=opus',
+];
+
+function getPreferredAudioMimeType(): string | undefined {
+  if (typeof MediaRecorder === 'undefined') return undefined;
+  return preferredAudioMimeTypes.find((mimeType) =>
+    MediaRecorder.isTypeSupported(mimeType),
+  );
+}
 
 export class MediaRecorderHandler {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
-  private ffmpeg: FFmpeg;
-
-  constructor() {
-    this.ffmpeg = new FFmpeg();
-    this.initializeFFmpeg();
-  }
-
-  private async initializeFFmpeg() {
-    await this.ffmpeg.load({
-      coreURL: await toBlobURL(
-        'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-        'text/javascript',
-      ),
-      wasmURL: await toBlobURL(
-        'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
-        'application/wasm',
-      ),
-    });
-  }
-
-  async convertAudioFormat(
-    audioBlob: Blob,
-    setLoadingFFmpeg: (loading: boolean) => void,
-  ) {
-    setLoadingFFmpeg(true); // Set loading state
-    if (!this.ffmpeg.loaded) {
-      try {
-        await this.ffmpeg.load({
-          coreURL: await toBlobURL(
-            'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-            'text/javascript',
-          ),
-          wasmURL: await toBlobURL(
-            'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
-            'application/wasm',
-          ),
-        });
-      } catch (error) {
-        console.error(
-          'Error loading FFmpeg now using backup audio converter:',
-          error,
-        );
-        setLoadingFFmpeg(false); // Reset loading state
-        return null;
-      }
-    }
-    try {
-      // Write the audio blob to the virtual file system
-      await this.ffmpeg.writeFile('audio.webm', await fetchFile(audioBlob));
-
-      // Convert the audio file to WAV format
-      await this.ffmpeg.exec(['-i', 'audio.webm', 'audio.wav']);
-
-      // Read the converted file from the virtual file system
-      const data = await this.ffmpeg.readFile('audio.wav');
-
-      let blobData: BlobPart;
-      if (data instanceof Uint8Array) {
-        // Create a new ArrayBuffer and copy the data to avoid SharedArrayBuffer issues
-        const buffer = new ArrayBuffer(data.byteLength);
-        new Uint8Array(buffer).set(data);
-        blobData = buffer;
-      } else {
-        blobData = data;
-      }
-
-      const wavBlob = new Blob([blobData], { type: 'audio/wav' });
-      return wavBlob;
-    } catch (error) {
-      console.error('Error converting audio format:', error);
-    } finally {
-      this.ffmpeg.terminate(); // Clean up and terminate the ffmpeg instance
-      setLoadingFFmpeg(false); // Reset loading state
-    }
-  }
 
   start(stream: MediaStream) {
-    this.mediaRecorder = new MediaRecorder(stream);
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length === 0) {
+      throw new Error('No microphone audio track is available.');
+    }
+
+    // Record audio only. The previous implementation recorded the camera stream,
+    // loaded FFmpeg from a third-party CDN, converted it to WAV, then uploaded it
+    // under an MP3 filename. OpenAI accepts WebM/MP4/OGG directly, so keep the
+    // browser-native audio container and remove that fragile conversion step.
+    const audioOnlyStream = new MediaStream(audioTracks);
+    const mimeType = getPreferredAudioMimeType();
+    this.mediaRecorder = mimeType
+      ? new MediaRecorder(audioOnlyStream, { mimeType })
+      : new MediaRecorder(audioOnlyStream);
+    this.audioChunks = [];
 
     this.mediaRecorder.ondataavailable = (event) => {
-      this.audioChunks.push(event.data);
+      if (event.data.size > 0) {
+        this.audioChunks.push(event.data);
+      }
     };
 
     this.mediaRecorder.start();
-    console.log('MediaRecorder started');
+    console.log('MediaRecorder started', this.mediaRecorder.mimeType);
   }
 
-  async stop(
-    setLoadingFFmpeg: (loading: boolean) => void,
-  ): Promise<Blob | undefined> {
-    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-      return new Promise<Blob | undefined>((resolve) => {
-        this.mediaRecorder!.onstop = async () => {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-          this.audioChunks = []; // Reset for the next recording
-          console.log('MediaRecorder stopped, processing audio blob');
-
-          const convertedAudioBlob = await this.convertAudioFormat(
-            audioBlob,
-            setLoadingFFmpeg,
-          );
-          if (convertedAudioBlob) {
-            resolve(convertedAudioBlob); // Return the converted audio blob
-          } else {
-            console.error('Converted audio blob is undefined');
-            resolve(undefined);
-          }
-        };
-        this.mediaRecorder!.stop();
-      });
+  async stop(): Promise<Blob | undefined> {
+    const recorder = this.mediaRecorder;
+    if (!recorder || recorder.state !== 'recording') {
+      return undefined;
     }
-    return undefined;
+
+    return new Promise<Blob | undefined>((resolve) => {
+      recorder.onstop = () => {
+        const chunkMimeType = this.audioChunks.find((chunk) => chunk.type)?.type;
+        const mimeType = recorder.mimeType || chunkMimeType || 'audio/webm';
+        const audioBlob = new Blob(this.audioChunks, { type: mimeType });
+
+        this.audioChunks = [];
+        this.mediaRecorder = null;
+
+        if (audioBlob.size === 0) {
+          console.error('MediaRecorder produced an empty audio blob');
+          resolve(undefined);
+          return;
+        }
+
+        console.log('MediaRecorder stopped', {
+          mimeType: audioBlob.type,
+          size: audioBlob.size,
+        });
+        resolve(audioBlob);
+      };
+
+      recorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event);
+        this.audioChunks = [];
+        this.mediaRecorder = null;
+        resolve(undefined);
+      };
+
+      recorder.stop();
+    });
   }
 
   isRecording(): boolean {
-    return this.mediaRecorder
-      ? this.mediaRecorder.state === 'recording'
-      : false;
+    return this.mediaRecorder?.state === 'recording';
   }
 }

@@ -50,6 +50,14 @@ const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
   }
 };
 
+function audioFileName(blob: Blob): string {
+  const mimeType = blob.type.toLowerCase();
+  if (mimeType.includes('mp4')) return 'answer.mp4';
+  if (mimeType.includes('ogg')) return 'answer.ogg';
+  if (mimeType.includes('wav')) return 'answer.wav';
+  return 'answer.webm';
+}
+
 export const UserCamera: React.FC<UserCameraProps> = ({
   answerCallback,
   isCameraOn,
@@ -62,6 +70,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isMicMuted, setIsMicMuted] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [processingError, setProcessingError] = useState<string | null>(null);
   const [micPermissionState, setMicPermissionState] = useState<
     'granted' | 'denied' | 'prompt' | null
   >(null);
@@ -70,8 +80,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
   const timerRef = useRef<number | null>(null);
+  const isRecordingRef = useRef(false);
   const whisperFinalTranscript = useRef<string | null>(null);
-  const [isLoadingFFmpeg, setIsLoadingFFmpeg] = useState(false);
 
   const audioStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -80,11 +90,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     useSpeechRecognition();
   const pathname = usePathname();
 
-  // Keep the existing media implementation intact while allowing newer
-  // session players to control when another recording may begin.
   void interviewMode;
   void showPermissionDialog;
-  void isLoadingFFmpeg;
 
   useEffect(() => {
     async function checkMicPermission() {
@@ -153,15 +160,27 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         }
       } catch (err) {
         console.error('Error accessing webcam and microphone:', err);
+        setProcessingError(
+          'Camera or microphone access failed. Check your browser permissions and try again.',
+        );
       }
     };
 
     if (isCameraOn) {
-      startCamera();
+      void startCamera();
     }
 
     return () => {
-      mediaRecorderHandlerRef.current?.stop(setIsLoadingFFmpeg);
+      isRecordingRef.current = false;
+      if (timerRef.current != null) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (mediaRecorderHandlerRef.current?.isRecording()) {
+        void mediaRecorderHandlerRef.current.stop();
+      }
+      mediaRecorderHandlerRef.current = null;
+
       if (audioStreamRef.current) {
         audioStreamRef.current.getTracks().forEach((track) => track.stop());
         if (videoRef.current) {
@@ -170,89 +189,133 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         audioStreamRef.current = null;
       }
       if (audioContextRef.current) {
-        audioContextRef.current.close();
+        void audioContextRef.current.close();
         audioContextRef.current = null;
       }
     };
   }, [isCameraOn, pathname]);
 
-  const handleAnswer = (answer: string) => {
-    answerCallback(answer);
-    whisperFinalTranscript.current = null;
-  };
+  const handleAnswer = useCallback(
+    (answer: string) => {
+      answerCallback(answer);
+      whisperFinalTranscript.current = null;
+    },
+    [answerCallback],
+  );
+
+  const handleEndRecord = useCallback(async () => {
+    if (!isRecordingRef.current) return;
+
+    isRecordingRef.current = false;
+    setIsRecording(false);
+    if (timerRef.current != null) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    setIsTranscribing(true);
+    setProcessingError(null);
+    isFetchingSpecificFeedback?.(true);
+
+    try {
+      let transcript = '';
+      const mediaHandler = mediaRecorderHandlerRef.current;
+
+      if (mediaHandler?.isRecording()) {
+        const audioBlob = await mediaHandler.stop();
+        mediaRecorderHandlerRef.current = null;
+
+        if (!audioBlob) {
+          throw new Error('The browser did not produce a usable audio recording.');
+        }
+
+        const formData = new FormData();
+        formData.append('file', audioBlob, audioFileName(audioBlob));
+        transcript = await transcribeInterviewAudio(formData);
+        whisperFinalTranscript.current = transcript;
+      } else {
+        stopRecognition();
+        transcript = finalTranscript.trim();
+      }
+
+      if (!transcript.trim()) {
+        throw new Error('No speech was detected in the recording.');
+      }
+
+      handleAnswer(transcript);
+      onRecordEnd?.();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Your answer could not be transcribed.';
+      console.error('UserCamera: recording/transcription failed', error);
+      setProcessingError(
+        message.includes('No speech')
+          ? message
+          : 'Your audio could not be transcribed. Please record your answer again.',
+      );
+      isFetchingSpecificFeedback?.(false);
+    } finally {
+      setIsTranscribing(false);
+    }
+  }, [
+    finalTranscript,
+    handleAnswer,
+    isFetchingSpecificFeedback,
+    onRecordEnd,
+    stopRecognition,
+  ]);
 
   const handleRecord = () => {
-    if (disabled) return;
+    if (disabled || isTranscribing || isRecordingRef.current) return;
     if (micPermissionState === 'denied') {
       setShowPermissionDialog(true);
+      setProcessingError(
+        'Microphone access is blocked. Allow microphone access in your browser settings.',
+      );
       return;
     }
+
+    setProcessingError(null);
     setIsRecording(true);
+    isRecordingRef.current = true;
     setRecordingTime(0);
-    if (audioStreamRef.current) {
-      if (audioContextRef.current?.state === 'suspended') {
-        audioContextRef.current.resume();
+
+    try {
+      if (audioStreamRef.current) {
+        if (audioContextRef.current?.state === 'suspended') {
+          void audioContextRef.current.resume();
+        }
+        const mediaHandler = new MediaRecorderHandler();
+        mediaRecorderHandlerRef.current = mediaHandler;
+        mediaHandler.start(audioStreamRef.current);
+        console.log('Audio Stream/MediaHandler - Recording started');
+      } else {
+        startRecognition();
+        console.log('Webkit Speech Recognition - Recording started');
+        console.log('Audio stream/MediaHandler not available');
       }
-      const mediaHandler = new MediaRecorderHandler();
-      mediaRecorderHandlerRef.current = mediaHandler;
-      mediaHandler.start(audioStreamRef.current);
-      console.log('Audio Stream/MediaHandler - Recording started');
-    } else {
-      startRecognition();
-      console.log('Webkit Speech Recognition - Recording started');
-      console.log('Audio stream/MediaHandler not available');
+    } catch (error) {
+      console.error('UserCamera: recording could not start', error);
+      isRecordingRef.current = false;
+      setIsRecording(false);
+      setProcessingError(
+        'Recording could not start. Check your microphone permissions and try again.',
+      );
+      return;
     }
+
     timerRef.current = window.setInterval(() => {
       setRecordingTime((prev) => {
-        if (prev + 1 >= maxRecordingSeconds) {
-          handleEndRecord();
+        const next = prev + 1;
+        if (next >= maxRecordingSeconds) {
+          void handleEndRecord();
         }
-        return prev + 1;
+        return next;
       });
     }, 1000);
   };
-
-  const handleEndRecord = useCallback(async () => {
-    if (!isRecording) return;
-    setIsRecording(false);
-    clearInterval(timerRef.current!);
-    if (isFetchingSpecificFeedback) {
-      isFetchingSpecificFeedback(true);
-    }
-    if (mediaRecorderHandlerRef.current) {
-      const convertedAudioBlob =
-        await mediaRecorderHandlerRef.current.stop(setIsLoadingFFmpeg);
-      if (convertedAudioBlob) {
-        const formData = new FormData();
-        formData.append('file', convertedAudioBlob, 'audio.mp3');
-        formData.append('model', 'whisper-1');
-        whisperFinalTranscript.current =
-          await transcribeInterviewAudio(formData);
-      } else {
-        console.error('Audio conversion failed');
-        if (isFetchingSpecificFeedback) {
-          isFetchingSpecificFeedback(false);
-        }
-        return;
-      }
-    } else {
-      stopRecognition();
-    }
-    const webSpeechTranscript = finalTranscript.trim();
-    whisperFinalTranscript.current
-      ? handleAnswer(whisperFinalTranscript.current)
-      : handleAnswer(webSpeechTranscript);
-    if (onRecordEnd) {
-      onRecordEnd();
-    }
-  }, [
-    isRecording,
-    stopRecognition,
-    finalTranscript,
-    answerCallback,
-    onRecordEnd,
-    isFetchingSpecificFeedback,
-  ]);
 
   return (
     <div className="flex w-full flex-col items-center space-y-4">
@@ -266,12 +329,15 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       </div>
 
       <div className="flex items-center justify-center space-x-4">
-        <Button onClick={handleRecord} disabled={isRecording || disabled}>
+        <Button
+          onClick={handleRecord}
+          disabled={isRecording || isTranscribing || disabled}
+        >
           <MicrophoneIcon className="h-6 w-6" />
         </Button>
         <Button
-          onClick={handleEndRecord}
-          disabled={!isRecording}
+          onClick={() => void handleEndRecord()}
+          disabled={!isRecording || isTranscribing}
           className="bg-red-500 hover:bg-red-600"
         >
           <StopCircle className="h-6 w-6" />
@@ -294,6 +360,14 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         <p className="text-sm text-muted-foreground">
           Recording for {recordingTime} seconds...
         </p>
+      )}
+
+      {isTranscribing && (
+        <p className="text-sm text-muted-foreground">Transcribing your answer…</p>
+      )}
+
+      {processingError && (
+        <p className="text-center text-sm text-red-500">{processingError}</p>
       )}
 
       {isMicMuted && (

@@ -20,42 +20,41 @@ interface UserCameraProps {
   maxRecordingSeconds?: number;
 }
 
-const getPreferredVideoDeviceId = async (): Promise<string | undefined> => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: false,
-    });
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(
-      (device) => device.kind === 'videoinput',
-    );
-    const exclusionKeywords = [
-      'android',
-      'phone',
-      'external',
-      'virtual',
-      'usb',
-      'wireless',
-    ];
-    const preferredDevice = videoDevices.find((device) => {
-      const label = device.label.toLowerCase();
-      return !exclusionKeywords.some((keyword) => label.includes(keyword));
-    });
-    stream.getTracks().forEach((track) => track.stop());
-    return preferredDevice ? preferredDevice.deviceId : undefined;
-  } catch (error) {
-    console.error('Error selecting preferred video device:', error);
-    return undefined;
-  }
-};
-
 function audioFileName(blob: Blob): string {
   const mimeType = blob.type.toLowerCase();
   if (mimeType.includes('mp4')) return 'answer.mp4';
   if (mimeType.includes('ogg')) return 'answer.ogg';
   if (mimeType.includes('wav')) return 'answer.wav';
   return 'answer.webm';
+}
+
+const microphoneConstraints: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+};
+
+async function acquirePracticeMedia(): Promise<{
+  stream: MediaStream;
+  cameraAvailable: boolean;
+}> {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: microphoneConstraints,
+    });
+    return { stream, cameraAvailable: stream.getVideoTracks().length > 0 };
+  } catch (error) {
+    console.warn(
+      'Default camera + microphone request failed; trying microphone only:',
+      error,
+    );
+    const audioOnly = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: microphoneConstraints,
+    });
+    return { stream: audioOnly, cameraAvailable: false };
+  }
 }
 
 export const UserCamera: React.FC<UserCameraProps> = ({
@@ -72,26 +71,28 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
+  const [mediaWarning, setMediaWarning] = useState<string | null>(null);
   const [micPermissionState, setMicPermissionState] = useState<
     'granted' | 'denied' | 'prompt' | null
   >(null);
-  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderHandlerRef = useRef<MediaRecorderHandler | null>(null);
   const timerRef = useRef<number | null>(null);
   const isRecordingRef = useRef(false);
-  const whisperFinalTranscript = useRef<string | null>(null);
 
-  const audioStreamRef = useRef<MediaStream | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const { startRecognition, stopRecognition, finalTranscript } =
-    useSpeechRecognition();
+  const {
+    startRecognition,
+    stopRecognition,
+    resetTranscript,
+    getFinalTranscript,
+  } = useSpeechRecognition();
   const pathname = usePathname();
 
   void interviewMode;
-  void showPermissionDialog;
 
   useEffect(() => {
     async function checkMicPermission() {
@@ -100,37 +101,28 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           name: 'microphone' as PermissionName,
         });
         setMicPermissionState(permission.state);
-        if (permission.state === 'denied') {
-          setShowPermissionDialog(true);
-        }
-        permission.onchange = () => {
-          setMicPermissionState(permission.state);
-          if (permission.state === 'denied') {
-            setShowPermissionDialog(true);
-          } else {
-            setShowPermissionDialog(false);
-          }
-        };
+        permission.onchange = () => setMicPermissionState(permission.state);
       } catch (error) {
-        console.error('Error checking microphone permission:', error);
+        console.warn('Microphone permission state is unavailable:', error);
       }
     }
-    checkMicPermission();
+    void checkMicPermission();
   }, []);
 
   useEffect(() => {
     const startCamera = async () => {
       try {
-        const deviceId = await getPreferredVideoDeviceId();
-        const constraints: MediaStreamConstraints = {
-          video: deviceId
-            ? { deviceId: { exact: deviceId } }
-            : { facingMode: 'user' },
-          audio: true,
-        };
-        const mediaStream =
-          await navigator.mediaDevices.getUserMedia(constraints);
-        audioStreamRef.current = mediaStream;
+        setProcessingError(null);
+        setMediaWarning(null);
+
+        const { stream, cameraAvailable } = await acquirePracticeMedia();
+        mediaStreamRef.current = stream;
+
+        if (!cameraAvailable) {
+          setMediaWarning(
+            'Camera unavailable. Your microphone still works, so you can continue the practice.',
+          );
+        }
 
         audioContextRef.current = new (
           window.AudioContext ||
@@ -141,27 +133,25 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           await audioContextRef.current.resume();
         }
 
-        const audioTracks = mediaStream.getAudioTracks();
-        if (audioTracks.length > 0) {
-          setIsMicMuted(audioTracks[0].muted);
-          audioTracks[0].addEventListener('mute', () => {
-            console.log('Microphone muted');
-            setIsMicMuted(true);
-          });
-          audioTracks[0].addEventListener('unmute', () => {
-            console.log('Microphone unmuted');
-            setIsMicMuted(false);
-          });
+        const audioTrack = stream.getAudioTracks()[0];
+        if (audioTrack) {
+          setIsMicMuted(audioTrack.muted);
+          audioTrack.addEventListener('mute', () => setIsMicMuted(true));
+          audioTrack.addEventListener('unmute', () => setIsMicMuted(false));
         }
 
         if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-          await videoRef.current.play();
+          if (cameraAvailable) {
+            videoRef.current.srcObject = stream;
+            await videoRef.current.play();
+          } else {
+            videoRef.current.srcObject = null;
+          }
         }
-      } catch (err) {
-        console.error('Error accessing webcam and microphone:', err);
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
         setProcessingError(
-          'Camera or microphone access failed. Check your browser permissions and try again.',
+          'Microphone access failed. Check your browser permissions and available input device.',
         );
       }
     };
@@ -176,31 +166,34 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         window.clearInterval(timerRef.current);
         timerRef.current = null;
       }
+      stopRecognition();
+      resetTranscript();
+
       if (mediaRecorderHandlerRef.current?.isRecording()) {
         void mediaRecorderHandlerRef.current.stop();
       }
       mediaRecorderHandlerRef.current = null;
 
-      if (audioStreamRef.current) {
-        audioStreamRef.current.getTracks().forEach((track) => track.stop());
-        if (videoRef.current) {
-          videoRef.current.srcObject = null;
-        }
-        audioStreamRef.current = null;
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
       }
       if (audioContextRef.current) {
         void audioContextRef.current.close();
         audioContextRef.current = null;
       }
     };
-  }, [isCameraOn, pathname]);
+  }, [isCameraOn, pathname, resetTranscript, stopRecognition]);
 
   const handleAnswer = useCallback(
     (answer: string) => {
       answerCallback(answer);
-      whisperFinalTranscript.current = null;
+      resetTranscript();
     },
-    [answerCallback],
+    [answerCallback, resetTranscript],
   );
 
   const handleEndRecord = useCallback(async () => {
@@ -217,8 +210,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     setProcessingError(null);
     isFetchingSpecificFeedback?.(true);
 
+    stopRecognition();
+    await new Promise((resolve) => window.setTimeout(resolve, 200));
+    const browserTranscript = getFinalTranscript();
+
     try {
-      let transcript = '';
+      let transcript = browserTranscript;
       const mediaHandler = mediaRecorderHandlerRef.current;
 
       if (mediaHandler?.isRecording()) {
@@ -231,18 +228,32 @@ export const UserCamera: React.FC<UserCameraProps> = ({
 
         const formData = new FormData();
         formData.append('file', audioBlob, audioFileName(audioBlob));
-        transcript = await transcribeInterviewAudio(formData);
-        whisperFinalTranscript.current = transcript;
-      } else {
-        stopRecognition();
-        transcript = finalTranscript.trim();
+
+        try {
+          const whisperTranscript = await transcribeInterviewAudio(formData);
+          if (typeof whisperTranscript === 'string' && whisperTranscript.trim()) {
+            transcript = whisperTranscript.trim();
+          }
+        } catch (transcriptionError) {
+          console.warn(
+            'AI transcription failed; trying browser transcript fallback:',
+            transcriptionError,
+          );
+          if (browserTranscript) {
+            setMediaWarning(
+              'AI transcription was unavailable, so InterviewGrade used the browser transcript for this answer.',
+            );
+          } else {
+            throw transcriptionError;
+          }
+        }
       }
 
-      if (!transcript.trim()) {
+      if (typeof transcript !== 'string' || !transcript.trim()) {
         throw new Error('No speech was detected in the recording.');
       }
 
-      handleAnswer(transcript);
+      handleAnswer(transcript.trim());
       onRecordEnd?.();
     } catch (error) {
       const message =
@@ -260,7 +271,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       setIsTranscribing(false);
     }
   }, [
-    finalTranscript,
+    getFinalTranscript,
     handleAnswer,
     isFetchingSpecificFeedback,
     onRecordEnd,
@@ -270,7 +281,6 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   const handleRecord = () => {
     if (disabled || isTranscribing || isRecordingRef.current) return;
     if (micPermissionState === 'denied') {
-      setShowPermissionDialog(true);
       setProcessingError(
         'Microphone access is blocked. Allow microphone access in your browser settings.',
       );
@@ -278,32 +288,36 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     }
 
     setProcessingError(null);
+    setMediaWarning(null);
     setIsRecording(true);
     isRecordingRef.current = true;
     setRecordingTime(0);
+    resetTranscript();
+    startRecognition();
 
     try {
-      if (audioStreamRef.current) {
+      if (mediaStreamRef.current) {
         if (audioContextRef.current?.state === 'suspended') {
           void audioContextRef.current.resume();
         }
         const mediaHandler = new MediaRecorderHandler();
         mediaRecorderHandlerRef.current = mediaHandler;
-        mediaHandler.start(audioStreamRef.current);
+        mediaHandler.start(mediaStreamRef.current);
         console.log('Audio Stream/MediaHandler - Recording started');
       } else {
-        startRecognition();
-        console.log('Webkit Speech Recognition - Recording started');
-        console.log('Audio stream/MediaHandler not available');
+        console.warn(
+          'Media stream unavailable; browser speech recognition is the only transcript source.',
+        );
       }
     } catch (error) {
-      console.error('UserCamera: recording could not start', error);
-      isRecordingRef.current = false;
-      setIsRecording(false);
-      setProcessingError(
-        'Recording could not start. Check your microphone permissions and try again.',
+      console.warn(
+        'MediaRecorder could not start; continuing with browser speech recognition:',
+        error,
       );
-      return;
+      mediaRecorderHandlerRef.current = null;
+      setMediaWarning(
+        'Audio recording fallback is active. Keep speaking normally until you press stop.',
+      );
     }
 
     timerRef.current = window.setInterval(() => {
@@ -344,12 +358,12 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </Button>
       </div>
 
-      {isRecording && audioStreamRef.current && audioContextRef.current && (
+      {isRecording && mediaStreamRef.current && audioContextRef.current && (
         <div className="flex w-full items-center justify-center">
           <div className="rounded-xl bg-gray-100 p-2 shadow-sm dark:bg-gray-800">
             <Meter
               audioContext={audioContextRef.current}
-              stream={audioStreamRef.current}
+              stream={mediaStreamRef.current}
               settings={{ bars: 30, spacing: 2, width: 5, height: 40 }}
             />
           </div>
@@ -364,6 +378,10 @@ export const UserCamera: React.FC<UserCameraProps> = ({
 
       {isTranscribing && (
         <p className="text-sm text-muted-foreground">Transcribing your answer…</p>
+      )}
+
+      {mediaWarning && (
+        <p className="text-center text-sm text-amber-600">{mediaWarning}</p>
       )}
 
       {processingError && (

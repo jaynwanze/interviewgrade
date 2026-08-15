@@ -1,32 +1,33 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     SpeechRecognition: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    webkitSpeechRecognition: any; // For Safari
+    webkitSpeechRecognition: any;
   }
 }
 
 export const useSpeechRecognition = () => {
   const recognition = useRef<null | typeof window.SpeechRecognition>(null);
-  const [finalTranscript, setFinalTranscript] = useState<string>('');
+  const transcriptRef = useRef('');
+  const [finalTranscript, setFinalTranscript] = useState('');
 
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      console.error('SpeechRecognition not supported in this browser.');
+      console.warn('SpeechRecognition not supported in this browser.');
       return;
     }
 
     recognition.current = new SpeechRecognition();
-    recognition.current.interimResults = false; // Only final results
-    recognition.current.continuous = true; // Continuous recognition
+    recognition.current.interimResults = false;
+    recognition.current.continuous = true;
     recognition.current.lang = 'en-US';
 
     recognition.current.onstart = () => {
@@ -34,14 +35,25 @@ export const useSpeechRecognition = () => {
     };
 
     recognition.current.onresult = (event) => {
-      // Append new transcript results without duplication
-      const transcript = event.results[event.resultIndex][0].transcript;
-      setFinalTranscript((prev) => prev + ' ' + transcript); // Append new transcript
-      console.log('Current transcription result:', transcript);
+      const parts: string[] = [];
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const text = event.results[index]?.[0]?.transcript;
+        if (typeof text === 'string' && text.trim()) {
+          parts.push(text.trim());
+        }
+      }
+
+      if (parts.length === 0) return;
+      const next = [transcriptRef.current, parts.join(' ')]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      transcriptRef.current = next;
+      setFinalTranscript(next);
     };
 
     recognition.current.onerror = (event) => {
-      console.error('Error during transcription:', event.error);
+      console.warn('Browser speech recognition error:', event.error);
     };
 
     recognition.current.onend = () => {
@@ -49,18 +61,43 @@ export const useSpeechRecognition = () => {
     };
 
     return () => {
-      recognition.current?.stop(); // Stop the recognition on cleanup
+      try {
+        recognition.current?.stop();
+      } catch {
+        // Recognition may already be stopped.
+      }
     };
   }, []);
 
-  const startRecognition = () => {
-    recognition.current?.start(); // Start the recognition
-  };
+  const resetTranscript = useCallback(() => {
+    transcriptRef.current = '';
+    setFinalTranscript('');
+  }, []);
 
-  const stopRecognition = () => {
-    setFinalTranscript(''); // Clear the final transcript
-    recognition.current?.stop(); // Explicitly stop recognition
-  };
+  const startRecognition = useCallback(() => {
+    resetTranscript();
+    try {
+      recognition.current?.start();
+    } catch (error) {
+      console.warn('Browser speech recognition could not start:', error);
+    }
+  }, [resetTranscript]);
 
-  return { startRecognition, stopRecognition, finalTranscript };
+  const stopRecognition = useCallback(() => {
+    try {
+      recognition.current?.stop();
+    } catch {
+      // Recognition may already be stopped.
+    }
+  }, []);
+
+  const getFinalTranscript = useCallback(() => transcriptRef.current.trim(), []);
+
+  return {
+    startRecognition,
+    stopRecognition,
+    resetTranscript,
+    getFinalTranscript,
+    finalTranscript,
+  };
 };

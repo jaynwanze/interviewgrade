@@ -1,9 +1,5 @@
-// File: app/actions/tts.ts
-'use server';
+'use client';
 
-import { createOpenAIClient } from './config';
-
-// generateTTS converts input text to spoken audio using OpenAI's TTS endpoint.
 export async function generateTTS(
   text: string,
   model: string = 'tts-1',
@@ -13,16 +9,33 @@ export async function generateTTS(
     throw new Error('No text provided');
   }
 
-  // Resolve OpenAI configuration at request time so a missing key does not
-  // crash route/module evaluation during a production build.
-  const openai = createOpenAIClient();
-  const mp3 = await openai.audio.speech.create({
-    model,
-    voice,
-    input: text,
+  const response = await fetch('/api/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, model, voice }),
   });
 
-  const buffer = Buffer.from(await mp3.arrayBuffer());
-  const base64Audio = buffer.toString('base64');
-  return `data:audio/mp3;base64,${base64Audio}`;
+  if (!response.ok) {
+    let message = 'AI question audio is temporarily unavailable.';
+    try {
+      const payload = (await response.json()) as { error?: string };
+      if (payload.error) message = payload.error;
+    } catch {
+      // Keep the safe default message.
+    }
+    throw new Error(message);
+  }
+
+  const audio = await response.blob();
+  if (audio.size === 0) {
+    throw new Error('AI question audio returned an empty response.');
+  }
+
+  return URL.createObjectURL(audio);
+}
+
+export function releaseTTSUrl(url: string | null | undefined) {
+  if (url?.startsWith('blob:')) {
+    URL.revokeObjectURL(url);
+  }
 }

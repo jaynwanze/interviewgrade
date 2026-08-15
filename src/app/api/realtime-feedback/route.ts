@@ -2,14 +2,10 @@ import { EvaluationCriteriaType, InterviewQuestion } from '@/types';
 import { createOpenAIClient } from '@/utils/openai/config';
 import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * Handles the POST request
- */
-export async function POST(req: NextRequest) {
-  if (req.method !== 'POST') {
-    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
-  }
+export const runtime = 'nodejs';
+export const maxDuration = 30;
 
+export async function POST(req: NextRequest) {
   const {
     skill,
     currentQuestion,
@@ -21,14 +17,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const openai = createOpenAIClient();
-    const systemMsg = buildSystemMessage(interview_evaluation_criterias);
+    const systemMsg = buildSystemMessage(interview_evaluation_criterias ?? []);
     const userMsg = constructQuestionFeedbackPrompt(
       skill,
       currentQuestion,
       currentAnswer,
       nextQuestion,
       interview_question_count,
-      interview_evaluation_criterias,
+      interview_evaluation_criterias ?? [],
     );
 
     const stream = await openai.chat.completions.create({
@@ -40,45 +36,77 @@ export async function POST(req: NextRequest) {
       stream: true,
     });
 
-    if (!stream) {
-      console.error('No content from AI');
-      return NextResponse.json(
-        { error: 'No content from AI' },
-        { status: 500 },
-      );
-    }
-
-    const headers = new Headers();
-    headers.set('Content-Type', 'text/event-stream');
-    headers.set('Cache-Control', 'no-cache');
-    headers.set('Connection', 'keep-alive');
-
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of stream) {
-          const data = chunk.choices?.[0]?.delta?.content;
-          if (data) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
-            );
+        try {
+          for await (const chunk of stream) {
+            const data = chunk.choices?.[0]?.delta?.content;
+            if (data) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
+              );
+            }
           }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        } catch (error) {
+          console.error('Legacy realtime feedback stream failed:', error);
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify(buildFallbackFeedback(nextQuestion != null))}\n\n`,
+            ),
+          );
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        } finally {
+          controller.close();
         }
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-        controller.close();
       },
     });
-    return new NextResponse(readableStream, { headers });
+
+    return new NextResponse(readableStream, {
+      headers: streamHeaders('ready'),
+    });
   } catch (error) {
     console.error(
-      'Error fetching feedback:',
+      'Legacy realtime feedback request failed:',
       error instanceof Error ? error.message : error,
     );
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
+    return feedbackUnavailableStream(nextQuestion != null);
   }
+}
+
+function feedbackUnavailableStream(hasNextQuestion: boolean) {
+  const encoder = new TextEncoder();
+  const body = new ReadableStream({
+    start(controller) {
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify(buildFallbackFeedback(hasNextQuestion))}\n\n`,
+        ),
+      );
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      controller.close();
+    },
+  });
+
+  return new NextResponse(body, { headers: streamHeaders('fallback') });
+}
+
+function buildFallbackFeedback(hasNextQuestion: boolean) {
+  return `Practice Feedback\nScore (%):\n0/100%\n\nSummary: Your answer was saved successfully, but live AI feedback is temporarily unavailable.\nAdvice for Next Question: ${
+    hasNextQuestion
+      ? 'Continue to the next question and focus on a clear, specific example.'
+      : 'N/A'
+  }`;
+}
+
+function streamHeaders(status: 'ready' | 'fallback') {
+  return {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-InterviewGrade-Feedback-Status': status,
+  };
 }
 
 function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
@@ -101,6 +129,7 @@ function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
   ${formatRubrics(criterion.rubrics)}`,
     )
     .join('\n\n');
+
   return {
     role: 'system' as const,
     content: `
@@ -110,15 +139,12 @@ function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
   
   ### Instructions
   Your evaluation should include:
-  - **Mark**: Assign a numerical score out of ${maxScorePerQuestion} based on the candidate's performance relative to the rubric. Ensure that the mark reflects the degree to which the candidate meets the criteria outlined in the rubric.
-  - **Summary**: Short/Concise evalaution of the candidate's answer to the current question and based off the evalution criteria.
+  - **Mark**: Assign a numerical score out of ${maxScorePerQuestion} based on the candidate's performance relative to the rubric.
+  - **Summary**: Short/concise evaluation of the candidate's answer to the current question and evaluation criteria.
   - **Advice for Next Question**: Offer advice for how to answer the next question effectively.
   
   ### Output Format
-  Provide your evaluation in the following this format without any additional text.
-  
-  1) A user-friendly block of text (plain text, no code fences) that streams. 
-     It should be formatted like:
+  Provide only this plain-text structure:
   
      Practice Feedback
      Score (%):
@@ -127,23 +153,14 @@ function buildSystemMessage(evaluationCriterias: EvaluationCriteriaType[]) {
      Summary: [some text]
      Advice for Next Question: [some text]
   
-     This block should be typed out gradually so the user can see it live.
-  
-  **Note:**
-  - If there is no next question, set "advice_for_next_question" to "N/A".
-  - Provide actionable and constructive advice to help the candidate improve.
-  -If the candidate's response is not provided, assume a score of 0 for that question.
-  -If the candidate's response is not relevant to the evaluation criteria, provide feedback accordingly.
-  -If the candidate's response is lacking or terrible, score it really low or zero marks if necessary and provide constructive feedback.
-  -If the candidate's response is partially relevant, provide partial credit based on the relevance.
-  -If the candidate's response is exemplary, provide full credit, fulls marks where due and highlight the strengths.
+  - If there is no next question, set Advice for Next Question to N/A.
+  - Do not invent facts missing from the candidate answer.
+  - Score irrelevant, empty, or poor answers appropriately low.
+  - Be actionable and constructive.
   `,
   };
 }
 
-/**
- * Constructs the prompt for OpenAI based on the current question and answer
- */
 function constructQuestionFeedbackPrompt(
   skill: string,
   currentQuestion: InterviewQuestion,
@@ -168,9 +185,6 @@ function constructQuestionFeedbackPrompt(
   
   ### Next Question
   ${nextQuestion ? `**Question**: ${nextQuestion.text}` : '**Question**: N/A'}
-  
-  ### Output Format
-  **Note**: Provide your evaluation in the following JSON format without any additional text.
   `,
   };
 }

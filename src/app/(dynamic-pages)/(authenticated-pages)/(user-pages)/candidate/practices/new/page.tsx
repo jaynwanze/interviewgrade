@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, WandSparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -80,7 +80,7 @@ export default function CreatePracticePage({
         <CardHeader>
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-              <WandSparkles className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </div>
             <div className="space-y-1">
               <CardTitle className="text-xl">Generate a draft with AI</CardTitle>

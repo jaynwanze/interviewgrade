@@ -1,5 +1,7 @@
 'use server';
 
+import { randomUUID } from 'node:crypto';
+
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -41,6 +43,8 @@ export async function createPracticeAction(formData: FormData) {
       '@/modules/practice/practice.service'
     );
     const service = await createAuthenticatedPracticeService();
+    const questionId = randomUUID();
+    const criterionId = randomUUID();
 
     const created = await service.create({
       title: parsed.data.title,
@@ -51,15 +55,18 @@ export async function createPracticeAction(formData: FormData) {
       estimatedDurationMinutes: 10,
       questions: [
         {
+          id: questionId,
           order: 0,
           prompt: parsed.data.question,
           guidance: null,
           preparationSeconds: 30,
           responseSeconds: 120,
+          rubricCriterionIds: [criterionId],
         },
       ],
       rubricCriteria: [
         {
+          id: criterionId,
           order: 0,
           name: parsed.data.rubricName,
           description: parsed.data.rubricDescription,

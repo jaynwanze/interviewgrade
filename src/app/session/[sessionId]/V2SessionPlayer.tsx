@@ -203,6 +203,7 @@ export function V2SessionPlayer({
     question: PracticeQuestion,
     followingQuestion: PracticeQuestion | null,
   ) {
+    const mappedRubric = rubricForQuestion(question, rubricCriteria);
     const response = await fetch('/api/v2/practice-feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -217,7 +218,7 @@ export function V2SessionPlayer({
         nextQuestion: followingQuestion
           ? { prompt: followingQuestion.prompt }
           : null,
-        rubricCriteria: rubricCriteria.map((criterion) => ({
+        rubricCriteria: mappedRubric.map((criterion) => ({
           name: criterion.name,
           description: criterion.description,
           weight: criterion.weight,
@@ -524,6 +525,23 @@ export function V2SessionPlayer({
       </div>
     </div>
   );
+}
+
+function rubricForQuestion(
+  question: PracticeQuestion,
+  rubricCriteria: RubricCriterion[],
+): RubricCriterion[] {
+  const mappedIds = question.rubricCriterionIds;
+  if (!mappedIds || mappedIds.length === 0) return rubricCriteria;
+
+  const rubricById = new Map(
+    rubricCriteria.map((criterion) => [criterion.id, criterion] as const),
+  );
+  const mapped = mappedIds
+    .map((criterionId) => rubricById.get(criterionId))
+    .filter((criterion): criterion is RubricCriterion => Boolean(criterion));
+
+  return mapped.length > 0 ? mapped : rubricCriteria;
 }
 
 function TimeMetric({

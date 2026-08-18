@@ -113,6 +113,13 @@ function EditorNotice({
           save the draft while you are adjusting them.
         </Notice>
       );
+    case 'mappings':
+      return (
+        <Notice tone="warning">
+          Every question needs at least one scoring criterion, and every rubric
+          criterion must be used by at least one question before publishing.
+        </Notice>
+      );
     case 'invalid':
       return (
         <Notice tone="error">

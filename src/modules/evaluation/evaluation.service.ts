@@ -2,7 +2,11 @@ import 'server-only';
 
 import { randomUUID } from 'node:crypto';
 
-import type { PracticeQuestion, PracticeVersion } from '@/modules/practice/practice.schema';
+import type {
+  PracticeQuestion,
+  PracticeVersion,
+  RubricCriterion,
+} from '@/modules/practice/practice.schema';
 import { createPublicSessionService } from '@/modules/session/session.service';
 import type {
   Session,
@@ -23,9 +27,11 @@ import {
   type SessionEvaluation,
 } from './evaluation.schema';
 
+// The persisted result shape is unchanged, so existing v1 reports remain
+// readable. Model/aggregation metadata below records the mapping-aware behavior.
 export const RESPONSE_EVALUATION_SCHEMA_VERSION = 'response-rubric-v1';
 export const SESSION_EVALUATION_SCHEMA_VERSION = 'session-rubric-v1';
-export const SESSION_AGGREGATION_VERSION = 'session-aggregate-v1';
+export const SESSION_AGGREGATION_VERSION = 'session-aggregate-v2-question-mapped';
 
 export type EvaluatedResponse = {
   response: SessionResponse;
@@ -70,12 +76,13 @@ export class EvaluationService {
       );
 
       if (!evaluation) {
+        const mappedRubric = rubricForQuestion(context.practiceVersion, question);
         const generated = await generateResponseEvaluation({
           practiceTitle: context.practiceVersion.snapshot.title,
           scenario: context.practiceVersion.snapshot.scenario,
           question,
           response,
-          rubricCriteria: context.practiceVersion.snapshot.rubricCriteria,
+          rubricCriteria: mappedRubric,
         });
 
         evaluation = await this.repository.saveResponseEvaluation(
@@ -211,6 +218,53 @@ function assertRuntimeRubric(practiceVersion: PracticeVersion) {
   if (criteria.length === 0 || criteria.some((criterion) => !criterion.id)) {
     throw new Error('Published rubric criteria must have runtime identifiers.');
   }
+
+  const criterionIds = new Set(criteria.map((criterion) => criterion.id!));
+  for (const question of practiceVersion.snapshot.questions) {
+    if (!question.id) {
+      throw new Error('Published questions must have runtime identifiers.');
+    }
+
+    // Undefined is the legacy full-rubric behavior. New published versions are
+    // always hydrated with explicit mappings.
+    const mappedIds = question.rubricCriterionIds;
+    if (mappedIds?.some((criterionId) => !criterionIds.has(criterionId))) {
+      throw new Error(
+        `Published question ${question.id} references an unknown rubric criterion.`,
+      );
+    }
+  }
+}
+
+function rubricForQuestion(
+  practiceVersion: PracticeVersion,
+  question: PracticeQuestion,
+): RubricCriterion[] {
+  const rubric = practiceVersion.snapshot.rubricCriteria;
+  const mappedIds = question.rubricCriterionIds;
+
+  if (!mappedIds || mappedIds.length === 0) {
+    return rubric;
+  }
+
+  const rubricById = new Map(
+    rubric.map((criterion) => [criterion.id, criterion] as const),
+  );
+  const mapped = mappedIds.map((criterionId) => {
+    const criterion = rubricById.get(criterionId);
+    if (!criterion) {
+      throw new Error(
+        `Question ${question.id ?? question.order} references unknown rubric criterion ${criterionId}.`,
+      );
+    }
+    return criterion;
+  });
+
+  if (mapped.length === 0) {
+    throw new Error('A published question must map to at least one rubric criterion.');
+  }
+
+  return mapped.sort((a, b) => a.order - b.order);
 }
 
 function buildSessionEvaluation(
@@ -223,28 +277,33 @@ function buildSessionEvaluation(
   }
 
   const rubric = practiceVersion.snapshot.rubricCriteria;
-  const criterionScores = rubric.map((criterion) => {
+  const criterionScores = rubric.flatMap((criterion) => {
     const scores = responseEvaluations
       .flatMap((evaluation) => evaluation.criterionScores)
       .filter((score) => score.criterionId === criterion.id);
 
-    if (scores.length !== responseEvaluations.length) {
-      throw new Error(
-        `Cannot aggregate session because criterion ${criterion.name} is missing from a response evaluation.`,
-      );
-    }
+    // A criterion can be mapped only to questions that the participant did not
+    // answer. In that case there is no evidence to score, so omit it rather than
+    // fabricating a zero.
+    if (scores.length === 0) return [];
 
     const score = roundScore(
       scores.reduce((sum, item) => sum + item.score, 0) / scores.length,
     );
 
-    return {
-      criterionId: criterion.id!,
-      criterionName: criterion.name,
-      score,
-      feedback: `Average across ${scores.length} evaluated response${scores.length === 1 ? '' : 's'}.`,
-    };
+    return [
+      {
+        criterionId: criterion.id!,
+        criterionName: criterion.name,
+        score,
+        feedback: `Average across ${scores.length} evaluated response${scores.length === 1 ? '' : 's'} mapped to this criterion.`,
+      },
+    ];
   });
+
+  if (criterionScores.length === 0) {
+    throw new Error('No rubric evidence was available to aggregate this session.');
+  }
 
   const overallScore = roundScore(
     responseEvaluations.reduce(

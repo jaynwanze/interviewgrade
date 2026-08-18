@@ -95,4 +95,20 @@ export async function completePracticeSessionAction(
   );
   const service = createPublicSessionService();
   await service.complete(normalizedId);
+
+  try {
+    const { createEvaluationService } = await import(
+      '@/modules/evaluation/evaluation.service'
+    );
+    await createEvaluationService().getOrCreateReport(normalizedId);
+  } catch (error) {
+    // Completion is durable even when model evaluation is temporarily unavailable.
+    // The report route exposes an explicit retry action for this case.
+    console.error(
+      'completePracticeSessionAction: report evaluation unavailable',
+      error,
+    );
+  }
+
+  redirect(`/session/${encodeURIComponent(normalizedId)}/report`);
 }

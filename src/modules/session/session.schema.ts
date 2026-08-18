@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const sessionStatusSchema = z.enum([
-  "created",
-  "in_progress",
-  "completed",
-  "abandoned",
+  'created',
+  'in_progress',
+  'completed',
+  'abandoned',
 ]);
 
 export const sessionResponseSchema = z.object({
@@ -15,6 +15,7 @@ export const sessionResponseSchema = z.object({
   transcript: z.string(),
   audioStoragePath: z.string().optional().nullable(),
   durationSeconds: z.number().nonnegative().optional().nullable(),
+  attemptNumber: z.number().int().positive(),
   submittedAt: z.coerce.date(),
 });
 

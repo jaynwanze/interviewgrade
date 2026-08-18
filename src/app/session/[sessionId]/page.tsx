@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Clock3, ListChecks, Play, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,8 @@ export default async function PracticeSessionPage({
       <SessionStateCard
         title="Practice complete"
         description={`This session has been completed with ${responses.length} saved response${responses.length === 1 ? '' : 's'}.`}
+        href={`/session/${session.id}/report`}
+        action="View final report"
       />
     );
   }
@@ -216,9 +219,13 @@ function Metric({
 function SessionStateCard({
   title,
   description,
+  href,
+  action,
 }: {
   title: string;
   description: string;
+  href?: string;
+  action?: string;
 }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
@@ -227,6 +234,13 @@ function SessionStateCard({
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
+        {href && action && (
+          <CardContent>
+            <Button asChild>
+              <Link href={href}>{action}</Link>
+            </Button>
+          </CardContent>
+        )}
       </Card>
     </main>
   );

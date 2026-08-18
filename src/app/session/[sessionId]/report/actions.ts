@@ -2,6 +2,8 @@
 
 import { redirect } from 'next/navigation';
 
+import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
+
 export async function generatePracticeReportAction(
   sessionId: string,
 ): Promise<void> {
@@ -13,6 +15,19 @@ export async function generatePracticeReportAction(
   let generated = false;
 
   try {
+    const loggedInUser = await serverGetOptionalLoggedInUser();
+    const { createPublicSessionService } = await import(
+      '@/modules/session/session.service'
+    );
+    const session = await createPublicSessionService().getAccessibleById(
+      normalizedId,
+      loggedInUser?.id ?? null,
+    );
+
+    if (!session || session.status !== 'completed') {
+      throw new Error('Session was not found or is not ready for evaluation.');
+    }
+
     const { createEvaluationService } = await import(
       '@/modules/evaluation/evaluation.service'
     );

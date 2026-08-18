@@ -19,6 +19,7 @@ type PracticeEditorPageProps = {
     saved?: string;
     published?: string;
     created?: string;
+    generated?: string;
     error?: string;
   };
 };
@@ -94,6 +95,15 @@ function EditorNotice({
 
   if (searchParams?.saved === '1') {
     return <Notice tone="success">Draft changes saved.</Notice>;
+  }
+
+  if (searchParams?.generated === '1') {
+    return (
+      <Notice tone="success">
+        AI draft created. Review the scenario, questions, rubric weights,
+        question mappings, and timings below. Nothing has been published yet.
+      </Notice>
+    );
   }
 
   if (searchParams?.created === '1') {

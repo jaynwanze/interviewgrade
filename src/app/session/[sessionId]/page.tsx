@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import type { SessionContext } from '@/modules/session/session.service';
+import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import { V2SessionPlayer } from './V2SessionPlayer';
 import { beginPracticeSessionAction } from './actions';
@@ -29,11 +30,15 @@ type SessionLoadResult =
 
 async function loadSessionContext(sessionId: string): Promise<SessionLoadResult> {
   try {
+    const loggedInUser = await serverGetOptionalLoggedInUser();
     const { createPublicSessionService } = await import(
       '@/modules/session/session.service'
     );
     const service = createPublicSessionService();
-    const context = await service.getContext(sessionId);
+    const context = await service.getAccessibleContext(
+      sessionId,
+      loggedInUser?.id ?? null,
+    );
 
     return context ? { state: 'ready', context } : { state: 'not-found' };
   } catch (error) {

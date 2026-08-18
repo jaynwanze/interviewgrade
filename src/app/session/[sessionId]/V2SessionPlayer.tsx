@@ -208,6 +208,7 @@ export function V2SessionPlayer({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        sessionId,
         practiceTitle,
         scenario,
         currentQuestion: {

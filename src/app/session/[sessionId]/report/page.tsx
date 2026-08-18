@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import type { EvaluationReport } from '@/modules/evaluation/evaluation.service';
+import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import { generatePracticeReportAction } from './actions';
 
@@ -36,11 +37,15 @@ type ReportLoadResult =
 
 async function loadReport(sessionId: string): Promise<ReportLoadResult> {
   try {
+    const loggedInUser = await serverGetOptionalLoggedInUser();
     const { createPublicSessionService } = await import(
       '@/modules/session/session.service'
     );
     const sessionService = createPublicSessionService();
-    const session = await sessionService.getById(sessionId);
+    const session = await sessionService.getAccessibleById(
+      sessionId,
+      loggedInUser?.id ?? null,
+    );
 
     if (!session) return { state: 'not-found' };
     if (session.status !== 'completed') return { state: 'not-complete' };

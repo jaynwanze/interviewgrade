@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
+
 const saveResponseSchema = z.object({
   questionId: z.string().min(1),
   questionOrder: z.number().int().nonnegative(),
@@ -10,6 +12,11 @@ const saveResponseSchema = z.object({
     message: 'Transcript cannot be blank.',
   }),
 });
+
+async function getActorUserId(): Promise<string | null> {
+  const user = await serverGetOptionalLoggedInUser();
+  return user?.id ?? null;
+}
 
 export async function beginPracticeSessionAction(sessionId: string) {
   const normalizedId = sessionId.trim();
@@ -24,7 +31,7 @@ export async function beginPracticeSessionAction(sessionId: string) {
       '@/modules/session/session.service'
     );
     const service = createPublicSessionService();
-    await service.start(normalizedId);
+    await service.startForParticipant(normalizedId, await getActorUserId());
     started = true;
   } catch (error) {
     console.error('beginPracticeSessionAction: could not start v2 session', error);
@@ -55,12 +62,15 @@ export async function savePracticeSessionResponseAction(
     '@/modules/session/session.service'
   );
   const service = createPublicSessionService();
-  const response = await service.saveResponse({
-    sessionId: normalizedId,
-    questionId: parsed.questionId,
-    questionOrder: parsed.questionOrder,
-    transcript: parsed.transcript,
-  });
+  const response = await service.saveResponseForParticipant(
+    {
+      sessionId: normalizedId,
+      questionId: parsed.questionId,
+      questionOrder: parsed.questionOrder,
+      transcript: parsed.transcript,
+    },
+    await getActorUserId(),
+  );
 
   return { responseId: response.id };
 }
@@ -79,7 +89,11 @@ export async function advancePracticeSessionAction(
     '@/modules/session/session.service'
   );
   const service = createPublicSessionService();
-  await service.setCurrentQuestion(normalizedId, nextOrder);
+  await service.setCurrentQuestionForParticipant(
+    normalizedId,
+    nextOrder,
+    await getActorUserId(),
+  );
 }
 
 export async function completePracticeSessionAction(
@@ -94,7 +108,7 @@ export async function completePracticeSessionAction(
     '@/modules/session/session.service'
   );
   const service = createPublicSessionService();
-  await service.complete(normalizedId);
+  await service.completeForParticipant(normalizedId, await getActorUserId());
 
   try {
     const { createEvaluationService } = await import(

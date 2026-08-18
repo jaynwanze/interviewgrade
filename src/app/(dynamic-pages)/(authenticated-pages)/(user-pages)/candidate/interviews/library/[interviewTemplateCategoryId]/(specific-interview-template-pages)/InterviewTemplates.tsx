@@ -1,11 +1,15 @@
 'use client';
 
 import { InterviewCardTemplate } from '@/components/Interviews/InterviewLibrary/InterviewTemplateCard';
+import { CreateCustomInterviewDialog } from '@/components/Interviews/CreateCustomInterviewDialog';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ProBadge, UpgradePrompt } from '@/components/ProFeatureGateDialog';
+import { UsageDisplay } from '@/components/UsageDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { canStartSession } from '@/data/user/candidate';
 import {
   getInterviewTemplatesByCategory,
   getPracticeTemplatesByCategoryAndMode,
@@ -21,12 +25,9 @@ import {
   INTERVIEW_INTERVIEW_MODE,
   INTERVIEW_PRACTICE_MODE,
 } from '@/utils/constants';
-import { ChevronLeft, Plus, Lock } from 'lucide-react';
+import { ChevronLeft, Lock, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { canStartSession } from '@/data/user/candidate';
-import { UpgradePrompt, ProBadge } from '@/components/ProFeatureGateDialog';
-import { UsageDisplay } from '@/components/UsageDisplay';
-import { CreateCustomInterviewDialog } from '@/components/Interviews/CreateCustomInterviewDialog';
 
 export function InterviewTemplates({
   interviewMode,
@@ -51,12 +52,13 @@ export function InterviewTemplates({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const displayString =
-    interviewMode === INTERVIEW_PRACTICE_MODE
-      ? 'Select Practice Session'
-      : 'Select Mock Interview';
-  const interviewModeString =
-    interviewMode === 'practice' ? 'Practice Mode' : 'Mock Interview';
+  const isPracticeMode = interviewMode === INTERVIEW_PRACTICE_MODE;
+  const displayString = isPracticeMode
+    ? 'Select Practice Session'
+    : 'Select Mock Interview';
+  const interviewModeString = isPracticeMode
+    ? 'Practice Mode'
+    : 'Mock Interview';
   // Determine badge color and icon based on mode
   const modeBadge =
     interviewMode === INTERVIEW_INTERVIEW_MODE
@@ -72,7 +74,7 @@ export function InterviewTemplates({
   const fetchInterviews = async () => {
     setIsLoading(true);
     try {
-      if (interviewMode === INTERVIEW_PRACTICE_MODE) {
+      if (isPracticeMode) {
         const data = await getPracticeTemplatesByCategoryAndMode(
           INTERVIEW_PRACTICE_MODE,
           'Soft Skills',
@@ -99,17 +101,16 @@ export function InterviewTemplates({
 
   useEffect(() => {
     const checkAccess = async () => {
-      const mode =
-        interviewMode === INTERVIEW_PRACTICE_MODE ? 'practice' : 'interview';
+      const mode = isPracticeMode ? 'practice' : 'interview';
       const access = await canStartSession(mode);
       setSessionAccess(access);
     };
     checkAccess();
-  }, [interviewMode]);
+  }, [interviewMode, isPracticeMode]);
 
   // Filter templates based on search query
   let filteredTemplates: (PracticeTemplate | InterviewTemplate)[] = [];
-  if (interviewMode === INTERVIEW_PRACTICE_MODE) {
+  if (isPracticeMode) {
     filteredTemplates = practiceTemplates.filter((template) =>
       template.title.toLowerCase().includes(searchQuery.toLowerCase()),
     );
@@ -139,8 +140,9 @@ export function InterviewTemplates({
         <div className="flex flex-col justify-center mx-auto items-center">
           <h1 className="text-2xl font-bold">{displayString}</h1>
           <p className="text-gray-500 mt-2">
-            Select a mock interview that aligns with your role, industry, or
-            skill focus.
+            {isPracticeMode
+              ? 'Choose a built-in practice template, or create a new v2 Practice.'
+              : 'Select a mock interview that aligns with your role, industry, or skill focus.'}
           </p>
         </div>
       </div>
@@ -150,17 +152,20 @@ export function InterviewTemplates({
         <div className="mb-4 p-4 border rounded-lg bg-muted/50">
           <div className="flex items-center justify-between">
             <UsageDisplay
-              label={
-                interviewMode === INTERVIEW_PRACTICE_MODE
-                  ? 'Practice Sessions'
-                  : 'Mock Interviews'
-              }
+              label={isPracticeMode ? 'Practice Sessions' : 'Mock Interviews'}
               used={sessionAccess.limit - sessionAccess.remaining}
               limit={sessionAccess.limit}
               isPro={sessionAccess.isPro}
             />
 
-            {sessionAccess.isPro ? (
+            {isPracticeMode ? (
+              <Button asChild>
+                <Link href="/candidate/practices/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Practice
+                </Link>
+              </Button>
+            ) : sessionAccess.isPro ? (
               <CreateCustomInterviewDialog
                 open={showCustomInterviewDialog}
                 onOpenChange={setShowCustomInterviewDialog}

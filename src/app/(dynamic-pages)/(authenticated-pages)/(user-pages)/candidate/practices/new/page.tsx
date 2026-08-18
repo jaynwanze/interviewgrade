@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, WandSparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 
+import { GeneratePracticeDraftForm } from './GeneratePracticeDraftForm';
 import { createPracticeAction } from './actions';
 
 type CreatePracticePageProps = {
@@ -25,6 +27,8 @@ export default function CreatePracticePage({
 }: CreatePracticePageProps) {
   const invalid = searchParams?.error === 'invalid';
   const unavailable = searchParams?.error === 'unavailable';
+  const invalidAiBrief = searchParams?.error === 'ai-input';
+  const aiUnavailable = searchParams?.error === 'ai';
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -39,25 +43,67 @@ export default function CreatePracticePage({
           <h1 className="text-3xl font-semibold tracking-tight">
             Create a practice
           </h1>
-          <p className="text-muted-foreground">
-            Start with the scenario, one question, and one scoring criterion. You
-            can expand the practice in the editor as the v2 creator rolls out.
+          <p className="max-w-2xl text-muted-foreground">
+            Generate a complete editable draft from a brief, or start manually and
+            build the questions and rubric yourself.
           </p>
         </div>
       </div>
 
       {invalid && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          Check the form and make sure every field has enough detail.
-        </div>
+        <Alert tone="destructive">
+          Check the manual form and make sure every field has enough detail.
+        </Alert>
+      )}
+
+      {invalidAiBrief && (
+        <Alert tone="destructive">
+          Give InterviewGrade a little more detail about what you want to practise.
+        </Alert>
+      )}
+
+      {aiUnavailable && (
+        <Alert tone="warning">
+          AI drafting is temporarily unavailable. You can still create the practice
+          manually below and use the same editor.
+        </Alert>
       )}
 
       {unavailable && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-foreground">
-          The new practice creator is not available in this environment yet.
+        <Alert tone="warning">
+          The new practice creator is not available in this environment right now.
           Your existing mock interviews are unaffected.
-        </div>
+        </Alert>
       )}
+
+      <Card className="border-primary/20 bg-primary/[0.025] shadow-sm">
+        <CardHeader>
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+              <WandSparkles className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Generate a draft with AI</CardTitle>
+              <CardDescription className="max-w-2xl">
+                InterviewGrade creates the scenario, questions, rubric, weights,
+                timings, and question-to-rubric mappings. Nothing is published until
+                you review it in the editor.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <GeneratePracticeDraftForm />
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center gap-4 py-1">
+        <Separator className="flex-1" />
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Or build manually
+        </span>
+        <Separator className="flex-1" />
+      </div>
 
       <form action={createPracticeAction} className="space-y-6">
         <Card>
@@ -69,7 +115,7 @@ export default function CreatePracticePage({
               <div>
                 <CardTitle className="text-xl">Practice setup</CardTitle>
                 <CardDescription>
-                  Keep this focused. The draft can become richer after creation.
+                  Create a small starting draft, then expand it in the full editor.
                 </CardDescription>
               </div>
             </div>
@@ -107,7 +153,7 @@ export default function CreatePracticePage({
 
             <Field
               label="Scenario"
-              hint="Give the AI and future evaluator the context for the practice."
+              hint="Give the evaluator the context for the practice."
               htmlFor="scenario"
             >
               <Textarea
@@ -127,8 +173,8 @@ export default function CreatePracticePage({
           <CardHeader>
             <CardTitle className="text-xl">Starter question</CardTitle>
             <CardDescription>
-              We will create the first draft with one question. Multi-question
-              editing comes next.
+              Start with one prompt. Add, remove, and reorder questions in the
+              editor after creation.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -154,8 +200,8 @@ export default function CreatePracticePage({
           <CardHeader>
             <CardTitle className="text-xl">Starter rubric</CardTitle>
             <CardDescription>
-              The first criterion carries 100% of the score until more criteria
-              are added in the editor.
+              The first criterion carries 100% of the score until you add and
+              reweight more criteria in the editor.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-5 md:grid-cols-2">
@@ -195,7 +241,7 @@ export default function CreatePracticePage({
           <Button asChild variant="outline">
             <Link href="/candidate/practices">Cancel</Link>
           </Button>
-          <Button type="submit">Create draft</Button>
+          <Button type="submit">Create manual draft</Button>
         </div>
       </form>
     </div>
@@ -221,6 +267,26 @@ function Field({
         </label>
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
+      {children}
+    </div>
+  );
+}
+
+function Alert({
+  tone,
+  children,
+}: {
+  tone: 'warning' | 'destructive';
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={
+        tone === 'destructive'
+          ? 'rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive'
+          : 'rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-foreground'
+      }
+    >
       {children}
     </div>
   );

@@ -1,27 +1,21 @@
 import { Suspense } from 'react';
 
 import type { CandidatePracticeAnalytics } from '@/modules/analytics/candidate-practice-analytics';
-import type {
-  CandidateSessionHistoryItem,
-  CandidateSessionHistorySummary,
-} from '@/modules/session/candidate-session-history';
+import type { CandidateDashboardProgress } from '@/modules/analytics/candidate-dashboard-progress';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 import InterviewTemplatesPage from './InterviewTemplatesPage';
 import { V2CandidateAnalytics } from './V2CandidateAnalytics';
 import { V2CandidateProgress } from './V2CandidateProgress';
 
-type V2ProgressData = {
-  summary: CandidateSessionHistorySummary;
-  recentSessions: CandidateSessionHistoryItem[];
-};
-
-async function loadV2Progress(userId: string): Promise<V2ProgressData | null> {
+async function loadV2Progress(
+  userId: string,
+): Promise<CandidateDashboardProgress | null> {
   try {
-    const { getCandidateSessionProgress } = await import(
-      '@/modules/session/candidate-session-history'
+    const { getCandidateDashboardProgress } = await import(
+      '@/modules/analytics/candidate-dashboard-progress'
     );
-    return await getCandidateSessionProgress(userId);
+    return await getCandidateDashboardProgress(userId);
   } catch (error) {
     console.error('CandidateDashboard: v2 progress unavailable', error);
     return null;

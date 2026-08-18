@@ -1,11 +1,12 @@
 import 'server-only';
 
-import { asc, and, eq } from 'drizzle-orm';
+import { asc, and, eq, inArray } from 'drizzle-orm';
 
 import { db, type InterviewGradeDatabase } from '@/db/client';
 import {
   practiceQuestions,
   practiceVersions,
+  questionRubricCriteria,
   rubricCriteria,
 } from '@/db/schema/practices';
 import {
@@ -53,6 +54,34 @@ export async function getPublishedPracticeVersionById(
       .orderBy(asc(rubricCriteria.position)),
   ]);
 
+  const mappings =
+    questions.length === 0
+      ? []
+      : await database
+          .select()
+          .from(questionRubricCriteria)
+          .where(
+            inArray(
+              questionRubricCriteria.questionId,
+              questions.map((question) => question.id),
+            ),
+          );
+
+  const criterionIds = new Set(criteria.map((criterion) => criterion.id));
+  const mappedByQuestion = new Map<string, string[]>();
+
+  for (const mapping of mappings) {
+    if (!criterionIds.has(mapping.rubricCriterionId)) {
+      throw new Error(
+        `Published practice version ${version.id} contains a cross-version rubric mapping.`,
+      );
+    }
+    const ids = mappedByQuestion.get(mapping.questionId) ?? [];
+    ids.push(mapping.rubricCriterionId);
+    mappedByQuestion.set(mapping.questionId, ids);
+  }
+
+  const allCriterionIds = criteria.map((criterion) => criterion.id);
   const snapshot = practiceDraftSchema.parse({
     title: version.title,
     description: version.description,
@@ -67,6 +96,12 @@ export async function getPublishedPracticeVersionById(
       guidance: question.guidance,
       preparationSeconds: question.preparationSeconds,
       responseSeconds: question.maxResponseSeconds,
+      // Legacy published versions contain no join rows. Preserve their original
+      // full-rubric behavior instead of making old sessions unscorable.
+      rubricCriterionIds:
+        mappedByQuestion.get(question.id)?.length
+          ? mappedByQuestion.get(question.id)
+          : allCriterionIds,
     })),
     rubricCriteria: criteria.map((criterion) => ({
       id: criterion.id,

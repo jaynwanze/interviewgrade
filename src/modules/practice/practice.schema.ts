@@ -9,6 +9,11 @@ export const practiceQuestionSchema = z.object({
   guidance: z.string().optional().nullable(),
   preparationSeconds: z.number().int().nonnegative().optional().nullable(),
   responseSeconds: z.number().int().positive().optional().nullable(),
+  // Undefined is reserved for legacy snapshots created before explicit
+  // question-to-rubric mappings existed. Persistence hydrates those as "all
+  // criteria" so historical published practices keep their original scoring
+  // semantics.
+  rubricCriterionIds: z.array(z.string().min(1)).optional(),
 });
 
 export const rubricCriterionSchema = z.object({

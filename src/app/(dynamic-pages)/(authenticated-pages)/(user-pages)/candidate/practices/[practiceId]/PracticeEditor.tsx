@@ -12,6 +12,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,29 +29,32 @@ import type { Practice } from '@/modules/practice/practice.schema';
 import { updatePracticeDraftAction } from './actions';
 
 type EditorQuestion = {
-  clientId: string;
+  id: string;
   prompt: string;
   guidance: string;
   preparationSeconds: number;
   responseSeconds: number;
+  rubricCriterionIds: string[];
 };
 
 type EditorCriterion = {
-  clientId: string;
+  id: string;
   name: string;
   description: string;
   weight: number;
 };
 
-function newClientId(prefix: string) {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return `${prefix}-${crypto.randomUUID()}`;
-  }
-
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
 export function PracticeEditor({ practice }: { practice: Practice }) {
+  const initialCriteria: EditorCriterion[] = practice.draft.rubricCriteria.map(
+    (criterion) => ({
+      id: criterion.id ?? uuidv4(),
+      name: criterion.name,
+      description: criterion.description,
+      weight: criterion.weight,
+    }),
+  );
+  const initialCriterionIds = initialCriteria.map((criterion) => criterion.id);
+
   const [title, setTitle] = useState(practice.draft.title);
   const [description, setDescription] = useState(practice.draft.description);
   const [scenario, setScenario] = useState(practice.draft.scenario);
@@ -63,21 +67,18 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
   const [estimatedDurationMinutes, setEstimatedDurationMinutes] = useState(
     practice.draft.estimatedDurationMinutes ?? 10,
   );
+  const [criteria, setCriteria] = useState<EditorCriterion[]>(initialCriteria);
   const [questions, setQuestions] = useState<EditorQuestion[]>(
-    practice.draft.questions.map((question, index) => ({
-      clientId: question.id ?? `question-${index}`,
+    practice.draft.questions.map((question) => ({
+      id: question.id ?? uuidv4(),
       prompt: question.prompt,
       guidance: question.guidance ?? '',
       preparationSeconds: question.preparationSeconds ?? 30,
       responseSeconds: question.responseSeconds ?? 120,
-    })),
-  );
-  const [criteria, setCriteria] = useState<EditorCriterion[]>(
-    practice.draft.rubricCriteria.map((criterion, index) => ({
-      clientId: criterion.id ?? `criterion-${index}`,
-      name: criterion.name,
-      description: criterion.description,
-      weight: criterion.weight,
+      rubricCriterionIds:
+        question.rubricCriterionIds?.length
+          ? question.rubricCriterionIds
+          : initialCriterionIds,
     })),
   );
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -87,6 +88,19 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
     [criteria],
   );
   const rubricReady = Math.abs(rubricTotal - 100) <= 0.01;
+  const unusedCriteria = useMemo(
+    () =>
+      criteria.filter(
+        (criterion) =>
+          !questions.some((question) =>
+            question.rubricCriterionIds.includes(criterion.id),
+          ),
+      ),
+    [criteria, questions],
+  );
+  const mappingsReady =
+    questions.every((question) => question.rubricCriterionIds.length > 0) &&
+    unusedCriteria.length === 0;
   const archived = practice.status === 'archived';
   const submitAction = updatePracticeDraftAction.bind(null, practice.id);
 
@@ -94,23 +108,56 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
     setQuestions((current) => [
       ...current,
       {
-        clientId: newClientId('question'),
+        id: uuidv4(),
         prompt: '',
         guidance: '',
         preparationSeconds: 30,
         responseSeconds: 120,
+        rubricCriterionIds: criteria.map((criterion) => criterion.id),
       },
     ]);
   }
 
   function updateQuestion(
     index: number,
-    patch: Partial<Omit<EditorQuestion, 'clientId'>>,
+    patch: Partial<Omit<EditorQuestion, 'id'>>,
   ) {
     setQuestions((current) =>
       current.map((question, questionIndex) =>
         questionIndex === index ? { ...question, ...patch } : question,
       ),
+    );
+  }
+
+  function toggleQuestionCriterion(
+    questionIndex: number,
+    criterionId: string,
+    checked: boolean,
+  ) {
+    setQuestions((current) =>
+      current.map((question, index) => {
+        if (index !== questionIndex) return question;
+
+        if (checked) {
+          return question.rubricCriterionIds.includes(criterionId)
+            ? question
+            : {
+                ...question,
+                rubricCriterionIds: [...question.rubricCriterionIds, criterionId],
+              };
+        }
+
+        if (question.rubricCriterionIds.length <= 1) {
+          return question;
+        }
+
+        return {
+          ...question,
+          rubricCriterionIds: question.rubricCriterionIds.filter(
+            (id) => id !== criterionId,
+          ),
+        };
+      }),
     );
   }
 
@@ -123,20 +170,25 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
   }
 
   function addCriterion() {
-    setCriteria((current) => [
-      ...current,
-      {
-        clientId: newClientId('criterion'),
-        name: '',
-        description: '',
-        weight: 0,
-      },
-    ]);
+    const criterion: EditorCriterion = {
+      id: uuidv4(),
+      name: '',
+      description: '',
+      weight: 0,
+    };
+
+    setCriteria((current) => [...current, criterion]);
+    setQuestions((current) =>
+      current.map((question) => ({
+        ...question,
+        rubricCriterionIds: [...question.rubricCriterionIds, criterion.id],
+      })),
+    );
   }
 
   function updateCriterion(
     index: number,
-    patch: Partial<Omit<EditorCriterion, 'clientId'>>,
+    patch: Partial<Omit<EditorCriterion, 'id'>>,
   ) {
     setCriteria((current) =>
       current.map((criterion, criterionIndex) =>
@@ -146,7 +198,22 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
   }
 
   function removeCriterion(index: number) {
-    setCriteria((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    const removed = criteria[index];
+    const remaining = criteria.filter((_, itemIndex) => itemIndex !== index);
+    if (!removed || remaining.length === 0) return;
+
+    setCriteria(remaining);
+    setQuestions((current) =>
+      current.map((question) => {
+        const mapped = question.rubricCriterionIds.filter(
+          (criterionId) => criterionId !== removed.id,
+        );
+        return {
+          ...question,
+          rubricCriterionIds: mapped.length > 0 ? mapped : [remaining[0].id],
+        };
+      }),
+    );
   }
 
   function moveCriterion(index: number, direction: -1 | 1) {
@@ -210,7 +277,7 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
           type="hidden"
           name="questionsJson"
           value={JSON.stringify(
-            questions.map(({ clientId: _clientId, ...question }) => ({
+            questions.map((question) => ({
               ...question,
               guidance: question.guidance.trim() || null,
             })),
@@ -219,9 +286,7 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
         <input
           type="hidden"
           name="rubricJson"
-          value={JSON.stringify(
-            criteria.map(({ clientId: _clientId, ...criterion }) => criterion),
-          )}
+          value={JSON.stringify(criteria)}
         />
 
         <Card>
@@ -331,7 +396,8 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
               <div>
                 <CardTitle>Questions</CardTitle>
                 <CardDescription className="mt-1.5">
-                  The order below is the order learners will receive the prompts.
+                  Set the learner order and choose exactly which rubric criteria
+                  should score each response.
                 </CardDescription>
               </div>
               <Button
@@ -349,12 +415,16 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
           <CardContent className="space-y-4">
             {questions.map((question, index) => (
               <QuestionEditor
-                key={question.clientId}
+                key={question.id}
                 question={question}
+                criteria={criteria}
                 index={index}
                 count={questions.length}
                 disabled={archived}
                 onChange={(patch) => updateQuestion(index, patch)}
+                onToggleCriterion={(criterionId, checked) =>
+                  toggleQuestionCriterion(index, criterionId, checked)
+                }
                 onRemove={() => removeQuestion(index)}
                 onMove={(direction) => moveQuestion(index, direction)}
               />
@@ -369,7 +439,8 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
                 <CardTitle>Scoring rubric</CardTitle>
                 <CardDescription className="mt-1.5">
                   Criteria can be saved at any positive weights. Publishing
-                  requires the total to equal 100%.
+                  requires 100% total weight and every criterion to be used by at
+                  least one question.
                 </CardDescription>
               </div>
               <Button
@@ -387,7 +458,7 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
           <CardContent className="space-y-4">
             {criteria.map((criterion, index) => (
               <CriterionEditor
-                key={criterion.clientId}
+                key={criterion.id}
                 criterion={criterion}
                 index={index}
                 count={criteria.length}
@@ -408,13 +479,34 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
               <span className="font-medium">Total rubric weight</span>
               <span className="font-semibold">{formatWeight(rubricTotal)}%</span>
             </div>
+
+            <div
+              className={`rounded-lg border px-4 py-3 text-sm ${
+                mappingsReady
+                  ? 'border-emerald-500/30 bg-emerald-500/5'
+                  : 'border-amber-500/30 bg-amber-500/5'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium">Question scoring coverage</span>
+                <span className="font-semibold">
+                  {mappingsReady ? 'Ready' : 'Needs attention'}
+                </span>
+              </div>
+              {!mappingsReady && unusedCriteria.length > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Map {unusedCriteria.map((criterion) => criterion.name || 'Unnamed criterion').join(', ')}
+                  {' '}to at least one question before publishing.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
         <div className="sticky bottom-4 z-10 flex flex-col gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            Save keeps the draft private. Publish freezes this version for
-            reproducible sessions.
+            Save keeps the draft private. Publish freezes the questions, mappings,
+            and rubric for reproducible sessions.
           </p>
           <div className="flex gap-2 sm:justify-end">
             <Button
@@ -431,7 +523,7 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
               type="submit"
               name="intent"
               value="publish"
-              disabled={archived || !rubricReady}
+              disabled={archived || !rubricReady || !mappingsReady}
             >
               <Send className="mr-2 h-4 w-4" />
               Publish
@@ -445,18 +537,22 @@ export function PracticeEditor({ practice }: { practice: Practice }) {
 
 function QuestionEditor({
   question,
+  criteria,
   index,
   count,
   disabled,
   onChange,
+  onToggleCriterion,
   onRemove,
   onMove,
 }: {
   question: EditorQuestion;
+  criteria: EditorCriterion[];
   index: number;
   count: number;
   disabled: boolean;
-  onChange: (patch: Partial<Omit<EditorQuestion, 'clientId'>>) => void;
+  onChange: (patch: Partial<Omit<EditorQuestion, 'id'>>) => void;
+  onToggleCriterion: (criterionId: string, checked: boolean) => void;
   onRemove: () => void;
   onMove: (direction: -1 | 1) => void;
 }) {
@@ -554,6 +650,49 @@ function QuestionEditor({
             />
           </Field>
         </div>
+
+        <div className="space-y-2">
+          <div>
+            <div className="text-sm font-medium">Scored against</div>
+            <p className="text-xs text-muted-foreground">
+              Select the rubric criteria that are relevant to this question. At
+              least one criterion must remain selected.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {criteria.map((criterion, criterionIndex) => {
+              const checked = question.rubricCriterionIds.includes(criterion.id);
+              const lastSelected = checked && question.rubricCriterionIds.length === 1;
+              return (
+                <label
+                  key={criterion.id}
+                  className="flex cursor-pointer items-start gap-3 rounded-lg border bg-muted/10 p-3 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4"
+                    checked={checked}
+                    disabled={disabled || lastSelected}
+                    onChange={(event) =>
+                      onToggleCriterion(criterion.id, event.target.checked)
+                    }
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-2 font-medium">
+                      <span>{criterion.name || `Criterion ${criterionIndex + 1}`}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatWeight(criterion.weight)}%
+                      </span>
+                    </span>
+                    <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                      {criterion.description || 'Describe what a strong response shows.'}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -572,7 +711,7 @@ function CriterionEditor({
   index: number;
   count: number;
   disabled: boolean;
-  onChange: (patch: Partial<Omit<EditorCriterion, 'clientId'>>) => void;
+  onChange: (patch: Partial<Omit<EditorCriterion, 'id'>>) => void;
   onRemove: () => void;
   onMove: (direction: -1 | 1) => void;
 }) {
@@ -672,6 +811,8 @@ function PracticePreview({
   criteria: EditorCriterion[];
   rubricTotal: number;
 }) {
+  const criteriaById = new Map(criteria.map((criterion) => [criterion.id, criterion]));
+
   return (
     <Card className="border-primary/20 bg-primary/[0.02]">
       <CardHeader>
@@ -709,13 +850,26 @@ function PracticePreview({
         <PreviewSection title="Questions">
           <ol className="space-y-3">
             {questions.map((question, index) => (
-              <li key={question.clientId} className="rounded-lg border bg-background p-4">
+              <li key={question.id} className="rounded-lg border bg-background p-4">
                 <div className="mb-1 text-xs font-semibold text-muted-foreground">
                   Question {index + 1}
                 </div>
                 <p className="text-sm font-medium">
                   {question.prompt || 'Question prompt'}
                 </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {question.rubricCriterionIds.map((criterionId) => {
+                    const criterion = criteriaById.get(criterionId);
+                    return criterion ? (
+                      <span
+                        key={criterionId}
+                        className="rounded-full border bg-muted/40 px-2 py-1 text-[11px] text-muted-foreground"
+                      >
+                        {criterion.name || 'Criterion'}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
               </li>
             ))}
           </ol>
@@ -724,7 +878,7 @@ function PracticePreview({
         <PreviewSection title={`Rubric · ${formatWeight(rubricTotal)}% total`}>
           <div className="grid gap-3 md:grid-cols-2">
             {criteria.map((criterion) => (
-              <div key={criterion.clientId} className="rounded-lg border bg-background p-4">
+              <div key={criterion.id} className="rounded-lg border bg-background p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="font-medium">
                     {criterion.name || 'Criterion'}
@@ -823,9 +977,7 @@ function StatusBadge({ status }: { status: Practice['status'] }) {
 
 function moveItem<T>(items: T[], index: number, direction: -1 | 1): T[] {
   const targetIndex = index + direction;
-  if (targetIndex < 0 || targetIndex >= items.length) {
-    return items;
-  }
+  if (targetIndex < 0 || targetIndex >= items.length) return items;
 
   const next = [...items];
   const [item] = next.splice(index, 1);
@@ -834,5 +986,7 @@ function moveItem<T>(items: T[], index: number, direction: -1 | 1): T[] {
 }
 
 function formatWeight(value: number) {
-  return Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  return Number.isInteger(value)
+    ? value.toString()
+    : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
 }

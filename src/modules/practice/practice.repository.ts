@@ -1,12 +1,15 @@
 import 'server-only';
 
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 
 import { db, type InterviewGradeDatabase } from '@/db/client';
 import {
   practiceQuestions,
   practices,
   practiceVersions,
+  questionRubricCriteria,
   rubricCriteria,
 } from '@/db/schema/practices';
 import {
@@ -22,11 +25,14 @@ import {
 
 const PUBLISH_WEIGHT_TOTAL = 100;
 const PUBLISH_WEIGHT_TOLERANCE = 0.01;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type PracticeRow = typeof practices.$inferSelect;
 type PracticeVersionRow = typeof practiceVersions.$inferSelect;
 type PracticeQuestionRow = typeof practiceQuestions.$inferSelect;
 type RubricCriterionRow = typeof rubricCriteria.$inferSelect;
+type QuestionRubricCriterionRow = typeof questionRubricCriteria.$inferSelect;
 
 function requireNonEmptyActor(actorUserId?: string): string {
   const actor = actorUserId?.trim();
@@ -51,6 +57,69 @@ function buildStableShareSlug(title: string, practiceId: string): string {
   return `${base || 'practice'}-${practiceId.replace(/-/g, '')}`;
 }
 
+function normalizedUuid(value?: string): string {
+  return value && UUID_PATTERN.test(value) ? value : randomUUID();
+}
+
+/**
+ * Draft child rows are replaceable, but their ids are part of the authoring
+ * contract because question ↔ rubric mappings reference them. Normalize every
+ * child to a UUID before persistence and preserve valid ids across draft saves.
+ */
+function normalizeDraftIdentifiers(draftInput: PracticeDraft): PracticeDraft {
+  const parsed = practiceDraftSchema.parse(draftInput);
+  const criterionIdMap = new Map<string, string>();
+  const seenCriterionIds = new Set<string>();
+
+  const normalizedCriteria = parsed.rubricCriteria.map((criterion) => {
+    const id = normalizedUuid(criterion.id);
+    if (seenCriterionIds.has(id)) {
+      throw new Error(`Duplicate rubric criterion id: ${id}.`);
+    }
+    seenCriterionIds.add(id);
+    if (criterion.id) {
+      criterionIdMap.set(criterion.id, id);
+    }
+    criterionIdMap.set(id, id);
+    return { ...criterion, id };
+  });
+
+  const allCriterionIds = normalizedCriteria.map((criterion) => criterion.id!);
+  const seenQuestionIds = new Set<string>();
+
+  const normalizedQuestions = parsed.questions.map((question) => {
+    const id = normalizedUuid(question.id);
+    if (seenQuestionIds.has(id)) {
+      throw new Error(`Duplicate practice question id: ${id}.`);
+    }
+    seenQuestionIds.add(id);
+
+    const requestedIds = question.rubricCriterionIds ?? allCriterionIds;
+    const mappedIds = requestedIds.map((criterionId) => {
+      const mapped = criterionIdMap.get(criterionId);
+      if (!mapped) {
+        throw new Error(
+          `Question ${question.order} references unknown rubric criterion ${criterionId}.`,
+        );
+      }
+      return mapped;
+    });
+    const rubricCriterionIds = Array.from(new Set(mappedIds));
+
+    if (rubricCriterionIds.length === 0) {
+      throw new Error('Every practice question must map to at least one rubric criterion.');
+    }
+
+    return { ...question, id, rubricCriterionIds };
+  });
+
+  return practiceDraftSchema.parse({
+    ...parsed,
+    questions: normalizedQuestions,
+    rubricCriteria: normalizedCriteria,
+  });
+}
+
 function assertUniqueDraftPositions(draft: PracticeDraft): void {
   const questionPositions = new Set<number>();
   for (const question of draft.questions) {
@@ -69,6 +138,52 @@ function assertUniqueDraftPositions(draft: PracticeDraft): void {
   }
 }
 
+function assertDraftMappings(
+  draft: PracticeDraft,
+  requireEveryCriterionUsed: boolean,
+): void {
+  const criterionIds = new Set(
+    draft.rubricCriteria.map((criterion) => {
+      if (!criterion.id) {
+        throw new Error('Rubric criteria must have runtime identifiers.');
+      }
+      return criterion.id;
+    }),
+  );
+  const usedCriterionIds = new Set<string>();
+
+  for (const question of draft.questions) {
+    const mappedIds = question.rubricCriterionIds ?? [];
+    if (mappedIds.length === 0) {
+      throw new Error(
+        `Question ${question.order + 1} must map to at least one rubric criterion.`,
+      );
+    }
+
+    for (const criterionId of mappedIds) {
+      if (!criterionIds.has(criterionId)) {
+        throw new Error(
+          `Question ${question.order + 1} references an unknown rubric criterion.`,
+        );
+      }
+      usedCriterionIds.add(criterionId);
+    }
+  }
+
+  if (requireEveryCriterionUsed) {
+    const unused = draft.rubricCriteria.filter(
+      (criterion) => criterion.id && !usedCriterionIds.has(criterion.id),
+    );
+    if (unused.length > 0) {
+      throw new Error(
+        `Every published rubric criterion must be mapped to at least one question. Unused: ${unused
+          .map((criterion) => criterion.name)
+          .join(', ')}.`,
+      );
+    }
+  }
+}
+
 function assertPublishableRubric(criteria: RubricCriterionRow[]): void {
   const weights = criteria.map((criterion) => Number(criterion.weight));
 
@@ -84,11 +199,59 @@ function assertPublishableRubric(criteria: RubricCriterionRow[]): void {
   }
 }
 
+/**
+ * Historical versions created before mappings existed have no join rows. For
+ * those versions, preserve the old behavior by treating every question as
+ * mapped to every rubric criterion. New authoring never persists an empty
+ * mapping for a question, so a missing row set remains an unambiguous legacy
+ * signal.
+ */
+function resolveEffectiveMappings(
+  questions: PracticeQuestionRow[],
+  criteria: RubricCriterionRow[],
+  mappings: QuestionRubricCriterionRow[],
+): QuestionRubricCriterionRow[] {
+  const questionIds = new Set(questions.map((question) => question.id));
+  const criterionIds = new Set(criteria.map((criterion) => criterion.id));
+  const mappedByQuestion = new Map<string, string[]>();
+
+  for (const mapping of mappings) {
+    if (!questionIds.has(mapping.questionId) || !criterionIds.has(mapping.rubricCriterionId)) {
+      throw new Error('Question rubric mapping crosses practice-version boundaries.');
+    }
+    const ids = mappedByQuestion.get(mapping.questionId) ?? [];
+    ids.push(mapping.rubricCriterionId);
+    mappedByQuestion.set(mapping.questionId, ids);
+  }
+
+  return questions.flatMap((question) => {
+    const explicitIds = mappedByQuestion.get(question.id);
+    const effectiveIds =
+      explicitIds && explicitIds.length > 0
+        ? explicitIds
+        : criteria.map((criterion) => criterion.id);
+
+    return effectiveIds.map((rubricCriterionId) => ({
+      questionId: question.id,
+      rubricCriterionId,
+    }));
+  });
+}
+
 function mapSnapshot(
   version: PracticeVersionRow,
   questions: PracticeQuestionRow[],
   criteria: RubricCriterionRow[],
+  mappings: QuestionRubricCriterionRow[],
 ): PracticeDraft {
+  const effectiveMappings = resolveEffectiveMappings(questions, criteria, mappings);
+  const mappedByQuestion = new Map<string, string[]>();
+  for (const mapping of effectiveMappings) {
+    const ids = mappedByQuestion.get(mapping.questionId) ?? [];
+    ids.push(mapping.rubricCriterionId);
+    mappedByQuestion.set(mapping.questionId, ids);
+  }
+
   return practiceDraftSchema.parse({
     title: version.title,
     description: version.description,
@@ -103,6 +266,7 @@ function mapSnapshot(
       guidance: question.guidance,
       preparationSeconds: question.preparationSeconds,
       responseSeconds: question.maxResponseSeconds,
+      rubricCriterionIds: mappedByQuestion.get(question.id) ?? [],
     })),
     rubricCriteria: criteria.map((criterion) => ({
       id: criterion.id,
@@ -114,10 +278,7 @@ function mapSnapshot(
   });
 }
 
-function mapPractice(
-  row: PracticeRow,
-  snapshot: PracticeDraft,
-): Practice {
+function mapPractice(row: PracticeRow, snapshot: PracticeDraft): Practice {
   return practiceSchema.parse({
     id: row.id,
     ownerOrganizationId: row.organizationId,
@@ -130,14 +291,15 @@ function mapPractice(
   });
 }
 
-/**
- * Drizzle-backed implementation of the v2 PracticeRepository contract.
- *
- * Reads can be performed without an actor. Mutations are intentionally actor
- * scoped so persistence never reaches into Supabase auth on its own. The
- * application layer is responsible for authenticating/authorizing the caller
- * and constructing this repository with that user's id.
- */
+function draftMappingValues(draft: PracticeDraft) {
+  return draft.questions.flatMap((question) =>
+    (question.rubricCriterionIds ?? []).map((rubricCriterionId) => ({
+      questionId: question.id!,
+      rubricCriterionId,
+    })),
+  );
+}
+
 export class DrizzlePracticeRepository implements PracticeRepository {
   constructor(
     private readonly actorUserId?: string,
@@ -168,7 +330,20 @@ export class DrizzlePracticeRepository implements PracticeRepository {
         .orderBy(asc(rubricCriteria.position)),
     ]);
 
-    return mapSnapshot(version, questions, criteria);
+    const mappings =
+      questions.length === 0
+        ? []
+        : await this.database
+            .select()
+            .from(questionRubricCriteria)
+            .where(
+              inArray(
+                questionRubricCriteria.questionId,
+                questions.map((question) => question.id),
+              ),
+            );
+
+    return mapSnapshot(version, questions, criteria, mappings);
   }
 
   private async hydrateDraftPractice(row: PracticeRow): Promise<Practice> {
@@ -187,10 +362,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
       .where(eq(practices.id, id))
       .limit(1);
 
-    if (!row) {
-      return null;
-    }
-
+    if (!row) return null;
     return this.hydrateDraftPractice(row);
   }
 
@@ -198,23 +370,16 @@ export class DrizzlePracticeRepository implements PracticeRepository {
     const [row] = await this.database
       .select()
       .from(practices)
-      .where(
-        and(eq(practices.shareSlug, slug), eq(practices.status, 'published')),
-      )
+      .where(and(eq(practices.shareSlug, slug), eq(practices.status, 'published')))
       .limit(1);
 
-    if (!row) {
-      return null;
-    }
-
+    if (!row) return null;
     if (!row.currentPublishedVersionId) {
       throw new Error(
         `Published practice ${row.id} does not have a published version pointer.`,
       );
     }
 
-    // Public reads intentionally hydrate the immutable published snapshot rather
-    // than the creator's potentially newer editable draft.
     const snapshot = await this.loadSnapshot(row.currentPublishedVersionId);
     return mapPractice(row, snapshot);
   }
@@ -234,8 +399,9 @@ export class DrizzlePracticeRepository implements PracticeRepository {
     draftInput: PracticeDraft,
   ): Promise<Practice> {
     const actorUserId = requireNonEmptyActor(this.actorUserId);
-    const draft = practiceDraftSchema.parse(draftInput);
+    const draft = normalizeDraftIdentifiers(draftInput);
     assertUniqueDraftPositions(draft);
+    assertDraftMappings(draft, false);
 
     const practiceId = await this.database.transaction(async (tx) => {
       const [practice] = await tx
@@ -249,9 +415,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
         })
         .returning({ id: practices.id });
 
-      if (!practice) {
-        throw new Error('Failed to create practice.');
-      }
+      if (!practice) throw new Error('Failed to create practice.');
 
       const [version] = await tx
         .insert(practiceVersions)
@@ -275,6 +439,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
 
       await tx.insert(practiceQuestions).values(
         draft.questions.map((question) => ({
+          id: question.id!,
           practiceVersionId: version.id,
           position: question.order,
           prompt: question.prompt,
@@ -286,6 +451,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
 
       await tx.insert(rubricCriteria).values(
         draft.rubricCriteria.map((criterion) => ({
+          id: criterion.id!,
           practiceVersionId: version.id,
           position: criterion.order,
           name: criterion.name,
@@ -293,6 +459,8 @@ export class DrizzlePracticeRepository implements PracticeRepository {
           weight: criterion.weight.toString(),
         })),
       );
+
+      await tx.insert(questionRubricCriteria).values(draftMappingValues(draft));
 
       await tx
         .update(practices)
@@ -310,14 +478,14 @@ export class DrizzlePracticeRepository implements PracticeRepository {
     if (!created) {
       throw new Error(`Created practice ${practiceId} could not be reloaded.`);
     }
-
     return created;
   }
 
   async updateDraft(id: string, draftInput: PracticeDraft): Promise<Practice> {
     requireNonEmptyActor(this.actorUserId);
-    const draft = practiceDraftSchema.parse(draftInput);
+    const draft = normalizeDraftIdentifiers(draftInput);
     assertUniqueDraftPositions(draft);
+    assertDraftMappings(draft, false);
 
     await this.database.transaction(async (tx) => {
       const [practice] = await tx
@@ -327,14 +495,10 @@ export class DrizzlePracticeRepository implements PracticeRepository {
         .limit(1)
         .for('update');
 
-      if (!practice) {
-        throw new Error(`Practice ${id} was not found.`);
-      }
-
+      if (!practice) throw new Error(`Practice ${id} was not found.`);
       if (practice.status === 'archived') {
         throw new Error('Archived practices cannot be edited.');
       }
-
       if (!practice.currentDraftVersionId) {
         throw new Error(`Practice ${id} does not have a current draft version.`);
       }
@@ -367,8 +531,9 @@ export class DrizzlePracticeRepository implements PracticeRepository {
         })
         .where(eq(practiceVersions.id, draftVersion.id));
 
-      // Draft child rows are replaceable because no session may reference a
-      // draft version. Published versions are never edited by this method.
+      // Deleting draft questions cascades their join rows. No session may point
+      // at a draft version, so the child set can be safely replaced while the
+      // same UUIDs are re-used for authoring stability.
       await tx
         .delete(practiceQuestions)
         .where(eq(practiceQuestions.practiceVersionId, draftVersion.id));
@@ -378,6 +543,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
 
       await tx.insert(practiceQuestions).values(
         draft.questions.map((question) => ({
+          id: question.id!,
           practiceVersionId: draftVersion.id,
           position: question.order,
           prompt: question.prompt,
@@ -389,6 +555,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
 
       await tx.insert(rubricCriteria).values(
         draft.rubricCriteria.map((criterion) => ({
+          id: criterion.id!,
           practiceVersionId: draftVersion.id,
           position: criterion.order,
           name: criterion.name,
@@ -396,6 +563,8 @@ export class DrizzlePracticeRepository implements PracticeRepository {
           weight: criterion.weight.toString(),
         })),
       );
+
+      await tx.insert(questionRubricCriteria).values(draftMappingValues(draft));
 
       await tx
         .update(practices)
@@ -411,7 +580,6 @@ export class DrizzlePracticeRepository implements PracticeRepository {
     if (!updated) {
       throw new Error(`Updated practice ${id} could not be reloaded.`);
     }
-
     return updated;
   }
 
@@ -426,14 +594,10 @@ export class DrizzlePracticeRepository implements PracticeRepository {
         .limit(1)
         .for('update');
 
-      if (!practice) {
-        throw new Error(`Practice ${id} was not found.`);
-      }
-
+      if (!practice) throw new Error(`Practice ${id} was not found.`);
       if (practice.status === 'archived') {
         throw new Error('Archived practices cannot be published.');
       }
-
       if (!practice.currentDraftVersionId) {
         throw new Error(`Practice ${id} does not have a current draft version.`);
       }
@@ -477,9 +641,29 @@ export class DrizzlePracticeRepository implements PracticeRepository {
       }
       assertPublishableRubric(criteria);
 
-      const snapshot = mapSnapshot(draftVersion, questions, criteria);
-      const publishedAt = new Date();
+      const rawMappings = await tx
+        .select()
+        .from(questionRubricCriteria)
+        .where(
+          inArray(
+            questionRubricCriteria.questionId,
+            questions.map((question) => question.id),
+          ),
+        );
+      const effectiveMappings = resolveEffectiveMappings(
+        questions,
+        criteria,
+        rawMappings,
+      );
+      const snapshot = mapSnapshot(
+        draftVersion,
+        questions,
+        criteria,
+        effectiveMappings,
+      );
+      assertDraftMappings(snapshot, true);
 
+      const publishedAt = new Date();
       await tx
         .update(practiceVersions)
         .set({ state: 'published', publishedAt })
@@ -519,7 +703,7 @@ export class DrizzlePracticeRepository implements PracticeRepository {
             maxResponseSeconds: question.maxResponseSeconds,
           })),
         )
-        .returning({ id: practiceQuestions.id });
+        .returning({ id: practiceQuestions.id, position: practiceQuestions.position });
 
       if (insertedQuestions.length !== questions.length) {
         throw new Error('Failed to clone published practice questions.');
@@ -537,11 +721,44 @@ export class DrizzlePracticeRepository implements PracticeRepository {
             rubricLevels: criterion.rubricLevels,
           })),
         )
-        .returning({ id: rubricCriteria.id });
+        .returning({ id: rubricCriteria.id, position: rubricCriteria.position });
 
       if (insertedCriteria.length !== criteria.length) {
         throw new Error('Failed to clone published rubric criteria.');
       }
+
+      const questionPositionById = new Map(
+        questions.map((question) => [question.id, question.position] as const),
+      );
+      const criterionPositionById = new Map(
+        criteria.map((criterion) => [criterion.id, criterion.position] as const),
+      );
+      const nextQuestionIdByPosition = new Map(
+        insertedQuestions.map((question) => [question.position, question.id] as const),
+      );
+      const nextCriterionIdByPosition = new Map(
+        insertedCriteria.map((criterion) => [criterion.position, criterion.id] as const),
+      );
+
+      const clonedMappings = effectiveMappings.map((mapping) => {
+        const questionPosition = questionPositionById.get(mapping.questionId);
+        const criterionPosition = criterionPositionById.get(mapping.rubricCriterionId);
+        const questionId =
+          questionPosition === undefined
+            ? undefined
+            : nextQuestionIdByPosition.get(questionPosition);
+        const rubricCriterionId =
+          criterionPosition === undefined
+            ? undefined
+            : nextCriterionIdByPosition.get(criterionPosition);
+
+        if (!questionId || !rubricCriterionId) {
+          throw new Error('Failed to clone question rubric mappings.');
+        }
+        return { questionId, rubricCriterionId };
+      });
+
+      await tx.insert(questionRubricCriteria).values(clonedMappings);
 
       await tx
         .update(practices)

@@ -5,18 +5,17 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Interview } from '@/types';
+import type { LegacyCandidateHistoryItem } from '@/modules/session/legacy-candidate-history';
 import { useRouter } from 'next/navigation';
 
 export const InterviewHistoryItem = ({
   interview,
 }: {
-  interview: Interview;
+  interview: LegacyCandidateHistoryItem;
 }) => {
   const router = useRouter();
 

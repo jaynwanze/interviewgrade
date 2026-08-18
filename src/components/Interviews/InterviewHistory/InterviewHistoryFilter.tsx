@@ -16,18 +16,27 @@ interface HistoryFilterProps {
   ) => void;
 }
 
+const countKeyByTab = {
+  All: 'all',
+  Completed: 'completed',
+  'Not Completed': 'notCompleted',
+  'Not Started': 'notStarted',
+} as const;
+
 export const InterviewHistoryFilter: React.FC<HistoryFilterProps> = ({
   activeTab,
   counts,
   onTabChange,
 }) => {
+  const countKey = countKeyByTab[activeTab];
+
   return (
     <>
       <span className="text-sm text-muted-foreground">
-        {counts[activeTab.toLowerCase().replace(' ', '')] || 0} results
+        {counts[countKey]} results
       </span>
       <Tabs
-        defaultValue={activeTab}
+        value={activeTab}
         onValueChange={(value) => onTabChange(value as typeof activeTab)}
         className="w-full"
       >

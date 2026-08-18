@@ -12,8 +12,10 @@ import type { CandidateSessionHistoryItem } from '@/modules/session/candidate-se
 import { useMemo } from 'react';
 
 export default function InterviewHistoryPage({
+  userId,
   v2Sessions,
 }: {
+  userId: string;
   v2Sessions: CandidateSessionHistoryItem[];
 }) {
   const {
@@ -25,7 +27,7 @@ export default function InterviewHistoryPage({
     error,
     handleTabChange,
     handleSwitchChange,
-  } = useInterviewHistory();
+  } = useInterviewHistory(userId);
 
   const filteredV2Sessions = useMemo(() => {
     if (activeSwitch !== 'Practice Mode') {
@@ -69,18 +71,6 @@ export default function InterviewHistoryPage({
     };
   }, [activeSwitch, counts, v2Sessions]);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (error && v2Sessions.length === 0) {
-    return <div className="text-center p-4">{error}</div>;
-  }
-
   const showLegacyList =
     filteredInterviews.length > 0 || filteredV2Sessions.length === 0;
 
@@ -118,7 +108,11 @@ export default function InterviewHistoryPage({
       </div>
       <Separator className="my-4" />
 
-      {error && v2Sessions.length > 0 && (
+      {error && !loading && v2Sessions.length === 0 && (
+        <div className="text-center p-4">{error}</div>
+      )}
+
+      {error && !loading && v2Sessions.length > 0 && (
         <div className="mx-auto mb-4 w-full max-w-4xl rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
           Older interview history could not be loaded, but your new Practice
           sessions are still available below.
@@ -130,11 +124,18 @@ export default function InterviewHistoryPage({
           <V2PracticeHistoryList sessions={filteredV2Sessions} />
         )}
 
-        {showLegacyList && (
-          <InterviewHistoryList
-            interviews={filteredInterviews}
-            interviewModeToggle={activeSwitch}
-          />
+        {loading ? (
+          <div className="flex flex-col items-center py-8 text-sm text-muted-foreground">
+            <LoadingSpinner />
+            <p className="mt-2">Loading older interview history…</p>
+          </div>
+        ) : (
+          showLegacyList && (
+            <InterviewHistoryList
+              interviews={filteredInterviews}
+              interviewModeToggle={activeSwitch}
+            />
+          )
         )}
       </div>
     </div>

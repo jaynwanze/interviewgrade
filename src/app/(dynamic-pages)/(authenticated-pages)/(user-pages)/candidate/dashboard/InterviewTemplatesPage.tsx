@@ -10,19 +10,13 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useWalkthrough } from '@/contexts/WalkthroughContext';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
-import { InterviewAnalytics } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import 'shepherd.js/dist/css/shepherd.css';
 
-export default function InterviewAnalyticsPage() {
-  const {
-    loadingOverview,
-    loadingDetailed,
-    error,
-    overview,
-    fetchOverviewData,
-  } = useAnalyticsData();
+export default function InterviewAnalyticsPage({ userId }: { userId: string }) {
+  const { loadingOverview, error, overview, fetchOverviewData } =
+    useAnalyticsData(userId);
 
   const searchParams = useSearchParams();
   const { startTour } = useWalkthrough();
@@ -34,15 +28,14 @@ export default function InterviewAnalyticsPage() {
   >('Practice Mode');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
-  const [filteredCompletedInterviews, setFilteredCompletedInterviews] =
-    useState<InterviewAnalytics[]>([]);
   const router = useRouter();
 
+  // Only the selected mode is loaded. The hook caches each mode after its
+  // first fetch so switching back is instant for the rest of this page visit.
   useEffect(() => {
-    fetchOverviewData(activeSwitch);
+    void fetchOverviewData(activeSwitch);
   }, [activeSwitch]);
 
-  // Debounce the search query
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -50,7 +43,6 @@ export default function InterviewAnalyticsPage() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Tour steps
   const analyticsTourSteps = [
     {
       id: 'dashboard-overview',
@@ -71,32 +63,6 @@ export default function InterviewAnalyticsPage() {
     },
   ];
 
-  // Switch handling
-  const handleSwitchChange = useCallback(
-    (switchMode: 'Practice Mode' | 'Interview Mode') => {
-      setActiveSwitch(switchMode);
-      if (overview?.interviewAnalytics) {
-        let filtered = [...overview.interviewAnalytics];
-        if (switchMode === 'Practice Mode') {
-          filtered = filtered.filter(
-            (interview) => interview.template_id !== null,
-          );
-        } else {
-          filtered = filtered.filter(
-            (interview) => interview.interview_template_id !== null,
-          );
-        }
-        setFilteredCompletedInterviews(filtered);
-      }
-    },
-    [overview],
-  );
-
-  useEffect(() => {
-    handleSwitchChange(activeSwitch);
-  }, [handleSwitchChange, activeSwitch]);
-
-  // Start tour if in tutorial mode
   useEffect(() => {
     if (isTutorialMode && !tourStarted) {
       startTour(analyticsTourSteps);
@@ -104,49 +70,37 @@ export default function InterviewAnalyticsPage() {
     }
   }, [isTutorialMode, tourStarted, startTour]);
 
-  // Filter results by debounced query
-  const uniqueFilteredTemplateInterviews = useMemo(() => {
-    if (!filteredCompletedInterviews) return [];
-    const templates: InterviewAnalytics[] = [];
-    const searchLower = debouncedQuery.toLowerCase();
-    filteredCompletedInterviews.forEach((interview) => {
-      const titleLower = interview.interview_title.toLowerCase();
-      if (titleLower.includes(searchLower)) {
-        templates.push(interview);
-      }
-    });
-    return templates;
-  }, [debouncedQuery, filteredCompletedInterviews]);
+  const filteredTemplates = useMemo(() => {
+    const searchLower = debouncedQuery.trim().toLowerCase();
+    if (!searchLower) {
+      return overview;
+    }
 
-  // Navigate to template details
+    return overview.filter((template) =>
+      template.title.toLowerCase().includes(searchLower),
+    );
+  }, [debouncedQuery, overview]);
+
   const handleTemplateClick = (templateId: string) => {
     const mode = activeSwitch === 'Practice Mode' ? 'practice' : 'interview';
     router.push(`/candidate/dashboard/${templateId}?mode=${mode}`);
   };
 
-  const averageScore = useMemo(() => {
-    if (!overview?.interviewAnalytics?.length) return 0;
-    const scores =
-      overview.interviewAnalytics.map((i) => i.avg_overall_grade || 0) || [];
-    const total = scores.reduce((a, b) => a + b, 0);
-    return Math.round(scores.length ? total / scores.length : 0);
-  }, [overview]);
-
   const renderContent = () => {
-    if (error) {
-      return <p className="text-center text-red-600">Failed to load data.</p>;
-    }
-
-    if (loadingOverview || loadingDetailed) {
+    if (loadingOverview) {
       return (
         <div className="flex flex-col items-center py-10">
           <LoadingSpinner />
-          <p className="mt-2 text-gray-500">Loading your dashboard...</p>
+          <p className="mt-2 text-gray-500">Loading skills...</p>
         </div>
       );
     }
 
-    if (!overview?.completedInterviews?.length) {
+    if (error) {
+      return <p className="text-center text-red-600">Failed to load data.</p>;
+    }
+
+    if (overview.length === 0) {
       return (
         <div className="text-center text-gray-600 my-6">
           <p>No completed sessions found. Start one to see analytics here.</p>
@@ -163,30 +117,9 @@ export default function InterviewAnalyticsPage() {
 
     return (
       <div className="space-y-6">
-        {/* <div className="mb-6 text-center">
-                    <h2 className="text-xl font-bold text-gray-800">Current Skills Breakdown</h2>
-                    <div className="flex justify-center mt-2">
-                        {uniqueFilteredTemplateInterviews.length > 0 && (
-                            <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-                                <TooltipProvider>
-                                    Total Grade Avg: <br></br> {averageScore}%
-                                    <Tooltip>
-                                        <TooltipTrigger className="cursor-pointer">
-                                            <Info className="inline-block ml-1 w-4 h-4 text-gray-500" />
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="w-48">
-                                            This is the average score across all your skills in {activeSwitch}.
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </span>
-                        )}
-                    </div>
-                </div> */}
-
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="bg-blue-100 text-blue-800 text-xs text-center font-medium px-2.5 py-0.5 rounded-full">
-            {uniqueFilteredTemplateInterviews.length} Skills Found
+            {filteredTemplates.length} Skills Found
           </div>
 
           <Input
@@ -209,7 +142,7 @@ export default function InterviewAnalyticsPage() {
           </div>
         </div>
         <CombinedTemplateCarousel
-          templates={uniqueFilteredTemplateInterviews}
+          templates={filteredTemplates}
           onView={handleTemplateClick}
         />
         <Separator className="my-4" />

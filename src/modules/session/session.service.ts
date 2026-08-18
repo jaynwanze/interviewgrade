@@ -25,6 +25,19 @@ export type SessionContext = {
   responses: SessionResponse[];
 };
 
+function canParticipantAccess(
+  session: Session,
+  actorUserId: string | null,
+): boolean {
+  // Anonymous sessions intentionally remain URL-capability sessions. Once a
+  // session is attached to a candidate account, that authenticated user owns
+  // the read/write capability for the session and its report.
+  return (
+    session.participantUserId == null ||
+    session.participantUserId === actorUserId
+  );
+}
+
 export class SessionService {
   constructor(private readonly repository: SessionRepository) {}
 
@@ -50,12 +63,32 @@ export class SessionService {
     return this.repository.getById(id);
   }
 
-  async getContext(id: string): Promise<SessionContext | null> {
+  async getAccessibleById(
+    id: string,
+    actorUserId: string | null,
+  ): Promise<Session | null> {
     const session = await this.repository.getById(id);
-    if (!session) {
+    if (!session || !canParticipantAccess(session, actorUserId)) {
       return null;
     }
 
+    return session;
+  }
+
+  async getContext(id: string): Promise<SessionContext | null> {
+    const session = await this.repository.getById(id);
+    return session ? this.hydrateContext(session) : null;
+  }
+
+  async getAccessibleContext(
+    id: string,
+    actorUserId: string | null,
+  ): Promise<SessionContext | null> {
+    const session = await this.getAccessibleById(id, actorUserId);
+    return session ? this.hydrateContext(session) : null;
+  }
+
+  private async hydrateContext(session: Session): Promise<SessionContext> {
     const practiceVersion = await getPublishedPracticeVersionById(
       session.practiceVersionId,
     );
@@ -65,12 +98,34 @@ export class SessionService {
       );
     }
 
-    const responses = await this.repository.listResponses(id);
+    const responses = await this.repository.listResponses(session.id);
 
     return { session, practiceVersion, responses };
   }
 
+  private async requireParticipantAccess(
+    id: string,
+    actorUserId: string | null,
+  ): Promise<Session> {
+    const session = await this.getAccessibleById(id, actorUserId);
+    if (!session) {
+      // Keep missing and unauthorized sessions indistinguishable at the
+      // application boundary so a session id cannot be used as an oracle.
+      throw new Error('Session was not found or is not available.');
+    }
+
+    return session;
+  }
+
   async start(id: string): Promise<Session> {
+    return this.repository.start(id);
+  }
+
+  async startForParticipant(
+    id: string,
+    actorUserId: string | null,
+  ): Promise<Session> {
+    await this.requireParticipantAccess(id, actorUserId);
     return this.repository.start(id);
   }
 
@@ -78,7 +133,24 @@ export class SessionService {
     return this.repository.saveResponse(input);
   }
 
+  async saveResponseForParticipant(
+    input: SubmitSessionResponseInput,
+    actorUserId: string | null,
+  ): Promise<SessionResponse> {
+    await this.requireParticipantAccess(input.sessionId, actorUserId);
+    return this.repository.saveResponse(input);
+  }
+
   async setCurrentQuestion(id: string, questionOrder: number): Promise<Session> {
+    return this.repository.setCurrentQuestion(id, questionOrder);
+  }
+
+  async setCurrentQuestionForParticipant(
+    id: string,
+    questionOrder: number,
+    actorUserId: string | null,
+  ): Promise<Session> {
+    await this.requireParticipantAccess(id, actorUserId);
     return this.repository.setCurrentQuestion(id, questionOrder);
   }
 
@@ -86,7 +158,23 @@ export class SessionService {
     return this.repository.complete(id);
   }
 
+  async completeForParticipant(
+    id: string,
+    actorUserId: string | null,
+  ): Promise<Session> {
+    await this.requireParticipantAccess(id, actorUserId);
+    return this.repository.complete(id);
+  }
+
   async abandon(id: string): Promise<Session> {
+    return this.repository.abandon(id);
+  }
+
+  async abandonForParticipant(
+    id: string,
+    actorUserId: string | null,
+  ): Promise<Session> {
+    await this.requireParticipantAccess(id, actorUserId);
     return this.repository.abandon(id);
   }
 }

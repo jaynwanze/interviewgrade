@@ -207,7 +207,7 @@ export class DrizzleSessionRepository implements SessionRepository {
 
     const response = await this.database.transaction(async (tx) => {
       // Lock the session so concurrent submissions for the same question cannot
-      // calculate the same retry attempt number.
+      // calculate the same retry attempt number or race question progress.
       const [session] = await tx
         .select()
         .from(sessions)
@@ -221,6 +221,10 @@ export class DrizzleSessionRepository implements SessionRepository {
 
       if (session.status !== 'in_progress') {
         throw new Error('Responses can only be submitted to an in-progress session.');
+      }
+
+      if (session.currentQuestionPosition !== parsed.questionOrder) {
+        throw new Error('Responses must be submitted for the current question.');
       }
 
       const [question] = await tx
@@ -297,6 +301,13 @@ export class DrizzleSessionRepository implements SessionRepository {
 
       if (existing.status === 'completed' || existing.status === 'abandoned') {
         throw new Error(`Session ${id} cannot change question from ${existing.status}.`);
+      }
+
+      if (
+        questionOrder !== existing.currentQuestionPosition &&
+        questionOrder !== existing.currentQuestionPosition + 1
+      ) {
+        throw new Error('Session progress can only advance to the next question.');
       }
 
       const [question] = await tx

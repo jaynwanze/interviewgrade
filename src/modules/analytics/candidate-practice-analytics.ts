@@ -1,14 +1,12 @@
 import 'server-only';
 
-import { and, desc, eq, inArray } from 'drizzle-orm';
-
 import { db, type InterviewGradeDatabase } from '@/db/client';
-import { sessionEvaluations } from '@/db/schema/evaluations';
-import { practiceVersions } from '@/db/schema/practices';
-import { sessions } from '@/db/schema/sessions';
-import { criterionScoreSchema } from '@/modules/evaluation/evaluation.schema';
+import {
+  getCandidateScoredSessions,
+  loadCandidateScoredSessions,
+  type CandidateScoredSession,
+} from '@/modules/session/candidate-scored-sessions';
 
-const criterionScoresSchema = criterionScoreSchema.array();
 const MAX_TREND_SESSIONS = 12;
 
 export type CandidateScoreTrendPoint = {
@@ -50,22 +48,12 @@ export type CandidatePracticeAnalytics = {
   latestRecommendation: string | null;
 };
 
-type ScoredSession = {
-  sessionId: string;
-  practiceId: string;
-  title: string;
-  completedAt: Date;
-  overallScore: number;
-  criterionScores: ReturnType<typeof criterionScoresSchema.parse>;
-  recommendation: string;
-};
-
 /**
  * Candidate analytics derived exclusively from persisted v2 session reports.
  *
- * Session evaluations are schema-versioned and append-only. For dashboard
- * analytics we intentionally use the newest persisted evaluation per session,
- * while older versions remain available to the report layer for reproducibility.
+ * Dashboard callers use the request-cached scored-session read model so Progress
+ * and Analytics do not independently materialize the same evaluation history.
+ * A custom database still bypasses the React cache for deterministic tests.
  */
 export async function getCandidatePracticeAnalytics(
   userId: string,
@@ -76,77 +64,17 @@ export async function getCandidatePracticeAnalytics(
     throw new Error('A candidate user id is required to load practice analytics.');
   }
 
-  const completedSessions = await database
-    .select({
-      sessionId: sessions.id,
-      practiceId: sessions.practiceId,
-      title: practiceVersions.title,
-      completedAt: sessions.completedAt,
-    })
-    .from(sessions)
-    .innerJoin(
-      practiceVersions,
-      eq(practiceVersions.id, sessions.practiceVersionId),
-    )
-    .where(
-      and(
-        eq(sessions.participantUserId, normalizedUserId),
-        eq(sessions.status, 'completed'),
-      ),
-    )
-    .orderBy(desc(sessions.completedAt));
+  const scoredSessions =
+    database === db
+      ? await getCandidateScoredSessions(normalizedUserId)
+      : await loadCandidateScoredSessions(normalizedUserId, database);
 
-  const sessionIds = completedSessions.map((session) => session.sessionId);
-  if (sessionIds.length === 0) {
-    return emptyAnalytics();
-  }
+  return buildCandidatePracticeAnalytics(scoredSessions);
+}
 
-  const evaluationRows = await database
-    .select({
-      sessionId: sessionEvaluations.sessionId,
-      overallScore: sessionEvaluations.overallScore,
-      criterionScores: sessionEvaluations.criterionScores,
-      recommendation: sessionEvaluations.recommendation,
-      createdAt: sessionEvaluations.createdAt,
-    })
-    .from(sessionEvaluations)
-    .where(inArray(sessionEvaluations.sessionId, sessionIds))
-    .orderBy(desc(sessionEvaluations.createdAt));
-
-  const latestEvaluationBySession = new Map<
-    string,
-    (typeof evaluationRows)[number]
-  >();
-
-  for (const evaluation of evaluationRows) {
-    if (!latestEvaluationBySession.has(evaluation.sessionId)) {
-      latestEvaluationBySession.set(evaluation.sessionId, evaluation);
-    }
-  }
-
-  const scoredSessions: ScoredSession[] = [];
-
-  for (const session of completedSessions) {
-    const evaluation = latestEvaluationBySession.get(session.sessionId);
-    if (!evaluation || !session.completedAt) {
-      continue;
-    }
-
-    const parsedCriteria = criterionScoresSchema.safeParse(
-      evaluation.criterionScores,
-    );
-
-    scoredSessions.push({
-      sessionId: session.sessionId,
-      practiceId: session.practiceId,
-      title: session.title,
-      completedAt: session.completedAt,
-      overallScore: Number(evaluation.overallScore),
-      criterionScores: parsedCriteria.success ? parsedCriteria.data : [],
-      recommendation: evaluation.recommendation,
-    });
-  }
-
+export function buildCandidatePracticeAnalytics(
+  scoredSessions: CandidateScoredSession[],
+): CandidatePracticeAnalytics {
   if (scoredSessions.length === 0) {
     return emptyAnalytics();
   }
@@ -189,7 +117,7 @@ export async function getCandidatePracticeAnalytics(
 }
 
 function buildCriterionPerformance(
-  scoredSessions: ScoredSession[],
+  scoredSessions: CandidateScoredSession[],
 ): CandidateCriterionPerformance[] {
   const aggregate = new Map<
     string,
@@ -237,11 +165,14 @@ function buildCriterionPerformance(
         evidenceCount: criterion.scores.length,
       };
     })
-    .sort((a, b) => b.averageScore - a.averageScore || a.name.localeCompare(b.name));
+    .sort(
+      (a, b) =>
+        b.averageScore - a.averageScore || a.name.localeCompare(b.name),
+    );
 }
 
 function buildPracticePerformance(
-  scoredSessions: ScoredSession[],
+  scoredSessions: CandidateScoredSession[],
 ): CandidatePracticePerformance[] {
   const aggregate = new Map<
     string,

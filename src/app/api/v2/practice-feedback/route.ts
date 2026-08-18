@@ -9,7 +9,6 @@ import { z } from 'zod';
 
 const feedbackRequestSchema = z.object({
   sessionId: z.string().min(1).max(160),
-  responseId: z.string().min(1).max(160),
 });
 
 const FEEDBACK_MODEL = 'gpt-5-mini';
@@ -60,29 +59,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const savedResponse = context.responses.find(
-      (response) => response.id === parsed.data.responseId,
-    );
-    if (!savedResponse) {
-      return NextResponse.json(
-        { error: 'Session or response was not found.' },
-        { status: 404 },
-      );
-    }
-
+    const currentQuestionOrder = context.session.currentQuestionOrder;
     const orderedQuestions = [...context.practiceVersion.snapshot.questions].sort(
       (a, b) => a.order - b.order,
     );
     const questionIndex = orderedQuestions.findIndex(
-      (question) =>
-        question.id === savedResponse.questionId &&
-        question.order === savedResponse.questionOrder,
+      (question) => question.order === currentQuestionOrder,
     );
     const currentQuestion = orderedQuestions[questionIndex];
 
-    if (!currentQuestion || questionIndex < 0) {
+    if (!currentQuestion || questionIndex < 0 || !currentQuestion.id) {
       return NextResponse.json(
-        { error: 'Saved response question is unavailable.' },
+        { error: 'Current practice question is unavailable.' },
+        { status: 409 },
+      );
+    }
+
+    const savedResponses = context.responses
+      .filter(
+        (response) =>
+          response.questionId === currentQuestion.id &&
+          response.questionOrder === currentQuestionOrder,
+      )
+      .sort((a, b) => b.attemptNumber - a.attemptNumber);
+    const savedResponse = savedResponses[0];
+
+    if (!savedResponse) {
+      return NextResponse.json(
+        { error: 'Save the response before requesting feedback.' },
         { status: 409 },
       );
     }

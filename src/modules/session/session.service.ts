@@ -137,7 +137,15 @@ export class SessionService {
     input: SubmitSessionResponseInput,
     actorUserId: string | null,
   ): Promise<SessionResponse> {
-    await this.requireParticipantAccess(input.sessionId, actorUserId);
+    const session = await this.requireParticipantAccess(
+      input.sessionId,
+      actorUserId,
+    );
+
+    if (session.currentQuestionOrder !== input.questionOrder) {
+      throw new Error('Responses must be submitted for the current question.');
+    }
+
     return this.repository.saveResponse(input);
   }
 
@@ -150,7 +158,15 @@ export class SessionService {
     questionOrder: number,
     actorUserId: string | null,
   ): Promise<Session> {
-    await this.requireParticipantAccess(id, actorUserId);
+    const session = await this.requireParticipantAccess(id, actorUserId);
+
+    if (
+      questionOrder !== session.currentQuestionOrder &&
+      questionOrder !== session.currentQuestionOrder + 1
+    ) {
+      throw new Error('Session progress can only advance to the next question.');
+    }
+
     return this.repository.setCurrentQuestion(id, questionOrder);
   }
 

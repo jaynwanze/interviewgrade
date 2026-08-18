@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useWalkthrough } from '@/contexts/WalkthroughContext';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
-import { Interview, InterviewAnalytics } from '@/types';
+import type { LegacyDetailedAnalytics } from '@/modules/analytics/legacy-detailed-analytics';
+import { Interview } from '@/types';
 import { Sparkles } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -30,8 +31,7 @@ export default function InterviewAnalyticsPage({
   const isTutorialMode = searchParams.get('1') === 'true';
   const mode = searchParams.get('mode');
   const [tourStarted, setTourStarted] = useState(false);
-  const [detailed, setDetailed] = useState<InterviewAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [detailed, setDetailed] = useState<LegacyDetailedAnalytics | null>(null);
 
   const mockLatestInterview: Interview = {
     id: 'mock-id',
@@ -74,7 +74,7 @@ export default function InterviewAnalyticsPage({
     return (
       <div className="flex flex-col items-center">
         <p className="text-center text-gray-500">Invalid mode selected.</p>
-        <p> Please select a valid mode to view analytics data.</p>
+        <p> Please select a valid mode.</p>
       </div>
     );
   }
@@ -87,18 +87,15 @@ export default function InterviewAnalyticsPage({
       : 'bg-purple-100 text-purple-800';
 
   useEffect(() => {
-    setLoading(true);
     if (selectedTemplateId) {
-      fetchDetailedData(selectedTemplateId, selectedMode).then((data) => {
+      void fetchDetailedData(selectedTemplateId, selectedMode).then((data) => {
         if (data) {
           setDetailed(data);
         }
       });
     }
-    setLoading(false);
   }, [selectedTemplateId, selectedMode]);
 
-  // Define tour steps specific to InterviewAnalyticsPage
   const analyticsTourSteps = [
     {
       id: 'dashboard-overview',
@@ -123,13 +120,11 @@ export default function InterviewAnalyticsPage({
     if (isTutorialMode && !tourStarted) {
       startTour(analyticsTourSteps);
       setTourStarted(true);
-      //endTutorialMode();
-      //replace router.push with endTutorialMode
     }
   }, [isTutorialMode, tourStarted, startTour]);
 
   const renderDetailed = () => {
-    if (loadingDetailed || loading) {
+    if (loadingDetailed) {
       return (
         <div className="flex flex-col items-center">
           <LoadingSpinner />
@@ -154,7 +149,7 @@ export default function InterviewAnalyticsPage({
             <div id="performance-graph">
               <InterviewAverageDetails
                 analyticsData={detailed}
-                latestInterview={mockLatestInterview!}
+                latestInterview={mockLatestInterview}
               />
               <InterviewGraphsDetailed
                 analyticsData={detailed}

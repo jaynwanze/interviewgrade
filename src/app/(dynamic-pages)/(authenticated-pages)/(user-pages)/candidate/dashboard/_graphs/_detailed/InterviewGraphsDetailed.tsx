@@ -1,7 +1,7 @@
 'use client';
 import { SentimentScore } from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
 import SentimentDisplay from '@/components/SentimentDisplay';
-import { InterviewAnalytics } from '@/types';
+import type { LegacyDetailedAnalytics } from '@/modules/analytics/legacy-detailed-analytics';
 import { motion } from 'framer-motion';
 import { AreaChartInteractiveOverallGrades } from './AreaChartInteractiveOverallGrades';
 import { RadialChartEvaluationsScoreAverages } from './RadialChartEvaluationsScoreAverages';
@@ -32,7 +32,7 @@ export function InterviewGraphsDetailed({
   analyticsData,
   sentimentAnalysis,
 }: {
-  analyticsData: InterviewAnalytics;
+  analyticsData: LegacyDetailedAnalytics;
   sentimentAnalysis: SentimentScore | null;
 }) {
   return (
@@ -45,7 +45,6 @@ export function InterviewGraphsDetailed({
       <div
         className={`grid md:grid-cols-1 lg:grid-cols-3 gap-6 mb-5 items-center`}
       >
-        {/* Sentiment Analysis */}
         {sentimentAnalysis && (
           <SentimentDisplay
             label={sentimentAnalysis.label}
@@ -64,21 +63,13 @@ export function InterviewGraphsDetailed({
           />
         </motion.div>
       </div>
-      <motion.div className="" variants={itemVariants}>
+      <motion.div variants={itemVariants}>
         <AreaChartInteractiveOverallGrades
           completedInterviewEvaluations={
             analyticsData.completed_interview_evaluations
           }
         />
       </motion.div>
-
-      {/* <motion.div className="" variants={itemVariants}>
-        <BarChartInteractiveEvaluationScores
-          completedInterviewEvaluations={
-            analyticsData.completed_interview_evaluations
-          }
-        />
-      </motion.div> */}
     </motion.div>
   );
 }

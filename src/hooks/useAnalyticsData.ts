@@ -2,7 +2,7 @@ import {
   SentimentScore,
   fetchSentiment,
 } from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
-import { getInterviewAnalytics } from '@/data/user/interviews';
+import type { LegacyDetailedAnalyticsMode } from '@/modules/analytics/legacy-detailed-analytics';
 import { getLegacyAnalyticsOverview } from '@/modules/analytics/legacy-analytics-overview';
 import type { LegacyAnalyticsOverviewItem } from '@/modules/analytics/legacy-analytics.types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
@@ -59,12 +59,11 @@ export const useAnalyticsData = (knownUserId?: string) => {
     }
   };
 
-  // Detailed analytics stay intentionally expensive and are only loaded after
-  // the candidate opens a specific skill. Sentiment is secondary enrichment:
-  // core analytics render first instead of waiting for the sentiment service.
+  // Detailed analytics load score/criterion/trend data first. Large answer
+  // transcript JSON is fetched separately only for optional sentiment enrichment.
   const fetchDetailedData = async (
     currentTemplateId: string,
-    interviewMode: string,
+    interviewMode: LegacyDetailedAnalyticsMode,
   ) => {
     try {
       setLoadingDetailed(true);
@@ -78,7 +77,11 @@ export const useAnalyticsData = (knownUserId?: string) => {
         return null;
       }
 
-      const analytics = await getInterviewAnalytics(
+      const {
+        getLegacyDetailedAnalytics,
+        getLegacyDetailedAnalyticsAnswers,
+      } = await import('@/modules/analytics/legacy-detailed-analytics');
+      const analytics = await getLegacyDetailedAnalytics(
         userId,
         currentTemplateId,
         interviewMode,
@@ -90,23 +93,21 @@ export const useAnalyticsData = (knownUserId?: string) => {
         return null;
       }
 
-      // Unblock the main analytics view before optional sentiment enrichment.
+      // Unblock the main analytics view before optional transcript + sentiment work.
       setLoadingDetailed(false);
 
-      const allAnswers = analytics.completed_interview_evaluations.flatMap(
-        (evaluation) =>
-          evaluation.question_answer_feedback.map(
-            (question) => question.answer,
-          ),
-      );
-
-      if (allAnswers.length > 0) {
-        void fetchSentiment(allAnswers)
-          .then((sentiment) => setCurrentSentimentDetailed(sentiment))
-          .catch((sentimentError) => {
-            console.error('Sentiment enrichment unavailable:', sentimentError);
-          });
-      }
+      void getLegacyDetailedAnalyticsAnswers(
+        userId,
+        currentTemplateId,
+        interviewMode,
+      )
+        .then((answers) =>
+          answers.length > 0 ? fetchSentiment(answers) : Promise.resolve(null),
+        )
+        .then((sentiment) => setCurrentSentimentDetailed(sentiment))
+        .catch((sentimentError) => {
+          console.error('Sentiment enrichment unavailable:', sentimentError);
+        });
 
       return analytics;
     } catch (err) {

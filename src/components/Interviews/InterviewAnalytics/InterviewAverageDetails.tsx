@@ -2,9 +2,9 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
-import { Interview, InterviewAnalytics } from '@/types';
+import type { LegacyDetailedAnalytics } from '@/modules/analytics/legacy-detailed-analytics';
+import { Interview } from '@/types';
 import { getBadgeColor } from '@/utils/getBadgeColour';
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { ClipboardList, Star, Trophy } from 'lucide-react';
 import { TemplateOverview } from './TemplateOverview';
 
@@ -12,19 +12,16 @@ export const InterviewAverageDetails = ({
   analyticsData,
   latestInterview,
 }: {
-  analyticsData: InterviewAnalytics;
+  analyticsData: LegacyDetailedAnalytics;
   latestInterview: Interview;
 }) => {
   const gridsColsSpanNum = analyticsData.interview_template_id ? 4 : 3;
   return (
     <>
-      {/* Key Metrics Grid */}
       <div
         className={`grid xs:grid-cols-1 md:grid-cols-2 lg:grid-cols-${gridsColsSpanNum} gap-6 mb-5 items-center`}
       >
-        {/* Template over view */}
         <TemplateOverview analyticsData={analyticsData} />
-        {/* Overall Grade + Best sub Skill Badge */}
         <Card className="flex flex-col justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
           <Trophy className="w-10 h-10 text-yellow-500" />
           <CardTitle className="mt-2">Current Grade Average</CardTitle>
@@ -41,18 +38,10 @@ export const InterviewAverageDetails = ({
               variant="outline"
               className="mt-1 text-sm px-3 py-1 rounded-full bg-gradient-to-r from-green-400 via-green-300 to-green-200 text-green-900 shadow-md"
             >
-              {analyticsData.best_evaluation_crieria ? (
-                <>{analyticsData.best_evaluation_crieria}</>
-              ) : (
-                'No Data Available'
-              )}
+              {analyticsData.best_evaluation_crieria || 'No Data Available'}
             </Badge>
-            {/* <p className="text-gray-500 mt-2">
-              Performance averaged over all sessions.
-            </p> */}
           </div>
         </Card>
-        {/* Average Mark Per Question */}
         {analyticsData.interview_template_id && (
           <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
             <Star className="w-10 h-10 text-purple-500" />
@@ -71,20 +60,12 @@ export const InterviewAverageDetails = ({
           </Card>
         )}
         <Card className="flex flex-col md:col-span-2 lg:col-span-1 justify-center items-center h-full shadow-lg rounded-lg text-center p-6 transform transition hover:scale-105">
-          {/* Total Sessions Count */}
           <ClipboardList className="w-10 h-10 text-blue-500" />
           <CardTitle className="mt-2">Total Completed Sessions</CardTitle>
           <div>
             <p className="text-4xl font-bold text-gray-900">
               {analyticsData.total_interviews || 0}
             </p>
-            {/* <a
-              href={`/candidate/interview-history/${latestInterview.id}`}
-              className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline transition p-1"
-            >
-              <MagnifyingGlassIcon className="inline w-4 h-4 mr-1" />
-              View latest session history
-            </a> */}
           </div>
         </Card>
       </div>

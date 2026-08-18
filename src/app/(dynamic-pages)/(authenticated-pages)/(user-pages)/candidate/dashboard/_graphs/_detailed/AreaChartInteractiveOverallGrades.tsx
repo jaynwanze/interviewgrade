@@ -22,8 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { InterviewEvaluation } from '@/types';
-import { useEffect, useState } from 'react';
+import type { LegacyAnalyticsTrendEvaluation } from '@/modules/analytics/legacy-detailed-analytics';
+import { useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 export type rawDataTypeChart = {
@@ -46,66 +46,45 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-// Helper function to group by date and calculate the average grade
 function aggregateDataByDate(data: rawDataTypeChart) {
-  const aggregated: rawDataTypeChart = [];
+  const byDate = new Map<string, { total: number; count: number }>();
 
-  data.forEach(({ date, interview_grade }) => {
-    if (!aggregated[date]) {
-      aggregated[date] = { date, interview_grade, count: 1 };
+  for (const { date, interview_grade } of data) {
+    const existing = byDate.get(date);
+    if (existing) {
+      existing.total += interview_grade;
+      existing.count += 1;
     } else {
-      aggregated[date].interview_grade += interview_grade;
-      aggregated[date].count += 1;
+      byDate.set(date, { total: interview_grade, count: 1 });
     }
-  });
+  }
 
-  // Convert the aggregated data into an array sorted by date
-  const aggregatedArray = Object.values(aggregated)
-    .map(({ date, interview_grade, count }) => ({
+  return Array.from(byDate.entries())
+    .map(([date, value]) => ({
       date,
-      interview_grade: interview_grade / count,
-      count,
+      interview_grade: value.total / value.count,
+      count: value.count,
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  return aggregatedArray;
 }
 
 export function AreaChartInteractiveOverallGrades({
   completedInterviewEvaluations,
 }: {
-  completedInterviewEvaluations: InterviewEvaluation[];
+  completedInterviewEvaluations: LegacyAnalyticsTrendEvaluation[];
 }) {
   const [timeRange, setTimeRange] = useState('90d');
-  let rawChartData: rawDataTypeChart = [];
-  const [chartData, setChartData] = useState<rawDataTypeChart>(
-    aggregateDataByDate(rawChartData),
-  );
-  const [interviewEvaluations, setInterviewEvalutations] = useState<
-    InterviewEvaluation[]
-  >([]);
-
-  const fetchInterviews = async () => {
-    try {
-      rawChartData = completedInterviewEvaluations.map((interviewEval) => {
-        return {
-          date: interviewEval.created_at.split('T')[0],
-          interview_grade: interviewEval.overall_grade,
+  const chartData = useMemo(
+    () =>
+      aggregateDataByDate(
+        completedInterviewEvaluations.map((evaluation) => ({
+          date: evaluation.created_at.split('T')[0],
+          interview_grade: evaluation.overall_grade,
           count: 1,
-        };
-      });
-      if (rawChartData.length === 0) {
-        return;
-      }
-      setChartData(aggregateDataByDate(rawChartData));
-    } catch (error) {
-      console.error('Failed to fetch interviews:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchInterviews();
-  }, [completedInterviewEvaluations]);
+        })),
+      ),
+    [completedInterviewEvaluations],
+  );
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
@@ -120,14 +99,8 @@ export function AreaChartInteractiveOverallGrades({
     return date >= now;
   });
 
-  let timeRangeString: string;
-  if (timeRange === '90d') {
-    timeRangeString = '3 months';
-  } else if (timeRange === '30d') {
-    timeRangeString = '30 days';
-  } else {
-    timeRangeString = '7 days';
-  }
+  const timeRangeString =
+    timeRange === '90d' ? '3 months' : timeRange === '30d' ? '30 days' : '7 days';
 
   return (
     <Card className="transform transition hover:scale-105">

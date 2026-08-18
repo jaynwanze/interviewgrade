@@ -15,8 +15,10 @@ import type { CandidateSessionHistoryItem } from '@/modules/session/candidate-se
 
 export function V2PracticeHistoryList({
   sessions,
+  totalCount = sessions.length,
 }: {
   sessions: CandidateSessionHistoryItem[];
+  totalCount?: number;
 }) {
   if (sessions.length === 0) {
     return null;
@@ -32,7 +34,7 @@ export function V2PracticeHistoryList({
           </p>
         </div>
         <span className="text-xs text-muted-foreground">
-          {sessions.length} session{sessions.length === 1 ? '' : 's'}
+          {totalCount} session{totalCount === 1 ? '' : 's'}
         </span>
       </div>
 

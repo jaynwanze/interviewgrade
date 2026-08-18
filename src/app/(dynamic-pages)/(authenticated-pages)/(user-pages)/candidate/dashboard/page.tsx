@@ -18,16 +18,10 @@ type V2ProgressData = {
 
 async function loadV2Progress(userId: string): Promise<V2ProgressData | null> {
   try {
-    const {
-      listCandidateSessionHistory,
-      summarizeCandidateSessionHistory,
-    } = await import('@/modules/session/candidate-session-history');
-    const history = await listCandidateSessionHistory(userId);
-
-    return {
-      summary: summarizeCandidateSessionHistory(history),
-      recentSessions: history.slice(0, 5),
-    };
+    const { getCandidateSessionProgress } = await import(
+      '@/modules/session/candidate-session-history'
+    );
+    return await getCandidateSessionProgress(userId);
   } catch (error) {
     console.error('CandidateDashboard: v2 progress unavailable', error);
     return null;

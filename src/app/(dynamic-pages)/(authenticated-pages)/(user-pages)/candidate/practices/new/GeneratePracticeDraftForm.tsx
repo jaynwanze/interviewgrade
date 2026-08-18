@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, WandSparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
 
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ function GenerateButton() {
       {pending ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (
-        <WandSparkles className="mr-2 h-4 w-4" />
+        <Sparkles className="mr-2 h-4 w-4" />
       )}
       {pending ? 'Generating draft…' : 'Generate with AI'}
     </Button>

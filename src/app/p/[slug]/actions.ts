@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
+
 const participantFormSchema = z.object({
   name: z.preprocess(
     (value) => (typeof value === 'string' && value.trim() ? value : null),
@@ -32,6 +34,7 @@ export async function startPublicPracticeSessionAction(
     redirect(`/p/${encodeURIComponent(normalizedSlug)}?error=details`);
   }
 
+  const loggedInUser = await serverGetOptionalLoggedInUser();
   let publishedVersionId: string | null = null;
 
   try {
@@ -58,10 +61,14 @@ export async function startPublicPracticeSessionAction(
       '@/modules/session/session.service'
     );
     const service = createPublicSessionService();
-    const session = await service.createPublic(publishedVersionId, {
-      name: participant.data.name,
-      email: participant.data.email,
-    });
+    const session = await service.createPublic(
+      publishedVersionId,
+      {
+        name: participant.data.name,
+        email: participant.data.email,
+      },
+      loggedInUser?.id ?? null,
+    );
     sessionId = session.id;
   } catch (error) {
     console.error(

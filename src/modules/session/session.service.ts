@@ -31,14 +31,16 @@ export class SessionService {
   async createPublic(
     practiceVersionId: string,
     participantInput: PublicParticipant = {},
+    participantUserId: string | null = null,
   ): Promise<Session> {
     const participant = publicParticipantSchema.parse(participantInput);
 
     // The repository independently verifies this is the stable practice's
-    // current published version. The service keeps the public API narrow.
+    // current published version. Public links remain anonymous-capable, but a
+    // logged-in candidate id can be attached so their history is durable.
     return this.repository.create({
       practiceVersionId,
-      participantUserId: null,
+      participantUserId,
       participantName: participant.name ?? null,
       participantEmail: participant.email ?? null,
     });

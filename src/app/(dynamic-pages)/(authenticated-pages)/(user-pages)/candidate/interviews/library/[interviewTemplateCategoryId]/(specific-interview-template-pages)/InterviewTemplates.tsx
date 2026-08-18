@@ -66,9 +66,7 @@ export function InterviewTemplates({
   const handleCreateCustomInterviewClick = () => {
     if (!sessionAccess?.isPro) {
       setShowUpgradePrompt(true);
-      return;
     }
-    setShowCustomInterviewDialog(true);
   };
 
   const fetchInterviews = async () => {
@@ -162,30 +160,27 @@ export function InterviewTemplates({
               isPro={sessionAccess.isPro}
             />
 
-            <Button
-              onClick={handleCreateCustomInterviewClick}
-              variant={sessionAccess.isPro ? 'default' : 'outline'}
-              // className={
-              //   sessionAccess.isPro
-              //     ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600'
-              //     : ''
-              // }
-            >
-              {sessionAccess.isPro ? (
-                <>
-                  <CreateCustomInterviewDialog
-                    open={showCustomInterviewDialog}
-                    onOpenChange={setShowCustomInterviewDialog}
-                  />
-                </>
-              ) : (
-                <>
-                  <Lock className="mr-2 h-4 w-4" />
-                  Custom Interview
-                  <ProBadge className="ml-2" />
-                </>
-              )}
-            </Button>
+            {sessionAccess.isPro ? (
+              <CreateCustomInterviewDialog
+                open={showCustomInterviewDialog}
+                onOpenChange={setShowCustomInterviewDialog}
+                trigger={
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Custom Interview
+                  </Button>
+                }
+              />
+            ) : (
+              <Button
+                onClick={handleCreateCustomInterviewClick}
+                variant="outline"
+              >
+                <Lock className="mr-2 h-4 w-4" />
+                Custom Interview
+                <ProBadge className="ml-2" />
+              </Button>
+            )}
           </div>
         </div>
       )}

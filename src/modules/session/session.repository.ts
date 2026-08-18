@@ -62,6 +62,7 @@ function mapResponse(row: SessionResponseRow): SessionResponse {
     transcript: row.transcript,
     audioStoragePath: row.audioObjectPath,
     durationSeconds: row.durationSeconds,
+    attemptNumber: row.attemptNumber,
     submittedAt: row.submittedAt,
   });
 }

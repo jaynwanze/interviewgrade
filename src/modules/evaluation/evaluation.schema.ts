@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const criterionScoreSchema = z.object({
   criterionId: z.string().min(1),
@@ -18,6 +18,7 @@ export const responseEvaluationSchema = z.object({
   sessionResponseId: z.string().min(1),
   overallScore: z.number().min(0).max(100),
   criterionScores: z.array(criterionScoreSchema),
+  summary: z.string().min(1).optional().nullable(),
   strengths: z.array(z.string().min(1)),
   improvements: z.array(z.string().min(1)),
   recommendation: z.string().min(1),
@@ -31,6 +32,7 @@ export const sessionEvaluationSchema = z.object({
   sessionId: z.string().min(1),
   overallScore: z.number().min(0).max(100),
   criterionScores: z.array(criterionScoreSchema),
+  summary: z.string().min(1).optional().nullable(),
   strengths: z.array(z.string().min(1)),
   improvements: z.array(z.string().min(1)),
   recommendation: z.string().min(1),
@@ -47,8 +49,18 @@ export type ResponseEvaluation = z.infer<typeof responseEvaluationSchema>;
 export type SessionEvaluation = z.infer<typeof sessionEvaluationSchema>;
 
 export interface EvaluationRepository {
-  getResponseEvaluation(responseId: string): Promise<ResponseEvaluation | null>;
-  getSessionEvaluation(sessionId: string): Promise<SessionEvaluation | null>;
+  getResponseEvaluation(
+    responseId: string,
+    schemaVersion: string,
+  ): Promise<ResponseEvaluation | null>;
+  getSessionEvaluation(
+    sessionId: string,
+    schemaVersion: string,
+  ): Promise<SessionEvaluation | null>;
+  listSessionResponseEvaluations(
+    sessionId: string,
+    schemaVersion: string,
+  ): Promise<ResponseEvaluation[]>;
   saveResponseEvaluation(
     evaluation: ResponseEvaluation,
   ): Promise<ResponseEvaluation>;

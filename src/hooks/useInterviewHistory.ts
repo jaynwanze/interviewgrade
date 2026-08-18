@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
 import { getInterviewHistory } from '@/data/user/interviews';
 import { Interview } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { useEffect, useState } from 'react';
 
-export const useInterviewHistory = () => {
+export const useInterviewHistory = (knownUserId?: string) => {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [filteredInterviews, setFilteredInterviews] = useState<Interview[]>([]);
   const [activeTab, setActiveTab] = useState<
@@ -23,25 +23,30 @@ export const useInterviewHistory = () => {
 
   const fetchInterviewHistory = async () => {
     try {
-      const user = await serverGetLoggedInUser();
-      const userId = user.id;
+      const userId =
+        knownUserId ?? (await serverGetLoggedInUser()).id;
       const data = await getInterviewHistory(userId);
       if (!data) {
-        console.error('No interview history found');
+        setInterviews([]);
+        setFilteredInterviews([]);
         return;
       }
       setInterviews(data);
       setFilteredInterviews(data);
-    } catch (error) {
-      console.error('Error fetching interview history:', error);
-      setError(error.message || 'Failed to fetch interview history');
+    } catch (caughtError) {
+      console.error('Error fetching interview history:', caughtError);
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Failed to fetch interview history',
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInterviewHistory();
+    void fetchInterviewHistory();
   }, []);
 
   const handleTabChange = (
@@ -56,16 +61,15 @@ export const useInterviewHistory = () => {
     setActiveSwitch(switchMode);
   };
 
-  // Apply filters whenever activeTab or activeSwitch changes
   useEffect(() => {
     let filtered = [...interviews];
 
-    // Filter based on activeSwitch
     if (activeSwitch === 'Practice Mode') {
       filtered = filtered.filter((i) => i.mode === 'practice');
-    } else if (activeSwitch === 'Interview Mode') {
+    } else {
       filtered = filtered.filter((i) => i.mode === 'interview');
     }
+
     setCounts({
       all: filtered.length,
       completed: filtered.filter((i) => i.status === 'completed').length,
@@ -73,7 +77,6 @@ export const useInterviewHistory = () => {
       notStarted: filtered.filter((i) => i.status === 'not_started').length,
     });
 
-    // Further filter based on activeTab
     switch (activeTab) {
       case 'Completed':
         filtered = filtered.filter((i) => i.status === 'completed');
@@ -86,7 +89,6 @@ export const useInterviewHistory = () => {
         break;
       case 'All':
       default:
-        // No additional filtering
         break;
     }
 

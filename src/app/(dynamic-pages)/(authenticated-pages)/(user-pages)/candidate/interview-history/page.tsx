@@ -21,5 +21,5 @@ export default async function InterviewHistory() {
   const user = await serverGetLoggedInUser();
   const v2Sessions = await loadV2History(user.id);
 
-  return <InterviewHistoryPage v2Sessions={v2Sessions} />;
+  return <InterviewHistoryPage userId={user.id} v2Sessions={v2Sessions} />;
 }

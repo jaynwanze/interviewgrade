@@ -2,118 +2,66 @@ import {
   SentimentScore,
   fetchSentiment,
 } from '@/components/Interviews/InterviewHistory/InterviewHistoryDetails';
-import {
-  getInterviewAnalytics,
-  getTotalCompletedInterviews,
-} from '@/data/user/interviews';
-import { Interview, InterviewAnalytics } from '@/types';
+import { getInterviewAnalytics } from '@/data/user/interviews';
+import { getLegacyAnalyticsOverview } from '@/modules/analytics/legacy-analytics-overview';
+import type { LegacyAnalyticsOverviewItem } from '@/modules/analytics/legacy-analytics.types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import { useState } from 'react';
-export const useAnalyticsData = () => {
+import { useRef, useState } from 'react';
+
+type AnalyticsMode = LegacyAnalyticsOverviewItem['mode'];
+
+export const useAnalyticsData = (knownUserId?: string) => {
   const [loadingOverview, setLoadingOverview] = useState(true);
   const [loadingDetailed, setLoadingDetailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [overview, setOverview] = useState<{
-    completedInterviews: Interview[] | null;
-    interviewAnalytics: InterviewAnalytics[] | null;
-  }>({
-    completedInterviews: [],
-    interviewAnalytics: [],
-  });
+  const [overview, setOverview] = useState<LegacyAnalyticsOverviewItem[]>([]);
   const [currentSentimentDetailed, setCurrentSentimentDetailed] =
     useState<SentimentScore | null>(null);
+  const overviewCache = useRef<
+    Partial<Record<AnalyticsMode, LegacyAnalyticsOverviewItem[]>>
+  >({});
 
-  // Fetch Overview Data
-  const fetchOverviewData = async (mode: string) => {
+  const resolveUserId = async () => {
+    if (knownUserId) {
+      return knownUserId;
+    }
+
+    const user = await serverGetLoggedInUser();
+    return user.id;
+  };
+
+  // Dashboard overview: fetch only the fields required by the skill cards.
+  // Results are cached per mode for this page visit so switching back does not
+  // repeat the same database work.
+  const fetchOverviewData = async (mode: AnalyticsMode) => {
+    const cached = overviewCache.current[mode];
+    if (cached) {
+      setOverview(cached);
+      setError(null);
+      setLoadingOverview(false);
+      return;
+    }
+
     try {
       setLoadingOverview(true);
       setError(null);
 
-      const user = await serverGetLoggedInUser();
-      if (!user || !user.id) {
-        console.error('User not found');
-        return;
-      }
-      setUserId(user.id);
+      const userId = await resolveUserId();
+      const summaries = await getLegacyAnalyticsOverview(userId, mode);
 
-      // Fetch all completed interviews
-      const completedInterviews = await getTotalCompletedInterviews(user.id);
-      if (!completedInterviews || completedInterviews.length === 0) {
-        setError('No completed interviews found.');
-        console.error('No completed interviews found.');
-        setLoadingOverview(false);
-        return;
-      }
-
-      // Filter interviews based on the selected mode
-      const filteredInterviews = completedInterviews.filter((interview) => {
-        if (mode === 'Practice Mode') {
-          return interview.template_id !== null; // Only include practice interviews
-        } else if (mode === 'Interview Mode') {
-          return interview.interview_template_id !== null; // Only include real interviews
-        }
-        return false;
-      });
-
-      // Filter unique templates with at least one completed interview
-      const uniqueTemplates = new Set<string>();
-      const filteredTemplates = filteredInterviews.filter((interview) => {
-        if (
-          uniqueTemplates.has(
-            mode === 'Practice Mode'
-              ? interview.template_id
-              : interview.interview_template_id,
-          )
-        ) {
-          return false;
-        }
-        uniqueTemplates.add(
-          mode === 'Practice Mode'
-            ? interview.template_id
-            : interview.interview_template_id,
-        );
-        return true;
-      });
-
-      // Fetch detailed analytics for each template
-      const interviewAnalytics = (
-        await Promise.all(
-          filteredTemplates.map((interview) =>
-            getInterviewAnalytics(
-              user.id,
-              mode === 'Practice Mode'
-                ? interview.template_id
-                : interview.interview_template_id,
-              mode,
-            ),
-          ),
-        )
-      ).filter(
-        (analytics): analytics is InterviewAnalytics => analytics !== null,
-      );
-
-      if (!interviewAnalytics || interviewAnalytics.length === 0) {
-        setError('Failed to fetch interview analytics data.');
-        console.error('Failed to fetch interview analytics data.');
-        setLoadingOverview(false);
-        return;
-      }
-
-      // Update the overview state
-      setOverview({
-        completedInterviews: filteredInterviews,
-        interviewAnalytics,
-      });
-      setLoadingOverview(false);
+      overviewCache.current[mode] = summaries;
+      setOverview(summaries);
     } catch (err) {
-      setLoadingOverview(false);
       setError('Failed to fetch overview analytics data.');
       console.error('Error fetching overview data:', err);
+    } finally {
+      setLoadingOverview(false);
     }
   };
 
-  // Fetch Detailed Data
+  // Detailed analytics stay intentionally expensive and are only loaded after
+  // the candidate opens a specific skill. Sentiment is secondary enrichment:
+  // core analytics render first instead of waiting for the sentiment service.
   const fetchDetailedData = async (
     currentTemplateId: string,
     interviewMode: string,
@@ -121,36 +69,29 @@ export const useAnalyticsData = () => {
     try {
       setLoadingDetailed(true);
       setError(null);
+      setCurrentSentimentDetailed(null);
 
-      const user = await serverGetLoggedInUser();
-      if (!user || !user.id) {
-        console.error('User not found');
-        setError('User not found.');
-        setLoadingDetailed(false);
-        return null;
-      }
-
-      const templateId = currentTemplateId;
-      if (!templateId) {
+      const userId = await resolveUserId();
+      if (!currentTemplateId) {
         setError('Template ID not found.');
-        console.error('Template ID not found.');
         setLoadingDetailed(false);
         return null;
       }
-
-      setUserId(user.id);
 
       const analytics = await getInterviewAnalytics(
-        user.id,
-        templateId,
+        userId,
+        currentTemplateId,
         interviewMode,
       );
+
       if (!analytics) {
         setError('No detailed analytics returned.');
-        console.error('No detailed analytics returned.');
         setLoadingDetailed(false);
         return null;
       }
+
+      // Unblock the main analytics view before optional sentiment enrichment.
+      setLoadingDetailed(false);
 
       const allAnswers = analytics.completed_interview_evaluations.flatMap(
         (evaluation) =>
@@ -159,10 +100,14 @@ export const useAnalyticsData = () => {
           ),
       );
 
-      const sentiment = await fetchSentiment(allAnswers);
-      setCurrentSentimentDetailed(sentiment);
+      if (allAnswers.length > 0) {
+        void fetchSentiment(allAnswers)
+          .then((sentiment) => setCurrentSentimentDetailed(sentiment))
+          .catch((sentimentError) => {
+            console.error('Sentiment enrichment unavailable:', sentimentError);
+          });
+      }
 
-      setLoadingDetailed(false);
       return analytics;
     } catch (err) {
       console.error('Error fetching detailed analytics:', err);

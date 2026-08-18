@@ -2,16 +2,21 @@
 
 import { InterviewHistoryFilter } from '@/components/Interviews/InterviewHistory/InterviewHistoryFilter';
 import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/InterviewHistoryList';
+import { V2PracticeHistoryList } from '@/components/Interviews/InterviewHistory/V2PracticeHistoryList';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useInterviewHistory } from '@/hooks/useInterviewHistory';
+import type { CandidateSessionHistoryItem } from '@/modules/session/candidate-session-history';
 import { useMemo } from 'react';
 
-export default function InterviewHistoryPage() {
+export default function InterviewHistoryPage({
+  v2Sessions,
+}: {
+  v2Sessions: CandidateSessionHistoryItem[];
+}) {
   const {
-    interviews,
     filteredInterviews,
     activeTab,
     activeSwitch,
@@ -22,30 +27,49 @@ export default function InterviewHistoryPage() {
     handleSwitchChange,
   } = useInterviewHistory();
 
-  const memoizedValues = useMemo(
-    () => ({
-      interviews,
-      filteredInterviews,
-      activeTab,
-      activeSwitch,
-      counts,
-      loading,
-      error,
-      handleTabChange,
-      handleSwitchChange,
-    }),
-    [
-      interviews,
-      filteredInterviews,
-      activeTab,
-      activeSwitch,
-      counts,
-      loading,
-      error,
-    ],
-  );
+  const filteredV2Sessions = useMemo(() => {
+    if (activeSwitch !== 'Practice Mode') {
+      return [];
+    }
 
-  if (memoizedValues.loading) {
+    return v2Sessions.filter((session) => {
+      switch (activeTab) {
+        case 'Completed':
+          return session.status === 'completed';
+        case 'Not Completed':
+          return session.status === 'in_progress' || session.status === 'abandoned';
+        case 'Not Started':
+          return session.status === 'created';
+        case 'All':
+        default:
+          return true;
+      }
+    });
+  }, [activeSwitch, activeTab, v2Sessions]);
+
+  const combinedCounts = useMemo(() => {
+    if (activeSwitch !== 'Practice Mode') {
+      return counts;
+    }
+
+    return {
+      all: counts.all + v2Sessions.length,
+      completed:
+        counts.completed +
+        v2Sessions.filter((session) => session.status === 'completed').length,
+      notCompleted:
+        counts.notCompleted +
+        v2Sessions.filter(
+          (session) =>
+            session.status === 'in_progress' || session.status === 'abandoned',
+        ).length,
+      notStarted:
+        counts.notStarted +
+        v2Sessions.filter((session) => session.status === 'created').length,
+    };
+  }, [activeSwitch, counts, v2Sessions]);
+
+  if (loading) {
     return (
       <div className="flex flex-col items-center">
         <LoadingSpinner />
@@ -53,13 +77,15 @@ export default function InterviewHistoryPage() {
     );
   }
 
-  if (memoizedValues.error) {
+  if (error && v2Sessions.length === 0) {
     return <div className="text-center p-4">{error}</div>;
   }
 
+  const showLegacyList =
+    filteredInterviews.length > 0 || filteredV2Sessions.length === 0;
+
   return (
     <div className="max-w-5xl mx-auto">
-      {/* Page Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-1">Interview History</h1>
         <p className="text-gray-500">
@@ -69,38 +95,48 @@ export default function InterviewHistoryPage() {
 
       <Separator className="my-4" />
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-        {/* Filters */}
         <InterviewHistoryFilter
-          activeTab={memoizedValues.activeTab}
-          counts={memoizedValues.counts}
-          onTabChange={memoizedValues.handleTabChange}
+          activeTab={activeTab}
+          counts={combinedCounts}
+          onTabChange={handleTabChange}
         />
 
-        {/* Mode Toggle */}
         <Label htmlFor="history-mode" className="text-sm font-medium">
-          {memoizedValues.activeSwitch === 'Interview Mode'
-            ? 'Interview Mode'
-            : 'Practice Mode'}
+          {activeSwitch === 'Interview Mode' ? 'Interview Mode' : 'Practice Mode'}
         </Label>
         <Switch
           id="history-mode"
-          checked={memoizedValues.activeSwitch === 'Interview Mode'}
+          checked={activeSwitch === 'Interview Mode'}
           onCheckedChange={() =>
             handleSwitchChange(
-              memoizedValues.activeSwitch === 'Practice Mode'
+              activeSwitch === 'Practice Mode'
                 ? 'Interview Mode'
                 : 'Practice Mode',
             )
           }
         />
       </div>
-      <Separator className="my-4 " />
+      <Separator className="my-4" />
 
-      {/* Interview List */}
-      <InterviewHistoryList
-        interviews={memoizedValues.filteredInterviews}
-        interviewModeToggle={memoizedValues.activeSwitch}
-      />
+      {error && v2Sessions.length > 0 && (
+        <div className="mx-auto mb-4 w-full max-w-4xl rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+          Older interview history could not be loaded, but your new Practice
+          sessions are still available below.
+        </div>
+      )}
+
+      <div className="space-y-6">
+        {activeSwitch === 'Practice Mode' && (
+          <V2PracticeHistoryList sessions={filteredV2Sessions} />
+        )}
+
+        {showLegacyList && (
+          <InterviewHistoryList
+            interviews={filteredInterviews}
+            interviewModeToggle={activeSwitch}
+          />
+        )}
+      </div>
     </div>
   );
 }

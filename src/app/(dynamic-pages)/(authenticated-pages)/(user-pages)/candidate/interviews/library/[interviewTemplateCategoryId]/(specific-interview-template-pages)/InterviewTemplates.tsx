@@ -14,6 +14,7 @@ import {
   getInterviewTemplatesByCategory,
   getPracticeTemplatesByCategoryAndMode,
 } from '@/data/user/templates';
+import { canStartV2AwarePracticeSessionAction } from '@/modules/session/session-usage.actions';
 import {
   COMING_SOON_MOCK_TEMPLATES,
   COMING_SOON_TEMPLATES,
@@ -59,7 +60,6 @@ export function InterviewTemplates({
   const interviewModeString = isPracticeMode
     ? 'Practice Mode'
     : 'Mock Interview';
-  // Determine badge color and icon based on mode
   const modeBadge =
     interviewMode === INTERVIEW_INTERVIEW_MODE
       ? 'bg-blue-500 text-white'
@@ -79,11 +79,9 @@ export function InterviewTemplates({
           INTERVIEW_PRACTICE_MODE,
           'Soft Skills',
         );
-        // Combine real templates + placeholders
         const combined = [...data, ...COMING_SOON_TEMPLATES];
         setPracticeTemplates(combined);
       } else {
-        // same logic for interviewTemplates
         const data = await getInterviewTemplatesByCategory('Soft Skills');
         const combined = [...data, ...COMING_SOON_MOCK_TEMPLATES];
         setInterviewTemplates(combined);
@@ -101,14 +99,14 @@ export function InterviewTemplates({
 
   useEffect(() => {
     const checkAccess = async () => {
-      const mode = isPracticeMode ? 'practice' : 'interview';
-      const access = await canStartSession(mode);
+      const access = isPracticeMode
+        ? await canStartV2AwarePracticeSessionAction()
+        : await canStartSession('interview');
       setSessionAccess(access);
     };
     checkAccess();
   }, [interviewMode, isPracticeMode]);
 
-  // Filter templates based on search query
   let filteredTemplates: (PracticeTemplate | InterviewTemplate)[] = [];
   if (isPracticeMode) {
     filteredTemplates = practiceTemplates.filter((template) =>
@@ -147,7 +145,6 @@ export function InterviewTemplates({
         </div>
       </div>
 
-      {/* Usage Display & Custom Interview Button */}
       {sessionAccess && (
         <div className="mb-4 p-4 border rounded-lg bg-muted/50">
           <div className="flex items-center justify-between">
@@ -223,7 +220,6 @@ export function InterviewTemplates({
         </div>
       )}
 
-      {/* Upgrade Prompt (Free users) */}
       <UpgradePrompt
         open={showUpgradePrompt}
         onOpenChange={setShowUpgradePrompt}

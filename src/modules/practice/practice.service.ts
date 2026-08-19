@@ -8,6 +8,10 @@ import {
   type PracticeVersion,
 } from '@/modules/practice/practice.schema';
 import { DrizzlePracticeRepository } from '@/modules/practice/practice.repository';
+import {
+  isLegacyPracticeImportBridgeUnavailable,
+  listLegacyImportedPracticeIds,
+} from '@/modules/practice/legacy-practice-import.repository';
 import { ensurePersonalWorkspace } from '@/modules/workspace/personal-workspace';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
@@ -22,6 +26,7 @@ export class PracticeService {
   constructor(
     private readonly repository: PracticeRepository,
     private readonly workspaceId: string,
+    private readonly actorUserId?: string,
   ) {}
 
   private assertOwnedByWorkspace(practice: Practice): void {
@@ -31,7 +36,33 @@ export class PracticeService {
   }
 
   async listMine(): Promise<Practice[]> {
-    return this.repository.listByOrganization(this.workspaceId);
+    const practices = await this.repository.listByOrganization(this.workspaceId);
+
+    if (!this.actorUserId) {
+      return practices;
+    }
+
+    // Built-in catalog templates are materialized into ordinary v2 Practice
+    // containers for runtime/versioning, but they are not authored content and
+    // should not pollute the candidate's "My Practices" library.
+    //
+    // Vercel does not apply SQL migrations during `next build`. If code reaches
+    // production before the transitional bridge migration, keep the authored
+    // library usable and simply skip this hiding layer until the table exists.
+    try {
+      const importedPracticeIds = await listLegacyImportedPracticeIds(
+        this.actorUserId,
+      );
+
+      return practices.filter(
+        (practice) => !importedPracticeIds.has(practice.id),
+      );
+    } catch (error) {
+      if (isLegacyPracticeImportBridgeUnavailable(error)) {
+        return practices;
+      }
+      throw error;
+    }
   }
 
   async getById(id: string): Promise<Practice | null> {
@@ -79,7 +110,7 @@ export async function createAuthenticatedPracticeService(): Promise<PracticeServ
   const workspaceId = await ensurePersonalWorkspace(user.id);
   const repository = new DrizzlePracticeRepository(user.id);
 
-  return new PracticeService(repository, workspaceId);
+  return new PracticeService(repository, workspaceId, user.id);
 }
 
 /**

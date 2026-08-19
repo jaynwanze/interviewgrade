@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToastMutation } from '@/hooks/useToastMutation';
+import { startBuiltInPracticeSessionAction } from '@/modules/practice/built-in-practice.actions';
 import { startLegacySessionAction } from '@/modules/session/legacy-session.actions';
 import {
   InterviewModeType,
@@ -50,11 +51,24 @@ export default function InterviewDetailsDialog({
       ? 'You will receive live feedback after each question and then an'
       : 'You will receive an';
 
-  // The function that attempts to start the interview
   const { mutate: handleClick } = useToastMutation(
     async () => {
       setIsStarting(true);
-      // Start the interview
+
+      if (interviewMode === 'practice') {
+        const { sessionId, runtime } = await startBuiltInPracticeSessionAction(
+          selectedTemplate.id,
+        );
+        router.push(
+          runtime === 'v2'
+            ? `/session/${sessionId}`
+            : `/candidate/interviews/session/${sessionId}`,
+        );
+        return;
+      }
+
+      // Mock Interview remains on the proven legacy runtime during the Practice
+      // cutover. Only built-in Practice cards switch to v2 in this slice.
       const interview = await startLegacySessionAction(
         selectedTemplate,
         interviewMode,

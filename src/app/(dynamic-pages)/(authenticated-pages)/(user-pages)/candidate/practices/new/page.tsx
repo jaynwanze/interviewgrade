@@ -16,6 +16,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { GeneratePracticeDraftForm } from './GeneratePracticeDraftForm';
 import { createPracticeAction } from './actions';
 
+export const maxDuration = 60;
+
 type CreatePracticePageProps = {
   searchParams?: {
     error?: string;

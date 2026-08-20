@@ -4,18 +4,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
 import * as schema from './schema';
-
-function getDatabaseUrl() {
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    throw new Error(
-      'DATABASE_URL is required for server-side InterviewGrade persistence.',
-    );
-  }
-
-  return databaseUrl;
-}
+import { getSupabaseDatabaseUrl } from './database-url';
 
 type PostgresClient = ReturnType<typeof postgres>;
 
@@ -25,7 +14,7 @@ const globalForDatabase = globalThis as typeof globalThis & {
 
 const client =
   globalForDatabase.interviewGradePostgresClient ??
-  postgres(getDatabaseUrl(), {
+  postgres(getSupabaseDatabaseUrl('transaction'), {
     // Supabase transaction pooling does not support prepared statements.
     prepare: false,
   });

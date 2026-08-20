@@ -12,6 +12,7 @@ declare global {
       PWD: string;
       SUPABASE_SERVICE_ROLE_KEY: string;
       SUPABASE_PROJECT_REF: string;
+      SUPABASE_DATABASE_PASSWORD: string;
       NEXT_PUBLIC_VERCEL_URL?: string;
       NEXT_PUBLIC_SITE_URL?: string;
       SUPABASE_JWT_SECRET: string;

@@ -2,18 +2,16 @@ import 'dotenv/config';
 
 import { defineConfig } from 'drizzle-kit';
 
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is required to run Drizzle Kit commands.');
-}
+import { getSupabaseDatabaseUrl } from './src/db/database-url';
 
 export default defineConfig({
   dialect: 'postgresql',
   schema: './src/db/schema',
   out: './drizzle',
   dbCredentials: {
-    url: databaseUrl,
+    // Drizzle Kit uses Supabase session pooling; application runtime uses
+    // transaction pooling through src/db/client.ts.
+    url: getSupabaseDatabaseUrl('session'),
   },
   strict: true,
   verbose: true,

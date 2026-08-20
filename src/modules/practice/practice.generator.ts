@@ -62,7 +62,7 @@ export async function generatePracticeDraft(input: {
     instructions:
       "You are InterviewGrade's practice designer. Turn the user's brief into a focused, realistic spoken practice session. The output is only a draft: make it useful and specific, but never claim facts about an employer, role, candidate, or process that are not in the brief. Questions must be answerable aloud. Rubric criteria must be distinct, evidence-based, and reusable across the session. Map every question to only the criteria that genuinely apply, and make sure every rubric criterion is used by at least one question. Return only the requested structured output.",
     input: `Create an InterviewGrade practice from this brief:\n\n${brief}\n\nTarget exactly ${questionCount} questions. Use 2-5 rubric criteria. Importance is a relative value from 1 (supporting) to 5 (most important); InterviewGrade will convert it into weights that total exactly 100%. Keep preparation and response times realistic for spoken answers.`,
-    max_output_tokens: 2600,
+    max_output_tokens: 6000,
     text: {
       format: {
         type: 'json_schema',
@@ -163,6 +163,12 @@ export async function generatePracticeDraft(input: {
       },
     },
   });
+
+  if (response.status === 'incomplete') {
+    throw new Error(
+      `The practice drafting model returned an incomplete response: ${response.incomplete_details?.reason ?? 'unknown reason'}.`,
+    );
+  }
 
   if (!response.output_text) {
     throw new Error('The practice drafting model returned no structured output.');

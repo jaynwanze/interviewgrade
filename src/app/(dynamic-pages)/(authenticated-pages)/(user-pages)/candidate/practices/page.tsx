@@ -27,8 +27,8 @@ async function loadMyPractices(): Promise<PracticeLoadResult> {
   await serverGetLoggedInUser();
 
   try {
-    // Keep the existing candidate shell resilient until DATABASE_URL and the
-    // v2 migrations are deployed in every environment.
+    // Keep the existing candidate shell resilient while v2 persistence is
+    // unavailable in an environment.
     const { createAuthenticatedPracticeService } = await import(
       '@/modules/practice/practice.service'
     );

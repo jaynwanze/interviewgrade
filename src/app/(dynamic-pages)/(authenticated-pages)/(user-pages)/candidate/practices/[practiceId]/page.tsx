@@ -28,6 +28,12 @@ type PracticeLoadResult =
   | { ready: true; practice: Practice | null }
   | { ready: false; practice: null };
 
+function normalizeEditorDifficulty(difficulty: string | null): string | null {
+  if (difficulty === 'Easy') return 'Beginner';
+  if (difficulty === 'Hard') return 'Advanced';
+  return difficulty;
+}
+
 async function loadPractice(practiceId: string): Promise<PracticeLoadResult> {
   await serverGetLoggedInUser();
 
@@ -38,7 +44,20 @@ async function loadPractice(practiceId: string): Promise<PracticeLoadResult> {
     const service = await createAuthenticatedPracticeService();
     const practice = await service.getById(practiceId);
 
-    return { ready: true, practice };
+    if (!practice) {
+      return { ready: true, practice: null };
+    }
+
+    return {
+      ready: true,
+      practice: {
+        ...practice,
+        draft: {
+          ...practice.draft,
+          difficulty: normalizeEditorDifficulty(practice.draft.difficulty),
+        },
+      },
+    };
   } catch (error) {
     console.error('PracticeEditorPage: v2 practice persistence unavailable', error);
     return { ready: false, practice: null };

@@ -71,10 +71,14 @@ export default async function PracticeEditorPage({
     notFound();
   }
 
+  const editorKey = result.practice.draft.questions
+    .map((question) => question.id)
+    .join(':');
+
   return (
     <div className="space-y-4">
       <EditorNotice searchParams={searchParams} />
-      <PracticeEditor practice={result.practice} />
+      <PracticeEditor key={editorKey} practice={result.practice} />
     </div>
   );
 }

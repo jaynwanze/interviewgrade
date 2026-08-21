@@ -28,7 +28,9 @@ type PracticeLoadResult =
   | { ready: true; practice: Practice | null }
   | { ready: false; practice: null };
 
-function normalizeEditorDifficulty(difficulty: string | null): string | null {
+function normalizeEditorDifficulty(
+  difficulty: string | null | undefined,
+): string | null | undefined {
   if (difficulty === 'Easy') return 'Beginner';
   if (difficulty === 'Hard') return 'Advanced';
   return difficulty;

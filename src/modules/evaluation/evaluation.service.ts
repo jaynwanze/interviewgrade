@@ -31,7 +31,8 @@ import {
 // readable. Model/aggregation metadata below records the mapping-aware behavior.
 export const RESPONSE_EVALUATION_SCHEMA_VERSION = 'response-rubric-v1';
 export const SESSION_EVALUATION_SCHEMA_VERSION = 'session-rubric-v1';
-export const SESSION_AGGREGATION_VERSION = 'session-aggregate-v2-question-mapped';
+export const SESSION_AGGREGATION_VERSION =
+  'session-aggregate-v3-rubric-weighted';
 
 export type EvaluatedResponse = {
   response: SessionResponse;
@@ -296,7 +297,7 @@ function buildSessionEvaluation(
         criterionId: criterion.id!,
         criterionName: criterion.name,
         score,
-        feedback: `Average across ${scores.length} evaluated response${scores.length === 1 ? '' : 's'} mapped to this criterion.`,
+        feedback: `Average across ${scores.length} evaluated response${scores.length === 1 ? '' : 's'} mapped to this criterion. Published rubric weight: ${criterion.weight}%.`,
       },
     ];
   });
@@ -305,11 +306,24 @@ function buildSessionEvaluation(
     throw new Error('No rubric evidence was available to aggregate this session.');
   }
 
+  const rubricById = new Map(
+    rubric.map((criterion) => [criterion.id!, criterion] as const),
+  );
+  const evidenceWeight = criterionScores.reduce(
+    (sum, criterionScore) =>
+      sum + (rubricById.get(criterionScore.criterionId)?.weight ?? 0),
+    0,
+  );
+
+  if (evidenceWeight <= 0) {
+    throw new Error('Rubric evidence must have a positive total weight.');
+  }
+
   const overallScore = roundScore(
-    responseEvaluations.reduce(
-      (sum, evaluation) => sum + evaluation.overallScore,
-      0,
-    ) / responseEvaluations.length,
+    criterionScores.reduce((sum, criterionScore) => {
+      const weight = rubricById.get(criterionScore.criterionId)?.weight ?? 0;
+      return sum + criterionScore.score * weight;
+    }, 0) / evidenceWeight,
   );
   const strongest = criterionScores.reduce((best, current) =>
     current.score > best.score ? current : best,
@@ -329,7 +343,7 @@ function buildSessionEvaluation(
     sessionId: session.id,
     overallScore,
     criterionScores,
-    summary: `Across ${responseEvaluations.length} evaluated response${responseEvaluations.length === 1 ? '' : 's'}, the session scored ${Math.round(overallScore)}/100. Strongest area: ${strongest.criterionName}. Primary improvement area: ${weakest.criterionName}.`,
+    summary: `Across ${responseEvaluations.length} evaluated response${responseEvaluations.length === 1 ? '' : 's'}, the rubric-weighted session score is ${Math.round(overallScore)}/100. Strongest area: ${strongest.criterionName}. Primary improvement area: ${weakest.criterionName}.`,
     strengths:
       strengths.length > 0
         ? strengths
@@ -342,7 +356,7 @@ function buildSessionEvaluation(
     schemaVersion: SESSION_EVALUATION_SCHEMA_VERSION,
     modelMetadata: {
       provider: 'interviewgrade',
-      model: 'deterministic-weighted-aggregation',
+      model: 'deterministic-rubric-weighted-aggregation',
       promptVersion: SESSION_AGGREGATION_VERSION,
     },
     createdAt: new Date(),

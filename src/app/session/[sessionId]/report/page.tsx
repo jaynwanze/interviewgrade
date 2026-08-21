@@ -68,7 +68,7 @@ async function loadReport(sessionId: string): Promise<ReportLoadResult> {
 export default async function PracticeReportPage({
   params,
   searchParams,
-}: PracticeReportPageProps) {
+}: ReportPageProps) {
   const result = await loadReport(params.sessionId);
 
   if (result.state === 'not-found') {

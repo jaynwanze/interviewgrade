@@ -81,10 +81,14 @@ export async function generateResponseEvaluation(input: {
             summary: { type: 'string' },
             strengths: {
               type: 'array',
+              minItems: 1,
+              maxItems: 4,
               items: { type: 'string' },
             },
             improvements: {
               type: 'array',
+              minItems: 1,
+              maxItems: 4,
               items: { type: 'string' },
             },
             recommendation: { type: 'string' },

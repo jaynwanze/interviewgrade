@@ -55,7 +55,7 @@ export async function generateResponseEvaluation(input: {
     instructions:
       "You are InterviewGrade's scoring engine. Evaluate only evidence present in the candidate answer, in the context of the question and scenario. Score every supplied rubric criterion from 0 to 100. Be rigorous, constructive, and concise. Do not invent achievements, facts, or missing details. Do not add criteria. Return only the requested structured output.",
     input: buildEvaluationPrompt(input),
-    max_output_tokens: 1200,
+    max_output_tokens: 4000,
     text: {
       format: {
         type: 'json_schema',
@@ -100,6 +100,12 @@ export async function generateResponseEvaluation(input: {
       },
     },
   });
+
+  if (response.status === 'incomplete') {
+    throw new Error(
+      `The evaluation model returned an incomplete response: ${response.incomplete_details?.reason ?? 'unknown reason'}.`,
+    );
+  }
 
   if (!response.output_text) {
     throw new Error('The evaluation model returned no structured output.');

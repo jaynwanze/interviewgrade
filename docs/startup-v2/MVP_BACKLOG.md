@@ -567,6 +567,20 @@ None should delay the core MVP.
 
 ---
 
+# Post-V2 product feature drafts
+
+These are intentionally queued behind V2 reliability, polish, E2E coverage and cleanup.
+
+## Upload document → Generate Practice
+
+See [UPLOAD_DOCUMENT_PRACTICE.md](./UPLOAD_DOCUMENT_PRACTICE.md).
+
+The first version should let a creator upload PDF, DOCX or TXT source material, optionally add a short instruction, and generate the same editable V2 PracticeDraft used by the existing AI creation flow. It must reuse the normal editor, preview, publish, session and scoring pipeline rather than creating a parallel document-specific architecture.
+
+Do not begin implementation until the remaining V2 production-polish checklist in the feature draft is complete.
+
+---
+
 # Launch metrics
 
 The MVP should capture product metrics that answer whether the problem is real:

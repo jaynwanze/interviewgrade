@@ -1,9 +1,18 @@
+import { randomUUID } from 'node:crypto';
+
 import type {
   PracticeQuestion,
   RubricCriterion,
 } from '@/modules/practice/practice.schema';
+import {
+  RESPONSE_EVALUATION_MODEL,
+  RESPONSE_PROMPT_VERSION,
+  generateResponseEvaluation,
+} from '@/modules/evaluation/evaluation.generator';
+import { createDrizzleEvaluationRepository } from '@/modules/evaluation/evaluation.repository';
+import { responseEvaluationSchema } from '@/modules/evaluation/evaluation.schema';
+import { RESPONSE_EVALUATION_SCHEMA_VERSION } from '@/modules/evaluation/evaluation.service';
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
-import { createOpenAIClient, hasOpenAIApiKey } from '@/utils/openai/config';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -11,7 +20,6 @@ const feedbackRequestSchema = z.object({
   sessionId: z.string().min(1).max(160),
 });
 
-const FEEDBACK_MODEL = 'gpt-5-mini';
 const FEEDBACK_STATUS_HEADER = 'X-InterviewGrade-Feedback-Status';
 
 export async function POST(request: NextRequest) {
@@ -97,65 +105,46 @@ export async function POST(request: NextRequest) {
       context.practiceVersion.snapshot.rubricCriteria,
     );
 
-    if (!hasOpenAIApiKey()) {
-      console.error(
-        'v2 practice feedback unavailable: OPENAI_API_KEY/OPENAI_SECRET_KEY is not configured',
-      );
-      return feedbackUnavailableStream(nextQuestion != null);
-    }
-
-    const snapshot = context.practiceVersion.snapshot;
-    const rubric = mappedRubric
-      .map(
-        (criterion, index) =>
-          `${index + 1}. ${criterion.name} (${criterion.weight}%): ${criterion.description}`,
-      )
-      .join('\n');
-
-    const instructions = `You are InterviewGrade's concise practice coach. Evaluate one spoken answer against the supplied weighted rubric. Score the answer from 0 to 100. Be demanding but constructive. Do not invent facts that are not present in the answer. If the answer is irrelevant or empty in substance, score it very low. Return only this exact plain-text structure:\n\nPractice Feedback\nScore (%):\n<integer>/100%\n\nSummary: <2-4 concise sentences>\nAdvice for Next Question: <1-2 actionable sentences, or N/A when there is no next question>`;
-
-    const prompt = `Practice: ${snapshot.title}\n\nScenario:\n${snapshot.scenario}\n\nWeighted rubric:\n${rubric}\n\nCurrent question:\n${currentQuestion.prompt}\n\nQuestion guidance:\n${currentQuestion.guidance ?? 'None'}\n\nCandidate answer:\n${savedResponse.transcript}\n\nNext question:\n${nextQuestion?.prompt ?? 'N/A'}`;
-
     try {
-      const openai = createOpenAIClient();
-      const stream = await openai.responses.create({
-        model: FEEDBACK_MODEL,
-        instructions,
-        input: prompt,
-        max_output_tokens: 260,
-        stream: true,
-      });
+      const repository = createDrizzleEvaluationRepository();
+      let evaluation = await repository.getResponseEvaluation(
+        savedResponse.id,
+        RESPONSE_EVALUATION_SCHEMA_VERSION,
+      );
 
-      const encoder = new TextEncoder();
-      const body = new ReadableStream({
-        async start(controller) {
-          try {
-            for await (const event of stream) {
-              if (event.type === 'response.output_text.delta') {
-                controller.enqueue(
-                  encoder.encode(`data: ${JSON.stringify(event.delta)}\n\n`),
-                );
-              }
-            }
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          } catch (error) {
-            console.error('v2 practice feedback stream failed', error);
-            const fallback = buildUnavailableFeedback(nextQuestion != null);
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify(fallback)}\n\n`),
-            );
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          } finally {
-            controller.close();
-          }
-        },
-      });
+      if (!evaluation) {
+        const generated = await generateResponseEvaluation({
+          practiceTitle: context.practiceVersion.snapshot.title,
+          scenario: context.practiceVersion.snapshot.scenario,
+          question: currentQuestion,
+          response: savedResponse,
+          rubricCriteria: mappedRubric,
+        });
 
-      return new NextResponse(body, {
-        headers: streamHeaders('ready'),
-      });
+        evaluation = await repository.saveResponseEvaluation(
+          responseEvaluationSchema.parse({
+            id: randomUUID(),
+            sessionResponseId: savedResponse.id,
+            overallScore: generated.overallScore,
+            criterionScores: generated.criterionScores,
+            summary: generated.summary,
+            strengths: generated.strengths,
+            improvements: generated.improvements,
+            recommendation: generated.recommendation,
+            schemaVersion: RESPONSE_EVALUATION_SCHEMA_VERSION,
+            modelMetadata: {
+              provider: 'openai',
+              model: RESPONSE_EVALUATION_MODEL,
+              promptVersion: RESPONSE_PROMPT_VERSION,
+            },
+            createdAt: new Date(),
+          }),
+        );
+      }
+
+      return feedbackEvaluationStream(evaluation, nextQuestion != null);
     } catch (error) {
-      console.error('v2 practice feedback request failed', error);
+      console.error('v2 practice feedback evaluation failed', error);
       return feedbackUnavailableStream(nextQuestion != null);
     }
   } catch (error) {
@@ -184,26 +173,32 @@ function rubricForQuestion(
   return mapped.length > 0 ? mapped : rubricCriteria;
 }
 
+function feedbackEvaluationStream(
+  evaluation: ReturnType<typeof responseEvaluationSchema.parse>,
+  hasNextQuestion: boolean,
+) {
+  const text = `Practice Feedback\nScore (%):\n${Math.round(evaluation.overallScore)}/100%\n\nSummary: ${evaluation.summary ?? 'Your answer was evaluated against the published rubric.'}\nAdvice for Next Question: ${hasNextQuestion ? evaluation.recommendation : 'N/A'}`;
+  return singleEventStream(text, 'ready');
+}
+
 function feedbackUnavailableStream(hasNextQuestion: boolean) {
+  const fallback = `Practice Feedback\n\nSummary: Your answer was saved successfully, but immediate AI feedback is temporarily unavailable.\nAdvice for Next Question: ${hasNextQuestion ? 'Continue to the next question and focus on a clear, specific response.' : 'N/A'}`;
+  return singleEventStream(fallback, 'fallback');
+}
+
+function singleEventStream(text: string, status: 'ready' | 'fallback') {
   const encoder = new TextEncoder();
-  const fallback = buildUnavailableFeedback(hasNextQuestion);
   const body = new ReadableStream({
     start(controller) {
-      controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify(fallback)}\n\n`),
-      );
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify(text)}\n\n`));
       controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       controller.close();
     },
   });
 
   return new NextResponse(body, {
-    headers: streamHeaders('fallback'),
+    headers: streamHeaders(status),
   });
-}
-
-function buildUnavailableFeedback(hasNextQuestion: boolean) {
-  return `Practice Feedback\n\nSummary: Your answer was saved successfully, but immediate AI feedback is temporarily unavailable.\nAdvice for Next Question: ${hasNextQuestion ? 'Continue to the next question and focus on a clear, specific response.' : 'N/A'}`;
 }
 
 function streamHeaders(status: 'ready' | 'fallback') {

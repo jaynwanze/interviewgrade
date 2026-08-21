@@ -29,6 +29,7 @@ Reasons are documented in [CODE_AUDIT.md](./CODE_AUDIT.md), but the major ones a
 - [SCORING.md](./SCORING.md) — canonical human-readable rubric mapping, response scoring and final-session aggregation rules.
 - [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) — ordered rebuild and source-to-target migration map.
 - [MVP_BACKLOG.md](./MVP_BACKLOG.md) — build backlog and acceptance criteria.
+- [UPLOAD_DOCUMENT_PRACTICE.md](./UPLOAD_DOCUMENT_PRACTICE.md) — post-V2 draft for turning PDF, DOCX or TXT source material into an editable PracticeDraft.
 
 ## Target stack
 

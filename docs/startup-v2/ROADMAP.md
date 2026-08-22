@@ -12,6 +12,14 @@ The core loop is:
 
 That loop can support self-practice and creator-to-participant sharing without requiring separate product architectures today.
 
+The V2 product model is defined in [PRODUCT_MODEL.md](./PRODUCT_MODEL.md):
+
+- authentication state is **Anonymous / Signed in**;
+- product behavior is **Creator / Participant**;
+- Creator and Participant are contextual capabilities, not permanent account types;
+- `Guest` means an **Anonymous Participant**, not a third role;
+- future workspace permissions remain a separate concern.
+
 For now:
 
 - a signed-in user can create and manage Practices;
@@ -55,16 +63,18 @@ For now:
 
 ## THEN — Lightweight product expansion
 
-Once the V2 foundation is complete, make the minimum product decisions required for the next growth loop.
+1. **Product model + lightweight auth decision — complete**
+   - Creator and Participant are contextual product behaviors rather than mutually exclusive user types.
+   - Guest is not a permanent role; it means an anonymous Participant.
+   - Creating/managing Practices and retaining account history require sign-in.
+   - Opening and completing a normal shared Practice remains account-free by default.
+   - Future workspace roles are kept separate from the core Practice model.
+   - See [PRODUCT_MODEL.md](./PRODUCT_MODEL.md).
 
-1. **Product model + lightweight auth decision**
-   - Formalize the Creator + Participant model without forcing a large role-system rewrite.
-   - Decide the minimum account requirements for creators versus participants.
-   - Preserve account-free shared Practice participation by default where practical.
-
-2. **Google sign-in**
+2. **Google sign-in — next**
    - Add Google as a low-friction creator/sign-in option alongside the existing email/magic-link path.
    - Do not make Google auth a prerequisite for participants opening shared Practices.
+   - Do not introduce a new Google-specific account type or revive Candidate/Employer role selection.
 
 3. **Upload document → Generate Practice**
    - Support PDF, DOCX and TXT first.
@@ -100,7 +110,9 @@ These should be driven by actual customer/use-case demand rather than treated as
 At the current checkpoint:
 
 - the V2 foundation is accepted complete;
+- the lightweight Creator / Participant product model is decided and documented;
+- Guest is treated as an anonymous Participant rather than a third account role;
 - Dashboard, Avery, Practice creation/share/session/feedback/report and V2-first History are live;
 - V2 database access is hardened and the remaining legacy billing dependency is quarantined behind a narrow compatibility boundary;
 - E2E and Supabase migration-history repair are documented deferred follow-ups;
-- **the next product step is the Product model + lightweight auth decision.**
+- **the next implementation step is Google sign-in.**

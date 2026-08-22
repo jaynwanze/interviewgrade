@@ -71,14 +71,18 @@ For now:
    - Future workspace roles are kept separate from the core Practice model.
    - See [PRODUCT_MODEL.md](./PRODUCT_MODEL.md).
 
-2. **Google sign-in — next**
-   - Add Google as a low-friction creator/sign-in option alongside the existing email/magic-link path.
-   - Do not make Google auth a prerequisite for participants opening shared Practices.
-   - Do not introduce a new Google-specific account type or revive Candidate/Employer role selection.
+2. **Google sign-in — complete for current scope**
+   - Google is available as a low-friction sign-in option alongside the existing email path.
+   - Shared Practice participation remains account-free and does not require Google.
+   - Supabase automatically links a Google identity to an existing verified-email account; therefore a legacy employer signing in with the same email correctly retains the existing employer account behavior.
+   - New OAuth users without legacy `userType` metadata enter the V2 signed-in shell rather than being treated as employers.
+   - **Deferred branding polish:** the Google hand-off currently shows the Supabase project hostname (`<project-ref>.supabase.co`). Revisit later with a Supabase custom auth domain such as `auth.interviewgrade.io` or direct Google Identity Services / ID-token sign-in. This is UX polish, not an auth blocker.
 
-3. **Upload document → Generate Practice**
-   - Support PDF, DOCX and TXT first.
-   - Extract source text and feed it into the existing V2 AI Practice generator.
+3. **Upload document → Generate Practice — next / in progress**
+   - First implementation slice: text-based PDF and TXT upload, server-side extraction, optional creator instruction, then the existing V2 AI Practice generator and editor.
+   - Do not retain the original file in the first version.
+   - Reject unsupported, oversized, empty/scanned and overlong sources explicitly rather than silently truncating them.
+   - DOCX remains part of the intended MVP and should follow as a small parser/dependency change after the PDF/TXT path is proven.
    - Always create an editable V2 Draft before publishing.
    - Do not create a parallel document-specific Practice architecture.
 
@@ -114,5 +118,6 @@ At the current checkpoint:
 - Guest is treated as an anonymous Participant rather than a third account role;
 - Dashboard, Avery, Practice creation/share/session/feedback/report and V2-first History are live;
 - V2 database access is hardened and the remaining legacy billing dependency is quarantined behind a narrow compatibility boundary;
+- Google sign-in is live for the current scope; the visible Supabase OAuth hostname is documented deferred branding polish;
 - E2E and Supabase migration-history repair are documented deferred follow-ups;
-- **the next implementation step is Google sign-in.**
+- **the next implementation step is Upload document → Generate Practice, beginning with PDF/TXT before the DOCX follow-up.**

@@ -1,10 +1,12 @@
+import Link from 'next/link';
+import { History, Library, Plus } from 'lucide-react';
 import { Suspense } from 'react';
 
+import { Button } from '@/components/ui/button';
 import type { CandidatePracticeAnalytics } from '@/modules/analytics/candidate-practice-analytics';
 import type { CandidateDashboardProgress } from '@/modules/analytics/candidate-dashboard-progress';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
-import InterviewTemplatesPage from './InterviewTemplatesPage';
 import { V2CandidateAnalytics } from './V2CandidateAnalytics';
 import { V2CandidateProgress } from './V2CandidateProgress';
 
@@ -59,11 +61,44 @@ async function V2AnalyticsSection({ userId }: { userId: string }) {
   return <V2CandidateAnalytics analytics={analytics} />;
 }
 
-export default async function InterviewAnaltyicsPage() {
+export default async function CandidateDashboardPage() {
   const user = await serverGetLoggedInUser();
 
   return (
-    <div>
+    <main className="pb-10">
+      <section className="container mx-auto w-3/4 px-4 pt-6">
+        <div className="flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight">Your progress</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Track your Practice sessions, rubric performance, and improvement over
+              time.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/candidate/practices/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create practice
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/candidate/practices">
+                <Library className="mr-2 h-4 w-4" />
+                My practices
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/candidate/interview-history">
+                <History className="mr-2 h-4 w-4" />
+                View history
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <Suspense fallback={<DashboardSectionFallback label="Loading progress…" />}>
         <V2ProgressSection userId={user.id} />
       </Suspense>
@@ -71,11 +106,7 @@ export default async function InterviewAnaltyicsPage() {
       <Suspense fallback={<DashboardSectionFallback label="Loading analytics…" />}>
         <V2AnalyticsSection userId={user.id} />
       </Suspense>
-
-      <Suspense fallback={<DashboardSectionFallback label="Loading skills…" />}>
-        <InterviewTemplatesPage userId={user.id} />
-      </Suspense>
-    </div>
+    </main>
   );
 }
 

@@ -5,7 +5,6 @@ import {
   BarChart3Icon,
   ListChecks,
   LucideHistory,
-  NotepadText,
   Settings,
 } from 'lucide-react';
 import { Suspense } from 'react';
@@ -35,25 +34,10 @@ export async function UserSidebar() {
           icon={<ListChecks className="h-5 w-5" />}
         />
         <SidebarLink
-          label="Mock Interviews"
-          href={`/candidate/interviews/library`}
-          icon={<NotepadText className="h-5 w-5" />}
-        />
-        <SidebarLink
           label="History"
           href="/candidate/interview-history"
           icon={<LucideHistory className="h-5 w-5" />}
         />
-        {/* <SidebarLink
-          label="Employer Interests"
-          href="/candidate/employer-interests"
-          icon={<TableProperties className="h-5 w-5" />}
-        /> */}
-        {/* <SidebarLink
-          label="Skill Development"
-          href="/candidate/skill-development"
-          icon={<ChartBarIcon className="h-5 w-5" />}
-        /> */}
         <SidebarLink
           label="Account Settings"
           href="/candidate/settings"

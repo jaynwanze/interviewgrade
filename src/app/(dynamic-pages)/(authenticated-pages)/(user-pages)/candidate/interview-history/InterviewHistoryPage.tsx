@@ -8,15 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type {
-  LegacyCandidateHistoryCounts,
   LegacyCandidateHistoryPage,
-  LegacyHistoryFilter,
   LegacyHistoryMode,
 } from '@/modules/session/legacy-candidate-history';
 import type {
-  CandidateSessionHistoryCounts,
+  CandidateSessionHistoryFilter,
   CandidateSessionHistoryPage,
 } from '@/modules/session/candidate-session-history';
+import { Archive, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 
@@ -30,15 +30,17 @@ const tabByFilter = {
 type HistoryTab = (typeof tabByFilter)[keyof typeof tabByFilter];
 
 export default function InterviewHistoryPage({
-  mode,
+  legacyView,
+  legacyMode,
   filter,
   v2Page,
   legacyPage,
   v2Error,
   legacyError,
 }: {
-  mode: LegacyHistoryMode;
-  filter: LegacyHistoryFilter;
+  legacyView: boolean;
+  legacyMode: LegacyHistoryMode;
+  filter: CandidateSessionHistoryFilter;
   v2Page: CandidateSessionHistoryPage;
   legacyPage: LegacyCandidateHistoryPage;
   v2Error: boolean;
@@ -48,11 +50,9 @@ export default function InterviewHistoryPage({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const activeTab = tabByFilter[filter];
-  const activeSwitch = mode === 'interview' ? 'Interview Mode' : 'Practice Mode';
-  const counts =
-    mode === 'practice'
-      ? combineCounts(v2Page.counts, legacyPage.counts)
-      : legacyPage.counts;
+  const activeSwitch =
+    legacyMode === 'interview' ? 'Interview Mode' : 'Practice Mode';
+  const counts = legacyView ? legacyPage.counts : v2Page.counts;
 
   const replaceParams = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -63,124 +63,156 @@ export default function InterviewHistoryPage({
         params.set(key, value);
       }
     }
+    const query = params.toString();
     startTransition(() => {
-      router.replace(`/candidate/interview-history?${params.toString()}`);
+      router.replace(
+        query
+          ? `/candidate/interview-history?${query}`
+          : '/candidate/interview-history',
+      );
     });
   };
 
   const handleTabChange = (tab: HistoryTab) => {
-    replaceParams({
-      status: filterForTab(tab),
-      v2Page: '1',
-      legacyPage: '1',
-    });
+    replaceParams({ status: filterForTab(tab), page: '1' });
   };
 
-  const handleSwitchChange = () => {
+  const handleLegacyModeChange = () => {
     replaceParams({
-      mode: mode === 'practice' ? 'interview' : 'practice',
-      v2Page: '1',
-      legacyPage: '1',
+      mode: legacyMode === 'practice' ? 'interview' : 'practice',
+      page: '1',
     });
   };
 
   return (
-    <div className={`max-w-5xl mx-auto ${isPending ? 'opacity-70' : ''}`}>
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-1">Interview History</h1>
-        <p className="text-gray-500">
-          Review your past interviews and practice sessions.
-        </p>
+    <div className={`mx-auto max-w-5xl ${isPending ? 'opacity-70' : ''}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">
+            {legacyView ? 'Legacy history' : 'History'}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {legacyView
+              ? 'Sessions from the original InterviewGrade interview and practice runtime.'
+              : 'Review your Practice attempts, continue unfinished sessions, and open completed reports.'}
+          </p>
+        </div>
+
+        {legacyView ? (
+          <Button asChild variant="outline" size="sm">
+            <Link href="/candidate/interview-history">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to History
+            </Link>
+          </Button>
+        ) : (
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/candidate/interview-history?legacy=1">
+              <Archive className="mr-2 h-4 w-4" />
+              Legacy history
+            </Link>
+          </Button>
+        )}
       </div>
 
-      <Separator className="my-4" />
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+      <Separator className="my-5" />
+
+      {legacyView && (
+        <div className="mb-5 rounded-lg border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+          This archive is kept for access to sessions created before the V2 Practice
+          runtime. It is not combined with current Practice scores or analytics.
+        </div>
+      )}
+
+      <div className="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
         <InterviewHistoryFilter
           activeTab={activeTab}
           counts={counts}
           onTabChange={handleTabChange}
         />
 
-        <Label htmlFor="history-mode" className="text-sm font-medium">
-          {activeSwitch}
-        </Label>
-        <Switch
-          id="history-mode"
-          checked={mode === 'interview'}
-          disabled={isPending}
-          onCheckedChange={handleSwitchChange}
-        />
+        {legacyView && (
+          <div className="flex items-center gap-3 whitespace-nowrap">
+            <Label htmlFor="history-mode" className="text-sm font-medium">
+              {activeSwitch}
+            </Label>
+            <Switch
+              id="history-mode"
+              checked={legacyMode === 'interview'}
+              disabled={isPending}
+              onCheckedChange={handleLegacyModeChange}
+            />
+          </div>
+        )}
       </div>
-      <Separator className="my-4" />
 
-      {v2Error && mode === 'practice' && (
+      <Separator className="my-5" />
+
+      {!legacyView && v2Error && (
         <StatusNotice>
-          New Practice history could not be loaded. Older Practice history is
-          still available below.
+          Practice history could not be loaded right now. Please refresh and try
+          again.
         </StatusNotice>
       )}
-      {legacyError && (
+      {legacyView && legacyError && (
         <StatusNotice>
-          Older interview history could not be loaded. New Practice sessions
-          remain available when applicable.
+          Legacy history could not be loaded right now. Your current V2 Practice
+          history is unaffected.
         </StatusNotice>
       )}
 
-      <div className="space-y-8">
-        {mode === 'practice' && v2Page.totalItems > 0 && (
-          <section className="space-y-4">
-            <V2PracticeHistoryList
-              sessions={v2Page.items}
-              totalCount={v2Page.totalItems}
-            />
-            <HistoryPager
-              label="New Practice sessions"
-              page={v2Page.page}
-              totalPages={v2Page.totalPages}
-              disabled={isPending}
-              onPageChange={(page) =>
-                replaceParams({ v2Page: String(page) })
-              }
-            />
-          </section>
-        )}
-
-        {!legacyError && (legacyPage.totalItems > 0 || mode === 'interview') && (
-          <section className="space-y-4">
-            {mode === 'practice' && legacyPage.totalItems > 0 && (
-              <div className="mx-auto w-full max-w-4xl px-1">
-                <h2 className="text-sm font-semibold">Earlier Practice Sessions</h2>
-                <p className="text-xs text-muted-foreground">
-                  Sessions from the original InterviewGrade practice runtime.
-                </p>
-              </div>
-            )}
-            <InterviewHistoryList
-              interviews={legacyPage.items}
-              interviewModeToggle={activeSwitch}
-            />
-            <HistoryPager
-              label={mode === 'interview' ? 'Interviews' : 'Earlier Practice sessions'}
-              page={legacyPage.page}
-              totalPages={legacyPage.totalPages}
-              disabled={isPending}
-              onPageChange={(page) =>
-                replaceParams({ legacyPage: String(page) })
-              }
-            />
-          </section>
-        )}
-
-        {mode === 'practice' &&
-          !v2Error &&
-          !legacyError &&
-          v2Page.totalItems === 0 &&
-          legacyPage.totalItems === 0 && (
-            <div className="mx-auto max-w-2xl rounded-lg border p-6 text-center text-sm text-muted-foreground">
+      {!legacyView && !v2Error && (
+        <div className="space-y-5">
+          {v2Page.totalItems > 0 ? (
+            <>
+              <V2PracticeHistoryList
+                sessions={v2Page.items}
+                totalCount={v2Page.totalItems}
+              />
+              <HistoryPager
+                label="Practice sessions"
+                page={v2Page.page}
+                totalPages={v2Page.totalPages}
+                disabled={isPending}
+                onPageChange={(page) => replaceParams({ page: String(page) })}
+              />
+            </>
+          ) : (
+            <EmptyHistory>
               No Practice sessions found for this filter.
-            </div>
+            </EmptyHistory>
           )}
-      </div>
+        </div>
+      )}
+
+      {legacyView && !legacyError && (
+        <div className="space-y-5">
+          {legacyPage.totalItems > 0 ? (
+            <>
+              <InterviewHistoryList
+                interviews={legacyPage.items}
+                interviewModeToggle={activeSwitch}
+              />
+              <HistoryPager
+                label={
+                  legacyMode === 'interview'
+                    ? 'Legacy interviews'
+                    : 'Legacy Practice sessions'
+                }
+                page={legacyPage.page}
+                totalPages={legacyPage.totalPages}
+                disabled={isPending}
+                onPageChange={(page) => replaceParams({ page: String(page) })}
+              />
+            </>
+          ) : (
+            <EmptyHistory>
+              No legacy {legacyMode === 'interview' ? 'interviews' : 'Practice sessions'}{' '}
+              found for this filter.
+            </EmptyHistory>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -237,19 +269,15 @@ function StatusNotice({ children }: { children: React.ReactNode }) {
   );
 }
 
-function combineCounts(
-  v2: CandidateSessionHistoryCounts,
-  legacy: LegacyCandidateHistoryCounts,
-) {
-  return {
-    all: v2.all + legacy.all,
-    completed: v2.completed + legacy.completed,
-    notCompleted: v2.notCompleted + legacy.notCompleted,
-    notStarted: v2.notStarted + legacy.notStarted,
-  };
+function EmptyHistory({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto max-w-2xl rounded-lg border p-6 text-center text-sm text-muted-foreground">
+      {children}
+    </div>
+  );
 }
 
-function filterForTab(tab: HistoryTab): LegacyHistoryFilter {
+function filterForTab(tab: HistoryTab): CandidateSessionHistoryFilter {
   switch (tab) {
     case 'Completed':
       return 'completed';

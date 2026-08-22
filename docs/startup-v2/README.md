@@ -23,6 +23,7 @@ Reasons are documented in [CODE_AUDIT.md](./CODE_AUDIT.md), but the major ones a
 
 ## Documents
 
+- [ROADMAP.md](./ROADMAP.md) — current NOW → THEN → LATER product sequence and active restart point.
 - [CODE_AUDIT.md](./CODE_AUDIT.md) — current system, risks and KEEP / MIGRATE / REFACTOR / FREEZE / DELETE decisions.
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — target v2 architecture and module boundaries.
 - [DATABASE_MODEL.md](./DATABASE_MODEL.md) — proposed PostgreSQL / Drizzle model.

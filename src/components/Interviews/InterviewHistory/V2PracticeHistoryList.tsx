@@ -25,12 +25,12 @@ export function V2PracticeHistoryList({
   }
 
   return (
-    <section className="w-full max-w-4xl mx-auto space-y-3">
+    <section className="mx-auto w-full max-w-4xl space-y-3">
       <div className="flex items-end justify-between gap-4 px-1">
         <div>
-          <h2 className="text-sm font-semibold">New Practice Sessions</h2>
+          <h2 className="text-sm font-semibold">Practice sessions</h2>
           <p className="text-xs text-muted-foreground">
-            Versioned v2 practices with structured reports.
+            Your recent attempts, progress, and structured reports.
           </p>
         </div>
         <span className="text-xs text-muted-foreground">
@@ -55,18 +55,18 @@ function V2PracticeHistoryItem({
   const status = statusDisplay(session.status);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-md hover:shadow-lg transition duration-200">
+    <Card className="mx-auto w-full max-w-2xl shadow-sm transition-shadow hover:shadow-md">
       <CardHeader>
-        <div className="flex justify-between items-center gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="text-lg font-semibold">
               {session.title}
             </CardTitle>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Versioned Practice
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Practice attempt</p>
           </div>
-          <Badge className={`${status.className} text-white px-3 py-1 rounded-md text-sm`}>
+          <Badge
+            className={`${status.className} rounded-md px-3 py-1 text-sm text-white`}
+          >
             {status.label}
           </Badge>
         </div>
@@ -76,22 +76,22 @@ function V2PracticeHistoryItem({
 
       <CardContent className="mt-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1 text-sm text-gray-600">
+          <div className="space-y-1 text-sm text-muted-foreground">
             <p>
-              <strong>Started At:</strong>{' '}
+              <span className="font-medium text-foreground">Started:</span>{' '}
               {session.startedAt
                 ? new Date(session.startedAt).toLocaleString()
-                : 'N/A'}
+                : 'Not started'}
             </p>
-            <p>
-              <strong>Completed At:</strong>{' '}
-              {session.completedAt
-                ? new Date(session.completedAt).toLocaleString()
-                : 'N/A'}
-            </p>
+            {session.completedAt && (
+              <p>
+                <span className="font-medium text-foreground">Completed:</span>{' '}
+                {new Date(session.completedAt).toLocaleString()}
+              </p>
+            )}
             {session.status === 'completed' && (
               <p>
-                <strong>Score:</strong>{' '}
+                <span className="font-medium text-foreground">Score:</span>{' '}
                 {session.overallScore == null
                   ? 'Report pending'
                   : `${Math.round(session.overallScore)}/100`}

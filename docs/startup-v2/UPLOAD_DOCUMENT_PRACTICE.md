@@ -1,8 +1,8 @@
 # Upload Document → Generate Practice
 
-Status: **post-V2 product feature draft**
+Status: **implementation in progress — PDF/TXT first slice**
 
-This feature should be implemented only after the current V2 Practice flow is polished, tested and cleaned up. It should reuse the existing V2 PracticeDraft, editor, rubric mapping, publishing, session and evaluation pipeline rather than introduce a parallel authoring system.
+This feature reuses the existing V2 PracticeDraft, editor, rubric mapping, publishing, session and evaluation pipeline rather than introducing a parallel authoring system.
 
 ## Product goal
 
@@ -62,11 +62,16 @@ The uploaded document is a source for draft generation only. It must never publi
 
 ## MVP file types
 
-Start with:
+Target:
 
 - PDF;
 - DOCX;
 - TXT.
+
+Implementation is intentionally sliced:
+
+1. prove PDF + TXT through the full existing draft/editor pipeline without adding a new dependency;
+2. add DOCX as the next small parser/dependency follow-up.
 
 Do not add OCR in the first version unless real pilot documents demonstrate that scanned PDFs are a common requirement.
 
@@ -147,20 +152,18 @@ Large documents should be rejected or reduced deliberately rather than silently 
 
 ## Storage decision
 
-For the first implementation, decide whether the original document needs durable storage at all.
-
-Preferred MVP if product requirements allow it:
+For the first implementation, the original document does not need durable storage:
 
 ```text
 upload
 → extract text server-side
 → generate draft
-→ discard temporary source file
+→ discard source file
 ```
 
 Only introduce durable source-file storage when creators need to revisit/download the original material or regenerate against the same source later.
 
-If source files are stored, document retention/deletion behavior must be explicit.
+If source files are stored in a future version, document retention/deletion behavior must be explicit.
 
 ## UI after generation
 
@@ -202,6 +205,8 @@ The first useful version is complete when:
 10. the published practice can run through the existing session/evaluation/report pipeline;
 11. generation failures do not create partially published content.
 
+The PDF/TXT first slice intentionally leaves criterion 2 partially open until DOCX is added.
+
 ## Testing
 
 Add coverage for:
@@ -218,18 +223,14 @@ Provider AI calls can be faked in CI.
 
 ## Implementation timing
 
-Do not start this feature until the V2 foundation work below is complete:
+The V2 foundation checkpoint has been accepted complete. Critical-path E2E and Supabase migration-history repair remain documented non-blocking engineering follow-ups rather than prerequisites for starting this feature.
 
-- verify the rubric-weighted scoring/report changes in production;
-- integrate V2 sessions into History / Analytics or the chosen replacement results experience;
-- fix Finish session → report navigation so refresh is not required;
-- restore/polish Avery speaking animation and TTS fallback behavior;
-- complete a clean 5/5 production Practice run;
-- add the critical-path V2 E2E test;
-- reconcile migration/history and remove obsolete strangler/fallback paths where appropriate;
-- complete the final V2 architecture/security cleanup pass.
+The current implementation order is:
 
-After that checkpoint, **Upload Document → Generate Practice** is a strong first post-V2 product feature because the difficult downstream pieces already exist: structured drafts, editing, rubric mappings, publishing, immutable versions, sessions and evaluation.
+1. PDF/TXT upload → extraction → existing Practice generator/editor;
+2. production smoke test with a small source document;
+3. DOCX parser/dependency follow-up;
+4. better sharing/results work from the main roadmap.
 
 ## Future extensions — not first version
 

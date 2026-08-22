@@ -15,8 +15,8 @@ const onboardingPaths = `/onboarding/(.*)?`;
 // server component is even rendered. This means no database queries
 // or other expensive operations are run if the user is not authorized.
 const protectedPagePrefixes = [
-  `/organization(/.*)?`, // matches /organization and any sub route of /organization
-  `/project(/.*)?`, // matches /project and any sub route of /project
+  `/organization(/.*)?`,
+  `/project(/.*)?`,
   `/settings(/.*)?`,
   `/invitations`,
   `/render/(.*)?`,
@@ -27,7 +27,6 @@ const protectedPagePrefixes = [
   onboardingPaths,
 ];
 
-// For candidate routes:
 function isCandidateRoute(pathname: string) {
   return (
     pathname.startsWith('/candidate') ||
@@ -35,7 +34,6 @@ function isCandidateRoute(pathname: string) {
   );
 }
 
-// For employer routes:
 function isEmployerRoute(pathname: string) {
   return (
     pathname.startsWith('/employer') ||
@@ -44,8 +42,6 @@ function isEmployerRoute(pathname: string) {
 }
 
 function isProtectedPage(pathname: string) {
-  // is exact match or starts with a protected page prefix
-
   return protectedPagePrefixes.some((prefix) => {
     const matchPath = match(prefix);
     return matchPath(pathname);
@@ -57,6 +53,7 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   const isOnboardingRoute = matchOnboarding(pathname);
   if (isProtectedPage(pathname) && user && !isOnboardingRoute) {
     const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
+    const legacyUserType = user.user_metadata?.userType;
     const {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
@@ -65,17 +62,19 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       onboardingHasSetEmployerPrefs,
     } = userMetadata;
 
-    // Check if user is a candidate
-    const isCandidate = userMetadata.userType === 'candidate'; // Assuming userType is part of user metadata
+    // Only explicit legacy account types use the old onboarding requirements.
+    // New V2 OAuth users do not have a permanent candidate/employer role.
     if (
-      isCandidate &&
+      legacyUserType === 'candidate' &&
       (!onboardingHasAcceptedTerms ||
         !onboardingHasCompletedProfile ||
         !onboardingHasCompletedCandidateDetails)
     ) {
       return true;
-    } else if (
-      userMetadata.userType === 'employer' &&
+    }
+
+    if (
+      legacyUserType === 'employer' &&
       (!onboardingHasAcceptedTerms ||
         !onboardingHasCreatedOrganization ||
         !onboardingHasSetEmployerPrefs)
@@ -86,10 +85,7 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   return false;
 }
 
-// this middleware refreshes the user's session and must be run
-// for any Server Component route that uses `createServerComponentSupabaseClient`
 export async function middleware(req: NextRequest) {
-  // Handle preflight CORS requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -106,7 +102,6 @@ export async function middleware(req: NextRequest) {
     request: req,
   });
 
-  // Create Supabase client with proper cookie handling for middleware
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -130,7 +125,6 @@ export async function middleware(req: NextRequest) {
     },
   );
 
-  // Add CORS headers
   supabaseResponse.headers.set('Access-Control-Allow-Origin', '*');
   supabaseResponse.headers.set(
     'Access-Control-Allow-Methods',
@@ -145,44 +139,45 @@ export async function middleware(req: NextRequest) {
     data: { user: maybeUser },
   } = await supabase.auth.getUser();
 
-  // If route is protected but no user => redirect to login
   if (isProtectedPage(req.nextUrl.pathname) && !maybeUser) {
     const redirectResponse = NextResponse.redirect(toSiteURL('/c/login'));
-    // Copy cookies to redirect response
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value);
     });
     return redirectResponse;
   }
 
-  // If user is present, parse their user type
   if (maybeUser) {
-    const userMetadata = authUserMetadataSchema.parse(maybeUser.user_metadata);
-    const userType = userMetadata.userType; // 'candidate' or 'employer', etc.
+    const legacyUserType = maybeUser.user_metadata?.userType;
 
     if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
       const redirectResponse = NextResponse.redirect(toSiteURL('/onboarding'));
-      // Copy cookies to redirect response
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value);
       });
       return redirectResponse;
     }
 
-    // If it's a candidate route but user is employer => redirect
-    if (isCandidateRoute(req.nextUrl.pathname) && userType !== 'candidate') {
+    // Only an explicit legacy employer account is blocked from the V2 user
+    // shell. Missing userType is the normal V2 OAuth case.
+    if (
+      isCandidateRoute(req.nextUrl.pathname) &&
+      legacyUserType === 'employer'
+    ) {
       const redirectResponse = NextResponse.redirect(toSiteURL('/employer'));
-      // Copy cookies to redirect response
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value);
       });
       return redirectResponse;
     }
 
-    // If it's an employer route but user is candidate => redirect
-    if (isEmployerRoute(req.nextUrl.pathname) && userType !== 'employer') {
+    // Employer routes remain legacy-only. Candidate and role-less V2 users are
+    // sent back to the V2 user shell.
+    if (
+      isEmployerRoute(req.nextUrl.pathname) &&
+      legacyUserType !== 'employer'
+    ) {
       const redirectResponse = NextResponse.redirect(toSiteURL('/candidate'));
-      // Copy cookies to redirect response
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value);
       });
@@ -190,20 +185,11 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // IMPORTANT: Return the supabaseResponse to ensure cookies are set
   return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - /api (API routes)
-     * Feel free to modify this pattern to include more paths.
-     */
     '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

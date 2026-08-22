@@ -23,6 +23,11 @@ const generatePracticeFormSchema = z.object({
   questionCount: z.coerce.number().int().min(3).max(8),
 });
 
+const generateDocumentPracticeFormSchema = z.object({
+  instruction: z.string().trim().max(1500),
+  questionCount: z.coerce.number().int().min(3).max(8),
+});
+
 export async function generatePracticeDraftAction(formData: FormData) {
   // AI generation creates persisted candidate content, so authentication is
   // required before either the model call or the database mutation.
@@ -55,21 +60,7 @@ export async function generatePracticeDraftAction(formData: FormData) {
     redirect('/candidate/practices/new?error=ai');
   }
 
-  let createdPracticeId: string | null = null;
-
-  try {
-    const { createAuthenticatedPracticeService } = await import(
-      '@/modules/practice/practice.service'
-    );
-    const service = await createAuthenticatedPracticeService();
-    const created = await service.create(generatedDraft);
-    createdPracticeId = created.id;
-  } catch (error) {
-    console.error(
-      'generatePracticeDraftAction: generated practice persistence unavailable',
-      error,
-    );
-  }
+  const createdPracticeId = await persistGeneratedDraft(generatedDraft);
 
   if (!createdPracticeId) {
     redirect('/candidate/practices/new?error=unavailable');
@@ -77,6 +68,77 @@ export async function generatePracticeDraftAction(formData: FormData) {
 
   revalidatePath('/candidate/practices');
   redirect(`/candidate/practices/${createdPracticeId}?generated=1`);
+}
+
+export async function generatePracticeDraftFromDocumentAction(
+  formData: FormData,
+) {
+  await serverGetLoggedInUser();
+
+  const document = formData.get('document');
+  const parsed = generateDocumentPracticeFormSchema.safeParse({
+    instruction: formData.get('instruction') ?? '',
+    questionCount: formData.get('questionCount'),
+  });
+
+  if (!(document instanceof File) || !parsed.success) {
+    redirect('/candidate/practices/new?error=document-input');
+  }
+
+  let extracted: { filename: string; text: string } | null = null;
+  let documentError: string | null = null;
+
+  const documentSource = await import('@/modules/practice/document-source');
+
+  try {
+    extracted = await documentSource.extractPracticeDocument(document);
+  } catch (error) {
+    if (error instanceof documentSource.PracticeDocumentError) {
+      documentError = mapDocumentError(error.code);
+    } else {
+      console.error(
+        'generatePracticeDraftFromDocumentAction: document extraction failed',
+        error,
+      );
+      documentError = 'document';
+    }
+  }
+
+  if (!extracted) {
+    redirect(`/candidate/practices/new?error=${documentError ?? 'document'}`);
+  }
+
+  let generatedDraft: PracticeDraft | null = null;
+
+  try {
+    const { generatePracticeDraftFromSource } = await import(
+      '@/modules/practice/practice.document-generator'
+    );
+    generatedDraft = await generatePracticeDraftFromSource({
+      sourceText: extracted.text,
+      sourceLabel: extracted.filename,
+      instruction: parsed.data.instruction,
+      questionCount: parsed.data.questionCount,
+    });
+  } catch (error) {
+    console.error(
+      'generatePracticeDraftFromDocumentAction: AI practice drafting unavailable',
+      error,
+    );
+  }
+
+  if (!generatedDraft) {
+    redirect('/candidate/practices/new?error=document-ai');
+  }
+
+  const createdPracticeId = await persistGeneratedDraft(generatedDraft);
+
+  if (!createdPracticeId) {
+    redirect('/candidate/practices/new?error=unavailable');
+  }
+
+  revalidatePath('/candidate/practices');
+  redirect(`/candidate/practices/${createdPracticeId}?generated=1&document=1`);
 }
 
 export async function createPracticeAction(formData: FormData) {
@@ -148,4 +210,33 @@ export async function createPracticeAction(formData: FormData) {
 
   revalidatePath('/candidate/practices');
   redirect(`/candidate/practices/${createdPracticeId}?created=1`);
+}
+
+async function persistGeneratedDraft(draft: PracticeDraft) {
+  try {
+    const { createAuthenticatedPracticeService } = await import(
+      '@/modules/practice/practice.service'
+    );
+    const service = await createAuthenticatedPracticeService();
+    const created = await service.create(draft);
+    return created.id;
+  } catch (error) {
+    console.error('persistGeneratedDraft: practice persistence unavailable', error);
+    return null;
+  }
+}
+
+function mapDocumentError(code: string) {
+  switch (code) {
+    case 'unsupported-type':
+      return 'document-type';
+    case 'too-large':
+      return 'document-size';
+    case 'empty':
+      return 'document-empty';
+    case 'too-much-text':
+      return 'document-length';
+    default:
+      return 'document';
+  }
 }

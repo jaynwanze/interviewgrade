@@ -39,36 +39,43 @@ export async function GET(request: Request) {
               );
             } catch {
               // The `setAll` method was called from a Server Component.
-              // This can be ignored if you have middleware refreshing
-              // user sessions.
+              // This can be ignored if middleware is refreshing user sessions.
             }
           },
         },
       },
     );
 
-    try {
-      await supabase.auth.exchangeCodeForSession(code);
-    } catch (error) {
-      console.error('Failed to exchange code for session: ', error);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      console.error('Failed to exchange code for session:', error);
+      return NextResponse.redirect(new URL('/c/login', requestUrl.origin));
     }
   }
 
   revalidatePath('/');
+
   const user = await serverGetLoggedInUser();
-  const userType: string = user.user_metadata.userType;
+  const legacyUserType = user.user_metadata?.userType;
 
-  let redirectTo = new URL('/', requestUrl.origin);
-
-  if (userType === 'candidate') {
-    redirectTo = new URL('/candidate', requestUrl.origin);
-  } else {
-    redirectTo = new URL('/employer', requestUrl.origin);
-  }
+  // Employer is the only legacy account type that needs its old shell. New V2
+  // OAuth users do not carry userType metadata and should enter the V2 candidate
+  // shell, where Creator/Participant behavior is resource-based rather than a
+  // permanent account role.
+  let redirectTo = new URL(
+    legacyUserType === 'employer' ? '/employer' : '/candidate',
+    requestUrl.origin,
+  );
 
   if (next) {
-    const decodedNext = decodeURIComponent(next);
-    redirectTo = new URL(decodedNext, requestUrl.origin);
+    try {
+      const decodedNext = decodeURIComponent(next);
+      if (decodedNext.startsWith('/') && !decodedNext.startsWith('//')) {
+        redirectTo = new URL(decodedNext, requestUrl.origin);
+      }
+    } catch {
+      // Keep the default authenticated destination for malformed next values.
+    }
   }
 
   return NextResponse.redirect(redirectTo);

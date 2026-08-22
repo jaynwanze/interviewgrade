@@ -20,6 +20,7 @@ import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import type { AuthProvider } from '@/types';
 import { UserType } from '@/types/userTypes';
 import { useState } from 'react';
+
 export function SignUp({
   next,
   nextActionType,
@@ -54,7 +55,7 @@ export function SignUp({
 
   const magicLinkMutation = useSAToastMutation(
     async (email: string) => {
-      return await signInWithMagicLink(email, userType, next); // Added userType
+      return await signInWithMagicLink(email, userType, next);
     },
     {
       loadingMessage: 'Sending magic link...',
@@ -75,6 +76,7 @@ export function SignUp({
       },
     },
   );
+
   const passwordMutation = useSAToastMutation(
     async ({ email, password }: { email: string; password: string }) => {
       setResendData({ email, password });
@@ -99,17 +101,15 @@ export function SignUp({
       successMessage: 'Account created!',
     },
   );
+
   const providerMutation = useSAToastMutation(
     async (provider: AuthProvider) => {
-      // since we can't use the onSuccess callback here to redirect from here
-      // we pass on the `next` to the signInWithProvider function
-      // the user gets redirected from the provider redirect callback
       return signInWithProvider(provider, next);
     },
     {
-      loadingMessage: 'Requesting login...',
+      loadingMessage: 'Opening Google...',
       successMessage: 'Redirecting...',
-      errorMessage: 'Failed to login',
+      errorMessage: 'Failed to continue with Google',
       onSuccess: (payload) => {
         window.location.href = payload.data.url;
       },
@@ -132,21 +132,29 @@ export function SignUp({
           }}
         />
       ) : (
-        <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
+        <div className="space-y-6 bg-background p-6 rounded-lg shadow dark:border">
           <header className="text-center space-y-1">
-            <div className="inline-flex items-center space-x-2">
-              <span
-                className="text-3xl font-semibold tracking-tight 
-               bg-gradient-to-r
-               bg-clip-text"
-              >
-                Candidate Signup
-              </span>
-              <span className="px-2 py-1 text-sm font-medium text-white bg-green-500 rounded-full">
-                New
-              </span>
-            </div>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Create your account
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Create Practices, share them, and keep your progress in one place.
+            </p>
           </header>
+
+          <div className="space-y-4">
+            <RenderProviders
+              providers={['google']}
+              isLoading={providerMutation.isLoading}
+              onProviderLoginRequested={providerMutation.mutate}
+            />
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
+              <span>or continue with email</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          </div>
+
           <Tabs defaultValue="password" className="md:min-w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>
@@ -158,7 +166,7 @@ export function SignUp({
                 <CardHeader className="py-6 px-0">
                   <CardTitle>Register to InterviewGrade</CardTitle>
                   <CardDescription>
-                    Create an account with your email and password
+                    Create an account with your email and password.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">
@@ -179,7 +187,7 @@ export function SignUp({
                 <CardHeader className="py-6 px-0">
                   <CardTitle>Register to InterviewGrade</CardTitle>
                   <CardDescription>
-                    Create an account with magic link we will send to your email
+                    Create an account with a magic link sent to your email.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">
@@ -187,23 +195,6 @@ export function SignUp({
                     onSubmit={(email) => magicLinkMutation.mutate(email)}
                     isLoading={magicLinkMutation.isLoading}
                     view="sign-up"
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="social-login">
-              <Card className="border-none shadow-none">
-                <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to InterviewGrade</CardTitle>
-                  <CardDescription>
-                    Register with your social account
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 p-0">
-                  <RenderProviders
-                    providers={['google']}
-                    isLoading={providerMutation.isLoading}
-                    onProviderLoginRequested={providerMutation.mutate}
                   />
                 </CardContent>
               </Card>

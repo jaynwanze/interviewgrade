@@ -112,6 +112,6 @@ export async function completePracticeSessionAction(
 
   // Completion is the durable boundary. Navigate immediately so a slow model
   // evaluation never leaves the participant stuck on the session screen. The
-  // report page owns generation, loading and retry UX after this point.
-  redirect(`/session/${encodeURIComponent(normalizedId)}/report?generate=1`);
+  // generation route owns report loading and retry UX after this point.
+  redirect(`/session/${encodeURIComponent(normalizedId)}/report/generating`);
 }

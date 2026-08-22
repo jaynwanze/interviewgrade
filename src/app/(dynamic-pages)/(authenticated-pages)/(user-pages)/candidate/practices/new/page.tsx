@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, FileText, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 
 import { GeneratePracticeDraftForm } from './GeneratePracticeDraftForm';
+import { UploadPracticeDocumentForm } from './UploadPracticeDocumentForm';
 import { createPracticeAction } from './actions';
 
 export const maxDuration = 60;
@@ -31,6 +32,13 @@ export default function CreatePracticePage({
   const unavailable = searchParams?.error === 'unavailable';
   const invalidAiBrief = searchParams?.error === 'ai-input';
   const aiUnavailable = searchParams?.error === 'ai';
+  const documentInput = searchParams?.error === 'document-input';
+  const documentType = searchParams?.error === 'document-type';
+  const documentSize = searchParams?.error === 'document-size';
+  const documentEmpty = searchParams?.error === 'document-empty';
+  const documentLength = searchParams?.error === 'document-length';
+  const documentUnavailable = searchParams?.error === 'document';
+  const documentAiUnavailable = searchParams?.error === 'document-ai';
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -46,8 +54,8 @@ export default function CreatePracticePage({
             Create a practice
           </h1>
           <p className="max-w-2xl text-muted-foreground">
-            Generate a complete editable draft from a brief, or start manually and
-            build the questions and rubric yourself.
+            Generate from a brief, turn a source document into an editable draft,
+            or start manually and build the questions and rubric yourself.
           </p>
         </div>
       </div>
@@ -68,6 +76,53 @@ export default function CreatePracticePage({
         <Alert tone="warning">
           AI drafting is temporarily unavailable. You can still create the practice
           manually below and use the same editor.
+        </Alert>
+      )}
+
+      {documentInput && (
+        <Alert tone="destructive">
+          Choose a supported document and check the generation options before trying
+          again.
+        </Alert>
+      )}
+
+      {documentType && (
+        <Alert tone="destructive">
+          This first document release supports text-based PDF and TXT files. DOCX is
+          planned as the next small follow-up.
+        </Alert>
+      )}
+
+      {documentSize && (
+        <Alert tone="destructive">
+          The document is larger than 5 MB. Choose a smaller source file.
+        </Alert>
+      )}
+
+      {documentEmpty && (
+        <Alert tone="destructive">
+          InterviewGrade could not find enough readable text in that document.
+          Scanned-image PDFs are not supported yet.
+        </Alert>
+      )}
+
+      {documentLength && (
+        <Alert tone="destructive">
+          The extracted document is too long for this first release. Use a shorter
+          source document; InterviewGrade will not silently truncate it.
+        </Alert>
+      )}
+
+      {documentUnavailable && (
+        <Alert tone="warning">
+          InterviewGrade could not read that document. Try another PDF or TXT file.
+        </Alert>
+      )}
+
+      {documentAiUnavailable && (
+        <Alert tone="warning">
+          The document was read successfully, but AI drafting is temporarily
+          unavailable. Your source file was not stored.
         </Alert>
       )}
 
@@ -96,6 +151,27 @@ export default function CreatePracticePage({
         </CardHeader>
         <CardContent>
           <GeneratePracticeDraftForm />
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-sm">
+        <CardHeader>
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-muted p-2.5 text-foreground">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Upload a document</CardTitle>
+              <CardDescription className="max-w-2xl">
+                Turn source material into the same editable Practice draft. The
+                uploaded file is used for generation only and is not published or
+                retained by this flow.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <UploadPracticeDocumentForm />
         </CardContent>
       </Card>
 

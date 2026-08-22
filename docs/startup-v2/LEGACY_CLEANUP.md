@@ -43,13 +43,15 @@ These are legacy areas that V2 still depends on or that should remain accessible
 
 ### Candidate subscription / quota bridge
 
-`src/modules/session/session-usage.service.ts` currently calls the legacy `canStartSession('practice')` path to obtain subscription limits, then combines that allowance with V2 session usage.
+V2 session usage is calculated in `src/modules/session/session-usage.service.ts`, combining the existing candidate Practice allowance with V2 session usage for the current month.
 
-That means candidate subscription/product/Stripe access code cannot be deleted yet without first replacing the V2 quota boundary.
+The direct legacy dependency is now isolated in `src/modules/session/legacy-practice-access.gateway.ts`. V2 session logic must not import the old all-purpose `src/data/user/candidate.tsx` module directly.
 
-Decision: **KEEP TRANSITIONALLY.**
+The compatibility gateway intentionally preserves the existing subscription and monthly-limit behavior. Candidate subscription/product/Stripe access code therefore remains a runtime dependency underneath that gateway until the post-V2 billing decision is made.
 
-When the post-V2 product model/billing decision is made, replace this with a narrow V2 creator/participant usage service and then remove the old candidate billing dependency.
+Decision: **KEEP TRANSITIONALLY, BEHIND ONE COMPATIBILITY BOUNDARY.**
+
+When the post-V2 product model/billing decision is made, replace the gateway with a narrow creator/participant usage service and then remove the old candidate billing dependency.
 
 ### Legacy History archive
 
@@ -160,7 +162,9 @@ As of the current V2 cleanup checkpoint:
 - V2 Practice creation/publish/share/session/feedback/report works in production;
 - Avery has been selectively ported into the cleaner V2 player;
 - V2 History is primary and V1 History is isolated as an archive;
-- Mock Interviews are frozen and should no longer appear in primary V2 navigation;
-- V2 session quotas still depend on the legacy candidate subscription-limit boundary;
+- Mock Interviews are frozen and no longer appear in primary V2 navigation;
+- V2 persistence tables are server-owned, RLS-enabled, and have no direct `anon` / `authenticated` table grants;
+- the V2 session quota dependency is isolated behind `legacy-practice-access.gateway.ts` while preserving current billing behavior;
+- migration history for the three manually applied V2 migrations still needs the documented Supabase CLI repair bookkeeping step;
 - critical-path E2E is intentionally deferred and should not block this cleanup pass;
-- the next cleanup work is architecture/security/migration reconciliation plus replacement of the remaining transitional boundaries before any destructive legacy purge.
+- destructive legacy deletion remains deferred until the post-V2 product/auth/billing decisions remove the final intentional compatibility boundaries.

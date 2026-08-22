@@ -40,11 +40,12 @@ export function Login({
   function redirectToDashboard() {
     router.refresh();
     if (next) {
-      router.push(`/auth/callback?next=${next}`);
+      router.push(`/auth/callback?next=${encodeURIComponent(next)}`);
     } else {
       router.push('/auth/callback');
     }
   }
+
   const magicLinkMutation = useSAToastMutation(
     async (email: string) => {
       return await signInWithMagicLink(email, userType, next);
@@ -68,6 +69,7 @@ export function Login({
       successMessage: 'A magic link has been sent to your email!',
     },
   );
+
   const passwordMutation = useSAToastMutation(
     async ({ email, password }: { email: string; password: string }) => {
       return await signInWithPassword(email, password);
@@ -89,14 +91,15 @@ export function Login({
       successMessage: 'Logged in!',
     },
   );
+
   const providerMutation = useSAToastMutation(
     async (provider: AuthProvider) => {
       return signInWithProvider(provider, next);
     },
     {
-      loadingMessage: 'Requesting login...',
+      loadingMessage: 'Opening Google...',
       successMessage: 'Redirecting...',
-      errorMessage: 'Failed to login',
+      errorMessage: 'Failed to login with Google',
       onSuccess: (payload) => {
         window.location.href = payload.data.url;
       },
@@ -120,7 +123,8 @@ export function Login({
     },
   );
 
-  (isLoggedIn || next) && redirectToDashboard();
+  isLoggedIn && redirectToDashboard();
+
   return (
     <div
       data-success={successMessage}
@@ -134,16 +138,29 @@ export function Login({
           resetSuccessMessage={setSuccessMessage}
         />
       ) : (
-        <div className="space-y-8 bg-background p-6 rounded-lg shadow dark:border">
+        <div className="space-y-6 bg-background p-6 rounded-lg shadow dark:border">
           <header className="text-center space-y-1">
-            <h1
-              className="text-3xl font-semibold tracking-tight
-               bg-gradient-to-r
-               bg-clip-text "
-            >
-              Candidate Login
+            <h1 className="text-3xl font-semibold tracking-tight">
+              Welcome back
             </h1>
+            <p className="text-sm text-muted-foreground">
+              Sign in to create Practices and track your progress.
+            </p>
           </header>
+
+          <div className="space-y-4">
+            <RenderProviders
+              providers={['google']}
+              isLoading={providerMutation.isLoading}
+              onProviderLoginRequested={providerMutation.mutate}
+            />
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
+              <span>or continue with email</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          </div>
+
           <Tabs defaultValue="password" className="md:min-w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>
@@ -176,7 +193,7 @@ export function Login({
                 <CardHeader className="py-6 px-0">
                   <CardTitle>Login to InterviewGrade</CardTitle>
                   <CardDescription>
-                    Login with magic link we will send to your email.
+                    Login with a magic link sent to your email.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">
@@ -184,23 +201,6 @@ export function Login({
                     onSubmit={(email) => magicLinkMutation.mutate(email)}
                     isLoading={magicLinkMutation.isLoading}
                     view="sign-in"
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="social-login">
-              <Card className="border-none shadow-none">
-                <CardHeader className="py-6 px-0">
-                  <CardTitle>Login to InterviewGrade</CardTitle>
-                  <CardDescription>
-                    Login with your social account.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 p-0">
-                  <RenderProviders
-                    providers={['google']}
-                    isLoading={providerMutation.isLoading}
-                    onProviderLoginRequested={providerMutation.mutate}
                   />
                 </CardContent>
               </Card>

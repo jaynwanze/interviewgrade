@@ -24,6 +24,7 @@ Reasons are documented in [CODE_AUDIT.md](./CODE_AUDIT.md), but the major ones a
 ## Documents
 
 - [ROADMAP.md](./ROADMAP.md) — current NOW → THEN → LATER product sequence and active restart point.
+- [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) — lightweight V2 identity/authorization model: Anonymous/Signed in, Creator/Participant, and future workspace permissions.
 - [LEGACY_CLEANUP.md](./LEGACY_CLEANUP.md) — current V1 → V2 port/freeze/transitional/delete decisions and safe cleanup sequence.
 - [MIGRATION_RECONCILIATION.md](./MIGRATION_RECONCILIATION.md) — production V2 migration-history repair steps and server-owned table hardening record.
 - [CODE_AUDIT.md](./CODE_AUDIT.md) — current system, risks and KEEP / MIGRATE / REFACTOR / FREEZE / DELETE decisions.

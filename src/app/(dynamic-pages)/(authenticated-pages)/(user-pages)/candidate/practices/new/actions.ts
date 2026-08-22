@@ -138,11 +138,7 @@ export async function generatePracticeDraftFromDocumentAction(
   }
 
   revalidatePath('/candidate/practices');
-  const query = new URLSearchParams({
-    generated: '1',
-    source: extracted.filename,
-  });
-  redirect(`/candidate/practices/${createdPracticeId}?${query.toString()}`);
+  redirect(`/candidate/practices/${createdPracticeId}?generated=1&document=1`);
 }
 
 export async function createPracticeAction(formData: FormData) {

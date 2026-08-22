@@ -4,8 +4,8 @@ import { and, count, eq, gte } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { sessions } from '@/db/schema/sessions';
-import { canStartSession } from '@/data/user/candidate';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { getLegacyPracticeSessionAccess } from './legacy-practice-access.gateway';
 
 async function countV2PracticeSessionsSince(
   participantUserId: string,
@@ -26,8 +26,9 @@ async function countV2PracticeSessionsSince(
 
 /**
  * Transitional quota view while Practice history spans legacy interviews and
- * v2 sessions. Mock Interview remains legacy-only, so only Practice needs the
- * combined count.
+ * v2 sessions. The legacy billing/usage dependency is isolated behind
+ * getLegacyPracticeSessionAccess so V2 runtime code does not import the old
+ * candidate data module directly.
  */
 export async function canStartV2AwarePracticeSession(): Promise<{
   allowed: boolean;
@@ -35,7 +36,7 @@ export async function canStartV2AwarePracticeSession(): Promise<{
   limit: number;
   isPro: boolean;
 }> {
-  const legacyAccess = await canStartSession('practice');
+  const legacyAccess = await getLegacyPracticeSessionAccess();
   if (legacyAccess.isPro) {
     return legacyAccess;
   }

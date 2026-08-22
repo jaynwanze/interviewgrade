@@ -21,21 +21,22 @@ export default async function InterviewHistory({
   searchParams?: HistorySearchParams;
 }) {
   const user = await serverGetLoggedInUser();
-  const mode = parseMode(searchParams?.mode);
+  const legacyView = firstValue(searchParams?.legacy) === '1';
+  const legacyMode = parseMode(searchParams?.mode);
   const filter = parseFilter(searchParams?.status);
-  const v2Page = parsePage(searchParams?.v2Page);
-  const legacyPage = parsePage(searchParams?.legacyPage);
+  const page = parsePage(searchParams?.page);
 
-  const [v2Result, legacyResult] = await Promise.all([
-    mode === 'practice'
-      ? loadV2Page(user.id, filter, v2Page)
-      : Promise.resolve({ page: emptyV2Page(), error: false }),
-    loadLegacyPage(user.id, mode, filter, legacyPage),
-  ]);
+  const v2Result = legacyView
+    ? { page: emptyV2Page(), error: false }
+    : await loadV2Page(user.id, filter, page);
+  const legacyResult = legacyView
+    ? await loadLegacyPage(user.id, legacyMode, filter, page)
+    : { page: emptyLegacyPage(), error: false };
 
   return (
     <InterviewHistoryPage
-      mode={mode}
+      legacyView={legacyView}
+      legacyMode={legacyMode}
       filter={filter}
       v2Page={v2Result.page}
       legacyPage={legacyResult.page}

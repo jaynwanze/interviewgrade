@@ -40,7 +40,7 @@ export async function UserSidebar() {
           icon={<NotepadText className="h-5 w-5" />}
         />
         <SidebarLink
-          label="Interview History"
+          label="History"
           href="/candidate/interview-history"
           icon={<LucideHistory className="h-5 w-5" />}
         />

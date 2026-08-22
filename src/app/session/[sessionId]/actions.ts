@@ -110,19 +110,8 @@ export async function completePracticeSessionAction(
   const service = createPublicSessionService();
   await service.completeForParticipant(normalizedId, await getActorUserId());
 
-  try {
-    const { createEvaluationService } = await import(
-      '@/modules/evaluation/evaluation.service'
-    );
-    await createEvaluationService().getOrCreateReport(normalizedId);
-  } catch (error) {
-    // Completion is durable even when model evaluation is temporarily unavailable.
-    // The report route exposes an explicit retry action for this case.
-    console.error(
-      'completePracticeSessionAction: report evaluation unavailable',
-      error,
-    );
-  }
-
-  redirect(`/session/${encodeURIComponent(normalizedId)}/report`);
+  // Completion is the durable boundary. Navigate immediately so a slow model
+  // evaluation never leaves the participant stuck on the session screen. The
+  // report page owns generation, loading and retry UX after this point.
+  redirect(`/session/${encodeURIComponent(normalizedId)}/report?generate=1`);
 }

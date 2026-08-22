@@ -18,7 +18,7 @@ For now:
 - a participant should be able to complete a shared Practice without being forced to create an account;
 - do not add heavyweight employer, workspace, SSO or integration architecture until the core V2 loop is reliable and there is evidence it is needed.
 
-## NOW — Finish the V2 foundation
+## NOW — V2 foundation accepted complete
 
 1. **Avery speaking experience — complete**
    - Keep the cleaner V2 three-column session layout.
@@ -36,25 +36,22 @@ For now:
    - V1 and V2 counts/scores are no longer mixed.
    - Original InterviewGrade sessions remain available only through an explicit Legacy history archive.
 
-4. **Core production flow — accepted for now**
+4. **Core production flow — accepted**
    - AI create → draft → publish → share → session → transcription → response evaluation → feedback → finish → final report has been exercised in production.
    - Dashboard and History reflect V2 results.
    - A ceremonial full five-answer run is not required to block the foundation; the final-question/Q5 edge case is accepted provisionally and can be covered when E2E work resumes.
 
-5. **Critical-path E2E — deferred**
-   - Eventually protect creator → publish → shared Practice → participant session → persisted evaluation → report.
-   - Include the final-question/Q5 completion edge case.
-   - Mock or fake expensive media/AI boundaries where appropriate in CI while keeping persistence and navigation assertions meaningful.
-   - This is valuable follow-up work, but it is intentionally not blocking the current V2 cleanup pass.
+5. **Legacy / architecture cleanup — complete for the current V2 boundary**
+   - Frozen V1 product surfaces are removed from the primary V2 navigation.
+   - V2 persistence tables are server-owned, RLS-enabled and have no direct `anon` / `authenticated` table grants.
+   - The remaining legacy Practice quota dependency is isolated behind one server-only compatibility gateway without changing billing behavior.
+   - V1 History remains an explicit archive instead of being mixed into V2 analytics.
+   - Destructive deletion of legacy application/database code is intentionally deferred until the post-V2 product/auth/billing decisions remove the final compatibility reasons to keep it.
 
-6. **V2 cleanup — active**
-   - Use [LEGACY_CLEANUP.md](./LEGACY_CLEANUP.md) as the execution guide for port/freeze/transitional/delete decisions.
-   - Remove frozen V1 product surfaces from primary V2 navigation without blindly deleting reference code.
-   - Reconcile manually applied Supabase migration history.
-   - Review V2 grants/RLS/GraphQL exposure separately from product work.
-   - Replace remaining transitional V2 → legacy dependencies before destructive code deletion.
-   - Finish the V2 architecture/documentation audit.
-   - Declare the V2 foundation complete before widening scope.
+6. **Non-blocking follow-ups — deferred**
+   - Critical-path E2E should eventually protect creator → publish → shared Practice → participant session → persisted evaluation → report, including the final-question/Q5 edge case.
+   - The three manually applied V2 Supabase migrations still need the documented `migration repair --status applied` bookkeeping step; do not rerun their DDL.
+   - These items are valuable engineering hygiene, but they do not block moving beyond the V2 foundation checkpoint.
 
 ## THEN — Lightweight product expansion
 
@@ -80,6 +77,12 @@ Once the V2 foundation is complete, make the minimum product decisions required 
    - Improve shared-link UX and optional participant capture.
    - Add richer result/analytics presentation only when it is backed by meaningful V2 evidence.
 
+5. **Participant mobile UX before wider launch**
+   - Keep creator/editor workflows desktop-first rather than forcing complex authoring onto a phone.
+   - Make the shared Practice page, Avery session, recording, feedback and report usable on modern mobile browsers.
+   - Do not hard-block phones or require an app install to open a shared Practice link.
+   - Consider PWA/native-app work later only if repeat participant usage creates a clear benefit.
+
 ## LATER — Only if demand exists
 
 Do not build these merely because the architecture could support them.
@@ -88,6 +91,7 @@ Do not build these merely because the architecture could support them.
 - **Assignments** — targeted participants, due dates, cohorts and completion tracking.
 - **ATS / LMS integrations** — launch InterviewGrade Practices from existing employer/training systems and return results.
 - **Enterprise auth** — SSO, Microsoft/Google Workspace administration and other organisation-specific controls.
+- **Native mobile app** — only if repeat learner/participant behavior justifies install friction and app-specific capabilities such as notifications or deeper device integration.
 
 These should be driven by actual customer/use-case demand rather than treated as prerequisites for the lightweight core product.
 
@@ -95,9 +99,8 @@ These should be driven by actual customer/use-case demand rather than treated as
 
 At the current checkpoint:
 
-- V2 Dashboard is primary;
-- Finish Practice/report navigation is fixed;
-- Avery speaking rings, browser TTS fallback and audio cleanup are live;
-- V2 History is primary and legacy history is isolated as an archive;
-- the core production flow is accepted for now and E2E is intentionally deferred;
-- **V2 legacy/architecture/security cleanup is the active implementation step.**
+- the V2 foundation is accepted complete;
+- Dashboard, Avery, Practice creation/share/session/feedback/report and V2-first History are live;
+- V2 database access is hardened and the remaining legacy billing dependency is quarantined behind a narrow compatibility boundary;
+- E2E and Supabase migration-history repair are documented deferred follow-ups;
+- **the next product step is the Product model + lightweight auth decision.**

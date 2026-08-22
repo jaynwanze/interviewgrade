@@ -1,5 +1,12 @@
 import Link from 'next/link';
-import { ExternalLink, FileQuestion, Pencil, Plus, Sparkles } from 'lucide-react';
+import {
+  BarChart3,
+  ExternalLink,
+  FileQuestion,
+  Pencil,
+  Plus,
+  Sparkles,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +19,8 @@ import {
 import type { Practice } from '@/modules/practice/practice.schema';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
+import { CopyPracticeLinkButton } from './CopyPracticeLinkButton';
+
 type MyPracticesPageProps = {
   searchParams?: {
     created?: string;
@@ -23,12 +32,9 @@ type PracticeLoadResult =
   | { ready: false; practices: [] };
 
 async function loadMyPractices(): Promise<PracticeLoadResult> {
-  // Authentication redirects should retain their normal behavior.
   await serverGetLoggedInUser();
 
   try {
-    // Keep the existing candidate shell resilient while v2 persistence is
-    // unavailable in an environment.
     const { createAuthenticatedPracticeService } = await import(
       '@/modules/practice/practice.service'
     );
@@ -58,8 +64,7 @@ export default async function MyPracticesPage({
           </div>
           <h1 className="text-3xl font-semibold tracking-tight">My Practices</h1>
           <p className="max-w-2xl text-muted-foreground">
-            Build reusable practice scenarios, questions, and scoring rubrics.
-            Your existing mock interviews remain available separately.
+            Create, publish, share, and review results from reusable Practices.
           </p>
         </div>
 
@@ -84,8 +89,7 @@ export default async function MyPracticesPage({
           <CardHeader>
             <CardTitle className="text-xl">Practice creator setup pending</CardTitle>
             <CardDescription>
-              The v2 practice database is not available in this environment yet.
-              Existing dashboard and mock interview features are unaffected.
+              The Practice service is not available in this environment right now.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -97,7 +101,7 @@ export default async function MyPracticesPage({
             </div>
             <h2 className="text-xl font-semibold">Create your first practice</h2>
             <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-              Start with a scenario, one question, and a scoring criterion. Your
+              Generate with AI, upload source material, or build manually. Your
               first draft stays private until you publish it.
             </p>
             <Button asChild className="mt-6">
@@ -128,6 +132,7 @@ function PracticeCard({ practice }: { practice: Practice }) {
         : 'Draft';
   const hasPublicLink =
     practice.status === 'published' && Boolean(practice.shareSlug);
+  const publicPath = practice.shareSlug ? `/p/${practice.shareSlug}` : null;
 
   return (
     <Card className="flex h-full flex-col">
@@ -163,13 +168,25 @@ function PracticeCard({ practice }: { practice: Practice }) {
             </Link>
           </Button>
 
-          {hasPublicLink && practice.shareSlug && (
-            <Button asChild className="w-full">
-              <Link href={`/p/${practice.shareSlug}`} target="_blank">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Open shared practice
-              </Link>
-            </Button>
+          {hasPublicLink && publicPath && (
+            <>
+              <Button asChild className="w-full">
+                <Link href={`/candidate/practices/${practice.id}/results`}>
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Results
+                </Link>
+              </Button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <CopyPracticeLinkButton path={publicPath} />
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={publicPath} target="_blank">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Open
+                  </Link>
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </CardContent>

@@ -182,7 +182,8 @@ export default async function PublicPracticePage({
                 </div>
                 <CardTitle>Ready to practise?</CardTitle>
                 <CardDescription>
-                  Start as a guest. Your name and email are optional.
+                  Start as a guest. Your name and email are optional. Your responses
+                  and Practice result will be visible to the creator.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -224,8 +225,10 @@ export default async function PublicPracticePage({
                   </Button>
 
                   <p className="text-center text-xs leading-5 text-muted-foreground">
-                    Your session is pinned to this published version, so the
-                    questions cannot change underneath you after you start.
+                    Your responses and result can be reviewed by the Practice creator.
+                    If you provide a name or email, those details are visible too. Your
+                    session is pinned to this published version so its questions cannot
+                    change after you start.
                   </p>
                 </form>
               </CardContent>

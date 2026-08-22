@@ -78,18 +78,20 @@ For now:
    - New OAuth users without legacy `userType` metadata enter the V2 signed-in shell rather than being treated as employers.
    - **Deferred branding polish:** the Google hand-off currently shows the Supabase project hostname (`<project-ref>.supabase.co`). Revisit later with a Supabase custom auth domain such as `auth.interviewgrade.io` or direct Google Identity Services / ID-token sign-in. This is UX polish, not an auth blocker.
 
-3. **Upload document → Generate Practice — next / in progress**
-   - First implementation slice: text-based PDF and TXT upload, server-side extraction, optional creator instruction, then the existing V2 AI Practice generator and editor.
-   - Do not retain the original file in the first version.
-   - Reject unsupported, oversized, empty/scanned and overlong sources explicitly rather than silently truncating them.
-   - DOCX remains part of the intended MVP and should follow as a small parser/dependency change after the PDF/TXT path is proven.
-   - Always create an editable V2 Draft before publishing.
-   - Do not create a parallel document-specific Practice architecture.
+3. **Upload document → Generate Practice — PDF/TXT path complete**
+   - Text-based PDF and TXT upload is live in production and has been smoke-tested with a realistic source document.
+   - Source text is extracted server-side, passed into the existing V2 Practice generator, and lands in the normal editable editor.
+   - The original file is not retained and local filenames are not persisted into the editor URL/history.
+   - Unsupported, oversized, empty/scanned and overlong sources fail explicitly rather than being silently truncated.
+   - DOCX remains an intentionally small parser/dependency follow-up; it does not block moving to the next product slice.
 
-4. **Better sharing and results**
-   - Improve creator-facing result review and participant identity where useful.
-   - Improve shared-link UX and optional participant capture.
-   - Add richer result/analytics presentation only when it is backed by meaningful V2 evidence.
+4. **Better sharing and results — active**
+   - Give creators a direct copy-share-link action from My Practices.
+   - Add a creator-owned Results view per Practice covering attempts across all published versions.
+   - Surface optional participant name/email only when supplied; anonymous attempts remain valid.
+   - Show status, final score and a read-only result detail backed by the existing immutable session/evaluation data.
+   - Make the shared Practice start page explicit that responses/results and optional identity can be reviewed by the Practice creator.
+   - Do not add assignment/workspace architecture merely to support basic creator result review.
 
 5. **Participant mobile UX before wider launch**
    - Keep creator/editor workflows desktop-first rather than forcing complex authoring onto a phone.
@@ -119,5 +121,6 @@ At the current checkpoint:
 - Dashboard, Avery, Practice creation/share/session/feedback/report and V2-first History are live;
 - V2 database access is hardened and the remaining legacy billing dependency is quarantined behind a narrow compatibility boundary;
 - Google sign-in is live for the current scope; the visible Supabase OAuth hostname is documented deferred branding polish;
+- PDF/TXT document → Practice is live and production-smoke-passed; DOCX remains a small deferred follow-up;
 - E2E and Supabase migration-history repair are documented deferred follow-ups;
-- **the next implementation step is Upload document → Generate Practice, beginning with PDF/TXT before the DOCX follow-up.**
+- **the active implementation step is better creator sharing and Practice results.**

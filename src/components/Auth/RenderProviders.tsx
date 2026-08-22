@@ -31,6 +31,7 @@ export const RenderProviders = ({
         const AuthIcon = SocialIcons[provider];
         const component = (
           <Button
+            type="button"
             variant="secondary"
             size="default"
             disabled={isLoading || isDemo}
@@ -40,7 +41,7 @@ export const RenderProviders = ({
             <div className="mr-2">
               <AuthIcon />
             </div>
-            <span className="">{capitalize(provider)}</span>
+            <span>Continue with {capitalize(provider)}</span>
           </Button>
         );
         return (

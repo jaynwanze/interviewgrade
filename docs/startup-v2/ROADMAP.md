@@ -113,7 +113,16 @@ For now:
    - Separately rate-limit abusive empty public-session creation/start attempts; empty starts must not consume paid usage.
    - See [PRACTICE_RUN_ENTITLEMENTS.md](./PRACTICE_RUN_ENTITLEMENTS.md) for the accepted implementation scope.
 
-6. **Participant mobile UX before wider launch**
+6. **Practice lifecycle delete/archive polish — queued after entitlements**
+   - Add a compact trash/bin action to Practice cards with an explicit confirmation dialog.
+   - Draft Practices with no participant history may be permanently deleted.
+   - Published Practices, or any Practice with session/result history, should be archived rather than physically deleted so historical reports remain valid.
+   - Archiving should remove the Practice from the normal My Practices view and stop its public share link from accepting new sessions.
+   - Existing creator Results and participant reports must remain readable after archival.
+   - Add a lightweight Archived filter/view later so creators can inspect or restore archived Practices if useful.
+   - Do not introduce a new lifecycle table for this; reuse the existing `practices.status = 'archived'` state and current referential protections.
+
+7. **Participant mobile UX before wider launch**
    - Keep creator/editor workflows desktop-first rather than forcing complex authoring onto a phone.
    - Make the shared Practice page, Avery session, recording, feedback and report usable on modern mobile browsers.
    - Do not hard-block phones or require an app install to open a shared Practice link.
@@ -143,5 +152,6 @@ At the current checkpoint:
 - Google sign-in is live for the current scope; the visible Supabase OAuth hostname is documented deferred branding polish;
 - PDF/TXT document → Practice is live and production-smoke-passed; DOCX remains a small deferred follow-up;
 - creator copy-sharing and Practice Results are implemented for the current lightweight scope;
+- Practice delete/archive UX is recorded as near-term lifecycle polish after entitlement protection rather than interrupting the active cost-safety work;
 - E2E and Supabase migration-history repair are documented deferred follow-ups;
 - **the active implementation step is V2 Practice-run entitlements and shared-link abuse protection, scoped in [PRACTICE_RUN_ENTITLEMENTS.md](./PRACTICE_RUN_ENTITLEMENTS.md).**

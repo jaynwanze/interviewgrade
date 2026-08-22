@@ -1,5 +1,7 @@
 'use client';
 
+import Lottie, { type LottieRefCurrentProps } from 'lottie-react';
+import talkingInterviewer from 'public/assets/animations/AnimationSpeakingRings.json';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
@@ -7,7 +9,6 @@ import {
   Clock3,
   Loader2,
   MessageSquare,
-  Sparkles,
   Volume2,
 } from 'lucide-react';
 
@@ -25,7 +26,11 @@ import type {
   PracticeQuestion,
   RubricCriterion,
 } from '@/modules/practice/practice.schema';
-import { generateTTS } from '@/utils/openai/textToSpeech';
+import {
+  speakWithBrowserVoice,
+  stopBrowserVoice,
+} from '@/utils/openai/clientSpeechFallback';
+import { generateTTS, releaseTTSUrl } from '@/utils/openai/textToSpeech';
 
 import {
   advancePracticeSessionAction,
@@ -71,6 +76,8 @@ export function V2SessionPlayer({
   const [speaking, setSpeaking] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
   const lastAutoSpokenQuestionRef = useRef<string | null>(null);
 
   const orderedQuestions = useMemo(
@@ -87,44 +94,105 @@ export function V2SessionPlayer({
     ? ((safeIndex + 1) / orderedQuestions.length) * 100
     : 0;
 
+  const stopCurrentSpeech = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    releaseTTSUrl(audioUrlRef.current);
+    audioUrlRef.current = null;
+    stopBrowserVoice();
+    setSpeaking(false);
+  }, []);
+
   const speakCurrentQuestion = useCallback(
     async (automatic = false) => {
-      if (!currentQuestion || speaking) return;
+      if (!currentQuestion) return;
+
+      stopCurrentSpeech();
+      setError(null);
+
+      const intro =
+        safeIndex === 0
+          ? "Welcome to your InterviewGrade practice session. Answer each question naturally, then review your feedback. Let's begin. "
+          : '';
+      const speechText = `${intro}Question ${safeIndex + 1}. ${currentQuestion.prompt}`;
+      let fallbackStarted = false;
+
+      const startBrowserFallback = () => {
+        if (fallbackStarted) return true;
+        fallbackStarted = true;
+
+        const started = speakWithBrowserVoice(
+          speechText,
+          () => setSpeaking(true),
+          () => setSpeaking(false),
+        );
+
+        if (!started) {
+          setSpeaking(false);
+          setError(
+            automatic
+              ? 'Automatic question audio could not play. Click Listen to hear the question.'
+              : 'The question audio could not be played. You can continue normally.',
+          );
+        }
+
+        return started;
+      };
 
       try {
+        const audioUrl = await generateTTS(speechText, 'tts-1', 'alloy');
+        audioUrlRef.current = audioUrl;
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          setSpeaking(false);
+          releaseTTSUrl(audioUrlRef.current);
+          audioUrlRef.current = null;
+          audioRef.current = null;
+        };
+        audio.onerror = () => {
+          console.warn('OpenAI TTS audio playback failed; using browser voice.');
+          releaseTTSUrl(audioUrlRef.current);
+          audioUrlRef.current = null;
+          audioRef.current = null;
+          startBrowserFallback();
+        };
+
         setSpeaking(true);
-        setError(null);
+        await audio.play();
+      } catch (cause) {
+        console.warn(
+          'V2SessionPlayer: OpenAI TTS unavailable; using browser voice fallback',
+          cause,
+        );
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
+          audioRef.current = null;
         }
-
-        const intro =
-          safeIndex === 0
-            ? "Welcome to your InterviewGrade practice session. Answer each question naturally, then review your feedback. Let's begin. "
-            : '';
-        const audioUrl = await generateTTS(
-          `${intro}Question ${safeIndex + 1}. ${currentQuestion.prompt}`,
-          'tts-1',
-          'alloy',
-        );
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
-        audio.onended = () => setSpeaking(false);
-        audio.onerror = () => setSpeaking(false);
-        await audio.play();
-      } catch (cause) {
-        console.error('V2SessionPlayer: question TTS failed', cause);
+        releaseTTSUrl(audioUrlRef.current);
+        audioUrlRef.current = null;
         setSpeaking(false);
-        setError(
-          automatic
-            ? 'Automatic question audio could not play. Click Listen to hear the question.'
-            : 'The question audio could not be played. You can continue normally.',
-        );
+        startBrowserFallback();
       }
     },
-    [currentQuestion, safeIndex, speaking],
+    [currentQuestion, safeIndex, stopCurrentSpeech],
   );
+
+  useEffect(() => {
+    if (!lottieRef.current) return;
+
+    if (speaking) {
+      lottieRef.current.setSpeed(1);
+      lottieRef.current.play();
+    } else {
+      lottieRef.current.stop();
+    }
+  }, [speaking]);
 
   useEffect(() => {
     if (!currentQuestion) return;
@@ -138,12 +206,9 @@ export function V2SessionPlayer({
 
   useEffect(
     () => () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
+      stopCurrentSpeech();
     },
-    [],
+    [stopCurrentSpeech],
   );
 
   async function handleTranscript(transcript: string) {
@@ -290,6 +355,7 @@ export function V2SessionPlayer({
 
   function showNextQuestion() {
     if (preparedNextOrder == null) return;
+    stopCurrentSpeech();
     setCurrentQuestionOrder(preparedNextOrder);
     setPreparedNextOrder(null);
     setFeedbackText('');
@@ -303,6 +369,7 @@ export function V2SessionPlayer({
     try {
       setBusy(true);
       setError(null);
+      stopCurrentSpeech();
       await completePracticeSessionAction(sessionId);
       setCameraOn(false);
       setComplete(true);
@@ -403,8 +470,14 @@ export function V2SessionPlayer({
             </div>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col justify-center space-y-5 p-6">
-            <div className="mx-auto rounded-full bg-primary/10 p-6 text-primary">
-              <Sparkles className="h-10 w-10" />
+            <div className="mx-auto w-full max-w-[280px] overflow-hidden">
+              <Lottie
+                animationData={talkingInterviewer}
+                loop
+                autoplay={false}
+                lottieRef={lottieRef}
+                className="h-[160px] w-full"
+              />
             </div>
             <div className="space-y-3 text-center">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

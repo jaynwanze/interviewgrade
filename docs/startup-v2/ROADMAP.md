@@ -20,6 +20,15 @@ The V2 product model is defined in [PRODUCT_MODEL.md](./PRODUCT_MODEL.md):
 - `Guest` means an **Anonymous Participant**, not a third role;
 - future workspace permissions remain a separate concern.
 
+The V2 AI-usage/billing decision for the next implementation slice is defined in [PRACTICE_RUN_ENTITLEMENTS.md](./PRACTICE_RUN_ENTITLEMENTS.md):
+
+- keep the existing Free / Pro Stripe subscription foundation;
+- treat one AI-evaluated Practice session as the understandable usage unit;
+- start with **3 Practice runs/month for Free** and **50 Practice runs/month for Pro**;
+- self-practice and shared participant sessions draw from the Practice owner's allowance;
+- shared Guests remain account-free;
+- consume a run only when the first valid response is submitted, not when a link is opened or an empty session is started.
+
 For now:
 
 - a signed-in user can create and manage Practices;
@@ -85,15 +94,26 @@ For now:
    - Unsupported, oversized, empty/scanned and overlong sources fail explicitly rather than being silently truncated.
    - DOCX remains an intentionally small parser/dependency follow-up; it does not block moving to the next product slice.
 
-4. **Better sharing and results — active**
-   - Give creators a direct copy-share-link action from My Practices.
-   - Add a creator-owned Results view per Practice covering attempts across all published versions.
-   - Surface optional participant name/email only when supplied; anonymous attempts remain valid.
-   - Show status, final score and a read-only result detail backed by the existing immutable session/evaluation data.
-   - Make the shared Practice start page explicit that responses/results and optional identity can be reviewed by the Practice creator.
-   - Do not add assignment/workspace architecture merely to support basic creator result review.
+4. **Better sharing and creator results — complete for current slice**
+   - Creators have a direct copy-share-link action from My Practices.
+   - Each Practice has a creator-owned Results view covering attempts across published versions.
+   - Optional participant name/email is surfaced only when supplied; anonymous attempts remain valid.
+   - Creator result review is read-only and backed by the existing immutable session/evaluation data.
+   - The shared Practice start experience makes creator visibility of responses/results explicit without adding assignment/workspace architecture.
 
-5. **Participant mobile UX before wider launch**
+5. **V2 Practice-run entitlements + shared-link abuse protection — active**
+   - Keep the working Free / Pro Stripe subscription machinery instead of rebuilding payments.
+   - Define V2 usage independently from the old Candidate `interviews` monthly counter.
+   - Start with **Free = 3 AI-evaluated Practice runs/month** and **Pro = 50/month**.
+   - Use one allowance for self-practice and participant runs on Practices owned by the account.
+   - A Guest never pays or signs up merely to complete an available shared Practice.
+   - Consume exactly one run when the session submits its first valid response; later questions/retries/final report remain included.
+   - Add a V2 server-owned usage ledger with idempotent one-row-per-session accounting.
+   - Make the allowance reservation atomic so concurrent participants cannot oversubscribe the owner's remaining usage.
+   - Separately rate-limit abusive empty public-session creation/start attempts; empty starts must not consume paid usage.
+   - See [PRACTICE_RUN_ENTITLEMENTS.md](./PRACTICE_RUN_ENTITLEMENTS.md) for the accepted implementation scope.
+
+6. **Participant mobile UX before wider launch**
    - Keep creator/editor workflows desktop-first rather than forcing complex authoring onto a phone.
    - Make the shared Practice page, Avery session, recording, feedback and report usable on modern mobile browsers.
    - Do not hard-block phones or require an app install to open a shared Practice link.
@@ -122,5 +142,6 @@ At the current checkpoint:
 - V2 database access is hardened and the remaining legacy billing dependency is quarantined behind a narrow compatibility boundary;
 - Google sign-in is live for the current scope; the visible Supabase OAuth hostname is documented deferred branding polish;
 - PDF/TXT document → Practice is live and production-smoke-passed; DOCX remains a small deferred follow-up;
+- creator copy-sharing and Practice Results are implemented for the current lightweight scope;
 - E2E and Supabase migration-history repair are documented deferred follow-ups;
-- **the active implementation step is better creator sharing and Practice results.**
+- **the active implementation step is V2 Practice-run entitlements and shared-link abuse protection, scoped in [PRACTICE_RUN_ENTITLEMENTS.md](./PRACTICE_RUN_ENTITLEMENTS.md).**

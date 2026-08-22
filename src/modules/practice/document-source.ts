@@ -14,7 +14,10 @@ export type PracticeDocumentErrorCode =
   | 'parse-failed';
 
 export class PracticeDocumentError extends Error {
-  constructor(public readonly code: PracticeDocumentErrorCode, message: string) {
+  constructor(
+    public readonly code: PracticeDocumentErrorCode,
+    message: string,
+  ) {
     super(message);
     this.name = 'PracticeDocumentError';
   }
@@ -50,10 +53,7 @@ export async function extractPracticeDocument(
       const pdfModule = await import('pdf-parse');
       const parsed = await pdfModule.default(buffer);
       extractedText = parsed.text;
-    } else if (
-      extension === '.txt' &&
-      isAllowedMime(file.type, 'text/plain')
-    ) {
+    } else if (extension === '.txt' && isAllowedMime(file.type, 'text/plain')) {
       extractedText = buffer.toString('utf8');
     } else {
       throw new PracticeDocumentError(
@@ -104,7 +104,8 @@ function sanitizeFilename(filename: string) {
 
 function normalizeExtractedText(text: string) {
   return text
-    .replace(/\u0000/g, '')
+    .split(String.fromCharCode(0))
+    .join('')
     .replace(/\r\n?/g, '\n')
     .replace(/[\t ]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')

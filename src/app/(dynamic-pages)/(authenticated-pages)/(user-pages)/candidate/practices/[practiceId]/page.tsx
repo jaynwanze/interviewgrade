@@ -20,7 +20,7 @@ type PracticeEditorPageProps = {
     published?: string;
     created?: string;
     generated?: string;
-    source?: string;
+    document?: string;
     error?: string;
   };
 };
@@ -126,10 +126,9 @@ function EditorNotice({
   if (searchParams?.generated === '1') {
     return (
       <Notice tone="success">
-        AI draft created
-        {searchParams.source ? ` from ${searchParams.source}` : ''}. Review the
-        scenario, questions, rubric weights, question mappings, and timings below.
-        Nothing has been published yet.
+        AI draft created{searchParams.document === '1' ? ' from your uploaded document' : ''}.
+        Review the scenario, questions, rubric weights, question mappings, and
+        timings below. Nothing has been published yet.
       </Notice>
     );
   }

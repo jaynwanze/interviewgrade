@@ -98,7 +98,7 @@ function isAllowedMime(actual: string, expected: string) {
 }
 
 function sanitizeFilename(filename: string) {
-  const basename = path.basename(filename.trim());
+  const basename = path.basename(filename.trim()).slice(0, 180);
   return basename || 'document';
 }
 

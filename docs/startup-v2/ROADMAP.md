@@ -31,25 +31,28 @@ For now:
    - Navigate away from the session immediately rather than waiting on a long evaluation call.
    - Show a report-generation state and preserve retry behavior if evaluation fails.
 
-3. **History — next**
-   - Verify completed V2 Practice sessions appear in the user-facing History experience.
-   - Remove or isolate legacy V1 data assumptions where they conflict with V2 sessions/reports.
-   - Keep historical V1 behavior intact unless intentionally migrated.
+3. **History — complete**
+   - V2 Practice sessions are the primary History experience.
+   - V1 and V2 counts/scores are no longer mixed.
+   - Original InterviewGrade sessions remain available only through an explicit Legacy history archive.
 
-4. **Full 5/5 production test**
-   - Run one clean published Practice through all five questions.
-   - Verify five saved responses and five response evaluations.
-   - Verify final report generation, V3 rubric-weighted aggregation and question-to-criterion mapping behavior.
-   - Verify dashboard/history reflect the completed V2 session correctly.
+4. **Core production flow — accepted for now**
+   - AI create → draft → publish → share → session → transcription → response evaluation → feedback → finish → final report has been exercised in production.
+   - Dashboard and History reflect V2 results.
+   - A ceremonial full five-answer run is not required to block the foundation; the final-question/Q5 edge case is accepted provisionally and can be covered when E2E work resumes.
 
-5. **Critical-path E2E**
-   - Protect the creator → publish → shared Practice → participant session → persisted evaluation → report path.
+5. **Critical-path E2E — deferred**
+   - Eventually protect creator → publish → shared Practice → participant session → persisted evaluation → report.
+   - Include the final-question/Q5 completion edge case.
    - Mock or fake expensive media/AI boundaries where appropriate in CI while keeping persistence and navigation assertions meaningful.
+   - This is valuable follow-up work, but it is intentionally not blocking the current V2 cleanup pass.
 
-6. **V2 cleanup**
+6. **V2 cleanup — active**
+   - Use [LEGACY_CLEANUP.md](./LEGACY_CLEANUP.md) as the execution guide for port/freeze/transitional/delete decisions.
+   - Remove frozen V1 product surfaces from primary V2 navigation without blindly deleting reference code.
    - Reconcile manually applied Supabase migration history.
    - Review V2 grants/RLS/GraphQL exposure separately from product work.
-   - Remove temporary fallback/strangler code that is no longer needed.
+   - Replace remaining transitional V2 → legacy dependencies before destructive code deletion.
    - Finish the V2 architecture/documentation audit.
    - Declare the V2 foundation complete before widening scope.
 
@@ -90,9 +93,11 @@ These should be driven by actual customer/use-case demand rather than treated as
 
 ## Current restart point
 
-At the time this roadmap was written:
+At the current checkpoint:
 
-- the V2 dashboard has been separated from the legacy V1 candidate skill-card dashboard;
-- the Finish Practice/report navigation fix has been merged;
-- Avery speaking rings, browser TTS fallback and audio cleanup have been merged;
-- **History integration is the next active implementation task.**
+- V2 Dashboard is primary;
+- Finish Practice/report navigation is fixed;
+- Avery speaking rings, browser TTS fallback and audio cleanup are live;
+- V2 History is primary and legacy history is isolated as an archive;
+- the core production flow is accepted for now and E2E is intentionally deferred;
+- **V2 legacy/architecture/security cleanup is the active implementation step.**

@@ -13,7 +13,7 @@ export const V2_PRACTICE_GENERATION_LIMITS: Record<
   number
 > = {
   free: 3,
-  pro: 50,
+  pro: 30,
 };
 
 type PracticeGenerationReservationRow = {

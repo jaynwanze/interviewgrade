@@ -9,7 +9,7 @@ export type V2Plan = 'free' | 'pro';
 
 export const V2_PRACTICE_RUN_LIMITS: Record<V2Plan, number> = {
   free: 3,
-  pro: 50,
+  pro: 30,
 };
 
 type PracticeRunUsageRow = {

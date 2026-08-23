@@ -1,8 +1,10 @@
 'use client';
-import { PageHeading } from '@/components/PageHeading';
-import { TabsNavigation } from '@/components/TabsNavigation';
+
 import { CreditCard, Lock, User } from 'lucide-react';
 import { useMemo } from 'react';
+
+import { PageHeading } from '@/components/PageHeading';
+import { TabsNavigation } from '@/components/TabsNavigation';
 
 export default function UserSettingsClientLayout({
   children,
@@ -22,7 +24,7 @@ export default function UserSettingsClientLayout({
         icon: <Lock />,
       },
       {
-        label: 'Billing',
+        label: 'Plan & Usage',
         href: `/candidate/settings/billing`,
         icon: <CreditCard />,
       },
@@ -30,10 +32,10 @@ export default function UserSettingsClientLayout({
   }, []);
 
   return (
-    <div className="space-y-6 min-h-screen">
+    <div className="min-h-screen space-y-6">
       <PageHeading
         title="User Settings"
-        subTitle="Manage your details, account and security settings here."
+        subTitle="Manage your account, security, plan and monthly usage."
       />
       <TabsNavigation tabs={tabs} />
       {children}

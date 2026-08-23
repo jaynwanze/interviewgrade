@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { PracticeRunLimitError } from '@/modules/session/session.errors';
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 const saveResponseSchema = z.object({
@@ -51,28 +52,45 @@ export async function savePracticeSessionResponseAction(
     questionOrder: number;
     transcript: string;
   },
-): Promise<{ responseId: string }> {
+): Promise<
+  | { success: true; responseId: string }
+  | { success: false; code: 'practice_run_limit'; message: string }
+> {
   const normalizedId = sessionId.trim();
   if (!normalizedId) {
     throw new Error('Session id is required.');
   }
 
   const parsed = saveResponseSchema.parse(input);
-  const { createPublicSessionService } = await import(
-    '@/modules/session/session.service'
-  );
-  const service = createPublicSessionService();
-  const response = await service.saveResponseForParticipant(
-    {
-      sessionId: normalizedId,
-      questionId: parsed.questionId,
-      questionOrder: parsed.questionOrder,
-      transcript: parsed.transcript,
-    },
-    await getActorUserId(),
-  );
 
-  return { responseId: response.id };
+  try {
+    const { createPublicSessionService } = await import(
+      '@/modules/session/session.service'
+    );
+    const service = createPublicSessionService();
+    const response = await service.saveResponseForParticipant(
+      {
+        sessionId: normalizedId,
+        questionId: parsed.questionId,
+        questionOrder: parsed.questionOrder,
+        transcript: parsed.transcript,
+      },
+      await getActorUserId(),
+    );
+
+    return { success: true, responseId: response.id };
+  } catch (error) {
+    if (error instanceof PracticeRunLimitError) {
+      return {
+        success: false,
+        code: error.code,
+        message:
+          'This Practice has reached its participant limit for this month. Please contact the person who shared it with you.',
+      };
+    }
+
+    throw error;
+  }
 }
 
 export async function advancePracticeSessionAction(

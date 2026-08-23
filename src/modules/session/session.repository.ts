@@ -1,11 +1,12 @@
 import 'server-only';
 
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { db, type InterviewGradeDatabase } from '@/db/client';
 import { practiceQuestions, practices, practiceVersions } from '@/db/schema/practices';
 import { sessionResponses, sessions } from '@/db/schema/sessions';
+import { PracticeRunLimitError } from '@/modules/session/session.errors';
 import {
   sessionResponseSchema,
   sessionSchema,
@@ -36,6 +37,15 @@ const submitResponseInputSchema = z.object({
 
 type SessionRow = typeof sessions.$inferSelect;
 type SessionResponseRow = typeof sessionResponses.$inferSelect;
+
+type PracticeRunReservationRow = {
+  allowed: boolean;
+  already_reserved: boolean;
+  funder_user_id: string;
+  plan: string;
+  used: number;
+  run_limit: number;
+};
 
 function mapSession(row: SessionRow): Session {
   return sessionSchema.parse({
@@ -244,6 +254,31 @@ export class DrizzleSessionRepository implements SessionRepository {
 
       if (!question) {
         throw new Error('Response question does not belong to this session version.');
+      }
+
+      // Reserve the Practice owner's monthly allowance only after the response
+      // has passed all session/question validation. The database function is
+      // idempotent per session and serializes reservations per owner, so shared
+      // participants cannot oversubscribe the remaining allowance concurrently.
+      // Because this runs inside the response transaction, a later insert
+      // failure rolls the reservation back as well.
+      const reservationResult = await tx.execute<PracticeRunReservationRow>(
+        sql`select * from public.reserve_v2_practice_run(${parsed.sessionId}::uuid)`,
+      );
+      const reservation = reservationResult[0];
+
+      if (!reservation) {
+        throw new Error('Practice-run reservation returned no result.');
+      }
+
+      if (!reservation.allowed) {
+        const plan = reservation.plan === 'pro' ? 'pro' : 'free';
+        throw new PracticeRunLimitError(
+          reservation.funder_user_id,
+          plan,
+          Number(reservation.used),
+          Number(reservation.run_limit),
+        );
       }
 
       const [previousAttempt] = await tx

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { getActiveProductsByType } from '@/data/user/employee';
+import type { V2PracticeGenerationUsage } from '@/modules/billing/v2-practice-generation-usage';
 import type { V2PracticeRunUsage } from '@/modules/billing/v2-practice-run-usage';
 import type { NormalizedSubscription, Product } from '@/types';
 
@@ -48,8 +49,7 @@ async function UpgradeToProCard() {
   const activeProducts = await getActiveProductsByType('subscription');
   const paidProducts = activeProducts.filter(
     (product) =>
-      (product.price_unit_amount ?? 0) > 0 &&
-      Boolean(product.price_id),
+      (product.price_unit_amount ?? 0) > 0 && Boolean(product.price_id),
   );
 
   if (paidProducts.length === 0) {
@@ -70,8 +70,7 @@ async function UpgradeToProCard() {
       <div>
         <h2 className="text-xl font-semibold">Upgrade to Pro</h2>
         <p className="text-sm text-muted-foreground">
-          Same InterviewGrade experience, with a much larger monthly Practice-run
-          allowance.
+          Same InterviewGrade experience, with much larger monthly AI allowances.
         </p>
       </div>
 
@@ -89,7 +88,7 @@ async function UpgradeToProCard() {
                       {product.title || 'Pro'}
                     </CardTitle>
                     <CardDescription className="mt-1">
-                      50 AI-evaluated Practice runs each month.
+                      50 Practice runs and 50 AI Practice generations each month.
                     </CardDescription>
                   </div>
                   <div className="text-right">
@@ -103,7 +102,7 @@ async function UpgradeToProCard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-5 pt-5">
-                <PlanFeatures runLimit={50} />
+                <PlanFeatures runLimit={50} generationLimit={50} />
                 <CreateSubscriptionButton
                   priceId={product.price_id}
                   label="Upgrade to Pro"
@@ -117,9 +116,17 @@ async function UpgradeToProCard() {
   );
 }
 
-function PlanFeatures({ runLimit }: { runLimit: number }) {
+function PlanFeatures({
+  runLimit,
+  generationLimit,
+}: {
+  runLimit: number;
+  generationLimit: number;
+}) {
   const features = [
     `${runLimit} AI-evaluated Practice runs per month`,
+    `${generationLimit} AI Practice generations per month`,
+    'Unlimited manual Practice creation',
     ...SHARED_V2_FEATURES,
   ];
 
@@ -154,8 +161,56 @@ function InactiveSubscriptionNotice({
   return (
     <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
       Your previous subscription is <span className="font-medium">{status}</span>.
-      The Free Practice-run allowance applies until the subscription becomes active
-      again.
+      The Free monthly allowances apply until the subscription becomes active again.
+    </div>
+  );
+}
+
+function UsageMeter({
+  label,
+  used,
+  limit,
+  remaining,
+  resetsAt,
+  description,
+  icon,
+}: {
+  label: string;
+  used: number;
+  limit: number;
+  remaining: number;
+  resetsAt: string;
+  description: string;
+  icon: React.ReactNode;
+}) {
+  const usagePercent = Math.min(100, Math.max(0, (used / limit) * 100));
+
+  return (
+    <div className="space-y-4 rounded-lg border bg-muted/20 p-5">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            {icon}
+            {label}
+          </div>
+          <div className="mt-2 text-3xl font-semibold tracking-tight">
+            {used}
+            <span className="text-base font-normal text-muted-foreground">
+              {' '}
+              / {limit}
+            </span>
+          </div>
+        </div>
+        <div className="text-right text-sm">
+          <div className="font-medium">{remaining} left</div>
+          <div className="text-muted-foreground">
+            Resets {formatResetDate(resetsAt)}
+          </div>
+        </div>
+      </div>
+
+      <Progress value={usagePercent} />
+      <p className="text-xs leading-5 text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -163,15 +218,13 @@ function InactiveSubscriptionNotice({
 export async function CandidateSubscriptionDetails({
   normalizedSubscription,
   practiceRunUsage,
+  practiceGenerationUsage,
 }: {
   normalizedSubscription?: NormalizedSubscription;
   practiceRunUsage: V2PracticeRunUsage;
+  practiceGenerationUsage: V2PracticeGenerationUsage;
 }) {
   const isPro = practiceRunUsage.plan === 'pro';
-  const usagePercent = Math.min(
-    100,
-    Math.max(0, (practiceRunUsage.used / practiceRunUsage.limit) * 100),
-  );
   const planLabel =
     isPro && normalizedSubscription?.type === 'trialing'
       ? 'Pro trial'
@@ -184,8 +237,8 @@ export async function CandidateSubscriptionDetails({
       <div className="space-y-1">
         <T.H3>Plan & usage</T.H3>
         <T.Subtle>
-          Practice runs cover both your own sessions and participants using
-          Practices you created.
+          Track the two monthly AI allowances used by V2. Manual Practice creation
+          stays unlimited.
         </T.Subtle>
       </div>
 
@@ -206,7 +259,8 @@ export async function CandidateSubscriptionDetails({
                 {planLabel} plan
               </CardTitle>
               <CardDescription className="mt-1">
-                {practiceRunUsage.limit} AI-evaluated Practice runs per calendar
+                {practiceRunUsage.limit} Practice runs and{' '}
+                {practiceGenerationUsage.limit} AI Practice generations per calendar
                 month.
               </CardDescription>
             </div>
@@ -214,42 +268,34 @@ export async function CandidateSubscriptionDetails({
           </div>
         </CardHeader>
 
-        <CardContent className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
-          <div className="space-y-4 rounded-lg border bg-muted/20 p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Gauge className="h-4 w-4" />
-                  Practice runs this month
-                </div>
-                <div className="mt-2 text-3xl font-semibold tracking-tight">
-                  {practiceRunUsage.used}
-                  <span className="text-base font-normal text-muted-foreground">
-                    {' '}
-                    / {practiceRunUsage.limit}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right text-sm">
-                <div className="font-medium">{practiceRunUsage.remaining} left</div>
-                <div className="text-muted-foreground">
-                  Resets {formatResetDate(practiceRunUsage.resetsAt)}
-                </div>
-              </div>
-            </div>
-
-            <Progress value={usagePercent} />
-
-            <p className="text-xs leading-5 text-muted-foreground">
-              A run is consumed when the first valid answer is submitted. Opening a
-              shared link, starting an empty session, or viewing results does not use
-              a run.
-            </p>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <UsageMeter
+              label="Practice runs this month"
+              used={practiceRunUsage.used}
+              limit={practiceRunUsage.limit}
+              remaining={practiceRunUsage.remaining}
+              resetsAt={practiceRunUsage.resetsAt}
+              icon={<Gauge className="h-4 w-4" />}
+              description="A Practice run is consumed when the first valid answer is submitted. Opening a shared link, starting an empty session, or viewing results does not use a run."
+            />
+            <UsageMeter
+              label="AI Practice generations this month"
+              used={practiceGenerationUsage.used}
+              limit={practiceGenerationUsage.limit}
+              remaining={practiceGenerationUsage.remaining}
+              resetsAt={practiceGenerationUsage.resetsAt}
+              icon={<Sparkles className="h-4 w-4" />}
+              description="Generating from an AI brief or an extracted PDF/TXT source uses one generation when the model request begins. Invalid inputs and manual Practice creation do not use this allowance."
+            />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 border-t pt-5">
             <div className="text-sm font-medium">Included in {planLabel}</div>
-            <PlanFeatures runLimit={practiceRunUsage.limit} />
+            <PlanFeatures
+              runLimit={practiceRunUsage.limit}
+              generationLimit={practiceGenerationUsage.limit}
+            />
           </div>
         </CardContent>
       </Card>
@@ -264,11 +310,12 @@ export async function CandidateSubscriptionDetails({
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
             When a participant submits the first answer to a Practice you created,
-            one run is taken from your monthly allowance.
+            one Practice run is taken from your monthly allowance.
           </p>
           <p>
             The rest of that session, including feedback and the final report, is
-            included in the same run.
+            included in the same run. AI generation is a separate creator-only
+            allowance used when you ask InterviewGrade to create a Practice draft.
           </p>
         </CardContent>
       </Card>

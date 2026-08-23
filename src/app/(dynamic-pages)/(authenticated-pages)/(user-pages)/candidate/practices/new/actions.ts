@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { reserveV2PracticeGeneration } from '@/modules/billing/v2-practice-generation-usage';
 import type { PracticeDraft } from '@/modules/practice/practice.schema';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
@@ -31,7 +32,7 @@ const generateDocumentPracticeFormSchema = z.object({
 export async function generatePracticeDraftAction(formData: FormData) {
   // AI generation creates persisted candidate content, so authentication is
   // required before either the model call or the database mutation.
-  await serverGetLoggedInUser();
+  const user = await serverGetLoggedInUser();
 
   const parsed = generatePracticeFormSchema.safeParse({
     brief: formData.get('brief'),
@@ -40,6 +41,23 @@ export async function generatePracticeDraftAction(formData: FormData) {
 
   if (!parsed.success) {
     redirect('/candidate/practices/new?error=ai-input');
+  }
+
+  let generationAllowed = false;
+
+  try {
+    const reservation = await reserveV2PracticeGeneration(user.id, 'brief');
+    generationAllowed = reservation.allowed;
+  } catch (error) {
+    console.error(
+      'generatePracticeDraftAction: AI generation allowance unavailable',
+      error,
+    );
+    redirect('/candidate/practices/new?error=ai');
+  }
+
+  if (!generationAllowed) {
+    redirect('/candidate/practices/new?error=ai-limit');
   }
 
   let generatedDraft: PracticeDraft | null = null;
@@ -67,13 +85,14 @@ export async function generatePracticeDraftAction(formData: FormData) {
   }
 
   revalidatePath('/candidate/practices');
+  revalidatePath('/candidate/settings/billing');
   redirect(`/candidate/practices/${createdPracticeId}?generated=1`);
 }
 
 export async function generatePracticeDraftFromDocumentAction(
   formData: FormData,
 ) {
-  await serverGetLoggedInUser();
+  const user = await serverGetLoggedInUser();
 
   const document = formData.get('document');
   const parsed = generateDocumentPracticeFormSchema.safeParse({
@@ -108,6 +127,23 @@ export async function generatePracticeDraftFromDocumentAction(
     redirect(`/candidate/practices/new?error=${documentError ?? 'document'}`);
   }
 
+  let generationAllowed = false;
+
+  try {
+    const reservation = await reserveV2PracticeGeneration(user.id, 'document');
+    generationAllowed = reservation.allowed;
+  } catch (error) {
+    console.error(
+      'generatePracticeDraftFromDocumentAction: AI generation allowance unavailable',
+      error,
+    );
+    redirect('/candidate/practices/new?error=document-ai');
+  }
+
+  if (!generationAllowed) {
+    redirect('/candidate/practices/new?error=ai-limit');
+  }
+
   let generatedDraft: PracticeDraft | null = null;
 
   try {
@@ -138,6 +174,7 @@ export async function generatePracticeDraftFromDocumentAction(
   }
 
   revalidatePath('/candidate/practices');
+  revalidatePath('/candidate/settings/billing');
   redirect(`/candidate/practices/${createdPracticeId}?generated=1&document=1`);
 }
 

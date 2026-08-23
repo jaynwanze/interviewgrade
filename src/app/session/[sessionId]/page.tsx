@@ -87,18 +87,18 @@ export default async function PracticeSessionPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
+        <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between sm:pb-6">
+          <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
               InterviewGrade
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
               {snapshot.title}
             </h1>
-            <p className="max-w-2xl text-muted-foreground">
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
               {snapshot.description}
             </p>
           </div>
@@ -120,8 +120,8 @@ export default async function PracticeSessionPage({
         )}
 
         {session.status === 'created' ? (
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <section className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+            <section className="order-2 space-y-6 lg:order-1">
               <Card>
                 <CardHeader>
                   <CardTitle>Session ready</CardTitle>
@@ -165,7 +165,7 @@ export default async function PracticeSessionPage({
               </Card>
             </section>
 
-            <aside>
+            <aside className="order-1 lg:order-2 lg:sticky lg:top-6">
               <Card className="shadow-md">
                 <CardHeader>
                   <CardTitle>Begin when you’re ready</CardTitle>
@@ -176,7 +176,7 @@ export default async function PracticeSessionPage({
                 </CardHeader>
                 <CardContent>
                   <form action={beginAction}>
-                    <Button type="submit" size="lg" className="w-full">
+                    <Button type="submit" size="lg" className="min-h-11 w-full">
                       <Play className="mr-2 h-4 w-4" />
                       Begin practice
                     </Button>
@@ -241,7 +241,7 @@ function SessionStateCard({
         </CardHeader>
         {href && action && (
           <CardContent>
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <Link href={href}>{action}</Link>
             </Button>
           </CardContent>

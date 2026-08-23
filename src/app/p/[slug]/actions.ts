@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
+import { reservePublicSessionStart } from '@/modules/session/public-session-rate-limit';
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 const participantFormSchema = z.object({
@@ -35,6 +36,7 @@ export async function startPublicPracticeSessionAction(
   }
 
   const loggedInUser = await serverGetOptionalLoggedInUser();
+  let practiceId: string | null = null;
   let publishedVersionId: string | null = null;
 
   try {
@@ -42,6 +44,7 @@ export async function startPublicPracticeSessionAction(
       '@/modules/practice/practice.service'
     );
     const practice = await getPublishedPracticeBySlug(normalizedSlug);
+    practiceId = practice?.id ?? null;
     publishedVersionId = practice?.currentPublishedVersionId ?? null;
   } catch (error) {
     console.error(
@@ -50,8 +53,25 @@ export async function startPublicPracticeSessionAction(
     );
   }
 
-  if (!publishedVersionId) {
+  if (!practiceId || !publishedVersionId) {
     redirect(`/p/${encodeURIComponent(normalizedSlug)}?error=unavailable`);
+  }
+
+  let startAllowed = false;
+
+  try {
+    const reservation = await reservePublicSessionStart(practiceId);
+    startAllowed = reservation.allowed;
+  } catch (error) {
+    console.error(
+      'startPublicPracticeSessionAction: public-session rate limit unavailable',
+      error,
+    );
+    redirect(`/p/${encodeURIComponent(normalizedSlug)}?error=unavailable`);
+  }
+
+  if (!startAllowed) {
+    redirect(`/p/${encodeURIComponent(normalizedSlug)}?error=rate-limit`);
   }
 
   let sessionId: string | null = null;

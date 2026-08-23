@@ -1,6 +1,6 @@
 # InterviewGrade Startup v2
 
-This directory is the engineering blueprint for turning the original InterviewGrade final-year-project codebase into the startup product.
+This directory is the engineering/product blueprint for turning the original InterviewGrade final-year-project codebase into the startup product.
 
 ## Product direction
 
@@ -8,67 +8,73 @@ This directory is the engineering blueprint for turning the original InterviewGr
 
 The first wedge remains interview and career-readiness practice. The core product is intentionally generic enough to support later verticals such as sales role-play, customer service, coaching and professional training without creating a new application for each vertical.
 
-## Rebuild decision
+## V2 implementation decision
 
-We will **not** incrementally upgrade the current FYP application into v2. The current repository remains the reference implementation and source of proven product capabilities. A clean v2 repository will selectively migrate the valuable pieces into a smaller domain and modern architecture.
+The original audit recommended a clean V2 repository. That approach was explored, then superseded by the implementation decision to **refactor the existing `interviewgrade` repository in place while isolating V2 behind new domain/application boundaries**.
 
-Reasons are documented in [CODE_AUDIT.md](./CODE_AUDIT.md), but the major ones are:
+The current repository is therefore both the legacy reference implementation and the active V2 product codebase.
 
-- candidate and employer concerns are deeply coupled into routing, middleware, data access and AI flows;
-- practice and interview templates duplicate the same underlying domain;
-- Supabase clients and RLS policies have become application architecture rather than infrastructure;
-- the dependency surface is much larger than the v2 product needs;
-- core session logic, AI evaluation and UI state are mixed together;
-- several FYP/demo features are unrelated to the startup's first commercial workflow.
+The practical rules are:
+
+- V2 Practice/session/evaluation code owns the current product path;
+- frozen V1 surfaces remain only where they are still useful as compatibility/archive infrastructure;
+- new V2 work should not deepen candidate/employer coupling;
+- V2 persistence is server-owned behind application boundaries;
+- destructive V1 cleanup is deferred until remaining compatibility reasons disappear;
+- historical architecture/audit documents still explain why the old design needed separation, but `ROADMAP.md` is the source of truth for current sequencing.
+
+The original risks remain documented in [CODE_AUDIT.md](./CODE_AUDIT.md), including duplicated template domains, legacy candidate/employer coupling and an oversized dependency/runtime surface.
 
 ## Documents
 
-- [ROADMAP.md](./ROADMAP.md) — current NOW → THEN → LATER product sequence and active restart point.
+- [ROADMAP.md](./ROADMAP.md) — current product sequence, shipped state and active restart point.
+- [DELIVERY_COACHING.md](./DELIVERY_COACHING.md) — speech-metrics → browser pose/framing → optional Supervision/server-vision sequence and guardrails.
 - [PRODUCT_MODEL.md](./PRODUCT_MODEL.md) — lightweight V2 identity/authorization model: Anonymous/Signed in, Creator/Participant, and future workspace permissions.
 - [LEGACY_CLEANUP.md](./LEGACY_CLEANUP.md) — current V1 → V2 port/freeze/transitional/delete decisions and safe cleanup sequence.
 - [MIGRATION_RECONCILIATION.md](./MIGRATION_RECONCILIATION.md) — production V2 migration-history repair steps and server-owned table hardening record.
-- [CODE_AUDIT.md](./CODE_AUDIT.md) — current system, risks and KEEP / MIGRATE / REFACTOR / FREEZE / DELETE decisions.
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — target v2 architecture and module boundaries.
-- [DATABASE_MODEL.md](./DATABASE_MODEL.md) — proposed PostgreSQL / Drizzle model.
+- [CODE_AUDIT.md](./CODE_AUDIT.md) — original/current system risks and KEEP / MIGRATE / REFACTOR / FREEZE / DELETE decisions.
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — V2 architecture and module boundaries; read with the in-place refactor decision above where older clean-repo wording remains historical.
+- [DATABASE_MODEL.md](./DATABASE_MODEL.md) — PostgreSQL / Drizzle V2 model.
 - [SCORING.md](./SCORING.md) — canonical human-readable rubric mapping, response scoring and final-session aggregation rules.
 - [DASHBOARD_VISION.md](./DASHBOARD_VISION.md) — north-star V2 progress dashboard, dynamic rubric analytics, V1 chart reuse and animation policy.
-- [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) — ordered rebuild and source-to-target migration map.
-- [MVP_BACKLOG.md](./MVP_BACKLOG.md) — build backlog and acceptance criteria.
-- [UPLOAD_DOCUMENT_PRACTICE.md](./UPLOAD_DOCUMENT_PRACTICE.md) — post-V2 draft for turning PDF, DOCX or TXT source material into an editable PracticeDraft.
+- [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) — ordered source-to-V2 migration map; some early clean-repo sequencing is historical.
+- [MVP_BACKLOG.md](./MVP_BACKLOG.md) — original build backlog and acceptance criteria; use the roadmap for current priorities.
+- [UPLOAD_DOCUMENT_PRACTICE.md](./UPLOAD_DOCUMENT_PRACTICE.md) — current PDF/TXT document-generation implementation plus deferred DOCX scope.
 
-## Target stack
+## Current stack direction
 
-- Next.js — current stable release at the time the v2 repository is bootstrapped
-- React + TypeScript
+- Next.js + React + TypeScript
 - Tailwind CSS + shadcn/ui
 - PostgreSQL
-- Drizzle ORM + Drizzle migrations
-- Supabase hosted Postgres, Auth and Storage only
+- Drizzle ORM + migrations for the V2 persistence path
+- Supabase hosted Postgres/Auth infrastructure where retained
 - OpenAI for practice generation, transcription, speech and evaluation
-- Stripe for organisation/creator billing
+- Stripe for current Free/Pro billing
 - Vercel for deployment
-- Zod at every external boundary
-- Playwright for critical end-to-end flows
+- Zod at external boundaries
+- Vitest/Playwright for focused unit/integration/E2E coverage
 
-Supabase is intentionally behind application boundaries. Most application code should never import `@supabase/supabase-js`.
+Supabase access for V2 persistence is intentionally server-owned. Browser roles should not receive direct access to V2 application tables.
 
 ## MVP definition
 
 The first startup MVP is complete when this works end-to-end:
 
 1. A creator signs in.
-2. The creator creates a practice manually or from an AI-generated draft.
-3. The practice contains a scenario, questions and a rubric.
+2. The creator creates a Practice manually, from AI, or from a supported document source.
+3. The Practice contains a scenario, questions and a rubric.
 4. The creator publishes it and receives a shareable URL.
 5. A participant opens the URL and starts a session.
 6. The participant answers each question by voice.
 7. Audio is transcribed and the response is evaluated against the configured rubric.
-8. The participant receives useful feedback.
-9. The creator can see completion and result data.
-10. Editing the practice later does not mutate historical sessions.
+8. The participant receives useful feedback and a final report.
+9. The creator can inspect completion/results data.
+10. Editing the Practice later does not mutate historical sessions.
 
-Everything outside that loop is secondary until the loop is reliable and customers use it.
+The runtime loop above is shipped for the current V2 scope. Remaining work is launch hardening, evidence-driven polish and carefully sequenced product improvements rather than rebuilding the foundation again.
 
-## Explicitly out of MVP
+## Explicitly out of the current core MVP
 
-Employer talent marketplace, candidate unlocking/tokens, resume matching, job-application tracking, sentiment/emotion scoring, course recommendations, white-labeling, LMS/SSO, public developer API, SDKs and complex cohort management are not part of the first v2 release.
+Employer talent marketplace, candidate unlocking/tokens, resume matching, job-application tracking, sentiment/emotion scoring, course recommendations, white-labeling, LMS/SSO, public developer API, SDKs and complex cohort management are not part of the current core V2 release.
+
+Visual delivery coaching, if validated later, must remain explainable and must not revive legacy emotion/sentiment scoring.

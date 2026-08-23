@@ -235,11 +235,17 @@ export function V2SessionPlayer({
       // 1. persist response
       // 2. fetch immediate feedback
       // 3. persist next-question progress
-      await savePracticeSessionResponseAction(sessionId, {
+      const saveResult = await savePracticeSessionResponseAction(sessionId, {
         questionId: currentQuestion.id,
         questionOrder: currentQuestion.order,
         transcript,
       });
+
+      if (!saveResult.success) {
+        setError(saveResult.message);
+        return;
+      }
+
       setResponseCount((count) => count + 1);
 
       try {

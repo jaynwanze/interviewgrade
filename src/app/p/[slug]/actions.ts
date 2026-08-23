@@ -71,7 +71,7 @@ export async function startPublicPracticeSessionAction(
   }
 
   if (!startAllowed) {
-    redirect(`/p/${encodeURIComponent(normalizedSlug)}?error=rate-limit`);
+    redirect(`/p/${encodeURIComponent(normalizedSlug)}?error=unavailable`);
   }
 
   let sessionId: string | null = null;

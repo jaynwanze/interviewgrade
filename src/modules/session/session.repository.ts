@@ -265,7 +265,7 @@ export class DrizzleSessionRepository implements SessionRepository {
       const reservationResult = await tx.execute<PracticeRunReservationRow>(
         sql`select * from public.reserve_v2_practice_run(${parsed.sessionId}::uuid)`,
       );
-      const reservation = reservationResult.rows[0];
+      const reservation = reservationResult[0];
 
       if (!reservation) {
         throw new Error('Practice-run reservation returned no result.');

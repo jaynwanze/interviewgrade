@@ -32,6 +32,7 @@ export default function CreatePracticePage({
   const unavailable = searchParams?.error === 'unavailable';
   const invalidAiBrief = searchParams?.error === 'ai-input';
   const aiUnavailable = searchParams?.error === 'ai';
+  const aiLimit = searchParams?.error === 'ai-limit';
   const documentInput = searchParams?.error === 'document-input';
   const documentType = searchParams?.error === 'document-type';
   const documentSize = searchParams?.error === 'document-size';
@@ -69,6 +70,20 @@ export default function CreatePracticePage({
       {invalidAiBrief && (
         <Alert tone="destructive">
           Give InterviewGrade a little more detail about what you want to practise.
+        </Alert>
+      )}
+
+      {aiLimit && (
+        <Alert tone="warning">
+          You have used this month&apos;s AI Practice generations. Your allowance
+          resets next month, and manual Practice creation remains available below.{' '}
+          <Link
+            href="/candidate/settings/billing"
+            className="font-medium underline underline-offset-4"
+          >
+            View Plan &amp; Usage
+          </Link>
+          .
         </Alert>
       )}
 

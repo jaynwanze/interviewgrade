@@ -430,8 +430,8 @@ export function V2SessionPlayer({
   );
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-3 rounded-lg border bg-background/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="flex flex-col gap-3 rounded-lg border bg-background/80 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
         <div>
           <div className="text-sm font-medium text-primary">
             Question {safeIndex + 1} of {orderedQuestions.length}
@@ -440,7 +440,7 @@ export function V2SessionPlayer({
             {responseCount} response{responseCount === 1 ? '' : 's'} saved
           </div>
         </div>
-        <div className="w-full max-w-xs">
+        <div className="w-full sm:max-w-xs">
           <Progress value={progress} />
         </div>
       </div>
@@ -451,8 +451,8 @@ export function V2SessionPlayer({
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="flex min-h-[520px] flex-col overflow-hidden">
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
+        <Card className="flex min-h-0 flex-col overflow-hidden lg:min-h-[520px]">
           <CardHeader className="border-b bg-muted/30">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -463,6 +463,7 @@ export function V2SessionPlayer({
                 type="button"
                 variant="outline"
                 size="sm"
+                className="min-h-10"
                 onClick={() => void speakCurrentQuestion(false)}
                 disabled={speaking || busy}
               >
@@ -475,21 +476,21 @@ export function V2SessionPlayer({
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col justify-center space-y-5 p-6">
+          <CardContent className="flex flex-1 flex-col justify-center space-y-4 p-4 sm:space-y-5 sm:p-6">
             <div className="mx-auto w-full max-w-[280px] overflow-hidden">
               <Lottie
                 animationData={talkingInterviewer}
                 loop
                 autoplay={false}
                 lottieRef={lottieRef}
-                className="h-[160px] w-full"
+                className="h-[112px] w-full sm:h-[160px]"
               />
             </div>
             <div className="space-y-3 text-center">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Question {safeIndex + 1}
               </div>
-              <p className="text-xl font-semibold leading-8">
+              <p className="break-words text-lg font-semibold leading-7 sm:text-xl sm:leading-8">
                 {currentQuestion.prompt}
               </p>
               {currentQuestion.guidance && (
@@ -511,7 +512,7 @@ export function V2SessionPlayer({
           </CardContent>
         </Card>
 
-        <Card className="flex min-h-[520px] flex-col overflow-hidden">
+        <Card className="flex min-h-0 flex-col overflow-hidden lg:min-h-[520px]">
           <CardHeader className="border-b bg-muted/30">
             <CardTitle className="text-lg">You</CardTitle>
             <CardDescription>
@@ -519,7 +520,7 @@ export function V2SessionPlayer({
               stop.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-1 items-center p-4">
+          <CardContent className="flex flex-1 items-center p-3 sm:p-4">
             <UserCamera
               answerCallback={handleTranscript}
               isCameraOn={cameraOn}
@@ -531,7 +532,7 @@ export function V2SessionPlayer({
           </CardContent>
         </Card>
 
-        <Card className="flex min-h-[520px] flex-col overflow-hidden">
+        <Card className="flex min-h-0 scroll-mt-4 flex-col overflow-hidden lg:min-h-[520px]">
           <CardHeader className="border-b bg-muted/30">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-primary" />
@@ -541,9 +542,9 @@ export function V2SessionPlayer({
               Your answer is saved before feedback or question progress changes.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col justify-center p-5">
+          <CardContent className="flex flex-1 flex-col justify-center p-4 sm:p-5">
             {busy && !hasFeedback ? (
-              <div className="flex flex-col items-center gap-3 text-center">
+              <div className="flex flex-col items-center gap-3 py-4 text-center sm:py-0">
                 <Loader2 className="h-7 w-7 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">
                   Saving your answer and preparing feedback…
@@ -581,19 +582,23 @@ export function V2SessionPlayer({
                 {!busy && (
                   <div className="grid gap-2 border-t pt-4">
                     {preparedNextOrder != null && (
-                      <Button onClick={showNextQuestion} variant="secondary">
+                      <Button
+                        onClick={showNextQuestion}
+                        variant="secondary"
+                        className="min-h-11"
+                      >
                         Next question
                         <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     )}
-                    <Button onClick={finishSession}>
+                    <Button onClick={finishSession} className="min-h-11">
                       {nextQuestion ? 'Finish session' : 'Finish practice'}
                     </Button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center">
+              <div className="py-4 text-center sm:py-0">
                 <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground/50" />
                 <p className="mt-3 text-sm text-muted-foreground">
                   Your feedback will appear here after you record an answer.

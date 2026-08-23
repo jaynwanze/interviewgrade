@@ -1,6 +1,6 @@
 # InterviewGrade Roadmap
 
-This is the current sequencing document for InterviewGrade. It is intentionally lightweight: keep the V2 Practice loop reliable, remove launch friction in the participant experience, and only add organisation/enterprise depth when real demand justifies it.
+This is the current sequencing document for InterviewGrade. Keep the shipped V2 Practice loop reliable, close the remaining launch-hardening work, then add small coaching improvements only where they create clear user value.
 
 ## Product principle
 
@@ -35,11 +35,12 @@ The original run-entitlement decision and accounting model are documented in [PR
    - AI create, document create, manual edit, publish and share use the V2 Practice model.
    - Published sessions remain pinned to immutable Practice versions.
 
-2. **Participant session + Avery + feedback + report — complete for desktop flow**
+2. **Participant session + Avery + feedback + report — complete for current scope**
    - Avery uses OpenAI TTS with browser speech fallback and speaking rings.
    - Responses are persisted before immediate feedback/progress changes.
    - Completing a session navigates immediately to report generation rather than waiting on the long evaluation request.
    - Final reports use the current rubric-weighted session aggregation model while preserving historical report semantics.
+   - Microphone-only fallback remains available when camera access is unavailable.
 
 3. **Dashboard and History — complete for current V2 boundary**
    - Dashboard and primary History are V2-first.
@@ -50,10 +51,6 @@ The original run-entitlement decision and accounting model are documented in [PR
    - V2 persistence tables are server-owned, RLS-enabled and have no direct `anon` / `authenticated` grants.
    - Remaining V1 compatibility is isolated instead of being allowed to define the V2 product.
    - Destructive V1 deletion remains intentionally deferred.
-
-5. **Non-blocking engineering hygiene — deferred**
-   - Critical-path E2E should eventually protect creator → publish → shared Practice → participant session → persisted evaluation → report, including the final-question/Q5 edge case.
-   - The three manually applied original V2 Supabase migrations still need the documented `migration repair --status applied` bookkeeping step; do not rerun their DDL.
 
 ## Lightweight product expansion — shipped
 
@@ -82,42 +79,69 @@ The original run-entitlement decision and accounting model are documented in [PR
    - AI Practice generation has its own server-owned usage ledger: Free = 3 and Pro = 30/month.
    - Plan & Usage exposes the current V2 allowances while retaining the existing Stripe checkout/portal/subscription foundation.
 
-## NOW — Participant mobile UX
+5. **Participant mobile UX — shipped for current scope**
+   - Shared Practice entry prioritizes the Start action on narrow screens while retaining scenario/rubric context.
+   - Pre-session Begin is reachable without desktop-first scrolling assumptions.
+   - Avery → participant recording → feedback stacks cleanly on mobile without desktop-sized minimum card heights.
+   - Camera/microphone, transcription, immediate feedback, next-question and finish semantics remain unchanged.
+   - Creator/editor authoring remains desktop-first; no native app or install requirement is introduced.
 
-1. **Shared Practice entry**
-   - Keep the Practice title, description and quick metadata visible first.
-   - On narrow screens, prioritize the guest Start card before long scenario/rubric content so a participant does not have to scroll through the full Practice definition just to begin.
-   - Keep the richer scenario/rubric context available below rather than hiding it.
+## NOW — Launch hardening
 
-2. **Pre-session Begin state**
-   - On narrow screens, put the Begin action before secondary session details/instructions.
-   - Preserve the current immutable-version/session semantics.
+The core V2 production/UX work is no longer the active feature build. What remains is focused reliability work rather than another redesign.
 
-3. **Avery session / recording / feedback**
-   - Keep the three-column desktop player.
-   - On mobile, stack Avery → participant recording → feedback without desktop-sized minimum card heights.
-   - Keep question audio, camera/microphone behavior, transcription, immediate feedback, next-question and finish semantics unchanged.
-   - Continue allowing microphone-only fallback when the camera is unavailable.
+1. **Critical-path E2E**
+   - Protect creator sign-in → create/edit → publish → shared Practice → participant answer → persisted feedback → finish → report → creator result.
+   - Include the final-question/Q5 completion edge case.
+   - Use provider fakes where appropriate so CI is deterministic.
 
-4. **Final report**
-   - Keep the current responsive report unless real mobile testing exposes a concrete overflow/readability issue.
-   - Avoid redesigning scoring presentation merely for visual churn.
+2. **Supabase migration-history repair**
+   - Perform the already documented `supabase migration repair --status applied` bookkeeping for the three original manually applied V2 migrations.
+   - Do not rerun their DDL.
 
-5. **Acceptance**
-   - A normal shared Practice should be usable on a modern mobile browser from link open through report viewing without a desktop-only blocker.
-   - Creator/editor authoring remains desktop-first for now.
-   - No native app or install requirement is introduced.
+3. **Evidence-driven production polish**
+   - Fix real browser/mobile/production issues as observed.
+   - Do not reopen scoring, session semantics or billing merely for visual churn.
 
-## NEXT — Small launch-quality follow-ups
+## NEXT — Better speech delivery metrics
 
-After the participant mobile slice is production-proven, choose the next small slice from evidence rather than adding architecture pre-emptively. Likely candidates are:
+After the launch-hardening checkpoint, the next recommended product experiment is objective spoken-delivery coaching.
+
+First slice:
+
+- answer duration;
+- word count;
+- speaking pace / words per minute;
+- low-ambiguity filler count/rate;
+- clear separate Delivery/Speaking UI that does not silently alter creator-defined rubric scores.
+
+Pause/cadence metrics should wait until InterviewGrade has a reliable timing source rather than being guessed from plain transcript text.
+
+See [DELIVERY_COACHING.md](./DELIVERY_COACHING.md) for implementation boundaries, acceptance criteria and guardrails.
+
+## AFTER — Browser-side visual delivery prototype
+
+Only after speech metrics are useful in real sessions:
+
+- prototype MediaPipe Face/Pose Landmarker directly in the browser;
+- aggregate a small set of observable framing signals locally;
+- keep raw video out of the server-side pipeline for the first prototype;
+- make the feature opt-in and Practice/coaching focused;
+- keep visual observations separate from competency/rubric scoring by default;
+- do not infer confidence, nervousness, honesty, personality or emotion from face/body movement.
+
+A Python/Supervision service is **not** the next step. It remains deferred until a validated browser prototype exposes a concrete need for server-side tracking, offline analysis or model interchange.
+
+## Small launch-quality follow-ups — choose from evidence
+
+These remain valid but should not interrupt the core reliability checkpoint or be treated as mandatory architecture work:
 
 - DOCX source-document support;
 - Archived Practice filter/restore;
 - participant/creator Results filtering or export if actual creator usage needs it;
 - Google OAuth custom-domain branding;
-- critical-path E2E coverage and deferred Supabase migration-history repair;
-- focused public/pricing copy cleanup where V1 wording remains.
+- focused public/pricing copy cleanup where V1 wording remains;
+- data-retention/deletion and observability improvements before broader pilots where needed.
 
 ## LATER — Only if demand exists
 
@@ -128,6 +152,7 @@ Do not build these merely because the architecture could support them.
 - **ATS / LMS integrations** — launch InterviewGrade Practices from existing employer/training systems and return results.
 - **Enterprise auth** — SSO, Microsoft/Google Workspace administration and other organisation-specific controls.
 - **Native mobile app** — only if repeat learner/participant behavior justifies install friction and app-specific capabilities such as notifications or deeper device integration.
+- **Server-side computer vision / Supervision** — only after browser-side visual coaching demonstrates real value and needs capabilities the browser path cannot provide simply.
 
 ## Current restart point
 
@@ -140,4 +165,5 @@ At this checkpoint:
 - V2 Practice-run, shared-link abuse and AI-generation cost protections are live;
 - Free is 3/3 and Pro is 30/30 for monthly Practice runs / AI Practice generations;
 - Plan & Usage and the existing Stripe Pro subscription are aligned to those production limits;
-- **the active implementation step is participant mobile UX for the shared Practice → session → feedback → report path.**
+- participant mobile UX is shipped for the current shared Practice → session → feedback → report flow;
+- **the active implementation step is launch hardening: critical-path E2E plus Supabase migration-history repair, followed by the first better-speech-metrics slice.**

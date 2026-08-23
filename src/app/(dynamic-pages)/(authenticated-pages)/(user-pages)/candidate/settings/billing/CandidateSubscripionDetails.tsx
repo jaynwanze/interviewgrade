@@ -1,4 +1,4 @@
-import { Check, Crown, Gauge, Sparkles, WandSparkles } from 'lucide-react';
+import { Check, Crown, Gauge, Sparkles } from 'lucide-react';
 
 import { T } from '@/components/ui/Typography';
 import { Badge } from '@/components/ui/badge';
@@ -285,7 +285,7 @@ export async function CandidateSubscriptionDetails({
               limit={practiceGenerationUsage.limit}
               remaining={practiceGenerationUsage.remaining}
               resetsAt={practiceGenerationUsage.resetsAt}
-              icon={<WandSparkles className="h-4 w-4" />}
+              icon={<Sparkles className="h-4 w-4" />}
               description="Generating from an AI brief or an extracted PDF/TXT source uses one generation when the model request begins. Invalid inputs and manual Practice creation do not use this allowance."
             />
           </div>

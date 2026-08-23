@@ -88,7 +88,7 @@ async function UpgradeToProCard() {
                       {product.title || 'Pro'}
                     </CardTitle>
                     <CardDescription className="mt-1">
-                      50 Practice runs and 50 AI Practice generations each month.
+                      30 Practice runs and 30 AI Practice generations each month.
                     </CardDescription>
                   </div>
                   <div className="text-right">
@@ -102,7 +102,7 @@ async function UpgradeToProCard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-5 pt-5">
-                <PlanFeatures runLimit={50} generationLimit={50} />
+                <PlanFeatures runLimit={30} generationLimit={30} />
                 <CreateSubscriptionButton
                   priceId={product.price_id}
                   label="Upgrade to Pro"

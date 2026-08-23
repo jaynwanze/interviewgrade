@@ -44,13 +44,13 @@ export async function UserSidebar() {
           icon={<Settings className="h-5 w-5" />}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-normal text-muted-foreground">
-          Subscription Details
+      <div className="flex flex-col gap-2">
+        <p className="px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Plan
         </p>
-        <Suspense fallback={<T.P>Loading Subscription Details details...</T.P>}>
+        <Suspense fallback={<T.Small>Loading plan...</T.Small>}>
           <SubscriptionCardSmall />
-        </Suspense>{' '}
+        </Suspense>
       </div>
     </div>
   );

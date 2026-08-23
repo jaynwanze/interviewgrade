@@ -12,6 +12,10 @@ import {
   isLegacyPracticeImportBridgeUnavailable,
   listLegacyImportedPracticeIds,
 } from '@/modules/practice/legacy-practice-import.repository';
+import {
+  retirePractice,
+  type PracticeRetireMode,
+} from '@/modules/practice/practice.lifecycle';
 import { ensurePersonalWorkspace } from '@/modules/workspace/personal-workspace';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
@@ -37,9 +41,12 @@ export class PracticeService {
 
   async listMine(): Promise<Practice[]> {
     const practices = await this.repository.listByOrganization(this.workspaceId);
+    const activePractices = practices.filter(
+      (practice) => practice.status !== 'archived',
+    );
 
     if (!this.actorUserId) {
-      return practices;
+      return activePractices;
     }
 
     // Built-in catalog templates are materialized into ordinary v2 Practice
@@ -54,12 +61,12 @@ export class PracticeService {
         this.actorUserId,
       );
 
-      return practices.filter(
+      return activePractices.filter(
         (practice) => !importedPracticeIds.has(practice.id),
       );
     } catch (error) {
       if (isLegacyPracticeImportBridgeUnavailable(error)) {
-        return practices;
+        return activePractices;
       }
       throw error;
     }
@@ -98,6 +105,25 @@ export class PracticeService {
 
     this.assertOwnedByWorkspace(existing);
     return this.repository.publish(id);
+  }
+
+  async retire(id: string): Promise<PracticeRetireMode> {
+    const actorUserId = this.actorUserId?.trim();
+    if (!actorUserId) {
+      throw new Error('An authenticated actor is required to retire a Practice.');
+    }
+
+    const existing = await this.repository.getById(id);
+    if (!existing) {
+      throw new Error(`Practice ${id} was not found.`);
+    }
+
+    this.assertOwnedByWorkspace(existing);
+    return retirePractice({
+      practiceId: id,
+      workspaceId: this.workspaceId,
+      actorUserId,
+    });
   }
 }
 

@@ -1,12 +1,12 @@
 # Upload Document → Generate Practice
 
-Status: **implementation in progress — PDF/TXT first slice**
+Status: **PDF/TXT shipped and production-smoke-passed; DOCX deferred**
 
 This feature reuses the existing V2 PracticeDraft, editor, rubric mapping, publishing, session and evaluation pipeline rather than introducing a parallel authoring system.
 
 ## Product goal
 
-Let a creator upload source material and turn it into an editable InterviewGrade practice.
+Let a creator upload source material and turn it into an editable InterviewGrade Practice.
 
 Useful source material includes:
 
@@ -20,12 +20,12 @@ Useful source material includes:
 - onboarding material;
 - assessment briefs.
 
-The creator should be able to go from a document to a useful first draft in a few minutes, then review and edit everything before publishing.
+The creator should be able to go from a document to a useful first draft quickly, then review and edit everything before publishing.
 
-## Proposed Create Practice entry point
+## Create Practice entry point
 
 ```text
-Create practice
+Create Practice
 
 How would you like to start?
 
@@ -34,9 +34,9 @@ How would you like to start?
 [ Build manually ]
 ```
 
-The existing AI generation and manual flows remain unchanged.
+The normal AI generation and manual flows remain separate entry points but converge on the same editable V2 Practice draft/editor model.
 
-## First-version flow
+## Current flow
 
 ```text
 Upload document
@@ -58,29 +58,27 @@ Preview
 Publish
 ```
 
-The uploaded document is a source for draft generation only. It must never publish content automatically.
+The uploaded document is a source for draft generation only. It never publishes content automatically.
 
-## MVP file types
+## File types
 
-Target:
+Current production support:
 
-- PDF;
-- DOCX;
+- text-based PDF;
 - TXT.
 
-Implementation is intentionally sliced:
+Deferred small follow-up:
 
-1. prove PDF + TXT through the full existing draft/editor pipeline without adding a new dependency;
-2. add DOCX as the next small parser/dependency follow-up.
+- DOCX.
 
-Do not add OCR in the first version unless real pilot documents demonstrate that scanned PDFs are a common requirement.
+Do not add OCR until real pilot documents demonstrate that scanned PDFs are a common requirement.
 
 ## Creator input
 
 After upload, allow an optional short instruction such as:
 
 ```text
-Turn this job description into a 5-question technical interview practice.
+Turn this job description into a 5-question technical interview Practice.
 ```
 
 or:
@@ -89,11 +87,11 @@ or:
 Create a customer-service role-play focused on de-escalation and policy knowledge.
 ```
 
-This instruction should guide generation without replacing the source document.
+This instruction guides generation without replacing the source document.
 
 ## Generated draft
 
-The document flow should generate the same V2 PracticeDraft shape as normal AI creation:
+The document flow generates the same V2 PracticeDraft shape as normal AI creation:
 
 ```text
 title
@@ -114,13 +112,13 @@ rubric criteria[]
 question → criterion mappings
 ```
 
-The generated draft must pass the same Zod validation and publishing rules as any other V2 practice.
+The generated draft must pass the same Zod validation and publishing rules as any other V2 Practice.
 
 ## Source handling
 
-The generation service should receive extracted text plus creator instructions, not raw file parsing logic.
+The generation service receives extracted text plus creator instructions, not raw file parsing logic.
 
-Prefer boundaries like:
+Keep boundaries conceptually like:
 
 ```text
 DocumentUploadService
@@ -137,22 +135,22 @@ This keeps document parsing separate from AI generation and means future sources
 
 ## Safety and limits
 
-First version should include:
+The shipped PDF/TXT path includes:
 
-- allowed MIME/type validation;
+- allowed type validation;
 - file size limit;
 - extracted-text length limit;
-- user-safe parse errors;
+- explicit unsupported/oversized/empty/scanned/overlong errors;
 - user-safe AI generation errors;
 - no browser exposure of provider/API secrets;
 - no automatic publication;
 - no silent replacement of an existing published PracticeVersion.
 
-Large documents should be rejected or reduced deliberately rather than silently truncated in an unpredictable way.
+Large documents are rejected deliberately rather than silently truncated unpredictably.
 
 ## Storage decision
 
-For the first implementation, the original document does not need durable storage:
+The original document is not durably stored in the current implementation:
 
 ```text
 upload
@@ -169,13 +167,9 @@ If source files are stored in a future version, document retention/deletion beha
 
 Once generation succeeds, send the creator to the existing editor.
 
-Show lightweight source context such as:
+Use a generic source notice rather than persisting the user's local filename into editor URLs/history or the durable Practice model.
 
-```text
-Generated from: senior-backend-engineer.pdf
-```
-
-The creator should still be able to edit every generated field, rubric weight and question mapping before publishing.
+The creator can edit every generated field, rubric weight and question mapping before publishing.
 
 ## Reuse, not duplication
 
@@ -187,29 +181,28 @@ Do **not** build:
 - separate session logic;
 - separate evaluation/scoring logic.
 
-A document-created practice becomes an ordinary V2 draft as soon as generation succeeds.
+A document-created Practice becomes an ordinary V2 draft as soon as generation succeeds.
 
-## Acceptance criteria
+## Current acceptance status
 
-The first useful version is complete when:
+The PDF/TXT slice is complete when:
 
-1. creator selects **Upload a document** from Create Practice;
-2. PDF, DOCX or TXT can be uploaded;
-3. invalid/oversized files fail safely;
-4. supported document text is extracted server-side;
-5. creator can provide an optional generation instruction;
-6. the existing AI generator returns a schema-valid V2 PracticeDraft;
-7. the creator lands in the normal editor;
-8. all generated content is editable;
-9. Preview and Publish use the normal V2 flow;
-10. the published practice can run through the existing session/evaluation/report pipeline;
-11. generation failures do not create partially published content.
-
-The PDF/TXT first slice intentionally leaves criterion 2 partially open until DOCX is added.
+1. creator selects **Upload a document** from Create Practice — **shipped**;
+2. PDF/TXT upload works — **shipped**;
+3. invalid/oversized files fail safely — **shipped**;
+4. supported document text is extracted server-side — **shipped**;
+5. creator can provide an optional generation instruction — **shipped**;
+6. the existing AI generator returns a schema-valid V2 PracticeDraft — **shipped**;
+7. the creator lands in the normal editor — **shipped**;
+8. all generated content is editable — **shipped**;
+9. Preview and Publish use the normal V2 flow — **shipped**;
+10. the published Practice can run through the existing session/evaluation/report pipeline — **production smoke passed**;
+11. generation failures do not create partially published content — **shipped**;
+12. DOCX can use the same flow once a parser dependency is deliberately added — **deferred**.
 
 ## Testing
 
-Add coverage for:
+Keep coverage for:
 
 - supported file validation;
 - unsupported file rejection;
@@ -217,26 +210,27 @@ Add coverage for:
 - oversized document;
 - extraction → PracticeDraft generation boundary;
 - generated draft validation;
-- one E2E happy path using a small fixture document.
+- one E2E happy path using a small fixture document when the critical E2E suite is expanded.
 
 Provider AI calls can be faked in CI.
 
-## Implementation timing
+## Current follow-up order
 
-The V2 foundation checkpoint has been accepted complete. Critical-path E2E and Supabase migration-history repair remain documented non-blocking engineering follow-ups rather than prerequisites for starting this feature.
+The original PDF/TXT implementation and production smoke test are complete.
 
-The current implementation order is:
+Remaining document-specific work is intentionally small:
 
-1. PDF/TXT upload → extraction → existing Practice generator/editor;
-2. production smoke test with a small source document;
-3. DOCX parser/dependency follow-up;
-4. better sharing/results work from the main roadmap.
+1. add DOCX only when it is worth the additional parser dependency;
+2. add fixture/E2E coverage as part of the broader critical-path E2E work;
+3. consider OCR, multi-document inputs or durable source storage only from real usage evidence.
 
-## Future extensions — not first version
+Document work is not the current active product slice. See [ROADMAP.md](./ROADMAP.md).
+
+## Future extensions — not current scope
 
 Potential later additions:
 
-- multiple documents in one practice;
+- multiple documents in one Practice;
 - paste a URL/web page;
 - Google Drive / OneDrive source import;
 - source citations inside generated questions;

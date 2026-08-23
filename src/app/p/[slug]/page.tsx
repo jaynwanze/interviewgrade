@@ -73,9 +73,9 @@ export default async function PublicPracticePage({
   const unavailableError = searchParams?.error === 'unavailable';
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto w-full max-w-5xl space-y-8">
-        <header className="flex items-center justify-between gap-4">
+    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6 sm:px-6 sm:py-12">
+      <div className="mx-auto w-full max-w-5xl space-y-6 sm:space-y-8">
+        <header className="flex items-start justify-between gap-4 sm:items-center">
           <div className="flex items-center gap-2 font-semibold tracking-tight">
             <div className="rounded-lg bg-primary/10 p-2 text-primary">
               <Sparkles className="h-5 w-5" />
@@ -87,38 +87,38 @@ export default async function PublicPracticePage({
           </span>
         </header>
 
+        <section className="space-y-4">
+          <div className="space-y-2">
+            <h1 className="break-words text-3xl font-semibold tracking-tight sm:text-5xl">
+              {practice.draft.title}
+            </h1>
+            <p className="max-w-3xl text-base leading-7 text-muted-foreground sm:text-lg">
+              {practice.draft.description}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+            {practice.draft.difficulty && (
+              <span className="rounded-full border bg-background px-3 py-1">
+                {practice.draft.difficulty}
+              </span>
+            )}
+            {practice.draft.estimatedDurationMinutes && (
+              <span className="inline-flex items-center rounded-full border bg-background px-3 py-1">
+                <Clock3 className="mr-1.5 h-3.5 w-3.5" />
+                About {practice.draft.estimatedDurationMinutes} min
+              </span>
+            )}
+            <span className="inline-flex items-center rounded-full border bg-background px-3 py-1">
+              <ListChecks className="mr-1.5 h-3.5 w-3.5" />
+              {practice.draft.questions.length}{' '}
+              {practice.draft.questions.length === 1 ? 'question' : 'questions'}
+            </span>
+          </div>
+        </section>
+
         <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
-          <section className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                  {practice.draft.title}
-                </h1>
-                <p className="max-w-3xl text-lg text-muted-foreground">
-                  {practice.draft.description}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                {practice.draft.difficulty && (
-                  <span className="rounded-full border bg-background px-3 py-1">
-                    {practice.draft.difficulty}
-                  </span>
-                )}
-                {practice.draft.estimatedDurationMinutes && (
-                  <span className="inline-flex items-center rounded-full border bg-background px-3 py-1">
-                    <Clock3 className="mr-1.5 h-3.5 w-3.5" />
-                    About {practice.draft.estimatedDurationMinutes} min
-                  </span>
-                )}
-                <span className="inline-flex items-center rounded-full border bg-background px-3 py-1">
-                  <ListChecks className="mr-1.5 h-3.5 w-3.5" />
-                  {practice.draft.questions.length}{' '}
-                  {practice.draft.questions.length === 1 ? 'question' : 'questions'}
-                </span>
-              </div>
-            </div>
-
+          <section className="order-2 space-y-6 lg:order-1">
             <Card>
               <CardHeader>
                 <CardTitle>Scenario</CardTitle>
@@ -157,15 +157,15 @@ export default async function PublicPracticePage({
                 {practice.draft.rubricCriteria.map((criterion) => (
                   <div
                     key={criterion.id ?? `${criterion.order}-${criterion.name}`}
-                    className="flex items-start justify-between gap-4 rounded-lg border bg-muted/20 p-4"
+                    className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                   >
-                    <div className="space-y-1">
-                      <div className="font-medium">{criterion.name}</div>
+                    <div className="min-w-0 space-y-1">
+                      <div className="break-words font-medium">{criterion.name}</div>
                       <p className="text-sm leading-6 text-muted-foreground">
                         {criterion.description}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                    <span className="w-fit shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
                       {criterion.weight}%
                     </span>
                   </div>
@@ -174,7 +174,7 @@ export default async function PublicPracticePage({
             </Card>
           </section>
 
-          <aside className="lg:sticky lg:top-8">
+          <aside className="order-1 lg:order-2 lg:sticky lg:top-8">
             <Card className="shadow-md">
               <CardHeader>
                 <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -204,7 +204,13 @@ export default async function PublicPracticePage({
                     <label htmlFor="name" className="text-sm font-medium">
                       Name <span className="text-muted-foreground">(optional)</span>
                     </label>
-                    <Input id="name" name="name" maxLength={160} autoComplete="name" />
+                    <Input
+                      id="name"
+                      name="name"
+                      maxLength={160}
+                      autoComplete="name"
+                      className="h-11"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -217,10 +223,11 @@ export default async function PublicPracticePage({
                       type="email"
                       maxLength={320}
                       autoComplete="email"
+                      className="h-11"
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full">
+                  <Button type="submit" size="lg" className="min-h-11 w-full">
                     Start practice
                   </Button>
 

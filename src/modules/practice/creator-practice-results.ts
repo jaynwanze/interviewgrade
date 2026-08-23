@@ -7,6 +7,10 @@ import { sessionEvaluations } from '@/db/schema/evaluations';
 import { practices, practiceVersions } from '@/db/schema/practices';
 import { sessions } from '@/db/schema/sessions';
 import { SESSION_EVALUATION_SCHEMA_VERSION } from '@/modules/evaluation/evaluation.service';
+import {
+  buildCreatorPracticeAnalytics,
+  type CreatorPracticeAnalytics,
+} from '@/modules/practice/creator-practice-analytics';
 import type { SessionStatus } from '@/modules/session/session.schema';
 
 export type CreatorPracticeResultAttempt = {
@@ -32,6 +36,23 @@ export type CreatorPracticeResults = {
     shareSlug: string | null;
   };
   attempts: CreatorPracticeResultAttempt[];
+  analytics: CreatorPracticeAnalytics;
+};
+
+type ResultRow = {
+  sessionId: string;
+  practiceVersion: number;
+  participantUserId: string | null;
+  participantName: string | null;
+  participantEmail: string | null;
+  status: string;
+  currentQuestionOrder: number;
+  overallScore: string | null;
+  criterionScores: unknown;
+  reportId: string | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  createdAt: Date;
 };
 
 export async function getCreatorPracticeResults(
@@ -66,6 +87,7 @@ export async function getCreatorPracticeResults(
       status: sessions.status,
       currentQuestionOrder: sessions.currentQuestionPosition,
       overallScore: sessionEvaluations.overallScore,
+      criterionScores: sessionEvaluations.criterionScores,
       reportId: sessionEvaluations.id,
       startedAt: sessions.startedAt,
       completedAt: sessions.completedAt,
@@ -89,23 +111,32 @@ export async function getCreatorPracticeResults(
     .where(eq(sessions.practiceId, practiceId))
     .orderBy(desc(sessions.createdAt));
 
+  const resultRows = rows as ResultRow[];
+  const attempts = resultRows.map((row) => ({
+    sessionId: row.sessionId,
+    practiceVersion: row.practiceVersion,
+    participantUserId: row.participantUserId,
+    participantName: row.participantName,
+    participantEmail: row.participantEmail,
+    status: row.status as SessionStatus,
+    currentQuestionOrder: row.currentQuestionOrder,
+    overallScore: row.overallScore == null ? null : Number(row.overallScore),
+    hasReport: row.reportId != null,
+    startedAt: row.startedAt,
+    completedAt: row.completedAt,
+    createdAt: row.createdAt,
+  }));
+
   return {
     practice,
-    attempts: rows.map((row) => ({
-      sessionId: row.sessionId,
-      practiceVersion: row.practiceVersion,
-      participantUserId: row.participantUserId,
-      participantName: row.participantName,
-      participantEmail: row.participantEmail,
-      status: row.status as SessionStatus,
-      currentQuestionOrder: row.currentQuestionOrder,
-      overallScore:
-        row.overallScore == null ? null : Number(row.overallScore),
-      hasReport: row.reportId != null,
-      startedAt: row.startedAt,
-      completedAt: row.completedAt,
-      createdAt: row.createdAt,
-    })),
+    attempts,
+    analytics: buildCreatorPracticeAnalytics(
+      resultRows.map((row) => ({
+        status: row.status,
+        overallScore: row.overallScore == null ? null : Number(row.overallScore),
+        criterionScores: row.criterionScores,
+      })),
+    ),
   };
 }
 

@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ExternalLink,
   Mail,
+  Target,
   UserRound,
   UsersRound,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import {
   getCreatorPracticeResults,
   type CreatorPracticeResultAttempt,
@@ -40,17 +42,7 @@ export default async function PracticeResultsPage({
     notFound();
   }
 
-  const completed = result.attempts.filter(
-    (attempt) => attempt.status === 'completed',
-  );
-  const scored = result.attempts.filter(
-    (attempt) => attempt.overallScore != null,
-  );
-  const averageScore =
-    scored.length > 0
-      ? scored.reduce((sum, attempt) => sum + (attempt.overallScore ?? 0), 0) /
-        scored.length
-      : null;
+  const { analytics } = result;
   const publicPath = result.practice.shareSlug
     ? `/p/${result.practice.shareSlug}`
     : null;
@@ -74,7 +66,8 @@ export default async function PracticeResultsPage({
               {result.practice.title}
             </h1>
             <p className="mt-1 max-w-2xl text-muted-foreground">
-              Review attempts across every published version of this Practice.
+              Understand participant performance across every published version, then
+              open an individual attempt for the full report.
             </p>
           </div>
         </div>
@@ -92,28 +85,30 @@ export default async function PracticeResultsPage({
         )}
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={<UsersRound className="h-5 w-5 text-primary" />}
           label="Attempts"
-          value={String(result.attempts.length)}
+          value={String(analytics.totalAttempts)}
           detail="All sessions started from this Practice"
         />
         <MetricCard
           icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />}
-          label="Completed"
-          value={String(completed.length)}
-          detail="Sessions that reached Finish Practice"
+          label="Completion rate"
+          value={formatPercent(analytics.completionRate)}
+          detail={`${analytics.completedAttempts} of ${analytics.totalAttempts} attempt${analytics.totalAttempts === 1 ? '' : 's'} completed`}
         />
         <MetricCard
           icon={<BarChart3 className="h-5 w-5 text-primary" />}
           label="Average score"
-          value={averageScore == null ? '—' : `${Math.round(averageScore)}/100`}
-          detail={
-            scored.length > 0
-              ? `Across ${scored.length} evaluated attempt${scored.length === 1 ? '' : 's'}`
-              : 'Appears after completed reports are evaluated'
-          }
+          value={formatScore(analytics.averageScore)}
+          detail={evaluationCountDetail(analytics.evaluatedAttempts)}
+        />
+        <MetricCard
+          icon={<Target className="h-5 w-5 text-primary" />}
+          label="Median score"
+          value={formatScore(analytics.medianScore)}
+          detail="Middle score across evaluated attempts"
         />
       </section>
 
@@ -136,24 +131,110 @@ export default async function PracticeResultsPage({
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Participant attempts</CardTitle>
-            <CardDescription>
-              Name and email appear only when the participant supplied them. Anonymous
-              attempts remain labelled as guests.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {result.attempts.map((attempt) => (
-              <AttemptRow
-                key={attempt.sessionId}
-                practiceId={params.practiceId}
-                attempt={attempt}
-              />
-            ))}
-          </CardContent>
-        </Card>
+        <>
+          <section className="grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Rubric performance
+                </CardTitle>
+                <CardDescription>
+                  Average final score for each rubric criterion. Weakest areas appear
+                  first so you can see where participants need the most support.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analytics.criterionAverages.length > 0 ? (
+                  <div className="space-y-5">
+                    {analytics.criterionAverages.map((criterion) => (
+                      <div key={criterion.criterionName} className="space-y-2">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="text-sm font-medium leading-5">
+                              {criterion.criterionName}
+                            </div>
+                            <div className="mt-0.5 text-xs text-muted-foreground">
+                              {criterion.evaluatedAttempts} evaluated attempt
+                              {criterion.evaluatedAttempts === 1 ? '' : 's'}
+                            </div>
+                          </div>
+                          <div className="shrink-0 text-sm font-semibold">
+                            {Math.round(criterion.averageScore)}/100
+                          </div>
+                        </div>
+                        <Progress value={criterion.averageScore} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <AnalyticsEmptyState text="Rubric averages will appear after a completed attempt has a final evaluation." />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Score distribution</CardTitle>
+                <CardDescription>
+                  Evaluated attempts grouped using the same score bands as individual
+                  final reports.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analytics.evaluatedAttempts > 0 ? (
+                  <div className="space-y-5">
+                    {analytics.scoreDistribution.map((bucket) => {
+                      const percent =
+                        (bucket.count / analytics.evaluatedAttempts) * 100;
+
+                      return (
+                        <div key={bucket.key} className="space-y-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-medium">{bucket.label}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Score {bucket.rangeLabel}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-semibold">{bucket.count}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {Math.round(percent)}%
+                              </div>
+                            </div>
+                          </div>
+                          <Progress value={percent} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <AnalyticsEmptyState text="Score distribution will appear after completed reports are evaluated." />
+                )}
+              </CardContent>
+            </Card>
+          </section>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Participant attempts</CardTitle>
+              <CardDescription>
+                Name and email appear only when the participant supplied them. Anonymous
+                attempts remain labelled as guests.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {result.attempts.map((attempt) => (
+                <AttemptRow
+                  key={attempt.sessionId}
+                  practiceId={params.practiceId}
+                  attempt={attempt}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
@@ -183,6 +264,14 @@ function MetricCard({
         <p className="text-xs leading-5 text-muted-foreground">{detail}</p>
       </CardContent>
     </Card>
+  );
+}
+
+function AnalyticsEmptyState({ text }: { text: string }) {
+  return (
+    <div className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+      {text}
+    </div>
   );
 }
 
@@ -298,6 +387,20 @@ function StatusBadge({ status }: { status: CreatorPracticeResultAttempt['status'
       {label}
     </span>
   );
+}
+
+function formatScore(value: number | null) {
+  return value == null ? '—' : `${Math.round(value)}/100`;
+}
+
+function formatPercent(value: number | null) {
+  return value == null ? '—' : `${Math.round(value)}%`;
+}
+
+function evaluationCountDetail(count: number) {
+  return count > 0
+    ? `Across ${count} evaluated attempt${count === 1 ? '' : 's'}`
+    : 'Appears after completed reports are evaluated';
 }
 
 function formatDateTime(value: Date) {

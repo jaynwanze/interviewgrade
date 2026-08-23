@@ -20,6 +20,7 @@ import type { Practice } from '@/modules/practice/practice.schema';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 import { CopyPracticeLinkButton } from './CopyPracticeLinkButton';
+import { PracticeLifecycleAction } from './PracticeLifecycleAction';
 
 type MyPracticesPageProps = {
   searchParams?: {
@@ -141,9 +142,16 @@ function PracticeCard({ practice }: { practice: Practice }) {
           <CardTitle className="line-clamp-2 text-xl leading-snug">
             {practice.draft.title}
           </CardTitle>
-          <span className="shrink-0 rounded-full border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            {statusLabel}
-          </span>
+          <div className="flex shrink-0 items-center gap-1">
+            <span className="rounded-full border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              {statusLabel}
+            </span>
+            <PracticeLifecycleAction
+              practiceId={practice.id}
+              title={practice.draft.title}
+              status={practice.status}
+            />
+          </div>
         </div>
         <CardDescription className="line-clamp-3">
           {practice.draft.description}

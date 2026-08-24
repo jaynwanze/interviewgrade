@@ -75,7 +75,7 @@ const PricingCard = ({
         </div>
 
         <Button asChild variant={isHighlighted ? 'default' : 'outline'} className="w-full">
-          <Link href="/c/sign-up">Start free</Link>
+          <Link href="/c/sign-up">{isHighlighted ? 'Upgrade to Pro' : 'Start free'}</Link>
         </Button>
       </CardHeader>
 

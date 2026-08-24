@@ -66,7 +66,7 @@ export default async function CandidateDashboardPage() {
 
   return (
     <main className="pb-10">
-      <section className="container mx-auto w-3/4 px-4 pt-6">
+      <section className="container mx-auto w-full px-4 pt-6 sm:w-11/12 lg:w-3/4">
         <div className="flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Your progress</h1>
@@ -76,20 +76,20 @@ export default async function CandidateDashboardPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button asChild>
+          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+            <Button asChild className="w-full sm:w-auto">
               <Link href="/candidate/practices/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Create practice
               </Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="w-full sm:w-auto">
               <Link href="/candidate/practices">
                 <Library className="mr-2 h-4 w-4" />
                 My practices
               </Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="w-full sm:w-auto">
               <Link href="/candidate/interview-history">
                 <History className="mr-2 h-4 w-4" />
                 View history
@@ -112,7 +112,7 @@ export default async function CandidateDashboardPage() {
 
 function DashboardSectionFallback({ label }: { label: string }) {
   return (
-    <div className="container mx-auto w-3/4 px-4 pt-4">
+    <div className="container mx-auto w-full px-4 pt-4 sm:w-11/12 lg:w-3/4">
       <div className="h-24 animate-pulse rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
         {label}
       </div>

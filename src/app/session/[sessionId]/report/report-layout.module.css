@@ -111,16 +111,12 @@
     margin: 12mm;
   }
 
-  :global(html),
-  :global(body) {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
   .printRoot {
     min-height: auto !important;
     padding: 0 !important;
     background: hsl(var(--background)) !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .reportShell {

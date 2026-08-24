@@ -17,9 +17,7 @@ export function GeneratePracticeDraftForm() {
             What do you want to practise?
           </label>
           <p className="text-xs text-muted-foreground">
-            Describe a role, skill, scenario, presentation, viva, sales call, or
-            paste a job description. InterviewGrade will turn it into an editable
-            draft.
+            Describe the role, skill, scenario, or paste a job description.
           </p>
         </div>
         <Textarea
@@ -29,7 +27,7 @@ export function GeneratePracticeDraftForm() {
           minLength={20}
           maxLength={12000}
           className="min-h-40"
-          placeholder="Example: I am preparing for a senior Java backend interview at a fintech company. Focus on system design, concurrency, APIs, trade-offs, and communicating technical decisions. Make the questions challenging but realistic."
+          placeholder="Example: Senior Java backend interview at a fintech company. Focus on system design, concurrency, APIs, trade-offs, and communicating technical decisions."
         />
       </div>
 
@@ -57,8 +55,7 @@ export function GeneratePracticeDraftForm() {
       </div>
 
       <p className="text-xs leading-5 text-muted-foreground">
-        AI only creates the draft. Review and edit the questions, rubric, weights,
-        mappings, timings, and scenario before you choose Publish.
+        You can review and edit everything before publishing.
       </p>
     </form>
   );
@@ -68,13 +65,13 @@ function GenerateButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending} className="sm:min-w-48">
+    <Button type="submit" disabled={pending} className="sm:min-w-44">
       {pending ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (
         <Sparkles className="mr-2 h-4 w-4" />
       )}
-      {pending ? 'Generating draft…' : 'Generate with AI'}
+      {pending ? 'Creating draft…' : 'Create with AI'}
     </Button>
   );
 }

@@ -17,8 +17,8 @@ export function UploadPracticeDocumentForm() {
             Source document
           </label>
           <p className="text-xs text-muted-foreground">
-            Upload a text-based PDF or TXT file up to 5 MB. The file is read
-            server-side to create the draft and is not stored by this flow.
+            Text-based PDF or TXT, up to 5 MB. The source is used to create the draft
+            and is not stored by this flow.
           </p>
         </div>
         <input
@@ -34,11 +34,10 @@ export function UploadPracticeDocumentForm() {
       <div className="space-y-2">
         <div className="space-y-1">
           <label htmlFor="documentInstruction" className="text-sm font-medium">
-            Optional instruction
+            Optional focus
           </label>
           <p className="text-xs text-muted-foreground">
-            Tell InterviewGrade what kind of spoken Practice to create from the
-            source material.
+            Add any role, skill, or interview focus you want reflected in the Practice.
           </p>
         </div>
         <Textarea
@@ -46,7 +45,7 @@ export function UploadPracticeDocumentForm() {
           name="instruction"
           maxLength={1500}
           className="min-h-28"
-          placeholder="Example: Turn this job description into a 5-question technical interview practice focused on the most important requirements."
+          placeholder="Example: Focus on the most important technical requirements and make it a 5-question spoken interview."
         />
       </div>
 
@@ -74,9 +73,7 @@ export function UploadPracticeDocumentForm() {
       </div>
 
       <p className="text-xs leading-5 text-muted-foreground">
-        Nothing is published automatically. After generation you will land in the
-        same editor where every question, rubric criterion, mapping, and timing can
-        be changed before Publish.
+        You can review and edit everything before publishing.
       </p>
     </form>
   );
@@ -86,13 +83,13 @@ function GenerateDocumentButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending} className="sm:min-w-52">
+    <Button type="submit" disabled={pending} className="sm:min-w-48">
       {pending ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (
         <FileText className="mr-2 h-4 w-4" />
       )}
-      {pending ? 'Reading & generating…' : 'Generate from document'}
+      {pending ? 'Creating draft…' : 'Create from document'}
     </Button>
   );
 }

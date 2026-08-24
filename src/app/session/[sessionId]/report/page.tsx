@@ -27,6 +27,7 @@ import {
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import { generatePracticeReportAction } from './actions';
+import { ExportReportButton } from './ExportReportButton';
 import styles from './report-layout.module.css';
 
 type ReportPageProps = {
@@ -196,7 +197,7 @@ export default async function PracticeReportPage({
     sessionEvaluation.modelMetadata.promptVersion === SESSION_AGGREGATION_VERSION;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6 sm:px-6 sm:py-9">
+    <main className={`${styles.printRoot} min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6 sm:px-6 sm:py-9`}>
       <div className={`mx-auto w-full max-w-6xl space-y-6 ${styles.reportShell}`}>
         <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0 space-y-2">
@@ -213,12 +214,15 @@ export default async function PracticeReportPage({
               {practiceVersion.version}
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/session/${report.session.id}`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Session
-            </Link>
-          </Button>
+          <div className={styles.reportActions}>
+            <ExportReportButton title={practiceVersion.snapshot.title} />
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/session/${report.session.id}`}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Session
+              </Link>
+            </Button>
+          </div>
         </header>
 
         <section className={styles.summaryGrid}>

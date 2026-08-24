@@ -1,4 +1,5 @@
 'use client';
+import { ReportReadyWatcher } from '@/components/ReportReadyWatcher';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { WalkthroughProvider } from '@/contexts/WalkthroughContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -33,6 +34,7 @@ export function AppProviders({
         <WalkthroughProvider>
           <NotificationsProvider>
             <QueryClientProvider client={queryClient}>
+              <ReportReadyWatcher />
               {children}
               <Analytics />
               <SpeedInsights />

@@ -556,7 +556,7 @@ export function V2SessionPlayer({
                 isCameraOn={cameraOn}
                 onRecordEnd={null}
                 interviewMode="Practice"
-                disabled={busy}
+                disabled={busy || speaking}
                 maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
                 controlsOverlay
               />
@@ -650,79 +650,15 @@ export function V2SessionPlayer({
                   <div className="text-sm font-semibold">Practice feedback</div>
                 </div>
 
-                {showPreviousFeedback && previousFeedback && (
-                  <div
-                    className={`rounded-lg border p-3 transition-colors ${
-                      previousFeedback.status === 'ready'
-                        ? 'border-primary/25 bg-primary/5'
-                        : 'bg-muted/15'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-xs font-medium text-muted-foreground">
-                          Previous answer · Question {previousFeedback.questionNumber}
-                        </div>
-                        <div className="mt-1 flex items-center gap-2 text-sm font-medium">
-                          {previousFeedback.status === 'processing' ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                              Feedback processing…
-                            </>
-                          ) : previousFeedback.status === 'ready' ? (
-                            <>
-                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                              Feedback ready
-                              {previousFeedback.feedback.score != null && (
-                                <span
-                                  className={scoreClass(previousFeedback.feedback.score)}
-                                >
-                                  · {Math.round(previousFeedback.feedback.score)}/100
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            'Feedback unavailable'
-                          )}
-                        </div>
-                      </div>
-
-                      {previousFeedback.status === 'ready' &&
-                        previousFeedback.feedback.summary && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="shrink-0"
-                            onClick={() =>
-                              setPreviousFeedbackExpanded((expanded) => !expanded)
-                            }
-                          >
-                            {previousFeedbackExpanded ? 'Hide' : 'View'}
-                          </Button>
-                        )}
-                    </div>
-
-                    {previousFeedbackExpanded && previousFeedback.feedback.summary && (
-                      <div className="mt-3 border-t pt-3">
-                        <p className="text-sm leading-6 text-muted-foreground">
-                          {previousFeedback.feedback.summary}
-                        </p>
-                        {previousFeedback.feedback.advice &&
-                          previousFeedback.feedback.advice !== 'N/A' && (
-                            <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                              <span className="font-medium text-foreground">
-                                Next focus:
-                              </span>{' '}
-                              {previousFeedback.feedback.advice}
-                            </p>
-                          )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {feedbackLoading && !hasFeedback ? (
+                {showPreviousFeedback && previousFeedback ? (
+                  <PreviousFeedbackCard
+                    previousFeedback={previousFeedback}
+                    expanded={previousFeedbackExpanded}
+                    onToggle={() =>
+                      setPreviousFeedbackExpanded((expanded) => !expanded)
+                    }
+                  />
+                ) : feedbackLoading && !hasFeedback ? (
                   <div className="rounded-lg border bg-muted/15 p-3">
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -768,11 +704,11 @@ export function V2SessionPlayer({
                       </p>
                     )}
                   </div>
-                ) : !showPreviousFeedback ? (
+                ) : (
                   <p className="text-sm leading-6 text-muted-foreground">
                     Your feedback will appear here after you record an answer.
                   </p>
-                ) : null}
+                )}
               </section>
             </div>
           </CardContent>
@@ -816,6 +752,73 @@ export function V2SessionPlayer({
           )}
         </Card>
       </div>
+    </div>
+  );
+}
+
+function PreviousFeedbackCard({
+  previousFeedback,
+  expanded,
+  onToggle,
+}: {
+  previousFeedback: PreviousFeedback;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const { status, feedback, questionNumber } = previousFeedback;
+  const ready = status === 'ready';
+
+  return (
+    <div className="rounded-lg border bg-muted/10 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Previous answer · Question {questionNumber}
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-sm font-medium">
+            {status === 'processing' ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Feedback processing…
+              </>
+            ) : ready ? (
+              <>
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                Feedback ready
+                {feedback.score != null && (
+                  <span className={scoreClass(feedback.score)}>
+                    · {Math.round(feedback.score)}/100
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-muted-foreground">Feedback unavailable</span>
+            )}
+          </div>
+        </div>
+        {ready && (feedback.summary || feedback.advice) && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="shrink-0"
+            onClick={onToggle}
+          >
+            {expanded ? 'Hide' : 'View'}
+          </Button>
+        )}
+      </div>
+
+      {ready && expanded && (
+        <div className="mt-3 space-y-3 border-t pt-3">
+          {feedback.summary && (
+            <FeedbackBlock label="Summary" text={feedback.summary} />
+          )}
+          {feedback.advice && feedback.advice !== 'N/A' && (
+            <FeedbackBlock label="For this question" text={feedback.advice} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

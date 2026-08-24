@@ -54,6 +54,30 @@
 
 .responseCard {
   overflow: hidden;
+  min-width: 0;
+}
+
+/* Long technical prompts must never push the question score outside the card. */
+.responseCard > div:first-child > div {
+  min-width: 0;
+}
+
+.responseCard > div:first-child > div > div:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.responseCard > div:first-child > div > div:last-child {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+}
+
+@media (min-width: 640px) {
+  .responseCard > div:first-child > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
 }
 
 .scoreDetails {

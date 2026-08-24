@@ -75,6 +75,7 @@ export function V2SessionPlayer({
   const [complete, setComplete] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
+  const [guidanceExpanded, setGuidanceExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
@@ -366,6 +367,7 @@ export function V2SessionPlayer({
     setPreparedNextOrder(null);
     setFeedbackText('');
     setFeedback({});
+    setGuidanceExpanded(false);
     setError(null);
   }
 
@@ -494,9 +496,26 @@ export function V2SessionPlayer({
                 {currentQuestion.prompt}
               </p>
               {currentQuestion.guidance && (
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {currentQuestion.guidance}
-                </p>
+                <div className="space-y-1.5 text-left">
+                  <p
+                    className={`text-sm leading-6 text-muted-foreground ${
+                      guidanceExpanded ? '' : 'line-clamp-2'
+                    }`}
+                  >
+                    {currentQuestion.guidance}
+                  </p>
+                  {currentQuestion.guidance.length > 120 && (
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-xs"
+                      onClick={() => setGuidanceExpanded((expanded) => !expanded)}
+                    >
+                      {guidanceExpanded ? 'Show less' : 'Show guidance'}
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">

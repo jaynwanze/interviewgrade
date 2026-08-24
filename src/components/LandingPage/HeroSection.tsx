@@ -1,50 +1,169 @@
 'use client';
-import { ArrowRight, ChevronRight, Clock4Icon, Sparkles } from 'lucide-react';
-import Image from 'next/image';
+
+import {
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  MessageSquareText,
+  Mic,
+  Sparkles,
+  Target,
+} from 'lucide-react';
 import Link from 'next/link';
-import HeroImage from '/public/images/interview-landingpage.jpg';
+
+import { Button } from '@/components/ui/button';
+
 export default function HeroSection() {
   return (
-    <section className=" py-10 lg:py-20 text-left px-6 lg:text-center max-w-5xl mx-auto">
-      <div className="flex flex-col  gap-10 w-full">
-        <div className="space-y-4 flex flex-col  lg:items-center  flex-1">
-          <Link href={'#'}>
-            <div className="flex items-center  gap-2 py-1 px-3 w-fit rounded-full border border-border dark:border-none bg-secondary">
-              <Sparkles size={16} />
-              <span className="text-md font-medium lg:text-base">
-                AI Powered Mock Interview System
-              </span>
-              <ArrowRight size={16} />
-            </div>
-          </Link>
-          <h1 className="font-semibold text-3xl lg:text-5xl">
-            Interview Preparation Empowered By AI.
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 leading-loose lg:text-lg lg:leading-relaxed max-w-4xl">
-            Prep smarter, Learn faster, and Recieve valuable interview feedback
-            easier
-          </p>
-          <div className="flex items-center gap-2 py-1 px-3 w-fit rounded-full border border-border dark:border-none bg-secondary cursor-pointer">
-            <Clock4Icon size={16} />
-            <span className="text-md font-medium lg:text-base">
-              Coming Soon
-            </span>
-            {/* {/* <ChevronRight size={16} /> */}
+    <section className="px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:pb-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-border/80 bg-muted/40 px-3 py-1 text-sm font-medium text-muted-foreground">
+            <Sparkles className="h-4 w-4 text-primary" />
+            AI-powered interview practice
           </div>
-          {/* <div className="flex flex-col md:flex-row items-center max-w-md w-full  gap-3 pt-2 ">
-            <Button className="w-full">
-              Log In
-              <ArrowRight size={16} className="ml-2" />
+
+          <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            Practice interviews. Get structured feedback. Improve faster.
+          </h1>
+
+          <p className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg">
+            Create or choose a Practice, answer naturally with Avery, and get
+            rubric-based feedback plus a detailed report after every session.
+          </p>
+
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button asChild size="lg" className="min-w-44">
+              <Link href="/c/sign-up">
+                Start practising free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
-            
-          </div> */}
+            <Button asChild variant="outline" size="lg" className="min-w-44">
+              <Link href="#how-it-works">See how it works</Link>
+            </Button>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground sm:text-sm">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" /> 3 AI Practice runs free
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" /> No card required
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-primary" /> Structured rubric feedback
+            </span>
+          </div>
         </div>
-        <div className="rounded-md border-2 flex-1 overflow-hidden border-border shadow-sm">
-          <Image
-            alt="Hero Image"
-            src={HeroImage}
-            className="overflow-hidden h-[500px] max-h-[500px]  object-cover"
-          />
+
+        <div className="relative mx-auto mt-12 max-w-5xl overflow-hidden rounded-2xl border border-border/80 bg-card shadow-2xl shadow-black/10">
+          <div className="flex items-center justify-between border-b border-border/70 bg-muted/20 px-4 py-3 sm:px-5">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Frontend Engineer Practice
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="rounded-full border px-2 py-1">Question 2 of 5</span>
+            </div>
+          </div>
+
+          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="p-4 sm:p-6">
+              <div className="rounded-xl border bg-background/40 p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium">Avery · Interviewer</div>
+                    <div className="mt-1 text-xs text-muted-foreground">Current question</div>
+                  </div>
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                    Listening
+                  </span>
+                </div>
+
+                <h2 className="mt-6 max-w-3xl text-2xl font-semibold leading-tight sm:text-3xl">
+                  Walk me through a complex UI you built. What were the biggest
+                  challenges and how did you solve them?
+                </h2>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Suggested answer time: 2–3 minutes
+                </p>
+              </div>
+
+              <div className="mt-4 rounded-xl border bg-background/40 p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium">Your response</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Answer naturally. Retry before moving on if you want.
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Not recording</span>
+                </div>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-[180px_1fr] sm:items-center">
+                  <div className="flex aspect-video items-center justify-center rounded-lg border bg-muted/20 text-muted-foreground">
+                    <Mic className="h-7 w-7" />
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex h-8 items-center justify-center gap-1">
+                      {[4, 8, 12, 7, 15, 9, 5, 11, 16, 8, 13, 6, 10, 14, 7].map(
+                        (height, index) => (
+                          <span
+                            key={`${height}-${index}`}
+                            className="w-1 rounded-full bg-primary/80"
+                            style={{ height }}
+                          />
+                        ),
+                      )}
+                    </div>
+                    <Button className="w-full sm:w-auto">
+                      <Mic className="mr-2 h-4 w-4" />
+                      Start recording
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside className="border-t border-border/70 bg-muted/10 p-4 lg:border-l lg:border-t-0 sm:p-5">
+              <div className="space-y-4">
+                <div className="rounded-xl border bg-background/60 p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Target className="h-4 w-4 text-primary" /> Rubric focus
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {['Problem solving', 'System design', 'Communication'].map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border bg-background/60 p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <MessageSquareText className="h-4 w-4 text-primary" /> Feedback
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                    Structured coaching appears after you submit your answer.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border bg-background/60 p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <BarChart3 className="h-4 w-4 text-primary" /> Final report
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                    Review rubric performance, strengths and what to focus on next.
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
       </div>
     </section>

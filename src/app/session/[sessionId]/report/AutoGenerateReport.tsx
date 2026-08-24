@@ -80,9 +80,15 @@ export function AutoGenerateReport({
       </div>
 
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
-        <Button asChild className="w-full sm:w-auto" disabled={!generationStarted}>
-          <Link href={homeHref}>{homeLabel}</Link>
-        </Button>
+        {generationStarted ? (
+          <Button asChild className="w-full sm:w-auto">
+            <Link href={homeHref}>{homeLabel}</Link>
+          </Button>
+        ) : (
+          <Button type="button" className="w-full sm:w-auto" disabled>
+            Starting report…
+          </Button>
+        )}
         {generationFailed && (
           <Button
             type="button"

@@ -22,6 +22,10 @@ const feedbackRequestSchema = z.object({
 
 const FEEDBACK_STATUS_HEADER = 'X-InterviewGrade-Feedback-Status';
 
+type PersistedResponseEvaluation = ReturnType<
+  typeof responseEvaluationSchema.parse
+>;
+
 export async function POST(request: NextRequest) {
   let requestBody: unknown;
   try {
@@ -105,50 +109,51 @@ export async function POST(request: NextRequest) {
       context.practiceVersion.snapshot.rubricCriteria,
     );
 
-    try {
+    const loadEvaluation = async (): Promise<PersistedResponseEvaluation> => {
       const repository = createDrizzleEvaluationRepository();
       let evaluation = await repository.getResponseEvaluation(
         savedResponse.id,
         RESPONSE_EVALUATION_SCHEMA_VERSION,
       );
 
-      if (!evaluation) {
-        const generated = await generateResponseEvaluation({
-          practiceTitle: context.practiceVersion.snapshot.title,
-          scenario: context.practiceVersion.snapshot.scenario,
-          question: currentQuestion,
-          response: savedResponse,
-          rubricCriteria: mappedRubric,
-        });
-
-        evaluation = await repository.saveResponseEvaluation(
-          responseEvaluationSchema.parse({
-            id: randomUUID(),
-            sessionResponseId: savedResponse.id,
-            overallScore: generated.overallScore,
-            criterionScores: generated.criterionScores,
-            summary: generated.summary,
-            strengths: generated.strengths,
-            improvements: generated.improvements,
-            recommendation: generated.recommendation,
-            schemaVersion: RESPONSE_EVALUATION_SCHEMA_VERSION,
-            modelMetadata: {
-              provider: 'openai',
-              model: RESPONSE_EVALUATION_MODEL,
-              promptVersion: RESPONSE_PROMPT_VERSION,
-            },
-            createdAt: new Date(),
-          }),
-        );
+      if (evaluation) {
+        return evaluation;
       }
 
-      return feedbackEvaluationStream(evaluation, nextQuestion != null);
-    } catch (error) {
-      console.error('v2 practice feedback evaluation failed', error);
-      return feedbackUnavailableStream(nextQuestion != null);
-    }
+      const generated = await generateResponseEvaluation({
+        practiceTitle: context.practiceVersion.snapshot.title,
+        scenario: context.practiceVersion.snapshot.scenario,
+        question: currentQuestion,
+        response: savedResponse,
+        rubricCriteria: mappedRubric,
+      });
+
+      evaluation = await repository.saveResponseEvaluation(
+        responseEvaluationSchema.parse({
+          id: randomUUID(),
+          sessionResponseId: savedResponse.id,
+          overallScore: generated.overallScore,
+          criterionScores: generated.criterionScores,
+          summary: generated.summary,
+          strengths: generated.strengths,
+          improvements: generated.improvements,
+          recommendation: generated.recommendation,
+          schemaVersion: RESPONSE_EVALUATION_SCHEMA_VERSION,
+          modelMetadata: {
+            provider: 'openai',
+            model: RESPONSE_EVALUATION_MODEL,
+            promptVersion: RESPONSE_PROMPT_VERSION,
+          },
+          createdAt: new Date(),
+        }),
+      );
+
+      return evaluation;
+    };
+
+    return feedbackEvaluationStream(loadEvaluation, nextQuestion != null);
   } catch (error) {
-    console.error('v2 practice feedback context unavailable', error);
+    console.error('practice feedback context unavailable', error);
     return NextResponse.json(
       { error: 'Practice feedback is temporarily unavailable.' },
       { status: 503 },
@@ -174,38 +179,61 @@ function rubricForQuestion(
 }
 
 function feedbackEvaluationStream(
-  evaluation: ReturnType<typeof responseEvaluationSchema.parse>,
+  loadEvaluation: () => Promise<PersistedResponseEvaluation>,
   hasNextQuestion: boolean,
 ) {
-  const text = `Practice Feedback\nScore (%):\n${Math.round(evaluation.overallScore)}/100%\n\nSummary: ${evaluation.summary ?? 'Your answer was evaluated against the published rubric.'}\nAdvice for Next Question: ${hasNextQuestion ? evaluation.recommendation : 'N/A'}`;
-  return singleEventStream(text, 'ready');
-}
-
-function feedbackUnavailableStream(hasNextQuestion: boolean) {
-  const fallback = `Practice Feedback\n\nSummary: Your answer was saved successfully, but immediate AI feedback is temporarily unavailable.\nAdvice for Next Question: ${hasNextQuestion ? 'Continue to the next question and focus on a clear, specific response.' : 'N/A'}`;
-  return singleEventStream(fallback, 'fallback');
-}
-
-function singleEventStream(text: string, status: 'ready' | 'fallback') {
   const encoder = new TextEncoder();
-  const body = new ReadableStream({
-    start(controller) {
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify(text)}\n\n`));
-      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-      controller.close();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const send = (text: string) => {
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify(text)}\n\n`),
+        );
+      };
+
+      // Open the stream immediately so the participant never sits behind a blank
+      // spinner while the structured rubric evaluation is being generated.
+      send('Response saved. Evaluating against your rubric…');
+
+      try {
+        const evaluation = await loadEvaluation();
+
+        // Reveal useful feedback progressively while preserving the same persisted
+        // structured evaluation used by reports and creator analytics.
+        send(
+          `\n\nPractice Feedback\nScore (%):\n${Math.round(evaluation.overallScore)}/100%`,
+        );
+        send(
+          `\n\nSummary: ${evaluation.summary ?? 'Your answer was evaluated against the published rubric.'}`,
+        );
+        send(
+          `\nAdvice for Next Question: ${hasNextQuestion ? evaluation.recommendation : 'N/A'}`,
+        );
+      } catch (error) {
+        console.error('practice feedback evaluation failed', error);
+        send(
+          '\n\nPractice Feedback\n\nSummary: Your answer was saved successfully, but immediate AI feedback is temporarily unavailable.',
+        );
+        send(
+          `\nAdvice for Next Question: ${hasNextQuestion ? 'Continue to the next question and focus on a clear, specific response.' : 'N/A'}`,
+        );
+      } finally {
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      }
     },
   });
 
   return new NextResponse(body, {
-    headers: streamHeaders(status),
+    headers: streamHeaders(),
   });
 }
 
-function streamHeaders(status: 'ready' | 'fallback') {
+function streamHeaders() {
   return {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache, no-transform',
     Connection: 'keep-alive',
-    [FEEDBACK_STATUS_HEADER]: status,
+    [FEEDBACK_STATUS_HEADER]: 'streaming',
   };
 }

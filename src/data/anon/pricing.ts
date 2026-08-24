@@ -13,7 +13,7 @@ export const pricing: Pricing[] = [
     description: 'Start practising and see the full InterviewGrade workflow.',
     features: [
       '3 AI Practice runs per month',
-      '3 AI Practice generations per month',
+      '3 AI-created Practices per month',
       'Unlimited manual Practice creation and editing',
       'Rubric-based answer feedback and final reports',
     ],
@@ -24,7 +24,7 @@ export const pricing: Pricing[] = [
     description: 'More monthly capacity for consistent interview practice.',
     features: [
       '30 AI Practice runs per month',
-      '30 AI Practice generations per month',
+      '30 AI-created Practices per month',
       'Unlimited manual Practice creation and editing',
       'Rubric-based answer feedback and final reports',
       'Shared Practice participation uses the creator allowance',

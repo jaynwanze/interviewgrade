@@ -128,7 +128,7 @@ export function Login({
   return (
     <div
       data-success={successMessage}
-      className="container data-[success]:flex items-center data-[success]:justify-center text-left max-w-lg mx-auto overflow-auto data-[success]:h-full min-h-[470px]"
+      className="mx-auto min-h-[470px] w-full max-w-lg overflow-auto px-3 text-left data-[success]:flex data-[success]:h-full data-[success]:items-center data-[success]:justify-center sm:px-0"
     >
       {successMessage ? (
         <ConfirmationPendingCard
@@ -138,9 +138,9 @@ export function Login({
           resetSuccessMessage={setSuccessMessage}
         />
       ) : (
-        <div className="space-y-6 bg-background p-6 rounded-lg shadow dark:border">
-          <header className="text-center space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight">
+        <div className="space-y-5 rounded-lg bg-background p-4 shadow dark:border sm:space-y-6 sm:p-6">
+          <header className="space-y-1 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Welcome back
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -156,19 +156,19 @@ export function Login({
             />
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <div className="h-px flex-1 bg-border" />
-              <span>or continue with email</span>
+              <span className="whitespace-nowrap">or continue with email</span>
               <div className="h-px flex-1 bg-border" />
             </div>
           </div>
 
-          <Tabs defaultValue="password" className="md:min-w-[400px]">
+          <Tabs defaultValue="password" className="w-full md:min-w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>
               <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
             </TabsList>
             <TabsContent value="password">
               <Card className="border-none shadow-none">
-                <CardHeader className="py-6 px-0">
+                <CardHeader className="px-0 py-5 sm:py-6">
                   <CardTitle>Login to InterviewGrade</CardTitle>
                   <CardDescription>
                     Login with the account you used to signup.
@@ -190,7 +190,7 @@ export function Login({
 
             <TabsContent value="magic-link">
               <Card className="border-none shadow-none">
-                <CardHeader className="py-6 px-0">
+                <CardHeader className="px-0 py-5 sm:py-6">
                   <CardTitle>Login to InterviewGrade</CardTitle>
                   <CardDescription>
                     Login with a magic link sent to your email.

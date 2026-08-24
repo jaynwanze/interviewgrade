@@ -556,7 +556,7 @@ export function V2SessionPlayer({
                 isCameraOn={cameraOn}
                 onRecordEnd={null}
                 interviewMode="Practice"
-                disabled={busy}
+                disabled={busy || speaking}
                 maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
                 controlsOverlay
               />

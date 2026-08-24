@@ -67,7 +67,7 @@ export default async function MyPracticesPage({
           </div>
           <h1 className="text-3xl font-semibold tracking-tight">My Practices</h1>
           <p className="text-sm text-muted-foreground">
-            Build, run, share and review your interview practices.
+            Create, run, share and review your Practices.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ function CreatePracticeCard() {
         </div>
         <div className="font-semibold">Create a new practice</div>
         <p className="mt-1 max-w-[220px] text-sm text-muted-foreground">
-          AI generate, upload context, or start from scratch.
+          Create with AI, upload a document, or start manually.
         </p>
         <Button asChild className="mt-5">
           <Link href="/candidate/practices/new">Create practice</Link>

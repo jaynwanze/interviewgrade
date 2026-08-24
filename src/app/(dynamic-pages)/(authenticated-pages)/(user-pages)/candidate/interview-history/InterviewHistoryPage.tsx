@@ -93,7 +93,7 @@ export default function InterviewHistoryPage({
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {legacyView
-              ? 'Sessions from the original InterviewGrade interview and practice runtime.'
+              ? 'Sessions from the original InterviewGrade interview and practice experience.'
               : 'Review your Practice attempts, continue unfinished sessions, and open completed reports.'}
           </p>
         </div>
@@ -119,8 +119,9 @@ export default function InterviewHistoryPage({
 
       {legacyView && (
         <div className="mb-5 rounded-lg border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-          This archive is kept for access to sessions created before the V2 Practice
-          runtime. It is not combined with current Practice scores or analytics.
+          This archive contains sessions created with InterviewGrade&apos;s previous
+          interview and practice experience. It is not included in current Practice
+          scores or analytics.
         </div>
       )}
 
@@ -156,7 +157,7 @@ export default function InterviewHistoryPage({
       )}
       {legacyView && legacyError && (
         <StatusNotice>
-          Legacy history could not be loaded right now. Your current V2 Practice
+          Legacy history could not be loaded right now. Your current Practice
           history is unaffected.
         </StatusNotice>
       )}

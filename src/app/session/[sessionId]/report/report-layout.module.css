@@ -141,17 +141,36 @@
   .scoreCard,
   .rubricGrid > *,
   .insightGrid > *,
-  .scoreDetails,
-  .responseCard {
+  .scoreDetails {
     break-inside: avoid-page;
     page-break-inside: avoid;
+  }
+
+  /* Start the detailed answer review on a clean page instead of orphaning its
+     heading at the bottom of the coaching-summary page. */
+  .scoreDetails + section {
+    break-before: page;
+    page-break-before: always;
   }
 
   .responseCard {
     overflow: visible;
   }
 
+  .responseCard > div:first-child,
+  .responseCard > div:last-child > div,
+  .responseCard > div:last-child > details {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
   .responseCard > div:first-child > div {
     grid-template-columns: minmax(0, 1fr) auto !important;
+  }
+
+  /* This is useful on-screen metadata, but in print it can become an orphaned
+     one-line fifth page when a long response card fills the previous sheet. */
+  .responseCard > div:last-child > p:last-child {
+    display: none !important;
   }
 }

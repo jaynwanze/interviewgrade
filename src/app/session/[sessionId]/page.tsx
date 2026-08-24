@@ -14,6 +14,7 @@ import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalL
 
 import { V2SessionPlayer } from './V2SessionPlayer';
 import { beginPracticeSessionAction } from './actions';
+import styles from './session-player-shell.module.css';
 
 type PracticeSessionPageProps = {
   params: { sessionId: string };
@@ -186,15 +187,17 @@ export default async function PracticeSessionPage({
             </aside>
           </div>
         ) : (
-          <V2SessionPlayer
-            sessionId={session.id}
-            practiceTitle={snapshot.title}
-            scenario={snapshot.scenario}
-            initialQuestionOrder={session.currentQuestionOrder}
-            initialResponseCount={responses.length}
-            questions={snapshot.questions}
-            rubricCriteria={snapshot.rubricCriteria}
-          />
+          <div className={styles.shell}>
+            <V2SessionPlayer
+              sessionId={session.id}
+              practiceTitle={snapshot.title}
+              scenario={snapshot.scenario}
+              initialQuestionOrder={session.currentQuestionOrder}
+              initialResponseCount={responses.length}
+              questions={snapshot.questions}
+              rubricCriteria={snapshot.rubricCriteria}
+            />
+          </div>
         )}
       </div>
     </main>

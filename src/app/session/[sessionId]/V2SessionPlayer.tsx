@@ -77,6 +77,7 @@ export function V2SessionPlayer({
   const [speaking, setSpeaking] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
   const [guidanceExpanded, setGuidanceExpanded] = useState(false);
+  const [answeredCurrentQuestion, setAnsweredCurrentQuestion] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
@@ -254,6 +255,7 @@ export function V2SessionPlayer({
       }
 
       setResponseCount((count) => count + 1);
+      setAnsweredCurrentQuestion(true);
 
       if (followingQuestion) {
         await advancePracticeSessionAction(sessionId, followingQuestion.order);
@@ -398,6 +400,7 @@ export function V2SessionPlayer({
     setFeedback({});
     setFeedbackLoading(false);
     setGuidanceExpanded(false);
+    setAnsweredCurrentQuestion(false);
     setError(null);
   }
 
@@ -462,6 +465,8 @@ export function V2SessionPlayer({
     feedbackText || feedback.score != null || feedback.summary || feedback.advice,
   );
   const canMoveNext = preparedNextOrder != null;
+  const isFinalQuestion = nextQuestion == null;
+  const canEndPractice = responseCount > 0;
 
   return (
     <div className="flex min-h-0 flex-col gap-3 lg:h-[calc(100vh-245px)] lg:min-h-[560px] lg:max-h-[760px]">
@@ -500,6 +505,7 @@ export function V2SessionPlayer({
                 interviewMode="Practice"
                 disabled={busy}
                 maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
+                controlsOverlay
               />
             </div>
           </CardContent>
@@ -646,22 +652,43 @@ export function V2SessionPlayer({
             </div>
           </CardContent>
 
-          <div className="shrink-0 border-t bg-background p-3">
-            {canMoveNext ? (
-              <Button onClick={showNextQuestion} className="w-full min-h-10">
-                Next question
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                onClick={finishSession}
-                className="w-full min-h-10"
-                disabled={busy || feedbackLoading}
-              >
-                {feedbackLoading ? 'Finishing feedback…' : 'Finish practice'}
-              </Button>
-            )}
-          </div>
+          {(canMoveNext || canEndPractice) && (
+            <div className="shrink-0 border-t bg-background p-3">
+              {canMoveNext ? (
+                <div className="space-y-2">
+                  <Button onClick={showNextQuestion} className="w-full min-h-10">
+                    Next question
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <Button
+                    onClick={finishSession}
+                    variant="ghost"
+                    className="w-full min-h-9 text-muted-foreground"
+                    disabled={busy || feedbackLoading}
+                  >
+                    End practice
+                  </Button>
+                </div>
+              ) : isFinalQuestion && answeredCurrentQuestion ? (
+                <Button
+                  onClick={finishSession}
+                  className="w-full min-h-10"
+                  disabled={busy || feedbackLoading}
+                >
+                  {feedbackLoading ? 'Finishing feedback…' : 'Finish practice'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={finishSession}
+                  variant="ghost"
+                  className="w-full min-h-9 text-muted-foreground"
+                  disabled={busy || feedbackLoading}
+                >
+                  End practice
+                </Button>
+              )}
+            </div>
+          )}
         </Card>
       </div>
     </div>

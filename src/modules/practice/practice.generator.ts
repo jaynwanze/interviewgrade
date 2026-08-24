@@ -14,7 +14,7 @@ export const PRACTICE_DRAFT_MODEL = 'gpt-5-mini';
 export const PRACTICE_DRAFT_PROMPT_VERSION = 'practice-draft-v1';
 
 const generatedPracticeDraftSchema = z.object({
-  title: z.string().trim().min(2).max(120),
+  title: z.string().trim().min(2).max(64),
   description: z.string().trim().min(10).max(1000),
   scenario: z.string().trim().min(10).max(1500),
   instructions: z.string().trim().min(5).max(1000),
@@ -60,8 +60,8 @@ export async function generatePracticeDraft(input: {
   const response = await openai.responses.create({
     model: PRACTICE_DRAFT_MODEL,
     instructions:
-      "You are InterviewGrade's practice designer. Turn the user's brief into a focused, realistic spoken practice session. The output is only a draft: make it useful and specific, but never claim facts about an employer, role, candidate, or process that are not in the brief. Questions must be answerable aloud. Rubric criteria must be distinct, evidence-based, and reusable across the session. Map every question to only the criteria that genuinely apply, and make sure every rubric criterion is used by at least one question. Return only the requested structured output.",
-    input: `Create an InterviewGrade practice from this brief:\n\n${brief}\n\nTarget exactly ${questionCount} questions. Use 2-5 rubric criteria. Importance is a relative value from 1 (supporting) to 5 (most important); InterviewGrade will convert it into weights that total exactly 100%. Keep preparation and response times realistic for spoken answers.`,
+      "You are InterviewGrade's practice designer. Turn the user's brief into a focused, realistic spoken practice session. The output is only a draft: make it useful and specific, but never claim facts about an employer, role, candidate, or process that are not in the brief. Questions must be answerable aloud. Rubric criteria must be distinct, evidence-based, and reusable across the session. Map every question to only the criteria that genuinely apply, and make sure every rubric criterion is used by at least one question. Use a short, specific Practice title: ideally 3-7 words, never a sentence, and never repeat the full user brief. Return only the requested structured output.",
+    input: `Create an InterviewGrade practice from this brief:\n\n${brief}\n\nTarget exactly ${questionCount} questions. Use 2-5 rubric criteria. Importance is a relative value from 1 (supporting) to 5 (most important); InterviewGrade will convert it into weights that total exactly 100%. Keep the title concise and dashboard-friendly. Keep preparation and response times realistic for spoken answers.`,
     max_output_tokens: 6000,
     text: {
       format: {
@@ -72,7 +72,7 @@ export async function generatePracticeDraft(input: {
           type: 'object',
           additionalProperties: false,
           properties: {
-            title: { type: 'string', minLength: 2, maxLength: 120 },
+            title: { type: 'string', minLength: 2, maxLength: 64 },
             description: { type: 'string', minLength: 10, maxLength: 1000 },
             scenario: { type: 'string', minLength: 10, maxLength: 1500 },
             instructions: { type: 'string', minLength: 5, maxLength: 1000 },
@@ -227,9 +227,6 @@ function buildPracticeDraft(generated: GeneratedPracticeDraft): PracticeDraft {
     };
   });
 
-  // Publishing requires every criterion to be used. Structured generation is
-  // instructed to do this already, but enforce it deterministically so a model
-  // omission can never leave the creator with an unpublishable AI draft.
   criterionIds.forEach((criterionId, criterionIndex) => {
     const isUsed = questions.some((question) =>
       question.rubricCriterionIds.includes(criterionId),

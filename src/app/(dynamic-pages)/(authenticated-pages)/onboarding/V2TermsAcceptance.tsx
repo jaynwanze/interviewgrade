@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -38,20 +37,12 @@ export function V2TermsAcceptance({ onSuccess }: { onSuccess: () => void }) {
           tailor your experience.
         </p>
       </CardContent>
-      <CardFooter className="flex flex-col gap-2 sm:flex-row">
+      <CardFooter>
         <TermsDetailDialog
           isLoading={isLoading}
           onConfirm={acceptTerms}
           userType="candidate"
         />
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={isLoading}
-          onClick={() => acceptTerms()}
-        >
-          Accept and continue
-        </Button>
       </CardFooter>
     </Card>
   );

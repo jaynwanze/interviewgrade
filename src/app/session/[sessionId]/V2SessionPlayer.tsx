@@ -44,6 +44,13 @@ type Feedback = {
   advice?: string;
 };
 
+type PreviousFeedback = {
+  questionOrder: number;
+  questionNumber: number;
+  status: 'processing' | 'ready' | 'unavailable';
+  feedback: Feedback;
+};
+
 type V2SessionPlayerProps = {
   sessionId: string;
   practiceTitle: string;
@@ -69,6 +76,9 @@ export function V2SessionPlayer({
   const [responseCount, setResponseCount] = useState(initialResponseCount);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedback, setFeedback] = useState<Feedback>({});
+  const [previousFeedback, setPreviousFeedback] =
+    useState<PreviousFeedback | null>(null);
+  const [previousFeedbackExpanded, setPreviousFeedbackExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -231,6 +241,7 @@ export function V2SessionPlayer({
 
     const answeredQuestion = currentQuestion;
     const answeredQuestionId = currentQuestion.id;
+    const answeredQuestionNumber = safeIndex + 1;
     const followingQuestion = nextQuestion;
     const feedbackRequestId = feedbackRequestRef.current + 1;
     feedbackRequestRef.current = feedbackRequestId;
@@ -258,6 +269,13 @@ export function V2SessionPlayer({
       setAnsweredCurrentQuestion(true);
 
       if (followingQuestion) {
+        setPreviousFeedback({
+          questionOrder: answeredQuestion.order,
+          questionNumber: answeredQuestionNumber,
+          status: 'processing',
+          feedback: {},
+        });
+        setPreviousFeedbackExpanded(false);
         await advancePracticeSessionAction(sessionId, followingQuestion.order);
         setPreparedNextOrder(followingQuestion.order);
       }
@@ -273,6 +291,13 @@ export function V2SessionPlayer({
       )
         .catch((feedbackError) => {
           console.error('V2SessionPlayer: feedback failed', feedbackError);
+          if (followingQuestion) {
+            setPreviousFeedback((previous) =>
+              previous?.questionOrder === answeredQuestion.order
+                ? { ...previous, status: 'unavailable' }
+                : previous,
+            );
+          }
           if (feedbackRequestRef.current === feedbackRequestId) {
             setError(
               'Your answer was saved, but immediate feedback is temporarily unavailable.',
@@ -334,6 +359,23 @@ export function V2SessionPlayer({
     let accumulated = '';
     let buffer = '';
 
+    const publishFeedback = () => {
+      const parsedFeedback = parseFeedback(accumulated);
+
+      if (followingQuestion) {
+        setPreviousFeedback((previous) =>
+          previous?.questionOrder === question.order
+            ? { ...previous, feedback: parsedFeedback }
+            : previous,
+        );
+      }
+
+      if (feedbackRequestRef.current === requestId) {
+        setFeedbackText(accumulated);
+        setFeedback(parsedFeedback);
+      }
+    };
+
     let streamComplete = false;
     while (!streamComplete) {
       const { value, done } = await reader.read();
@@ -358,10 +400,7 @@ export function V2SessionPlayer({
         try {
           const delta = JSON.parse(data) as string;
           accumulated += delta;
-          if (feedbackRequestRef.current === requestId) {
-            setFeedbackText(accumulated);
-            setFeedback(parseFeedback(accumulated));
-          }
+          publishFeedback();
         } catch (cause) {
           console.error('V2SessionPlayer: feedback SSE parse failed', cause);
         }
@@ -373,17 +412,28 @@ export function V2SessionPlayer({
       if (data && data !== '[DONE]') {
         const delta = JSON.parse(data) as string;
         accumulated += delta;
-        if (feedbackRequestRef.current === requestId) {
-          setFeedbackText(accumulated);
-          setFeedback(parseFeedback(accumulated));
-        }
+        publishFeedback();
       }
     }
 
-    if (
-      feedbackStatus === 'fallback' &&
-      feedbackRequestRef.current === requestId
-    ) {
+    const parsedFeedback = parseFeedback(accumulated);
+    const feedbackUnavailable =
+      feedbackStatus === 'fallback' ||
+      /temporarily unavailable/i.test(parsedFeedback.summary ?? '');
+
+    if (followingQuestion) {
+      setPreviousFeedback((previous) =>
+        previous?.questionOrder === question.order
+          ? {
+              ...previous,
+              status: feedbackUnavailable ? 'unavailable' : 'ready',
+              feedback: parsedFeedback,
+            }
+          : previous,
+      );
+    }
+
+    if (feedbackUnavailable && feedbackRequestRef.current === requestId) {
       setError(
         'Your answer was saved, but the live AI feedback service is currently unavailable.',
       );
@@ -467,6 +517,9 @@ export function V2SessionPlayer({
   const canMoveNext = preparedNextOrder != null;
   const isFinalQuestion = nextQuestion == null;
   const canEndPractice = responseCount > 0;
+  const showPreviousFeedback =
+    previousFeedback != null &&
+    previousFeedback.questionOrder !== currentQuestionOrder;
 
   return (
     <div className="flex min-h-0 flex-col gap-3 lg:h-[calc(100vh-245px)] lg:min-h-[560px] lg:max-h-[760px]">
@@ -597,6 +650,78 @@ export function V2SessionPlayer({
                   <div className="text-sm font-semibold">Practice feedback</div>
                 </div>
 
+                {showPreviousFeedback && previousFeedback && (
+                  <div
+                    className={`rounded-lg border p-3 transition-colors ${
+                      previousFeedback.status === 'ready'
+                        ? 'border-primary/25 bg-primary/5'
+                        : 'bg-muted/15'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-muted-foreground">
+                          Previous answer · Question {previousFeedback.questionNumber}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2 text-sm font-medium">
+                          {previousFeedback.status === 'processing' ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                              Feedback processing…
+                            </>
+                          ) : previousFeedback.status === 'ready' ? (
+                            <>
+                              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                              Feedback ready
+                              {previousFeedback.feedback.score != null && (
+                                <span
+                                  className={scoreClass(previousFeedback.feedback.score)}
+                                >
+                                  · {Math.round(previousFeedback.feedback.score)}/100
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            'Feedback unavailable'
+                          )}
+                        </div>
+                      </div>
+
+                      {previousFeedback.status === 'ready' &&
+                        previousFeedback.feedback.summary && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="shrink-0"
+                            onClick={() =>
+                              setPreviousFeedbackExpanded((expanded) => !expanded)
+                            }
+                          >
+                            {previousFeedbackExpanded ? 'Hide' : 'View'}
+                          </Button>
+                        )}
+                    </div>
+
+                    {previousFeedbackExpanded && previousFeedback.feedback.summary && (
+                      <div className="mt-3 border-t pt-3">
+                        <p className="text-sm leading-6 text-muted-foreground">
+                          {previousFeedback.feedback.summary}
+                        </p>
+                        {previousFeedback.feedback.advice &&
+                          previousFeedback.feedback.advice !== 'N/A' && (
+                            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                              <span className="font-medium text-foreground">
+                                Next focus:
+                              </span>{' '}
+                              {previousFeedback.feedback.advice}
+                            </p>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {feedbackLoading && !hasFeedback ? (
                   <div className="rounded-lg border bg-muted/15 p-3">
                     <div className="flex items-center gap-2 text-sm font-medium">
@@ -643,11 +768,11 @@ export function V2SessionPlayer({
                       </p>
                     )}
                   </div>
-                ) : (
+                ) : !showPreviousFeedback ? (
                   <p className="text-sm leading-6 text-muted-foreground">
                     Your feedback will appear here after you record an answer.
                   </p>
-                )}
+                ) : null}
               </section>
             </div>
           </CardContent>

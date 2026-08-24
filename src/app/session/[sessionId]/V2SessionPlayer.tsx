@@ -229,6 +229,7 @@ export function V2SessionPlayer({
     }
 
     const answeredQuestion = currentQuestion;
+    const answeredQuestionId = currentQuestion.id;
     const followingQuestion = nextQuestion;
     const feedbackRequestId = feedbackRequestRef.current + 1;
     feedbackRequestRef.current = feedbackRequestId;
@@ -242,7 +243,7 @@ export function V2SessionPlayer({
 
     try {
       const saveResult = await savePracticeSessionResponseAction(sessionId, {
-        questionId: answeredQuestion.id,
+        questionId: answeredQuestionId,
         questionOrder: answeredQuestion.order,
         transcript,
       });

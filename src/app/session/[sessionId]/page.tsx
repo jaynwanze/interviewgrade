@@ -88,23 +88,23 @@ export default async function PracticeSessionPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto w-full max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between sm:pb-6">
-          <div className="min-w-0 space-y-2">
+    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-5 sm:px-6 sm:py-6">
+      <div className="mx-auto w-full max-w-[1440px] space-y-5">
+        <header className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-5">
+          <div className="min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
               InterviewGrade
             </div>
-            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="line-clamp-2 break-words text-2xl font-semibold tracking-tight sm:text-3xl">
               {snapshot.title}
             </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+            <p className="line-clamp-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               {snapshot.description}
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <div className="flex shrink-0 flex-wrap gap-2 text-xs text-muted-foreground">
             <span className="rounded-full border bg-background px-3 py-1.5">
               Version {practiceVersion.version}
             </span>

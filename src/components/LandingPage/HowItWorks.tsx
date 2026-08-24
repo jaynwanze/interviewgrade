@@ -1,95 +1,65 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Upload, MessageSquare, BarChart3, Trophy } from 'lucide-react';
+import { BarChart3, MessageSquare, Sparkles } from 'lucide-react';
 
 const steps = [
   {
-    icon: Upload,
-    title: 'Choose Your Interview',
+    icon: Sparkles,
+    step: '01',
+    title: 'Create or choose a Practice',
     description:
-      'Select from 50+ interview templates covering soft skills, technical questions, and role-specific scenarios.',
-    color: 'from-blue-500 to-cyan-500',
+      'Generate a focused Practice with AI, upload source material, or start from an existing Practice.',
   },
   {
     icon: MessageSquare,
-    title: 'Practice with AI',
+    step: '02',
+    title: 'Answer naturally with Avery',
     description:
-      'Answer questions naturally while our AI evaluates your response in real-time. No judgment, just helpful feedback.',
-    color: 'from-purple-500 to-pink-500',
+      'Work through realistic spoken questions with a clear prompt, recording controls, and question-specific rubric focus.',
   },
   {
     icon: BarChart3,
-    title: 'Get Detailed Feedback',
+    step: '03',
+    title: 'Review feedback and improve',
     description:
-      'Receive comprehensive rubric-based scoring with specific suggestions on how to improve each answer.',
-    color: 'from-orange-500 to-red-500',
-  },
-  {
-    icon: Trophy,
-    title: 'Land Your Dream Job',
-    description:
-      'Track your progress over time, build confidence, and walk into your interview ready to impress.',
-    color: 'from-green-500 to-emerald-500',
+      'Get structured rubric feedback after answers and a final report showing strengths, gaps, and what to practise next.',
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-24" id="how-it-works">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            How It Works
-          </motion.h2>
-          <motion.p
-            className="text-lg text-muted-foreground max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-            From nervous candidate to confident professional in 4 simple steps
-          </motion.p>
+    <section className="border-y border-border/60 bg-muted/[0.08] px-4 py-16 sm:px-6 sm:py-20" id="how-it-works">
+      <div className="mx-auto max-w-6xl">
+        <div className="max-w-2xl">
+          <div className="text-sm font-medium text-primary">How it works</div>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+            A simple loop from practice to progress.
+          </h2>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            InterviewGrade keeps the flow focused: prepare, answer, then use clear
+            evidence-based coaching to improve the next attempt.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.title}
-              className="relative"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          {steps.map((step) => (
+            <article
+              key={step.step}
+              className="rounded-xl border border-border/80 bg-background/50 p-5 sm:p-6"
             >
-              {/* Connector line */}
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-10 left-[60%] w-full h-0.5 bg-gradient-to-r from-muted-foreground/20 to-transparent" />
-              )}
-
-              <div className="text-center">
-                <div
-                  className={`w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br ${step.color} p-0.5 mb-6`}
-                >
-                  <div className="w-full h-full bg-background rounded-2xl flex items-center justify-center">
-                    <step.icon className="h-8 w-8 text-foreground" />
-                  </div>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <step.icon className="h-5 w-5" />
                 </div>
-                <div className="text-sm font-medium text-muted-foreground mb-2">
-                  Step {index + 1}
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-muted-foreground text-sm">
-                  {step.description}
-                </p>
+                <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
+                  {step.step}
+                </span>
               </div>
-            </motion.div>
+              <h3 className="mt-6 text-lg font-semibold">{step.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {step.description}
+              </p>
+            </article>
           ))}
         </div>
       </div>

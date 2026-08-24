@@ -1,0 +1,72 @@
+.reportShell {
+  width: 100%;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .summaryGrid {
+    grid-template-columns: minmax(250px, 0.78fr) minmax(0, 2fr);
+    align-items: stretch;
+  }
+}
+
+.scoreCard {
+  position: relative;
+  overflow: hidden;
+}
+
+.scoreCard::after {
+  content: '';
+  position: absolute;
+  inset: auto -3rem -4rem auto;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary) / 0.06);
+  pointer-events: none;
+}
+
+.rubricGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .rubricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.insightGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .insightGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.responseCard {
+  overflow: hidden;
+}
+
+.scoreDetails {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--background));
+}
+
+.scoreDetails summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.scoreDetails summary::-webkit-details-marker {
+  display: none;
+}

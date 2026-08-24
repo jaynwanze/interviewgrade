@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Calculator,
   CheckCircle2,
+  ChevronDown,
   Lightbulb,
   MessageSquareText,
   Sparkles,
@@ -26,6 +27,7 @@ import {
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import { generatePracticeReportAction } from './actions';
+import styles from './report-layout.module.css';
 
 type ReportPageProps = {
   params: { sessionId: string };
@@ -152,24 +154,24 @@ export default async function PracticeReportPage({
     sessionEvaluation.modelMetadata.promptVersion === SESSION_AGGREGATION_VERSION;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto w-full max-w-6xl space-y-8">
-        <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
+    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6 sm:px-6 sm:py-9">
+      <div className={`mx-auto w-full max-w-6xl space-y-6 ${styles.reportShell}`}>
+        <header className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              InterviewGrade final report
+              Final report
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
               {practiceVersion.snapshot.title}
             </h1>
-            <p className="max-w-3xl text-muted-foreground">
-              Version {practiceVersion.version} · {report.responses.length} evaluated
-              response{report.responses.length === 1 ? '' : 's'} · latest attempt per
-              question
+            <p className="text-sm text-muted-foreground">
+              {report.responses.length} evaluated response
+              {report.responses.length === 1 ? '' : 's'} · Practice version{' '}
+              {practiceVersion.version}
             </p>
           </div>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" size="sm">
             <Link href={`/session/${report.session.id}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Session
@@ -177,9 +179,9 @@ export default async function PracticeReportPage({
           </Button>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[340px_1fr]">
-          <Card className="shadow-md">
-            <CardHeader className="text-center">
+        <section className={styles.summaryGrid}>
+          <Card className={`${styles.scoreCard} shadow-sm`}>
+            <CardHeader className="pb-3 text-center">
               <CardDescription>Overall score</CardDescription>
               <div className={`text-6xl font-bold tracking-tight ${scoreClass(score)}`}>
                 {score}
@@ -188,7 +190,7 @@ export default async function PracticeReportPage({
                 {scoreBand(score)}
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <Progress value={score} />
               <p className="text-sm leading-6 text-muted-foreground">
                 {sessionEvaluation.summary}
@@ -197,32 +199,34 @@ export default async function PracticeReportPage({
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Target className="h-5 w-5 text-primary" />
                 Rubric performance
               </CardTitle>
               <CardDescription>
-                Each criterion is averaged across the latest answered questions that
-                were mapped to it. The published rubric weight is shown beside the
-                score.
+                Your performance across the criteria this Practice was designed to assess.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
+            <CardContent className={styles.rubricGrid}>
               {sessionEvaluation.criterionScores.map((criterion) => (
-                <div key={criterion.criterionId} className="rounded-lg border p-4">
+                <div
+                  key={criterion.criterionId}
+                  className="rounded-lg border bg-muted/10 p-3.5"
+                >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-medium">{criterion.criterionName}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {rubricWeightById.get(criterion.criterionId) ?? 0}% published
-                        weight
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        {rubricWeightById.get(criterion.criterionId) ?? 0}% weight
                       </div>
                     </div>
-                    <div className="font-semibold">{Math.round(criterion.score)}/100</div>
+                    <div className={`shrink-0 font-semibold ${scoreClass(criterion.score)}`}>
+                      {Math.round(criterion.score)}
+                    </div>
                   </div>
                   <Progress value={criterion.score} className="mt-3" />
-                  <p className="mt-3 text-xs text-muted-foreground">
+                  <p className="mt-2.5 text-xs leading-5 text-muted-foreground">
                     {criterion.feedback}
                   </p>
                 </div>
@@ -230,6 +234,33 @@ export default async function PracticeReportPage({
             </CardContent>
           </Card>
         </section>
+
+        <section className={styles.insightGrid}>
+          <InsightCard
+            icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />}
+            title="What went well"
+            items={sessionEvaluation.strengths}
+          />
+          <InsightCard
+            icon={<TrendingUp className="h-5 w-5 text-amber-600" />}
+            title="Focus next"
+            items={sessionEvaluation.improvements}
+          />
+        </section>
+
+        <Card className="border-primary/20 bg-primary/5 shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Lightbulb className="h-5 w-5 text-primary" />
+              Recommended next step
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-7 sm:text-base">
+              {sessionEvaluation.recommendation}
+            </p>
+          </CardContent>
+        </Card>
 
         <ScoringExplanation
           usesCurrentAggregation={usesCurrentAggregation}
@@ -241,43 +272,22 @@ export default async function PracticeReportPage({
           evidenceWeight={evidenceWeight}
         />
 
-        <section className="grid gap-6 md:grid-cols-2">
-          <InsightCard
-            icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />}
-            title="Strengths"
-            items={sessionEvaluation.strengths}
-          />
-          <InsightCard
-            icon={<TrendingUp className="h-5 w-5 text-amber-600" />}
-            title="Areas to improve"
-            items={sessionEvaluation.improvements}
-          />
-        </section>
-
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              Recommended next step
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="leading-7">{sessionEvaluation.recommendation}</p>
-          </CardContent>
-        </Card>
-
-        <section className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Response review</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Each response below is scored only against the criteria mapped to that
-              question. The published weights are normalized across those mapped
-              criteria. Older retry attempts remain stored as history but are not
-              double-counted here.
-            </p>
+        <section className="space-y-4 pt-1">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                Response review
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Review each answer, its score, and the rubric feedback behind it.
+              </p>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Latest attempt per question
+            </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {report.responses.map(({ response, question, evaluation }, index) => {
               const mappedWeight = evaluation.criterionScores.reduce(
                 (sum, criterion) =>
@@ -286,51 +296,32 @@ export default async function PracticeReportPage({
               );
 
               return (
-                <Card key={response.id}>
-                  <CardHeader>
+                <Card key={response.id} className={styles.responseCard}>
+                  <CardHeader className="pb-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
+                      <div className="min-w-0">
                         <CardDescription>
                           Question {index + 1} · Attempt {response.attemptNumber}
                         </CardDescription>
-                        <CardTitle className="mt-1 text-xl leading-snug">
+                        <CardTitle className="mt-1 text-lg leading-snug sm:text-xl">
                           {question.prompt}
                         </CardTitle>
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          Weighted from {evaluation.criterionScores.length} mapped
-                          criterion{evaluation.criterionScores.length === 1 ? '' : 's'}
-                          {mappedWeight > 0
-                            ? ` · ${mappedWeight}% of the published rubric represented on this question`
-                            : ''}
-                        </p>
                       </div>
-                      <div className="text-right">
+                      <div className="flex items-baseline gap-1 sm:block sm:text-right">
                         <div
                           className={`text-2xl font-bold ${scoreClass(evaluation.overallScore)}`}
                         >
-                          {Math.round(evaluation.overallScore)}/100
+                          {Math.round(evaluation.overallScore)}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          question score
-                        </div>
+                        <div className="text-xs text-muted-foreground">/100</div>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-5">
-                    <div className="rounded-lg border bg-muted/20 p-4">
-                      <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                        <MessageSquareText className="h-4 w-4" />
-                        Your response
-                      </div>
-                      <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                        {response.transcript}
-                      </p>
-                    </div>
-
+                  <CardContent className="space-y-4">
                     {evaluation.summary && (
-                      <div>
-                        <div className="text-sm font-medium">Evaluation summary</div>
-                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      <div className="rounded-lg bg-muted/25 p-4">
+                        <div className="text-sm font-medium">Feedback summary</div>
+                        <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                           {evaluation.summary}
                         </p>
                       </div>
@@ -340,16 +331,17 @@ export default async function PracticeReportPage({
                       {evaluation.criterionScores.map((criterion) => (
                         <div key={criterion.criterionId} className="rounded-lg border p-3">
                           <div className="flex items-start justify-between gap-2 text-sm">
-                            <div>
+                            <div className="min-w-0">
                               <span className="font-medium">
                                 {criterion.criterionName}
                               </span>
-                              <div className="mt-1 text-xs text-muted-foreground">
-                                {rubricWeightById.get(criterion.criterionId) ?? 0}%
-                                published weight
+                              <div className="mt-0.5 text-xs text-muted-foreground">
+                                {rubricWeightById.get(criterion.criterionId) ?? 0}% weight
                               </div>
                             </div>
-                            <span>{Math.round(criterion.score)}/100</span>
+                            <span className={scoreClass(criterion.score)}>
+                              {Math.round(criterion.score)}
+                            </span>
                           </div>
                           <p className="mt-2 text-xs leading-5 text-muted-foreground">
                             {criterion.feedback}
@@ -357,6 +349,27 @@ export default async function PracticeReportPage({
                         </div>
                       ))}
                     </div>
+
+                    <details className="group rounded-lg border bg-background">
+                      <summary className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-medium">
+                        <span className="flex items-center gap-2">
+                          <MessageSquareText className="h-4 w-4 text-muted-foreground" />
+                          Your response
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+                      </summary>
+                      <div className="border-t px-4 py-3">
+                        <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                          {response.transcript}
+                        </p>
+                      </div>
+                    </details>
+
+                    <p className="text-xs text-muted-foreground">
+                      {evaluation.criterionScores.length} mapped criterion
+                      {evaluation.criterionScores.length === 1 ? '' : 's'}
+                      {mappedWeight > 0 ? ` · ${mappedWeight}% of published rubric represented` : ''}
+                    </p>
                   </CardContent>
                 </Card>
               );
@@ -389,19 +402,29 @@ function ScoringExplanation({
   evidenceWeight: number;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-5 w-5 text-primary" />
-          How your score is calculated
-        </CardTitle>
-        <CardDescription>
+    <details className={`${styles.scoreDetails} group`}>
+      <summary className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="rounded-md bg-muted p-2 text-muted-foreground">
+            <Calculator className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-sm font-medium">How scoring works</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">
+              View rubric weighting and score calculation details.
+            </div>
+          </div>
+        </div>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+      </summary>
+
+      <div className="space-y-4 border-t px-4 py-4 sm:px-5">
+        <p className="text-sm leading-6 text-muted-foreground">
           {usesCurrentAggregation
             ? 'We average the evidence for each rubric criterion, then apply the published rubric weights. Criteria with no answered evidence are excluded and the remaining weights are normalized.'
             : 'This persisted report was created with the previous session aggregation model: its overall score is the average of the question scores. The rubric cards are still criterion averages. New reports use rubric-weighted session aggregation.'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </p>
+
         {usesCurrentAggregation ? (
           <>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -420,15 +443,15 @@ function ScoringExplanation({
                   {evidenceWeight !== 100 && (
                     <div className="mt-1 text-xs text-muted-foreground">
                       Published weight {formatNumber(row.publishedWeight)}%; normalized
-                      because only {formatNumber(evidenceWeight)}% of the rubric had
-                      answered evidence.
+                      because {formatNumber(evidenceWeight)}% of the rubric had answered
+                      evidence.
                     </div>
                   )}
                 </div>
               ))}
             </div>
             <div className="rounded-lg bg-muted/30 px-4 py-3 text-sm">
-              Add the weighted contributions above ={' '}
+              Weighted contributions ={' '}
               <span className="font-semibold">
                 {formatNumber(overallScore)}/100
               </span>
@@ -444,8 +467,8 @@ function ScoringExplanation({
             step.
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </details>
   );
 }
 
@@ -460,8 +483,8 @@ function InsightCard({
 }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
           {icon}
           {title}
         </CardTitle>

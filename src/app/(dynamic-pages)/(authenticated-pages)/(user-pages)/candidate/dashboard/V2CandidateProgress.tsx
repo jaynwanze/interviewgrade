@@ -30,9 +30,9 @@ export function V2CandidateProgress({
   );
 
   return (
-    <section className="container mx-auto w-3/4 px-4 pt-4">
+    <section className="container mx-auto w-full px-4 pt-4 sm:w-11/12 lg:w-3/4">
       <Card className="border-primary/15 bg-primary/[0.02]">
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -43,7 +43,7 @@ export function V2CandidateProgress({
                 Track completed Practices, scores and coaching reports.
               </CardDescription>
             </div>
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
               <Link href="/candidate/interview-history">
                 View history
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -52,8 +52,8 @@ export function V2CandidateProgress({
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <MetricCard
               label="Completed"
               value={`${summary.completedSessions}`}
@@ -79,13 +79,13 @@ export function V2CandidateProgress({
 
           {latestCompleted && (
             <div className="flex flex-col gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
+              <div className="flex min-w-0 items-start gap-3">
                 <div className="rounded-full bg-emerald-500/10 p-2 text-emerald-600">
                   <CheckCircle2 className="h-4 w-4" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-semibold">Latest completed practice</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
+                  <div className="mt-1 break-words text-sm text-muted-foreground">
                     {latestCompleted.title}
                     {latestCompleted.overallScore != null
                       ? ` · ${Math.round(latestCompleted.overallScore)}/100`
@@ -93,7 +93,7 @@ export function V2CandidateProgress({
                   </div>
                 </div>
               </div>
-              <Button asChild size="sm">
+              <Button asChild size="sm" className="w-full sm:w-auto">
                 <Link href={`/session/${latestCompleted.id}/report`}>
                   {latestCompleted.hasReport ? 'View report' : 'Generate report'}
                 </Link>
@@ -118,13 +118,15 @@ function MetricCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border bg-background p-4">
-      <div className="flex items-center justify-between gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        <span>{label}</span>
+    <div className="min-w-0 rounded-lg border bg-background p-3 sm:p-4">
+      <div className="flex items-center justify-between gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">
+        <span className="min-w-0 break-words">{label}</span>
         {icon}
       </div>
-      <div className="mt-2 text-2xl font-semibold">{value}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
+      <div className="mt-2 break-words text-xl font-semibold sm:text-2xl">{value}</div>
+      <div className="mt-1 text-[11px] leading-4 text-muted-foreground sm:text-xs">
+        {hint}
+      </div>
     </div>
   );
 }

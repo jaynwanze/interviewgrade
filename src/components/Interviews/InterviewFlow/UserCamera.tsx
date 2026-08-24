@@ -368,6 +368,18 @@ export const UserCamera: React.FC<UserCameraProps> = ({
           }`}
         />
 
+        {controlsOverlay && isRecording && mediaStreamRef.current && audioContextRef.current && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-20 flex justify-center">
+            <div className="rounded-full border border-white/15 bg-black/50 px-3 py-2 shadow-lg backdrop-blur-sm">
+              <Meter
+                audioContext={audioContextRef.current}
+                stream={mediaStreamRef.current}
+                settings={{ bars: 18, spacing: 2, width: 3, height: 28 }}
+              />
+            </div>
+          </div>
+        )}
+
         {controlsOverlay && (
           <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
             <div className="pointer-events-auto rounded-full border border-white/15 bg-black/55 p-2 shadow-xl backdrop-blur-sm">

@@ -17,7 +17,8 @@ import { Label } from '@/components/ui/label';
 import type { Table } from '@/types';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 
-import { ProfileUpdate, TermsAcceptance } from './OnboardingFlow';
+import { ProfileUpdate } from './OnboardingFlow';
+import { V2TermsAcceptance } from './V2TermsAcceptance';
 import {
   completeV2OnboardingAction,
   type V2ExperienceLevel,
@@ -96,12 +97,7 @@ export function V2OnboardingFlow({
   }
 
   if (step === 'terms') {
-    return (
-      <TermsAcceptance
-        userType="candidate"
-        onSuccess={() => setStep('profile')}
-      />
-    );
+    return <V2TermsAcceptance onSuccess={() => setStep('profile')} />;
   }
 
   if (step === 'profile') {

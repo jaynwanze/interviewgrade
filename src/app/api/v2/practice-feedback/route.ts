@@ -18,6 +18,7 @@ import { z } from 'zod';
 
 const feedbackRequestSchema = z.object({
   sessionId: z.string().min(1).max(160),
+  currentAnswer: z.string().trim().min(1),
 });
 
 const FEEDBACK_STATUS_HEADER = 'X-InterviewGrade-Feedback-Status';
@@ -71,34 +72,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const currentQuestionOrder = context.session.currentQuestionOrder;
     const orderedQuestions = [...context.practiceVersion.snapshot.questions].sort(
       (a, b) => a.order - b.order,
     );
+
+    // The participant can advance the durable session pointer as soon as an answer
+    // is saved. Do not infer the answer being evaluated from currentQuestionOrder,
+    // because by the time this request reaches the server that pointer may already
+    // refer to the following question.
+    const savedResponse = [...context.responses]
+      .filter((response) => response.transcript.trim() === parsed.data.currentAnswer)
+      .sort(
+        (a, b) =>
+          b.submittedAt.getTime() - a.submittedAt.getTime() ||
+          b.attemptNumber - a.attemptNumber,
+      )[0];
+
+    if (!savedResponse) {
+      return NextResponse.json(
+        { error: 'Save the response before requesting feedback.' },
+        { status: 409 },
+      );
+    }
+
     const questionIndex = orderedQuestions.findIndex(
-      (question) => question.order === currentQuestionOrder,
+      (question) =>
+        question.id === savedResponse.questionId &&
+        question.order === savedResponse.questionOrder,
     );
     const currentQuestion = orderedQuestions[questionIndex];
 
     if (!currentQuestion || questionIndex < 0 || !currentQuestion.id) {
       return NextResponse.json(
-        { error: 'Current practice question is unavailable.' },
-        { status: 409 },
-      );
-    }
-
-    const savedResponses = context.responses
-      .filter(
-        (response) =>
-          response.questionId === currentQuestion.id &&
-          response.questionOrder === currentQuestionOrder,
-      )
-      .sort((a, b) => b.attemptNumber - a.attemptNumber);
-    const savedResponse = savedResponses[0];
-
-    if (!savedResponse) {
-      return NextResponse.json(
-        { error: 'Save the response before requesting feedback.' },
+        { error: 'Answered practice question is unavailable.' },
         { status: 409 },
       );
     }

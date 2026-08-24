@@ -18,6 +18,7 @@ interface UserCameraProps {
   interviewMode: string | null;
   disabled?: boolean;
   maxRecordingSeconds?: number;
+  controlsOverlay?: boolean;
 }
 
 function audioFileName(blob: Blob): string {
@@ -65,6 +66,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   interviewMode,
   disabled = false,
   maxRecordingSeconds = 120,
+  controlsOverlay = false,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -331,34 +333,59 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     }, 1000);
   };
 
+  const recordingControls = (
+    <div className="flex items-center justify-center space-x-3">
+      <Button
+        onClick={handleRecord}
+        disabled={isRecording || isTranscribing || disabled}
+        className={controlsOverlay ? 'h-11 w-11 rounded-full p-0 shadow-lg' : undefined}
+        aria-label="Record answer"
+      >
+        <MicrophoneIcon className="h-6 w-6" />
+      </Button>
+      <Button
+        onClick={() => void handleEndRecord()}
+        disabled={!isRecording || isTranscribing}
+        className={`bg-red-500 hover:bg-red-600 ${
+          controlsOverlay ? 'h-11 w-11 rounded-full p-0 shadow-lg' : ''
+        }`}
+        aria-label="Stop recording"
+      >
+        <StopCircle className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+
   return (
     <div className="flex w-full flex-col items-center space-y-4">
-      <div className="w-full">
+      <div className={`w-full ${controlsOverlay ? 'relative overflow-hidden rounded-md' : ''}`}>
         <video
           ref={videoRef}
           muted
           playsInline
-          className="h-auto w-full max-w-full rounded-md border-4 border-blue-300 object-cover shadow-sm"
+          className={`w-full max-w-full rounded-md border-4 border-blue-300 object-cover shadow-sm ${
+            controlsOverlay ? 'aspect-video h-full max-h-[min(62vh,640px)]' : 'h-auto'
+          }`}
         />
+
+        {controlsOverlay && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
+            <div className="pointer-events-auto rounded-full border border-white/15 bg-black/55 p-2 shadow-xl backdrop-blur-sm">
+              {recordingControls}
+            </div>
+          </div>
+        )}
+
+        {controlsOverlay && (isRecording || isTranscribing) && (
+          <div className="absolute left-4 top-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+            {isTranscribing ? 'Transcribing…' : `Recording ${recordingTime}s`}
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center justify-center space-x-4">
-        <Button
-          onClick={handleRecord}
-          disabled={isRecording || isTranscribing || disabled}
-        >
-          <MicrophoneIcon className="h-6 w-6" />
-        </Button>
-        <Button
-          onClick={() => void handleEndRecord()}
-          disabled={!isRecording || isTranscribing}
-          className="bg-red-500 hover:bg-red-600"
-        >
-          <StopCircle className="h-6 w-6" />
-        </Button>
-      </div>
+      {!controlsOverlay && recordingControls}
 
-      {isRecording && mediaStreamRef.current && audioContextRef.current && (
+      {isRecording && mediaStreamRef.current && audioContextRef.current && !controlsOverlay && (
         <div className="flex w-full items-center justify-center">
           <div className="rounded-xl bg-gray-100 p-2 shadow-sm dark:bg-gray-800">
             <Meter
@@ -370,13 +397,13 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         </div>
       )}
 
-      {isRecording && (
+      {isRecording && !controlsOverlay && (
         <p className="text-sm text-muted-foreground">
           Recording for {recordingTime} seconds...
         </p>
       )}
 
-      {isTranscribing && (
+      {isTranscribing && !controlsOverlay && (
         <p className="text-sm text-muted-foreground">Transcribing your answer…</p>
       )}
 

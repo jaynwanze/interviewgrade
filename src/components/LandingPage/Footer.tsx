@@ -1,74 +1,58 @@
 import logo from '@public/logos/InterviewGrade.png';
 import Image from 'next/image';
 import Link from 'next/link';
+
 import { footerItems, footerSocialItems } from './footer-items';
 
 export function Footer() {
   return (
-    <footer className="bg-secondary/50 min-h-[200px]  text-foreground border-y-2 border-border">
-      <div className="max-w-6xl mx-auto pt-28 px-8 lg:px-6 xl:px-0">
-        <div className="flex flex-col">
-          <div className="flex flex-col lg:flex-row items-center gap-y-6 pb-28 ">
-            <div className="flex flex-col w-full gap-8 lg:gap-4 ">
-              <Link href="/">
-                <div className="relative flex gap-2 items-center text-black dark:text-white ">
-                  <Image
-                    src={logo}
-                    alt="logo"
-                    className="dark:block hidden h-8 w-8"
-                  />
-                  <Image
-                    src={logo}
-                    alt="logo"
-                    className="block dark:hidden h-8 w-8"
-                  />
-                  <span className=" font-medium text-2xl text-foreground sm:inline-block">
-                    InterviewGrade
-                  </span>
-                </div>
-              </Link>
-              <p className="max-w-[350px] dark:font-light">
-                InterviewGrade. Dublin, Ireland
-              </p>
-            </div>
-            <div className="flex lg:justify-end  w-full items-start gap-10 lg:gap-20 flex-wrap">
-              {footerItems.map((item) => (
-                <div className="space-y-4 lg:space-y-6" key={item.title}>
-                  <h3 className="font-semibold uppercase text-sm">
-                    {item.title}
-                  </h3>
-                  <ul className="space-y-4 mt-5">
-                    {item.items.map((link) => (
-                      <li className="dark:font-light" key={link.name}>
-                        <Link href={link.url}>{link.name}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="w-full h-[1px] bg-slate-200 dark:bg-slate-800"></div>
-          <div className="flex flex-col gap-8 lg:flex-row justify-between items-center py-16 w-full">
-            <p className="text-slate-500  w-full dark:text-slate-400 text-sm">
-              © 2024
-              <a
-                href="https://interviewgrade.io/"
-                className="underline mx-2 decoration-slate-500 dark:decoration-slate-400 underline-offset-1 dec"
-                target="_blank"
-              >
-                InterviewGrade Limited.
-              </a>
-              All Rights Reserved
+    <footer className="border-t border-border/70 bg-secondary/30 text-foreground">
+      <div className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-sm">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src={logo} alt="InterviewGrade" className="h-8 w-8" />
+              <span className="text-lg font-semibold">InterviewGrade</span>
+            </Link>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              AI-powered interview Practice with structured feedback and reports.
+              Dublin, Ireland.
             </p>
-            <div className="flex  lg:justify-end  gap-6 w-full">
-              {footerSocialItems.map((item) => (
-                <Link key={item.name} href={item.url}>
-                  <item.icon />{' '}
-                  {/* Using External Icon since brand icons are deprecated in Lucide Icons */}
-                </Link>
-              ))}
-            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-10 sm:gap-14">
+            {footerItems.map((item) => (
+              <div key={item.title}>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {item.title}
+                </h3>
+                <ul className="mt-4 space-y-3 text-sm">
+                  {item.items.map((link) => (
+                    <li key={link.name}>
+                      <Link href={link.url} className="text-muted-foreground transition-colors hover:text-foreground">
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-col gap-5 border-t border-border/70 pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>© 2026 InterviewGrade Limited. All rights reserved.</p>
+          <div className="flex items-center gap-5">
+            {footerSocialItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.url}
+                aria-label={item.name}
+                className="transition-colors hover:text-foreground"
+              >
+                <item.icon />
+              </Link>
+            ))}
           </div>
         </div>
       </div>

@@ -25,7 +25,7 @@ const Pricing = () => {
             Start free. Upgrade when you need more practice.
           </h2>
           <p className="mt-3 text-base leading-7 text-muted-foreground">
-            Simple monthly allowances for AI-generated Practices and AI Practice runs.
+            Simple monthly allowances for AI-created Practices and AI Practice runs.
             Manual Practice creation stays unlimited.
           </p>
         </div>

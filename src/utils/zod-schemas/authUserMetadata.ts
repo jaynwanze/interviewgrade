@@ -10,6 +10,13 @@ export const authUserMetadataSchema = z
     onboardingVersion: z.number().optional(),
     onboardingV2Complete: z.boolean().optional(),
     onboardingV2FirstAction: z.enum(['practice', 'create']).optional(),
+    practiceTargetRole: z.string().max(120).optional(),
+    practiceExperienceLevel: z
+      .enum(['intern', 'graduate', 'mid', 'senior'])
+      .optional(),
+    practiceInterviewFocus: z
+      .enum(['behavioral', 'technical', 'system-design', 'mixed'])
+      .optional(),
   })
   .passthrough();
 

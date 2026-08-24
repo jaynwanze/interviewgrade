@@ -2,6 +2,16 @@
   width: 100%;
 }
 
+.printRoot {
+  width: 100%;
+}
+
+.reportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .summaryGrid {
   display: grid;
   gap: 1rem;
@@ -93,4 +103,55 @@
 
 .scoreDetails summary::-webkit-details-marker {
   display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  .printRoot {
+    min-height: auto !important;
+    padding: 0 !important;
+    background: hsl(var(--background)) !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .reportShell {
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .reportActions {
+    display: none !important;
+  }
+
+  .summaryGrid {
+    grid-template-columns: minmax(180px, 0.78fr) minmax(0, 2fr) !important;
+    align-items: stretch;
+  }
+
+  .rubricGrid,
+  .insightGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .scoreCard,
+  .rubricGrid > *,
+  .insightGrid > *,
+  .scoreDetails,
+  .responseCard {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .responseCard {
+    overflow: visible;
+  }
+
+  .responseCard > div:first-child > div {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+  }
 }

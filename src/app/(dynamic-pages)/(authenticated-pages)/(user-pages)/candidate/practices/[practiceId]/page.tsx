@@ -9,6 +9,7 @@ import {
 import type { Practice } from '@/modules/practice/practice.schema';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
+import styles from './editor-layout.module.css';
 import { PracticeEditor } from './PracticeEditor';
 
 type PracticeEditorPageProps = {
@@ -78,10 +79,9 @@ export default async function PracticeEditorPage({
       <div className="mx-auto w-full max-w-6xl">
         <Card className="border-dashed">
           <CardHeader>
-            <CardTitle className="text-xl">Practice editor setup pending</CardTitle>
+            <CardTitle className="text-xl">Practice editor unavailable</CardTitle>
             <CardDescription>
-              The v2 practice database is not available in this environment yet.
-              Your existing dashboard and mock interviews are unaffected.
+              Refresh to try loading this Practice again.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -100,7 +100,9 @@ export default async function PracticeEditorPage({
   return (
     <div className="space-y-4">
       <EditorNotice searchParams={searchParams} />
-      <PracticeEditor key={editorKey} practice={result.practice} />
+      <div className={styles.shell}>
+        <PracticeEditor key={editorKey} practice={result.practice} />
+      </div>
     </div>
   );
 }
@@ -113,22 +115,21 @@ function EditorNotice({
   if (searchParams?.published === '1') {
     return (
       <Notice tone="success">
-        Published successfully. That version is now immutable, and a fresh
-        editable draft was created for future changes.
+        Published. This version is now locked for future sessions and a fresh draft
+        is ready for your next edit.
       </Notice>
     );
   }
 
   if (searchParams?.saved === '1') {
-    return <Notice tone="success">Draft changes saved.</Notice>;
+    return <Notice tone="success">Draft saved.</Notice>;
   }
 
   if (searchParams?.generated === '1') {
     return (
       <Notice tone="success">
         AI draft created{searchParams.document === '1' ? ' from your uploaded document' : ''}.
-        Review the scenario, questions, rubric weights, question mappings, and
-        timings below. Nothing has been published yet.
+        Review the questions, rubric and timings before publishing.
       </Notice>
     );
   }
@@ -136,8 +137,8 @@ function EditorNotice({
   if (searchParams?.created === '1') {
     return (
       <Notice tone="success">
-        Practice created. Build out the questions and rubric, preview it, then
-        publish when it is ready.
+        Practice created. Add your questions and scoring rubric, then publish when
+        it is ready.
       </Notice>
     );
   }
@@ -146,29 +147,28 @@ function EditorNotice({
     case 'weights':
       return (
         <Notice tone="warning">
-          Rubric weights must total exactly 100% before publishing. You can still
-          save the draft while you are adjusting them.
+          Rubric weights must total 100% before publishing. You can still save the
+          draft while adjusting them.
         </Notice>
       );
     case 'mappings':
       return (
         <Notice tone="warning">
-          Every question needs at least one scoring criterion, and every rubric
-          criterion must be used by at least one question before publishing.
+          Every question needs a scoring criterion and every criterion must be used
+          before publishing.
         </Notice>
       );
     case 'invalid':
       return (
         <Notice tone="error">
-          Some draft fields are incomplete or outside their allowed ranges. Check
-          the questions, timing, rubric, and practice details, then try again.
+          Some fields are incomplete or outside their allowed ranges. Review the
+          highlighted Practice details and try again.
         </Notice>
       );
     case 'unavailable':
       return (
         <Notice tone="warning">
-          The practice could not be saved in this environment. Existing mock
-          interview features are unaffected.
+          This Practice could not be saved. Your current draft remains on screen.
         </Notice>
       );
     default:

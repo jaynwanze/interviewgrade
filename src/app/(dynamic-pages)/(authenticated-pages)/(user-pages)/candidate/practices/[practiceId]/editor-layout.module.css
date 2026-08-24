@@ -1,0 +1,68 @@
+.shell {
+  width: 100%;
+}
+
+/* Keep the existing mobile flow intact. On desktop, give the question authoring
+   surface visual priority while Practice setup becomes a compact supporting rail. */
+@media (min-width: 1024px) {
+  .shell :global(form) {
+    display: grid;
+    grid-template-columns: minmax(290px, 0.72fr) minmax(0, 1.45fr);
+    align-items: start;
+    gap: 1.25rem;
+  }
+
+  .shell :global(form > input[type='hidden']) {
+    display: none;
+  }
+
+  .shell :global(form > div:nth-of-type(1)) {
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .shell :global(form > div:nth-of-type(2)) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .shell :global(form > div:nth-of-type(3)) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .shell :global(form > div:nth-of-type(4)) {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  /* The setup rail should be quick to scan rather than another full-width form. */
+  .shell :global(form > div:nth-of-type(1) textarea) {
+    min-height: 5rem;
+  }
+
+  .shell :global(form > div:nth-of-type(1) textarea.min-h-32) {
+    min-height: 7rem;
+  }
+
+  /* Questions are the primary authoring task. Give them slightly more breathing
+     room without increasing the overall page width. */
+  .shell :global(form > div:nth-of-type(2)) {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+  }
+
+  /* Save / Publish remains sticky but reads like an action bar, not another card. */
+  .shell :global(form > div:nth-of-type(4)) {
+    bottom: 1rem;
+    border-color: hsl(var(--border));
+  }
+}
+
+@media (min-width: 1280px) {
+  .shell :global(form) {
+    grid-template-columns: minmax(310px, 0.68fr) minmax(0, 1.52fr);
+    gap: 1.5rem;
+  }
+}

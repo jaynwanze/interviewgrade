@@ -95,23 +95,65 @@ export default async function PracticeReportPage({
 
   if (result.state === 'pending') {
     const retryAction = generatePracticeReportAction.bind(null, params.sessionId);
+    const retrying = searchParams?.error === 'evaluation';
+
     return (
-      <main className="flex min-h-screen items-center justify-center px-4">
-        <Card className="w-full max-w-lg text-center">
-          <CardHeader>
-            <CardTitle>Generate final report</CardTitle>
-            <CardDescription>
-              {searchParams?.error === 'evaluation'
-                ? 'The previous evaluation attempt did not complete. Your responses are saved safely and can be evaluated again.'
-                : 'Your responses are saved. Generate the structured rubric evaluation when you are ready.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action={retryAction}>
-              <Button type="submit">Generate report</Button>
-            </form>
-          </CardContent>
-        </Card>
+      <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-10 sm:px-6 sm:py-16">
+        <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
+          <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border bg-primary/10 text-primary">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="mb-8 max-w-xl text-center">
+            <div className="text-sm font-medium text-primary">Final report</div>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+              {retrying ? 'Your report is ready to retry' : 'Turn your answers into a coaching report'}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
+              {retrying
+                ? 'The previous evaluation attempt did not complete. Your responses are saved safely, so you can run the rubric evaluation again.'
+                : 'Your responses are saved. InterviewGrade will evaluate them against the published rubric and build your final coaching report.'}
+            </p>
+          </div>
+
+          <Card className="w-full overflow-hidden border-primary/15 shadow-sm">
+            <CardContent className="p-0">
+              <div className="grid gap-px bg-border sm:grid-cols-3">
+                <ReportStep
+                  number="1"
+                  title="Responses saved"
+                  description="Your submitted answers are safely stored."
+                  complete
+                />
+                <ReportStep
+                  number="2"
+                  title="Rubric evaluation"
+                  description="Score each answer against the Practice criteria."
+                />
+                <ReportStep
+                  number="3"
+                  title="Coaching report"
+                  description="See strengths, improvements and next steps."
+                />
+              </div>
+              <div className="flex flex-col gap-3 bg-background p-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Generation may take a few moments. You only need to start it once.
+                </p>
+                <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/candidate/interview-history">Back to history</Link>
+                  </Button>
+                  <form action={retryAction}>
+                    <Button type="submit" size="sm" className="w-full sm:w-auto">
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      {retrying ? 'Retry report' : 'Generate report'}
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     );
   }
@@ -298,16 +340,16 @@ export default async function PracticeReportPage({
               return (
                 <Card key={response.id} className={styles.responseCard}>
                   <CardHeader className="pb-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                       <div className="min-w-0">
                         <CardDescription>
                           Question {index + 1} · Attempt {response.attemptNumber}
                         </CardDescription>
-                        <CardTitle className="mt-1 text-lg leading-snug sm:text-xl">
+                        <CardTitle className="mt-1 break-words text-lg leading-snug sm:text-xl">
                           {question.prompt}
                         </CardTitle>
                       </div>
-                      <div className="flex items-baseline gap-1 sm:block sm:text-right">
+                      <div className="flex min-w-[4.5rem] shrink-0 items-baseline gap-1 sm:block sm:text-right">
                         <div
                           className={`text-2xl font-bold ${scoreClass(evaluation.overallScore)}`}
                         >
@@ -500,6 +542,34 @@ function InsightCard({
         </ul>
       </CardContent>
     </Card>
+  );
+}
+
+function ReportStep({
+  number,
+  title,
+  description,
+  complete = false,
+}: {
+  number: string;
+  title: string;
+  description: string;
+  complete?: boolean;
+}) {
+  return (
+    <div className="bg-background p-4 sm:p-5">
+      <div
+        className={`mb-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+          complete
+            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+            : 'bg-muted text-muted-foreground'
+        }`}
+      >
+        {complete ? <CheckCircle2 className="h-4 w-4" /> : number}
+      </div>
+      <div className="text-sm font-medium">{title}</div>
+      <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+    </div>
   );
 }
 

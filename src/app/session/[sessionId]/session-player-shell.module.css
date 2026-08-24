@@ -2,8 +2,8 @@
   width: 100%;
 }
 
-/* Keep the proven mobile stack untouched. On desktop, reshape the existing
-   three-card player into a focused main column plus a compact feedback rail. */
+/* Keep mobile and tablet stacking predictable. At standard desktop widths the
+   interview stays question-first with a compact feedback rail. */
 @media (min-width: 1024px) {
   .shell :global(.lg\:grid-cols-3) {
     grid-template-columns: minmax(0, 1.9fr) minmax(280px, 0.62fr) !important;
@@ -31,8 +31,6 @@
     top: 1.5rem;
   }
 
-  /* Avery/question card: turn the former full-height column into a compact,
-     question-first surface while keeping Listen/TTS and speaking rings. */
   .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :first-child {
     padding: 0.9rem 1.1rem;
   }
@@ -77,8 +75,6 @@
     margin: 0;
   }
 
-  /* Recording area should feel like the primary workspace, not another
-     competing dashboard column. */
   .shell :global(.lg\:grid-cols-3) > :nth-child(2) > :first-child {
     padding: 0.9rem 1.1rem;
   }
@@ -87,7 +83,6 @@
     padding: 1rem 1.15rem 1.2rem;
   }
 
-  /* Compact feedback rail: preserve all states/actions but reduce visual mass. */
   .shell :global(.lg\:grid-cols-3) > :nth-child(3) > :first-child {
     padding: 0.9rem 1rem;
   }
@@ -102,16 +97,70 @@
   }
 }
 
+/* On wide desktop, stop stacking the interviewer above the camera. Give each
+   primary surface its own column and keep feedback as the compact rail. */
 @media (min-width: 1280px) {
   .shell :global(.lg\:grid-cols-3) {
-    grid-template-columns: minmax(0, 2.2fr) minmax(290px, 0.6fr) !important;
-    gap: 1.25rem;
+    grid-template-columns:
+      minmax(300px, 0.9fr)
+      minmax(460px, 1.45fr)
+      minmax(280px, 0.72fr) !important;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+    height: 100%;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+    height: 100%;
+    top: 1rem;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.15rem 1.2rem;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child {
+    width: 100%;
+    max-width: 110px;
+    margin: 0 auto;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child > * {
+    height: 92px !important;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(2) {
+    text-align: center;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(3) {
+    width: 100%;
   }
 }
 
 @media (min-width: 1536px) {
   .shell :global(.lg\:grid-cols-3) {
-    grid-template-columns: minmax(0, 2.45fr) minmax(300px, 0.58fr) !important;
-    gap: 1.5rem;
+    grid-template-columns:
+      minmax(330px, 0.95fr)
+      minmax(560px, 1.6fr)
+      minmax(300px, 0.72fr) !important;
+    gap: 1.25rem;
   }
 }

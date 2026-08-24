@@ -5,18 +5,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import { AutoGenerateReport } from '../AutoGenerateReport';
-import { generatePracticeReportAction } from '../actions';
 
 type GeneratingReportPageProps = {
   params: { sessionId: string };
 };
 
-export default function GeneratingReportPage({
+export default async function GeneratingReportPage({
   params,
 }: GeneratingReportPageProps) {
-  const generateAction = generatePracticeReportAction.bind(null, params.sessionId);
+  const loggedInUser = await serverGetOptionalLoggedInUser();
+  const homeHref = loggedInUser ? '/candidate/dashboard' : '/';
+  const homeLabel = loggedInUser ? 'Go to dashboard' : 'Go home';
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
@@ -28,7 +30,11 @@ export default function GeneratingReportPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AutoGenerateReport generateAction={generateAction} />
+          <AutoGenerateReport
+            sessionId={params.sessionId}
+            homeHref={homeHref}
+            homeLabel={homeLabel}
+          />
         </CardContent>
       </Card>
     </main>

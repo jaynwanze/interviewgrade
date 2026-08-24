@@ -40,8 +40,7 @@ export function V2CandidateProgress({
                 Practice Progress
               </CardTitle>
               <CardDescription className="mt-1.5">
-                Results from your new versioned Practice sessions and structured
-                reports.
+                Track completed Practices, scores and coaching reports.
               </CardDescription>
             </div>
             <Button asChild variant="outline" size="sm">
@@ -68,7 +67,7 @@ export function V2CandidateProgress({
             <MetricCard
               label="Best score"
               value={formatScore(summary.bestScore)}
-              hint="Across v2 reports"
+              hint="Across completed reports"
               icon={<Trophy className="h-4 w-4" />}
             />
             <MetricCard

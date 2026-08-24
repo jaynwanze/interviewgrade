@@ -20,7 +20,7 @@ import {
   ManageSubscriptionButton,
 } from './ActionButtons';
 
-const SHARED_V2_FEATURES = [
+const SHARED_FEATURES = [
   'Create, publish, and share reusable Practices',
   'Full per-answer feedback and final reports',
   'Creator Results for shared Practices',
@@ -70,7 +70,7 @@ async function UpgradeToProCard() {
       <div>
         <h2 className="text-xl font-semibold">Upgrade to Pro</h2>
         <p className="text-sm text-muted-foreground">
-          Same InterviewGrade experience, with much larger monthly AI allowances.
+          Same InterviewGrade experience, with more monthly Practice capacity.
         </p>
       </div>
 
@@ -88,7 +88,7 @@ async function UpgradeToProCard() {
                       {product.title || 'Pro'}
                     </CardTitle>
                     <CardDescription className="mt-1">
-                      30 Practice runs and 30 AI Practice generations each month.
+                      30 Practice runs and 30 AI-created Practices each month.
                     </CardDescription>
                   </div>
                   <div className="text-right">
@@ -125,9 +125,9 @@ function PlanFeatures({
 }) {
   const features = [
     `${runLimit} AI-evaluated Practice runs per month`,
-    `${generationLimit} AI Practice generations per month`,
+    `${generationLimit} AI-created Practices per month`,
     'Unlimited manual Practice creation',
-    ...SHARED_V2_FEATURES,
+    ...SHARED_FEATURES,
   ];
 
   return (
@@ -237,8 +237,8 @@ export async function CandidateSubscriptionDetails({
       <div className="space-y-1">
         <T.H3>Plan & usage</T.H3>
         <T.Subtle>
-          Track the two monthly AI allowances used by V2. Manual Practice creation
-          stays unlimited.
+          Track your monthly Practice allowances. Manual Practice creation stays
+          unlimited.
         </T.Subtle>
       </div>
 
@@ -260,7 +260,7 @@ export async function CandidateSubscriptionDetails({
               </CardTitle>
               <CardDescription className="mt-1">
                 {practiceRunUsage.limit} Practice runs and{' '}
-                {practiceGenerationUsage.limit} AI Practice generations per calendar
+                {practiceGenerationUsage.limit} AI-created Practices per calendar
                 month.
               </CardDescription>
             </div>
@@ -277,16 +277,16 @@ export async function CandidateSubscriptionDetails({
               remaining={practiceRunUsage.remaining}
               resetsAt={practiceRunUsage.resetsAt}
               icon={<Gauge className="h-4 w-4" />}
-              description="A Practice run is consumed when the first valid answer is submitted. Opening a shared link, starting an empty session, or viewing results does not use a run."
+              description="A Practice run is used when the first valid answer is submitted. Opening a shared link, starting an empty session, or viewing results does not use a run."
             />
             <UsageMeter
-              label="AI Practice generations this month"
+              label="AI-created Practices this month"
               used={practiceGenerationUsage.used}
               limit={practiceGenerationUsage.limit}
               remaining={practiceGenerationUsage.remaining}
               resetsAt={practiceGenerationUsage.resetsAt}
               icon={<Sparkles className="h-4 w-4" />}
-              description="Generating from an AI brief or an extracted PDF/TXT source uses one generation when the model request begins. Invalid inputs and manual Practice creation do not use this allowance."
+              description="Creating a draft from an AI brief or PDF/TXT source uses one allowance when creation begins. Invalid inputs and manual Practice creation do not use it."
             />
           </div>
 
@@ -314,8 +314,8 @@ export async function CandidateSubscriptionDetails({
           </p>
           <p>
             The rest of that session, including feedback and the final report, is
-            included in the same run. AI generation is a separate creator-only
-            allowance used when you ask InterviewGrade to create a Practice draft.
+            included in the same run. AI-created Practice capacity is a separate
+            creator-only allowance used when InterviewGrade creates a draft for you.
           </p>
         </CardContent>
       </Card>

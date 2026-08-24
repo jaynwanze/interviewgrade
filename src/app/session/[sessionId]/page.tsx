@@ -171,8 +171,8 @@ export default async function PracticeSessionPage({
                 <CardHeader>
                   <CardTitle>Begin when you’re ready</CardTitle>
                   <CardDescription>
-                    Starting changes the session to in progress. The player will
-                    use your camera and microphone to capture each response.
+                    Starting begins your Practice. Your camera and microphone are used
+                    only to capture each response during the session.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -267,7 +267,7 @@ function SessionUnavailable() {
   return (
     <SessionStateCard
       title="Session temporarily unavailable"
-      description="The new session service is not available in this environment right now."
+      description="Practice sessions are temporarily unavailable. Refresh and try again."
     />
   );
 }

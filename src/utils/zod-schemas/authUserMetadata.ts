@@ -7,6 +7,9 @@ export const authUserMetadataSchema = z
     onboardingHasCompletedCandidateDetails: z.boolean().default(false),
     onboardingHasCreatedOrganization: z.boolean().default(false),
     onboardingHasSetEmployerPrefs: z.boolean().default(false),
+    onboardingVersion: z.number().optional(),
+    onboardingV2Complete: z.boolean().optional(),
+    onboardingV2FirstAction: z.enum(['practice', 'create']).optional(),
   })
   .passthrough();
 

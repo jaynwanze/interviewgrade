@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { CheckCircle2, Euro } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,49 +10,32 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { pricing } from '@/data/anon/pricing';
 import { cn } from '@/lib/utils';
-import { CheckCircle2Icon, EuroIcon } from 'lucide-react';
-import TitleBlock from '../title-block';
 
 const Pricing = () => {
   return (
-    <section className="py-16 max-w-6xl flex flex-col justify-center items-center  mx-auto space-y-10 overflow-hidden px-6">
-      <TitleBlock
-        icon={<EuroIcon size={16} />}
-        title="Quality without any compromise"
-        section="Pricing"
-        subtitle="Simple, transparent pricing for every hiring team. Unlock powerful interview insights and candidate evaluation with InterviewGrade."
-      />
+    <section className="border-y border-border/60 bg-muted/[0.08] px-4 py-16 sm:px-6 sm:py-20" id="pricing">
+      <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-border/80 bg-muted/30 px-3 py-1 text-sm font-medium text-muted-foreground">
+            <Euro className="h-4 w-4 text-primary" /> Pricing
+          </div>
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Start free. Upgrade when you need more practice.
+          </h2>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            Simple monthly allowances for AI-generated Practices and AI Practice runs.
+            Manual Practice creation stays unlimited.
+          </p>
+        </div>
 
-      <Tabs
-        defaultValue="monthly"
-        className="flex justify-center w-full  items-center flex-col"
-      >
-        <TabsList className="mb-6 max-w-80 w-full">
-          <TabsTrigger className="w-full" value="monthly">
-            Monthly
-          </TabsTrigger>
-          <TabsTrigger className="w-full" value="annual">
-            Annual
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="monthly" className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full ">
-            {pricing.map((item, i) => (
-              <PricingCard key={i} {...item} />
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="annual" className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full ">
-            {pricing.map((item, i) => (
-              <PricingCard key={i} {...item} price={item.annualPrice} />
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+          {pricing.map((item) => (
+            <PricingCard key={item.title} {...item} />
+          ))}
+        </div>
+      </div>
     </section>
   );
 };
@@ -69,34 +55,41 @@ const PricingCard = ({
 }) => {
   return (
     <Card
-      className={cn(`${isHighlighted ? 'bg-secondary' : ''} ,
-     h-fit
-    `)}
+      className={cn(
+        'relative flex h-full flex-col border-border/80 bg-card/60',
+        isHighlighted && 'border-primary/40 bg-primary/[0.04]',
+      )}
     >
-      <CardHeader className="space-y-1 p-4">
-        <div className="flex items-start justify-between">
+      <CardHeader className="space-y-4 p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-xl font-bold">{title}</CardTitle>
-            <CardDescription className="text-base">
-              {description}
-            </CardDescription>
+            <CardTitle className="text-xl font-semibold">{title}</CardTitle>
+            <CardDescription className="mt-1 leading-6">{description}</CardDescription>
           </div>
-          {isHighlighted && <Badge className="text-center">Most Popular</Badge>}
+          {isHighlighted && <Badge>Most popular</Badge>}
         </div>
-        <h3 className="text-4xl font-bold py-3 tracking-tighter">€{price}</h3>
-        <Button>Get Started</Button>
+
+        <div className="flex items-end gap-1">
+          <span className="text-4xl font-semibold tracking-tight">€{price}</span>
+          <span className="pb-1 text-sm text-muted-foreground">/ month</span>
+        </div>
+
+        <Button asChild variant={isHighlighted ? 'default' : 'outline'} className="w-full">
+          <Link href="/c/sign-up">Start free</Link>
+        </Button>
       </CardHeader>
 
-      <CardContent className="p-4">
-        <div className="h-[1px] bg-slate-200 dark:bg-slate-500 w-full "></div>
-        <ul className="space-y-3 pt-10">
-          {features.map((feature, i) => (
-            <li key={i} className="flex items-center">
-              <CheckCircle2Icon size={16} />
-              <span className="ml-2 text-sm font-medium">{feature}</span>
-            </li>
-          ))}
-        </ul>
+      <CardContent className="mt-auto p-5 pt-0 sm:p-6 sm:pt-0">
+        <div className="border-t border-border/70 pt-5">
+          <ul className="space-y-3">
+            {features.map((feature) => (
+              <li key={feature} className="flex items-start gap-2.5 text-sm">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span className="leading-6 text-muted-foreground">{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, BriefcaseBusiness, PlayCircle, Sparkles } from 'lucide-react';
+import { ArrowRight, Briefcase, PlayCircle, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 
@@ -218,7 +218,7 @@ export function V2OnboardingFlow({
               onClick={() => finish('create')}
             >
               <span className="flex items-center gap-3">
-                <BriefcaseBusiness className="h-5 w-5" />
+                <Briefcase className="h-5 w-5" />
                 <span>
                   <span className="block font-semibold">Create a Practice</span>
                   <span className="block text-xs font-normal text-muted-foreground">

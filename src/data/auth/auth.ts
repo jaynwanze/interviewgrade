@@ -3,6 +3,18 @@ import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/cr
 import type { AuthProvider, SAPayload } from '@/types';
 import { UserType } from '@/types/userTypes';
 import { toSiteURL } from '@/utils/helpers';
+
+function authMetadataForUserType(userType: UserType) {
+  if (userType === 'candidate') {
+    return {
+      onboardingVersion: 2,
+      onboardingV2Complete: false,
+    };
+  }
+
+  return { userType };
+}
+
 export const signUp = async (
   email: string,
   password: string,
@@ -15,7 +27,7 @@ export const signUp = async (
     password,
     options: {
       emailRedirectTo: toSiteURL('/auth/callback'),
-      data: { userType },
+      data: authMetadataForUserType(userType),
     },
   });
   if (error) {
@@ -68,7 +80,7 @@ export const signInWithMagicLink = async (
     email,
     options: {
       emailRedirectTo: redirectUrl.toString(),
-      data: { userType },
+      data: authMetadataForUserType(userType),
     },
   });
 
@@ -86,8 +98,8 @@ export const signInWithMagicLink = async (
 
 export const signInWithProvider = async (
   provider: AuthProvider,
-  // Accept userType as a parameter
   next?: string,
+  v2Onboarding = false,
 ): Promise<
   SAPayload<{
     url: string;
@@ -97,6 +109,9 @@ export const signInWithProvider = async (
   const redirectToURL = new URL(toSiteURL('/auth/callback'));
   if (next) {
     redirectToURL.searchParams.set('next', next);
+  }
+  if (v2Onboarding) {
+    redirectToURL.searchParams.set('v2Onboarding', '1');
   }
   const { error, data } = await supabase.auth.signInWithOAuth({
     provider,

@@ -2,93 +2,100 @@
   width: 100%;
 }
 
-/* Keep mobile and tablet stacking predictable. At standard desktop widths the
-   interview stays question-first with a compact feedback rail. */
+/* Mobile and tablet keep the natural stacked order from the player component.
+   Desktop becomes question-first: the prompt spans the full workspace, then the
+   camera is the primary surface with feedback as a compact secondary panel. */
 @media (min-width: 1024px) {
   .shell :global(.lg\:grid-cols-3) {
-    grid-template-columns: minmax(0, 1.9fr) minmax(280px, 0.62fr) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px) !important;
     align-items: start;
     gap: 1rem;
   }
 
+  /* Question / Avery spans the full workspace so long prompts never get squeezed
+     into a narrow interview column. */
   .shell :global(.lg\:grid-cols-3) > :nth-child(1) {
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: 1;
     min-height: 0 !important;
   }
 
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :first-child {
+    padding: 0.75rem 1rem;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 190px;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.15rem 1.1rem;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child {
+    width: 72px;
+    max-width: 72px;
+    margin: 0;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child > * {
+    height: 64px !important;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(2) {
+    min-width: 0;
+    margin: 0;
+    text-align: left;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(2) p:first-of-type {
+    font-size: clamp(1.3rem, 1.8vw, 1.65rem);
+    line-height: 1.28;
+    letter-spacing: -0.02em;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(3) {
+    width: 190px;
+    margin: 0;
+  }
+
+  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(3) > * {
+    padding: 0.6rem 0.7rem;
+  }
+
+  /* Camera is the main interaction surface. Do not force it to match an empty
+     feedback card's height. */
   .shell :global(.lg\:grid-cols-3) > :nth-child(2) {
     grid-column: 1;
     grid-row: 2;
     min-height: 0 !important;
   }
 
-  .shell :global(.lg\:grid-cols-3) > :nth-child(3) {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    min-height: 0 !important;
-    position: sticky;
-    top: 1.5rem;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :first-child {
-    padding: 0.9rem 1.1rem;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) {
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    align-items: center;
-    column-gap: 1.25rem;
-    row-gap: 0.9rem;
-    padding: 1.15rem 1.25rem 1.25rem;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    max-width: 92px;
-    margin: 0;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child > * {
-    height: 78px !important;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(2) {
-    grid-column: 2;
-    grid-row: 1;
-    text-align: left;
-    margin: 0;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(2) p:first-of-type {
-    font-size: clamp(1.35rem, 2vw, 1.75rem);
-    line-height: 1.28;
-    letter-spacing: -0.02em;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(3) {
-    grid-column: 2;
-    grid-row: 2;
-    margin: 0;
-  }
-
   .shell :global(.lg\:grid-cols-3) > :nth-child(2) > :first-child {
-    padding: 0.9rem 1.1rem;
+    padding: 0.8rem 1rem;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(2) > :nth-child(2) {
-    padding: 1rem 1.15rem 1.2rem;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  /* Feedback stays useful but secondary. Before an answer it should be a small
+     status card, not a tall empty rail. */
+  .shell :global(.lg\:grid-cols-3) > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 0 !important;
+    position: sticky;
+    top: 1.25rem;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(3) > :first-child {
-    padding: 0.9rem 1rem;
+    padding: 0.8rem 0.9rem;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(3) > :nth-child(2) {
-    padding: 1rem;
+    min-height: 150px;
+    padding: 0.9rem;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(3) :global(.text-4xl) {
@@ -97,70 +104,34 @@
   }
 }
 
-/* On wide desktop, stop stacking the interviewer above the camera. Give each
-   primary surface its own column and keep feedback as the compact rail. */
 @media (min-width: 1280px) {
   .shell :global(.lg\:grid-cols-3) {
-    grid-template-columns:
-      minmax(300px, 0.9fr)
-      minmax(460px, 1.45fr)
-      minmax(280px, 0.72fr) !important;
-    align-items: stretch;
-    gap: 1rem;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
-    height: 100%;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(2) {
-    grid-column: 2;
-    grid-row: 1;
-    height: 100%;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(3) {
-    grid-column: 3;
-    grid-row: 1;
-    height: 100%;
-    top: 1rem;
+    grid-template-columns: minmax(0, 1fr) 330px !important;
+    gap: 1.25rem;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 1rem;
-    padding: 1.15rem 1.2rem;
+    grid-template-columns: 80px minmax(0, 1fr) 210px;
+    gap: 1.25rem;
+    padding: 1.05rem 1.25rem 1.15rem;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child {
-    width: 100%;
-    max-width: 110px;
-    margin: 0 auto;
+    width: 80px;
+    max-width: 80px;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :first-child > * {
-    height: 92px !important;
-  }
-
-  .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(2) {
-    text-align: center;
+    height: 70px !important;
   }
 
   .shell :global(.lg\:grid-cols-3) > :nth-child(1) > :nth-child(2) > :nth-child(3) {
-    width: 100%;
+    width: 210px;
   }
 }
 
 @media (min-width: 1536px) {
   .shell :global(.lg\:grid-cols-3) {
-    grid-template-columns:
-      minmax(330px, 0.95fr)
-      minmax(560px, 1.6fr)
-      minmax(300px, 0.72fr) !important;
-    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr) 340px !important;
   }
 }

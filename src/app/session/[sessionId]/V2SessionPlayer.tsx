@@ -70,6 +70,7 @@ export function V2SessionPlayer({
   const [feedbackText, setFeedbackText] = useState('');
   const [feedback, setFeedback] = useState<Feedback>({});
   const [busy, setBusy] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preparedNextOrder, setPreparedNextOrder] = useState<number | null>(null);
   const [complete, setComplete] = useState(false);
@@ -80,6 +81,7 @@ export function V2SessionPlayer({
   const audioUrlRef = useRef<string | null>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const lastAutoSpokenQuestionRef = useRef<string | null>(null);
+  const feedbackRequestRef = useRef(0);
 
   const orderedQuestions = useMemo(
     () => [...questions].sort((a, b) => a.order - b.order),
@@ -208,6 +210,7 @@ export function V2SessionPlayer({
   useEffect(
     () => () => {
       stopCurrentSpeech();
+      feedbackRequestRef.current += 1;
     },
     [stopCurrentSpeech],
   );
@@ -225,20 +228,23 @@ export function V2SessionPlayer({
       return;
     }
 
+    const answeredQuestion = currentQuestion;
+    const answeredQuestionId = currentQuestion.id;
+    const followingQuestion = nextQuestion;
+    const feedbackRequestId = feedbackRequestRef.current + 1;
+    feedbackRequestRef.current = feedbackRequestId;
+
     setBusy(true);
+    setFeedbackLoading(false);
     setError(null);
     setFeedbackText('');
     setFeedback({});
     setPreparedNextOrder(null);
 
     try {
-      // Preserve the proven Practice ordering:
-      // 1. persist response
-      // 2. fetch immediate feedback
-      // 3. persist next-question progress
       const saveResult = await savePracticeSessionResponseAction(sessionId, {
-        questionId: currentQuestion.id,
-        questionOrder: currentQuestion.order,
+        questionId: answeredQuestionId,
+        questionOrder: answeredQuestion.order,
         transcript,
       });
 
@@ -249,19 +255,33 @@ export function V2SessionPlayer({
 
       setResponseCount((count) => count + 1);
 
-      try {
-        await streamFeedback(transcript, currentQuestion, nextQuestion);
-      } catch (feedbackError) {
-        console.error('V2SessionPlayer: feedback failed', feedbackError);
-        setError(
-          'Your answer was saved, but immediate feedback is temporarily unavailable.',
-        );
+      if (followingQuestion) {
+        await advancePracticeSessionAction(sessionId, followingQuestion.order);
+        setPreparedNextOrder(followingQuestion.order);
       }
 
-      if (nextQuestion) {
-        await advancePracticeSessionAction(sessionId, nextQuestion.order);
-        setPreparedNextOrder(nextQuestion.order);
-      }
+      setBusy(false);
+      setFeedbackLoading(true);
+
+      void streamFeedback(
+        transcript,
+        answeredQuestion,
+        followingQuestion,
+        feedbackRequestId,
+      )
+        .catch((feedbackError) => {
+          console.error('V2SessionPlayer: feedback failed', feedbackError);
+          if (feedbackRequestRef.current === feedbackRequestId) {
+            setError(
+              'Your answer was saved, but immediate feedback is temporarily unavailable.',
+            );
+          }
+        })
+        .finally(() => {
+          if (feedbackRequestRef.current === feedbackRequestId) {
+            setFeedbackLoading(false);
+          }
+        });
     } catch (cause) {
       console.error('V2SessionPlayer: response flow failed', cause);
       setError('Your response could not be saved. Please try again.');
@@ -274,6 +294,7 @@ export function V2SessionPlayer({
     transcript: string,
     question: PracticeQuestion,
     followingQuestion: PracticeQuestion | null,
+    requestId: number,
   ) {
     const mappedRubric = rubricForQuestion(question, rubricCriteria);
     const response = await fetch('/api/v2/practice-feedback', {
@@ -335,8 +356,10 @@ export function V2SessionPlayer({
         try {
           const delta = JSON.parse(data) as string;
           accumulated += delta;
-          setFeedbackText(accumulated);
-          setFeedback(parseFeedback(accumulated));
+          if (feedbackRequestRef.current === requestId) {
+            setFeedbackText(accumulated);
+            setFeedback(parseFeedback(accumulated));
+          }
         } catch (cause) {
           console.error('V2SessionPlayer: feedback SSE parse failed', cause);
         }
@@ -348,12 +371,17 @@ export function V2SessionPlayer({
       if (data && data !== '[DONE]') {
         const delta = JSON.parse(data) as string;
         accumulated += delta;
-        setFeedbackText(accumulated);
-        setFeedback(parseFeedback(accumulated));
+        if (feedbackRequestRef.current === requestId) {
+          setFeedbackText(accumulated);
+          setFeedback(parseFeedback(accumulated));
+        }
       }
     }
 
-    if (feedbackStatus === 'fallback') {
+    if (
+      feedbackStatus === 'fallback' &&
+      feedbackRequestRef.current === requestId
+    ) {
       setError(
         'Your answer was saved, but the live AI feedback service is currently unavailable.',
       );
@@ -363,21 +391,24 @@ export function V2SessionPlayer({
   function showNextQuestion() {
     if (preparedNextOrder == null) return;
     stopCurrentSpeech();
+    feedbackRequestRef.current += 1;
     setCurrentQuestionOrder(preparedNextOrder);
     setPreparedNextOrder(null);
     setFeedbackText('');
     setFeedback({});
+    setFeedbackLoading(false);
     setGuidanceExpanded(false);
     setError(null);
   }
 
   async function finishSession() {
-    if (busy || complete) return;
+    if (busy || feedbackLoading || complete) return;
 
     try {
       setBusy(true);
       setError(null);
       stopCurrentSpeech();
+      feedbackRequestRef.current += 1;
       await completePracticeSessionAction(sessionId);
       setCameraOn(false);
       setComplete(true);
@@ -399,7 +430,7 @@ export function V2SessionPlayer({
           <CardTitle className="text-2xl">Practice complete</CardTitle>
           <CardDescription>
             Your {responseCount} saved response{responseCount === 1 ? '' : 's'} are
-            now attached to this immutable practice version.
+            now attached to this practice version.
           </CardDescription>
         </CardHeader>
         {feedback.summary && (
@@ -420,7 +451,7 @@ export function V2SessionPlayer({
         <CardHeader>
           <CardTitle>Question unavailable</CardTitle>
           <CardDescription>
-            This immutable practice version does not contain a current question.
+            This practice version does not contain a current question.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -430,42 +461,72 @@ export function V2SessionPlayer({
   const hasFeedback = Boolean(
     feedbackText || feedback.score != null || feedback.summary || feedback.advice,
   );
+  const canMoveNext = preparedNextOrder != null;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <div className="flex flex-col gap-3 rounded-lg border bg-background/80 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-        <div>
+    <div className="flex min-h-0 flex-col gap-3 lg:h-[calc(100vh-245px)] lg:min-h-[560px] lg:max-h-[760px]">
+      <div className="flex shrink-0 items-center gap-4 rounded-lg border bg-background/80 px-3 py-2.5 sm:px-4">
+        <div className="min-w-[104px]">
           <div className="text-sm font-medium text-primary">
             Question {safeIndex + 1} of {orderedQuestions.length}
           </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            {responseCount} response{responseCount === 1 ? '' : 's'} saved
+          <div className="text-xs text-muted-foreground">
+            {responseCount} saved
           </div>
         </div>
-        <div className="w-full sm:max-w-xs">
-          <Progress value={progress} />
-        </div>
+        <Progress value={progress} className="flex-1" />
       </div>
 
       {error && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+        <div className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2.5 text-sm">
           {error}
         </div>
       )}
 
-      <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
-        <Card className="flex min-h-0 flex-col overflow-hidden lg:min-h-[520px]">
-          <CardHeader className="border-b bg-muted/30">
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_410px]">
+        <Card className="flex min-h-[420px] min-w-0 flex-col overflow-hidden lg:min-h-0">
+          <CardHeader className="shrink-0 border-b bg-muted/20 px-4 py-3">
+            <CardTitle className="text-base">You</CardTitle>
+            <CardDescription className="text-xs">
+              Answer naturally. Your response is transcribed when you stop recording.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-3">
+            <div className="w-full max-w-5xl">
+              <UserCamera
+                answerCallback={handleTranscript}
+                isCameraOn={cameraOn}
+                onRecordEnd={null}
+                interviewMode="Practice"
+                disabled={busy}
+                maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="flex min-h-0 flex-col overflow-hidden lg:h-full">
+          <CardHeader className="shrink-0 border-b bg-muted/20 px-4 py-3">
             <div className="flex items-center justify-between gap-3">
-              <div>
-                <CardTitle className="text-lg">Interviewer</CardTitle>
-                <CardDescription>Avery</CardDescription>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border bg-background">
+                  <Lottie
+                    animationData={talkingInterviewer}
+                    loop
+                    autoplay={false}
+                    lottieRef={lottieRef}
+                    className="h-full w-full"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <CardTitle className="text-base">Avery</CardTitle>
+                  <CardDescription className="text-xs">Interviewer</CardDescription>
+                </div>
               </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="min-h-10"
                 onClick={() => void speakCurrentQuestion(false)}
                 disabled={speaking || busy}
               >
@@ -478,153 +539,129 @@ export function V2SessionPlayer({
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col justify-center space-y-4 p-4 sm:space-y-5 sm:p-6">
-            <div className="mx-auto w-full max-w-[280px] overflow-hidden">
-              <Lottie
-                animationData={talkingInterviewer}
-                loop
-                autoplay={false}
-                lottieRef={lottieRef}
-                className="h-[112px] w-full sm:h-[160px]"
-              />
-            </div>
-            <div className="space-y-3 text-center">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Question {safeIndex + 1}
-              </div>
-              <p className="break-words text-lg font-semibold leading-7 sm:text-xl sm:leading-8">
-                {currentQuestion.prompt}
-              </p>
-              {currentQuestion.guidance && (
-                <div className="space-y-1.5 text-left">
-                  <p
-                    className={`text-sm leading-6 text-muted-foreground ${
-                      guidanceExpanded ? '' : 'line-clamp-2'
-                    }`}
-                  >
-                    {currentQuestion.guidance}
-                  </p>
-                  {currentQuestion.guidance.length > 120 && (
-                    <Button
-                      type="button"
-                      variant="link"
-                      size="sm"
-                      className="h-auto p-0 text-xs"
-                      onClick={() => setGuidanceExpanded((expanded) => !expanded)}
-                    >
-                      {guidanceExpanded ? 'Show less' : 'Show guidance'}
-                    </Button>
-                  )}
+
+          <CardContent className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="space-y-4">
+              <section className="space-y-2.5">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Question {safeIndex + 1}
                 </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <TimeMetric
-                label="Preparation"
-                seconds={currentQuestion.preparationSeconds}
-              />
-              <TimeMetric
-                label="Response max"
-                seconds={currentQuestion.responseSeconds}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="flex min-h-0 flex-col overflow-hidden lg:min-h-[520px]">
-          <CardHeader className="border-b bg-muted/30">
-            <CardTitle className="text-lg">You</CardTitle>
-            <CardDescription>
-              Record naturally. InterviewGrade transcribes your response when you
-              stop.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-1 items-center p-3 sm:p-4">
-            <UserCamera
-              answerCallback={handleTranscript}
-              isCameraOn={cameraOn}
-              onRecordEnd={null}
-              interviewMode="Practice"
-              disabled={busy}
-              maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="flex min-h-0 scroll-mt-4 flex-col overflow-hidden lg:min-h-[520px]">
-          <CardHeader className="border-b bg-muted/30">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-primary" />
-              <CardTitle className="text-lg">Practice feedback</CardTitle>
-            </div>
-            <CardDescription>
-              Your answer is saved before feedback or question progress changes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col justify-center p-4 sm:p-5">
-            {busy && !hasFeedback ? (
-              <div className="flex flex-col items-center gap-3 py-4 text-center sm:py-0">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">
-                  Saving your answer and preparing feedback…
+                <p className="break-words text-xl font-semibold leading-7 tracking-tight">
+                  {currentQuestion.prompt}
                 </p>
-              </div>
-            ) : hasFeedback ? (
-              <div className="space-y-5">
-                {feedback.score != null && (
-                  <div className="text-center">
-                    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Score
-                    </div>
-                    <div
-                      className={`mt-1 text-4xl font-bold ${scoreClass(feedback.score)}`}
+                {currentQuestion.guidance && (
+                  <div className="space-y-1.5">
+                    <p
+                      className={`text-sm leading-6 text-muted-foreground ${
+                        guidanceExpanded ? '' : 'line-clamp-2'
+                      }`}
                     >
-                      {Math.round(feedback.score)}/100
-                    </div>
-                  </div>
-                )}
-
-                {feedback.summary && (
-                  <FeedbackBlock label="Summary" text={feedback.summary} />
-                )}
-
-                {nextQuestion && feedback.advice && feedback.advice !== 'N/A' && (
-                  <FeedbackBlock label="Advice for next question" text={feedback.advice} />
-                )}
-
-                {!feedback.summary && feedbackText && (
-                  <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                    {feedbackText}
-                  </p>
-                )}
-
-                {!busy && (
-                  <div className="grid gap-2 border-t pt-4">
-                    {preparedNextOrder != null && (
+                      {currentQuestion.guidance}
+                    </p>
+                    {currentQuestion.guidance.length > 120 && (
                       <Button
-                        onClick={showNextQuestion}
-                        variant="secondary"
-                        className="min-h-11"
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs"
+                        onClick={() => setGuidanceExpanded((expanded) => !expanded)}
                       >
-                        Next question
-                        <ChevronRight className="ml-2 h-4 w-4" />
+                        {guidanceExpanded ? 'Show less' : 'Show guidance'}
                       </Button>
                     )}
-                    <Button onClick={finishSession} className="min-h-11">
-                      {nextQuestion ? 'Finish session' : 'Finish practice'}
-                    </Button>
                   </div>
                 )}
-              </div>
-            ) : (
-              <div className="py-4 text-center sm:py-0">
-                <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground/50" />
-                <p className="mt-3 text-sm text-muted-foreground">
-                  Your feedback will appear here after you record an answer.
-                </p>
-              </div>
-            )}
+                <div className="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
+                  <TimePill
+                    label="Prep"
+                    seconds={currentQuestion.preparationSeconds}
+                  />
+                  <TimePill
+                    label="Response"
+                    seconds={currentQuestion.responseSeconds}
+                  />
+                </div>
+              </section>
+
+              <div className="border-t" />
+
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <div className="text-sm font-semibold">Practice feedback</div>
+                </div>
+
+                {feedbackLoading && !hasFeedback ? (
+                  <div className="rounded-lg border bg-muted/15 p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      Response saved
+                    </div>
+                    <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
+                      Evaluating against your rubric…
+                      {canMoveNext ? ' You can continue now or wait for feedback.' : ''}
+                    </p>
+                  </div>
+                ) : hasFeedback ? (
+                  <div className="space-y-4">
+                    {feedback.score != null && (
+                      <div className="flex items-end justify-between rounded-lg border bg-muted/10 p-3">
+                        <div>
+                          <div className="text-xs text-muted-foreground">Score</div>
+                          <div
+                            className={`text-3xl font-bold ${scoreClass(feedback.score)}`}
+                          >
+                            {Math.round(feedback.score)}
+                            <span className="text-base font-medium text-muted-foreground">
+                              /100
+                            </span>
+                          </div>
+                        </div>
+                        {feedbackLoading && (
+                          <Loader2 className="mb-1 h-4 w-4 animate-spin text-muted-foreground" />
+                        )}
+                      </div>
+                    )}
+                    {feedback.summary && (
+                      <FeedbackBlock label="Summary" text={feedback.summary} />
+                    )}
+                    {nextQuestion && feedback.advice && feedback.advice !== 'N/A' && (
+                      <FeedbackBlock
+                        label="For the next question"
+                        text={feedback.advice}
+                      />
+                    )}
+                    {!feedback.summary && feedbackText && (
+                      <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                        {feedbackText}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    Your feedback will appear here after you record an answer.
+                  </p>
+                )}
+              </section>
+            </div>
           </CardContent>
+
+          <div className="shrink-0 border-t bg-background p-3">
+            {canMoveNext ? (
+              <Button onClick={showNextQuestion} className="w-full min-h-10">
+                Next question
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={finishSession}
+                className="w-full min-h-10"
+                disabled={busy || feedbackLoading}
+              >
+                {feedbackLoading ? 'Finishing feedback…' : 'Finish practice'}
+              </Button>
+            )}
+          </div>
         </Card>
       </div>
     </div>
@@ -648,7 +685,7 @@ function rubricForQuestion(
   return mapped.length > 0 ? mapped : rubricCriteria;
 }
 
-function TimeMetric({
+function TimePill({
   label,
   seconds,
 }: {
@@ -656,15 +693,10 @@ function TimeMetric({
   seconds?: number | null;
 }) {
   return (
-    <div className="rounded-lg border bg-muted/20 p-3">
-      <div className="flex items-center gap-1.5 text-muted-foreground">
-        <Clock3 className="h-3.5 w-3.5" />
-        {label}
-      </div>
-      <div className="mt-1 font-semibold">
-        {seconds == null ? 'Flexible' : `${seconds}s`}
-      </div>
-    </div>
+    <span className="inline-flex items-center gap-1.5 rounded-full border bg-muted/15 px-2.5 py-1">
+      <Clock3 className="h-3.5 w-3.5" />
+      {label}: {seconds == null ? 'Flexible' : `${seconds}s`}
+    </span>
   );
 }
 

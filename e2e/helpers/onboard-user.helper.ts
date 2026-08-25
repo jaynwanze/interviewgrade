@@ -12,7 +12,7 @@ export async function onboardUserHelper({
   );
 
   if (!viewTermsDialog) {
-    throw new Error('acceptTermsForm not found');
+    throw new Error('viewTermsDialog not found');
   }
 
   const viewTermsButton = await viewTermsDialog.waitForSelector(
@@ -20,7 +20,7 @@ export async function onboardUserHelper({
   );
 
   if (!viewTermsButton) {
-    throw new Error('view accept terms not found');
+    throw new Error('view terms button not found');
   }
 
   await viewTermsButton.click();
@@ -34,57 +34,32 @@ export async function onboardUserHelper({
   }
 
   await acceptTermsButton.click();
-
-  // wait for text "Terms accepted!"
   await page.waitForSelector('text=Terms accepted!');
 
   const form = await page.waitForSelector(
     'form[data-testid="create-new-profile"]',
   );
   if (!form) {
-    throw new Error('form not found');
+    throw new Error('profile form not found');
   }
+
   const input = await form.waitForSelector('input[name="name"]');
-  // enter text in the input field
   await input.fill(name);
-  // get button with text "save"
+
   const submitButton = await form.waitForSelector('button:has-text("Save")');
   if (!submitButton) {
-    throw new Error('submitButton not found');
+    throw new Error('profile save button not found');
   }
-  await submitButton.click();
 
-  // wait for text "Profile updated!"
+  await submitButton.click();
   await page.waitForSelector('text=Profile updated!');
 
-  const createOrganizationForm = await page.waitForSelector(
-    'form[data-testid="create-new-organization"]',
-  );
-
-  if (!createOrganizationForm) {
-    throw new Error('createOrganizationForm not found');
-  }
-
-  const inputCreateOrg = await createOrganizationForm.waitForSelector(
-    'input[name="organizationTitle"]',
-  );
-
-  if (!inputCreateOrg) {
-    throw new Error('inputCreateOrg not found');
-  }
-
-  await inputCreateOrg.fill('My Organization');
-
-  const createOrganizationButton = await createOrganizationForm.waitForSelector(
-    'button:has-text("Create Organization")',
-  );
-
-  if (!createOrganizationButton) {
-    throw new Error('createOrganizationButton not found');
-  }
-
-  await createOrganizationButton.click();
-
-  // wait for text "Organization created!"
-  await page.waitForSelector('text=Organization created!');
+  // V2 intentionally has no candidate/employer organization step. New users
+  // land on private Practice preferences and choose their first action.
+  await page.waitForSelector('text=Set your Practice target');
+  await page.getByLabel('Target role').fill('Business Analyst');
+  await page.getByRole('button', { name: 'Graduate' }).click();
+  await page.getByRole('button', { name: 'Role-specific' }).click();
+  await page.getByRole('button', { name: 'Create a Practice' }).click();
+  await page.waitForURL('/candidate/practices/new');
 }

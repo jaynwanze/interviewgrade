@@ -21,7 +21,8 @@ const config: PlaywrightTestConfig = {
   // Run your local dev server before starting the tests:
   // https://playwright.dev/docs/test-advanced#launching-a-development-web-server-during-the-tests
   webServer: {
-    command: 'cross-env NODE_ENV=test next dev',
+    command:
+      'cross-env NODE_ENV=test INTERVIEWGRADE_E2E_FAKE_AI=1 next dev',
     url: baseURL,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
@@ -32,16 +33,21 @@ const config: PlaywrightTestConfig = {
     // More information: https://playwright.dev/docs/api/class-testoptions#test-options-base-url
     baseURL,
 
+    // Chromium's synthetic media devices let the V2 session exercise the real
+    // MediaRecorder path without requiring a physical webcam or microphone.
+    launchOptions: {
+      args: [
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream',
+        '--autoplay-policy=no-user-gesture-required',
+      ],
+    },
+
     // Retry a test if its failing with enabled tracing. This allows you to analyse the DOM, console logs, network traffic etc.
     // More information: https://playwright.dev/docs/trace-viewer
     trace: 'retry-with-trace',
 
     actionTimeout: 60 * 1000,
-
-    // All available context options: https://playwright.dev/docs/api/class-browser#browser-new-context
-    // contextOptions: {
-    //   ignoreHTTPSErrors: true,
-    // },
   },
 
   projects: [

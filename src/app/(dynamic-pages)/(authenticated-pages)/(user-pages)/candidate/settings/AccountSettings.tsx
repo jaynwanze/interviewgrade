@@ -1,6 +1,14 @@
 'use client';
-import { PageHeading } from '@/components/PageHeading';
+
+import { ConfirmDeleteAccountDialog } from '@/components/Settings/ConfirmDeleteAccountDialog';
 import { UpdateAvatarAndNameBody } from '@/components/UpdateAvatarAndName';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   updateUserProfileNameAndAvatar,
   uploadPublicUserAvatar,
@@ -9,7 +17,6 @@ import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import type { Table } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ConfirmDeleteAccountDialog } from '@/components/Settings/ConfirmDeleteAccountDialog';
 
 export function CandidateAccountSettings({
   userProfile,
@@ -48,12 +55,9 @@ export function CandidateAccountSettings({
       successMessage: 'Profile updated!',
     },
   );
-  // This loading state is for the new avatar image
-  // being fetched from the server to the browser. At this point the
-  // upload is complete, but the new image is not yet available to the browser.
+
   const [isNewAvatarImageLoading, setIsNewAvatarImageLoading] =
     useState<boolean>(false);
-
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
     userProfile.avatar_url ?? undefined,
   );
@@ -94,37 +98,51 @@ export function CandidateAccountSettings({
   );
 
   return (
-    <div className="max-w-sm">
-      <div className="space-y-16">
-        <UpdateAvatarAndNameBody
-          onSubmit={(fullName: string) => {
-            mutate({
-              fullName,
-              avatarUrl,
-            });
-          }}
-          onFileUpload={(file: File) => {
-            upload(file);
-          }}
-          userId={userProfile.id}
-          userEmail={userEmail}
-          isNewAvatarImageLoading={isNewAvatarImageLoading}
-          setIsNewAvatarImageLoading={setIsNewAvatarImageLoading}
-          isUploading={isUploading}
-          isLoading={isLoading ?? isUploading}
-          profileAvatarUrl={avatarUrl ?? undefined}
-          profileFullname={userProfile.full_name ?? undefined}
-        />
-        <div className="space-y-2">
-          <PageHeading
-            title="Danger zone"
-            titleClassName="text-xl"
-            subTitleClassName="text-base -mt-1"
-            subTitle="Delete your account. This action is irreversible. All your data will be lost."
-          />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>
+            Update the name and avatar shown across InterviewGrade.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-xl">
+            <UpdateAvatarAndNameBody
+              onSubmit={(fullName: string) => {
+                mutate({
+                  fullName,
+                  avatarUrl,
+                });
+              }}
+              onFileUpload={(file: File) => {
+                upload(file);
+              }}
+              userId={userProfile.id}
+              userEmail={userEmail}
+              isNewAvatarImageLoading={isNewAvatarImageLoading}
+              setIsNewAvatarImageLoading={setIsNewAvatarImageLoading}
+              isUploading={isUploading}
+              isLoading={isLoading ?? isUploading}
+              profileAvatarUrl={avatarUrl ?? undefined}
+              profileFullname={userProfile.full_name ?? undefined}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-base">Delete account</CardTitle>
+          <CardDescription>
+            Permanently delete your InterviewGrade account and associated data. This
+            cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <ConfirmDeleteAccountDialog />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

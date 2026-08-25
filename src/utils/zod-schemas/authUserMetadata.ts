@@ -15,7 +15,13 @@ export const authUserMetadataSchema = z
       .enum(['intern', 'graduate', 'mid', 'senior'])
       .optional(),
     practiceInterviewFocus: z
-      .enum(['behavioral', 'technical', 'system-design', 'mixed'])
+      .enum([
+        'behavioral',
+        'technical',
+        'role-specific',
+        'system-design',
+        'mixed',
+      ])
       .optional(),
   })
   .passthrough();

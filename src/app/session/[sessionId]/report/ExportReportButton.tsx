@@ -4,6 +4,8 @@ import { Download } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
+import { PracticeCoachButton } from './PracticeCoachButton';
+
 export function ExportReportButton({ title }: { title: string }) {
   const exportReport = () => {
     const previousTitle = document.title;
@@ -17,9 +19,12 @@ export function ExportReportButton({ title }: { title: string }) {
   };
 
   return (
-    <Button type="button" variant="outline" size="sm" onClick={exportReport}>
-      <Download className="mr-2 h-4 w-4" />
-      Export PDF
-    </Button>
+    <>
+      <PracticeCoachButton />
+      <Button type="button" variant="outline" size="sm" onClick={exportReport}>
+        <Download className="mr-2 h-4 w-4" />
+        Export PDF
+      </Button>
+    </>
   );
 }

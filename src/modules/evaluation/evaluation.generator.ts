@@ -7,6 +7,7 @@ import type {
   RubricCriterion,
 } from '@/modules/practice/practice.schema';
 import type { SessionResponse } from '@/modules/session/session.schema';
+import { isInterviewGradeE2EMode } from '@/modules/testing/e2e-mode';
 import { createOpenAIClient } from '@/utils/openai/config';
 import type { CriterionScore } from './evaluation.schema';
 
@@ -47,6 +48,10 @@ export async function generateResponseEvaluation(input: {
 }): Promise<GeneratedResponseEvaluation> {
   if (input.rubricCriteria.length === 0) {
     throw new Error('A published rubric is required to evaluate a response.');
+  }
+
+  if (isInterviewGradeE2EMode()) {
+    return buildE2EResponseEvaluation(input.rubricCriteria);
   }
 
   const openai = createOpenAIClient();
@@ -130,6 +135,35 @@ export async function generateResponseEvaluation(input: {
     strengths: generated.strengths,
     improvements: generated.improvements,
     recommendation: generated.recommendation,
+  };
+}
+
+function buildE2EResponseEvaluation(
+  rubricCriteria: RubricCriterion[],
+): GeneratedResponseEvaluation {
+  const criterionScores = rubricCriteria
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .map((criterion) => {
+      if (!criterion.id) {
+        throw new Error('Published rubric criteria require ids in E2E mode.');
+      }
+
+      return {
+        criterionId: criterion.id,
+        criterionName: criterion.name,
+        score: 82,
+        feedback: `E2E fixture feedback for ${criterion.name}.`,
+      };
+    });
+
+  return {
+    overallScore: calculateWeightedScore(criterionScores, rubricCriteria),
+    criterionScores,
+    summary: 'E2E fixture: the answer addressed the published rubric clearly.',
+    strengths: ['Used a clear example and explained the reasoning.'],
+    improvements: ['Add one more specific outcome or measurable result.'],
+    recommendation: 'Keep the same structure and make the outcome more specific.',
   };
 }
 

@@ -1,6 +1,6 @@
 # InterviewGrade Roadmap
 
-This is the current sequencing document for InterviewGrade. Keep the shipped V2 Practice loop reliable, close the remaining launch-hardening work, then add small coaching improvements only where they create clear user value.
+This is the current sequencing document for InterviewGrade. Keep the shipped V2 Practice loop reliable, close the remaining launch-hardening work, then add product extensions only where they deepen the core Practice → feedback → improvement loop.
 
 ## Product principle
 
@@ -88,24 +88,71 @@ The original run-entitlement decision and accounting model are documented in [PR
 
 ## NOW — Launch hardening
 
-The core V2 production/UX work is no longer the active feature build. What remains is focused reliability work rather than another redesign.
+The core V2 production/UX work is no longer the active feature build. What remains is focused reliability/security work rather than another redesign.
 
-1. **Critical-path E2E**
+1. **Finish current security hardening**
+   - Complete the remaining items from the active security audit.
+   - Keep fixes narrow and evidence-driven; do not silently revive retired V1 surfaces.
+
+2. **Critical-path E2E**
    - Protect creator sign-in → create/edit → publish → shared Practice → participant answer → persisted feedback → finish → report → creator result.
    - Include the final-question/Q5 completion edge case.
    - Use provider fakes where appropriate so CI is deterministic.
-
-2. **Supabase migration-history repair**
-   - Perform the already documented `supabase migration repair --status applied` bookkeeping for the three original manually applied V2 migrations.
-   - Do not rerun their DDL.
 
 3. **Evidence-driven production polish**
    - Fix real browser/mobile/production issues as observed.
    - Do not reopen scoring, session semantics or billing merely for visual churn.
 
-## NEXT — Better speech delivery metrics
+The earlier Supabase migration-history repair is complete and is no longer an active roadmap item.
 
-After the launch-hardening checkpoint, the next recommended product experiment is objective spoken-delivery coaching.
+## NEXT — Report-grounded AI Coach
+
+After the current hardening/E2E checkpoint, the next product extension is a small **AI Coach grounded in a completed response/report**.
+
+First slice:
+
+- signed-in participant only;
+- entry point from the final report / response review;
+- suggested prompts plus one short custom question;
+- server-side loading of trusted PracticeVersion, transcript and persisted Evaluation;
+- Coach explains or helps improve an answer but never changes the persisted score;
+- no generic global chatbot;
+- no persistent chat threads in the first slice;
+- separate bounded Coach usage/rate control rather than “unlimited AI Coach”.
+
+Examples:
+
+- “Why did I get this score?”
+- “How could I structure this answer better?”
+- “Show me a stronger STAR outline using only facts I gave.”
+- “What should I practise next?”
+
+See [AI_COACH_AND_PRACTICE_CONTEXT.md](./AI_COACH_AND_PRACTICE_CONTEXT.md) for the architecture, authorization, grounding, cost and persistence decisions.
+
+## THEN — Job-description / résumé Practice context
+
+Extend the existing **Create a Practice** pipeline instead of launching a separate résumé-analysis product.
+
+First slice:
+
+- explicit source kind: job description / résumé / other;
+- reuse the current PDF/TXT extraction path;
+- source remains request-scoped and is not stored by default;
+- generation still returns the same editable `PracticeDraft`;
+- context-enhanced creation consumes the existing AI-created Practice allowance;
+- no résumé employability score, candidate ranking or hiring prediction.
+
+Follow-up only after the single-context path is stable:
+
+- job description + résumé in one generation request;
+- DOCX support;
+- saved reusable context only if users demonstrate a real reuse need.
+
+See [AI_COACH_AND_PRACTICE_CONTEXT.md](./AI_COACH_AND_PRACTICE_CONTEXT.md).
+
+## AFTER — Better speech delivery metrics
+
+After the two core-loop product extensions above, the next recommended coaching experiment is objective spoken-delivery coaching.
 
 First slice:
 
@@ -119,7 +166,7 @@ Pause/cadence metrics should wait until InterviewGrade has a reliable timing sou
 
 See [DELIVERY_COACHING.md](./DELIVERY_COACHING.md) for implementation boundaries, acceptance criteria and guardrails.
 
-## AFTER — Browser-side visual delivery prototype
+## AFTER THAT — Browser-side visual delivery prototype
 
 Only after speech metrics are useful in real sessions:
 
@@ -140,6 +187,7 @@ These remain valid but should not interrupt the core reliability checkpoint or b
 - Archived Practice filter/restore;
 - participant/creator Results filtering or export if actual creator usage needs it;
 - Google OAuth custom-domain branding;
+- hosted Supabase branded auth email templates/custom SMTP;
 - focused public/pricing copy cleanup where V1 wording remains;
 - data-retention/deletion and observability improvements before broader pilots where needed.
 
@@ -147,6 +195,8 @@ These remain valid but should not interrupt the core reliability checkpoint or b
 
 Do not build these merely because the architecture could support them.
 
+- **Persistent Coach threads** — only if users repeatedly ask multi-turn follow-up questions after reports.
+- **Saved Practice context library** — only if people repeatedly reuse the same résumé/job-description context and accept the added retention/privacy burden.
 - **Teams / workspaces** — multiple creators, shared Practice ownership and organisation-level administration.
 - **Assignments** — targeted participants, due dates, cohorts and completion tracking.
 - **ATS / LMS integrations** — launch InterviewGrade Practices from existing employer/training systems and return results.
@@ -166,4 +216,4 @@ At this checkpoint:
 - Free is 3/3 and Pro is 30/30 for monthly Practice runs / AI Practice generations;
 - Plan & Usage and the existing Stripe Pro subscription are aligned to those production limits;
 - participant mobile UX is shipped for the current shared Practice → session → feedback → report flow;
-- **the active implementation step is launch hardening: critical-path E2E plus Supabase migration-history repair, followed by the first better-speech-metrics slice.**
+- **the active implementation step remains launch hardening/security + critical-path E2E; after that the planned product order is report-grounded AI Coach → job-description/résumé Practice context → speech metrics → browser-side visual coaching.**

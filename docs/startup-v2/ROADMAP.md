@@ -1,158 +1,152 @@
 # InterviewGrade Roadmap
 
-This is the current sequencing document for InterviewGrade. Keep the shipped V2 Practice loop reliable, close the remaining launch-hardening work, then add product extensions only where they deepen the core Practice → feedback → improvement loop.
+This is the current sequencing document for InterviewGrade. Keep the shipped V2 Practice loop reliable, finish launch/security follow-through, then add product extensions only where they deepen the core Practice → feedback → improvement loop.
+
+For the concise end-of-day restart point, read [CURRENT_STATUS.md](./CURRENT_STATUS.md).
 
 ## Product principle
 
 The core loop is:
 
-**Create a Practice → complete or share it → evaluate results → improve.**
-
-That loop supports self-practice and creator-to-participant sharing without requiring separate product architectures today.
+**Create a Practice → complete or share it → evaluate results → improve → practise again.**
 
 The V2 product model is defined in [PRODUCT_MODEL.md](./PRODUCT_MODEL.md):
 
 - authentication state is **Anonymous / Signed in**;
 - product behavior is **Creator / Participant**;
 - Creator and Participant are contextual capabilities, not permanent account types;
-- `Guest` means an **Anonymous Participant**, not a third role;
+- `Guest` means an **Anonymous Participant**;
 - future workspace permissions remain a separate concern.
 
-Current individual V2 usage is intentionally simple:
+Current individual usage:
 
-- **Free:** 3 AI-evaluated Practice runs/month + 3 AI Practice generations/month;
-- **Pro (€9.99/month):** 30 AI-evaluated Practice runs/month + 30 AI Practice generations/month;
+- **Free:** 3 AI-evaluated Practice runs/month + 3 AI-created Practices/month;
+- **Pro (€9.99/month):** 30 AI-evaluated Practice runs/month + 30 AI-created Practices/month;
 - self-practice and shared participant runs draw from the Practice owner's run allowance;
-- a Guest remains account-free and never pays merely to complete an available shared Practice;
 - a Practice run is consumed only on the first valid response in a session;
 - manual Practice creation/editing remains unlimited.
 
-The original run-entitlement decision and accounting model are documented in [PRACTICE_RUN_ENTITLEMENTS.md](./PRACTICE_RUN_ENTITLEMENTS.md). The original 50-run Pro target was later tightened to 30 in production after the entitlement path was implemented; production limits and Plan & Usage are the current source of truth.
+## V2 foundation — shipped
 
-## V2 foundation — accepted complete
-
-1. **Practice model, editor, publish/share and immutable versions — complete**
-   - AI create, document create, manual edit, publish and share use the V2 Practice model.
+1. **Practice model, editor, publish/share and immutable versions**
+   - AI creation, context/document creation and manual creation use the V2 Practice model.
    - Published sessions remain pinned to immutable Practice versions.
 
-2. **Participant session + Avery + feedback + report — complete for current scope**
-   - Avery uses OpenAI TTS with browser speech fallback and speaking rings.
-   - Responses are persisted before immediate feedback/progress changes.
-   - Completing a session navigates immediately to report generation rather than waiting on the long evaluation request.
-   - Final reports use the current rubric-weighted session aggregation model while preserving historical report semantics.
-   - Microphone-only fallback remains available when camera access is unavailable.
+2. **Participant session + Avery + feedback + report**
+   - voice capture, transcription, Avery TTS/fallback and rubric-based feedback are live;
+   - responses persist before progress/feedback transitions;
+   - completion hands off to report generation without blocking on the long report request;
+   - final reports use rubric-weighted aggregation;
+   - microphone-only fallback remains available when camera access is unavailable.
 
-3. **Dashboard and History — complete for current V2 boundary**
-   - Dashboard and primary History are V2-first.
-   - V1 sessions remain available only through an explicit legacy archive rather than being mixed into V2 analytics.
+3. **Dashboard, History and creator Results**
+   - primary surfaces are V2-first;
+   - legacy history remains isolated as compatibility/archive data;
+   - creator Results supports participant drill-down and aggregate score/rubric analytics.
 
-4. **Legacy / database boundary — complete for current scope**
-   - Frozen V1 product surfaces are removed from the primary V2 navigation.
-   - V2 persistence tables are server-owned, RLS-enabled and have no direct `anon` / `authenticated` grants.
-   - Remaining V1 compatibility is isolated instead of being allowed to define the V2 product.
-   - Destructive V1 deletion remains intentionally deferred.
+4. **Identity, sharing and billing**
+   - Google and email authentication are live;
+   - shared Practice participation remains account-free;
+   - Free/Pro Practice-run and AI-created Practice allowances are server-owned;
+   - Plan & Usage reflects 3/3 Free and 30/30 Pro limits.
 
-## Lightweight product expansion — shipped
+5. **Participant mobile UX**
+   - shared entry, pre-session start, session controls, feedback and report flows are usable on narrow screens;
+   - creator/editor authoring remains desktop-first.
 
-1. **Product model + Google sign-in**
-   - Creator and Participant are contextual behaviors rather than permanent account roles.
-   - Shared Practice participation remains account-free.
-   - Google sign-in is live alongside email auth.
-   - The visible Supabase OAuth hostname remains deferred branding polish.
+6. **Critical-path E2E — shipped (#127)**
+   - protects creator → create/publish → anonymous participant → saved responses → feedback → final question/Q5 → report → creator Results;
+   - uses deterministic provider/media boundaries for Playwright rather than production AI calls.
 
-2. **Upload document → Generate Practice**
-   - Text-based PDF and TXT upload is live and production-smoke-passed.
-   - Source text is extracted server-side and routed through the normal editable Practice draft flow.
-   - Original files and local filenames are not retained.
-   - DOCX remains a small deferred parser follow-up.
+## Security hardening — major application fixes shipped
 
-3. **Creator sharing, lifecycle and Results**
-   - Published Practice cards support direct copy/open/results actions.
-   - Safe lifecycle behavior is live: unused drafts can be deleted; published/history-bearing Practices archive instead of destroying results.
-   - Creator Results supports participant attempt drill-down, completion rate, average/median score, score distribution and rubric criterion averages across evaluated attempts.
+The 2026-08-25 security pass closed the highest-risk application/database findings:
 
-4. **V2 cost and abuse protection**
-   - `practice_run_usage` owns V2 monthly Practice-run accounting.
-   - Free = 3 and Pro = 30 AI-evaluated Practice runs/month.
-   - Reservation is atomic and idempotent per session; the first valid response is the consumption boundary.
-   - Public empty-session starts are separately limited to 30 starts per Practice in a rolling hour and do not consume paid run allowance.
-   - AI Practice generation has its own server-owned usage ledger: Free = 3 and Pro = 30/month.
-   - Plan & Usage exposes the current V2 allowances while retaining the existing Stripe checkout/portal/subscription foundation.
+- #113 — enable RLS on exposed legacy tables;
+- #114 — narrow organization/profile/invitation RLS;
+- #115 — rate-limit public TTS/transcription;
+- #116 — harden legacy `SECURITY DEFINER` functions;
+- #117 — retire unused legacy AI compute and protect legacy feedback;
+- #118 — remove unrestricted public Storage policies;
+- #119 — constrain account-deletion token inserts to the current user;
+- #125 — retire the unauthenticated application-email relay.
 
-5. **Participant mobile UX — shipped for current scope**
-   - Shared Practice entry prioritizes the Start action on narrow screens while retaining scenario/rubric context.
-   - Pre-session Begin is reachable without desktop-first scrolling assumptions.
-   - Avery → participant recording → feedback stacks cleanly on mobile without desktop-sized minimum card heights.
-   - Camera/microphone, transcription, immediate feedback, next-question and finish semantics remain unchanged.
-   - Creator/editor authoring remains desktop-first; no native app or install requirement is introduced.
+Production verification established that browser roles no longer have the dangerous table-grant + RLS-disabled combination found during the audit, and unrestricted Storage policies were removed.
 
-## NOW — Launch hardening
+### Remaining security/platform follow-through
 
-The core V2 production/UX work is no longer the active feature build. What remains is focused reliability/security work rather than another redesign.
+Issue #107 remains open until the remaining external/platform items are resolved or explicitly documented:
 
-1. **Finish current security hardening**
-   - Complete the remaining items from the active security audit.
-   - Keep fixes narrow and evidence-driven; do not silently revive retired V1 surfaces.
+- inspect the actual GitHub Dependabot/security-alert list when available;
+- reduce hosted Supabase Auth OTP expiry to under one hour;
+- enable Supabase leaked-password protection;
+- schedule the available Supabase/Postgres platform security upgrade;
+- apply branded hosted Supabase Auth templates and custom SMTP separately from the repository templates.
 
-2. **Critical-path E2E**
-   - Protect creator sign-in → create/edit → publish → shared Practice → participant answer → persisted feedback → finish → report → creator result.
-   - Include the final-question/Q5 completion edge case.
-   - Use provider fakes where appropriate so CI is deterministic.
+## Product improvement loop — shipped
 
-3. **Evidence-driven production polish**
-   - Fix real browser/mobile/production issues as observed.
-   - Do not reopen scoring, session semantics or billing merely for visual churn.
+### Report-grounded AI Coach (#130)
 
-The earlier Supabase migration-history repair is complete and is no longer an active roadmap item.
+AI Coach now extends the existing Evaluation/report flow rather than creating a generic chatbot.
 
-## NEXT — Report-grounded AI Coach
+First shipped slice:
 
-After the current hardening/E2E checkpoint, the next product extension is a small **AI Coach grounded in a completed response/report**.
+- signed-in own completed session only;
+- report/response context resolved server-side;
+- suggested prompts plus a short custom question;
+- persisted Evaluation remains authoritative and is never mutated by Coach;
+- no persistent chat threads;
+- no personality/emotion/confidence/honesty/employability or hiring inference;
+- bounded usage: 5 questions per result and burst max 3 per 10 minutes.
 
-First slice:
-
-- signed-in participant only;
-- entry point from the final report / response review;
-- suggested prompts plus one short custom question;
-- server-side loading of trusted PracticeVersion, transcript and persisted Evaluation;
-- Coach explains or helps improve an answer but never changes the persisted score;
-- no generic global chatbot;
-- no persistent chat threads in the first slice;
-- separate bounded Coach usage/rate control rather than “unlimited AI Coach”.
-
-Examples:
-
-- “Why did I get this score?”
-- “How could I structure this answer better?”
-- “Show me a stronger STAR outline using only facts I gave.”
-- “What should I practise next?”
-
-See [AI_COACH_AND_PRACTICE_CONTEXT.md](./AI_COACH_AND_PRACTICE_CONTEXT.md) for the architecture, authorization, grounding, cost and persistence decisions.
-
-## THEN — Job-description / résumé Practice context
-
-Extend the existing **Create a Practice** pipeline instead of launching a separate résumé-analysis product.
-
-First slice:
-
-- explicit source kind: job description / résumé / other;
-- reuse the current PDF/TXT extraction path;
-- source remains request-scoped and is not stored by default;
-- generation still returns the same editable `PracticeDraft`;
-- context-enhanced creation consumes the existing AI-created Practice allowance;
-- no résumé employability score, candidate ranking or hiring prediction.
-
-Follow-up only after the single-context path is stable:
-
-- job description + résumé in one generation request;
-- DOCX support;
-- saved reusable context only if users demonstrate a real reuse need.
+The dedicated production Supabase Coach usage migration has been applied.
 
 See [AI_COACH_AND_PRACTICE_CONTEXT.md](./AI_COACH_AND_PRACTICE_CONTEXT.md).
 
-## AFTER — Better speech delivery metrics
+### Job-description / résumé Practice context (#133)
 
-After the two core-loop product extensions above, the next recommended coaching experiment is objective spoken-delivery coaching.
+The existing Create Practice document path now accepts an explicit context kind:
+
+- job description;
+- résumé / CV;
+- other source document.
+
+The existing PDF/TXT extraction, size/type/text validation and editable `PracticeDraft` flow are reused. Files and extracted text remain transient by default. Résumé generation is constrained to experience explicitly present in the source and does not become a résumé-scoring or employability product.
+
+Follow-ups remain evidence-driven:
+
+- combined JD + résumé request;
+- DOCX;
+- reusable saved context only if users actually need reuse enough to justify retention/privacy cost.
+
+### Coach → follow-up Practice (#135)
+
+The improvement loop is now closed:
+
+**report → Ask Coach → Create a follow-up Practice → editable Practice draft → practise again.**
+
+The follow-up generation brief is rebuilt server-side from persisted weaknesses, improvement areas and recommendation. Raw transcript text and browser-supplied Coach text are excluded. The normal AI-created Practice allowance applies and generated follow-ups are never auto-published.
+
+### Session navigation (#132)
+
+The active session route tree now has a shared Back action across the live session, report-generating state, final report and terminal session states. Signed-in users return to Dashboard; guests return to InterviewGrade home.
+
+## NOW — Deployment + launch follow-through
+
+At the end of 2026-08-25, `master` is ahead of production because the Vercel account hit the daily deployment limit.
+
+The last confirmed READY production deployment observed that day was #127. #130, #132, #133 and #135 are merged to `master` but must be verified after Vercel can deploy again.
+
+Immediate sequence:
+
+1. Confirm Vercel quota reset and deploy current `master` to production.
+2. Smoke-test AI Coach, Coach → follow-up Practice, JD/résumé context and shared session Back navigation in production.
+3. Finish issue #107 platform/dependency-alert follow-through.
+4. Fix only concrete production/browser issues found during those checks.
+
+## NEXT — Objective speech delivery metrics
+
+After the deployment/security checkpoint is clean, the next recommended product experiment is objective spoken-delivery coaching.
 
 First slice:
 
@@ -160,60 +154,54 @@ First slice:
 - word count;
 - speaking pace / words per minute;
 - low-ambiguity filler count/rate;
-- clear separate Delivery/Speaking UI that does not silently alter creator-defined rubric scores.
+- separate Delivery/Speaking UI that does not silently alter creator-defined rubric scores.
 
 Pause/cadence metrics should wait until InterviewGrade has a reliable timing source rather than being guessed from plain transcript text.
 
-See [DELIVERY_COACHING.md](./DELIVERY_COACHING.md) for implementation boundaries, acceptance criteria and guardrails.
+See [DELIVERY_COACHING.md](./DELIVERY_COACHING.md).
 
-## AFTER THAT — Browser-side visual delivery prototype
+## AFTER — Browser-side visual delivery prototype
 
 Only after speech metrics are useful in real sessions:
 
 - prototype MediaPipe Face/Pose Landmarker directly in the browser;
 - aggregate a small set of observable framing signals locally;
 - keep raw video out of the server-side pipeline for the first prototype;
-- make the feature opt-in and Practice/coaching focused;
+- make the feature opt-in and coaching-focused;
 - keep visual observations separate from competency/rubric scoring by default;
 - do not infer confidence, nervousness, honesty, personality or emotion from face/body movement.
 
-A Python/Supervision service is **not** the next step. It remains deferred until a validated browser prototype exposes a concrete need for server-side tracking, offline analysis or model interchange.
+A Python/Supervision service remains deferred until a validated browser prototype exposes a concrete need for server-side tracking/offline analysis.
 
 ## Small launch-quality follow-ups — choose from evidence
 
-These remain valid but should not interrupt the core reliability checkpoint or be treated as mandatory architecture work:
+These are valid, but should not interrupt production reliability work merely for feature count:
 
-- DOCX source-document support;
+- DOCX context/document support;
+- combined JD + résumé Practice context;
 - Archived Practice filter/restore;
-- participant/creator Results filtering or export if actual creator usage needs it;
+- creator Results filtering/export if usage needs it;
 - Google OAuth custom-domain branding;
-- hosted Supabase branded auth email templates/custom SMTP;
-- focused public/pricing copy cleanup where V1 wording remains;
-- data-retention/deletion and observability improvements before broader pilots where needed.
+- hosted Supabase branded auth emails/custom SMTP;
+- public/pricing copy cleanup where stale V1 language still surfaces;
+- data-retention/deletion and observability improvements before broader pilots.
 
-## LATER — Only if demand exists
+## LATER — only if demand exists
 
-Do not build these merely because the architecture could support them.
+Do not build these simply because the architecture can support them:
 
-- **Persistent Coach threads** — only if users repeatedly ask multi-turn follow-up questions after reports.
-- **Saved Practice context library** — only if people repeatedly reuse the same résumé/job-description context and accept the added retention/privacy burden.
-- **Teams / workspaces** — multiple creators, shared Practice ownership and organisation-level administration.
-- **Assignments** — targeted participants, due dates, cohorts and completion tracking.
-- **ATS / LMS integrations** — launch InterviewGrade Practices from existing employer/training systems and return results.
-- **Enterprise auth** — SSO, Microsoft/Google Workspace administration and other organisation-specific controls.
-- **Native mobile app** — only if repeat learner/participant behavior justifies install friction and app-specific capabilities such as notifications or deeper device integration.
-- **Server-side computer vision / Supervision** — only after browser-side visual coaching demonstrates real value and needs capabilities the browser path cannot provide simply.
+- persistent Coach threads;
+- saved Practice context library;
+- standalone résumé analysis/scoring;
+- teams/workspaces with multiple creators;
+- assignments/cohorts/due dates;
+- ATS/LMS integrations;
+- enterprise SSO/admin;
+- native mobile app;
+- server-side computer vision.
 
 ## Current restart point
 
-At this checkpoint:
+See [CURRENT_STATUS.md](./CURRENT_STATUS.md). The short version is:
 
-- the V2 foundation and core Practice loop are live;
-- Creator / Participant product semantics and Google sign-in are live;
-- PDF/TXT document generation is live; DOCX is deferred;
-- Practice sharing, safe delete/archive lifecycle and richer Creator Results analytics are live;
-- V2 Practice-run, shared-link abuse and AI-generation cost protections are live;
-- Free is 3/3 and Pro is 30/30 for monthly Practice runs / AI Practice generations;
-- Plan & Usage and the existing Stripe Pro subscription are aligned to those production limits;
-- participant mobile UX is shipped for the current shared Practice → session → feedback → report flow;
-- **the active implementation step remains launch hardening/security + critical-path E2E; after that the planned product order is report-grounded AI Coach → job-description/résumé Practice context → speech metrics → browser-side visual coaching.**
+**deploy current master → production smoke test → finish #107 external/platform security follow-through → objective speech-delivery metrics, unless production evidence changes the priority.**

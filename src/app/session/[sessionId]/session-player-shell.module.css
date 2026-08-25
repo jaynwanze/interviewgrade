@@ -1,67 +1,145 @@
 .shell {
   width: 100%;
   min-width: 0;
+  min-height: 0;
+  height: calc(100dvh - 8.75rem);
 }
 
 /*
- * Focus mode should read as one interview stage, not a stack of dashboard cards.
- * Keep the existing V2 components/tokens, but let the active session size itself
- * to the viewport instead of reserving a large fixed-height canvas.
+ * Active Practice focus mode is deliberately viewport-bound. The session route
+ * still owns its normal V2 shell, but the live question itself should behave like
+ * one stage rather than a vertically stacked page of cards.
  */
-@media (min-width: 1024px) {
-  .shell > div {
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-  }
+:global(body):has(.shell > div:has(video)) {
+  overflow: hidden;
 }
 
-/* Compact the Avery/question surface without changing its component structure. */
-.shell > div > div:has(> div > :global(.text-center)) > div {
-  padding: 0.75rem 1rem !important;
+.shell > div:has(video) {
+  position: relative;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  max-width: 72rem;
+  gap: 0 !important;
+  overflow: hidden;
+}
+
+/* Compact progress stays peripheral at the top of the stage. */
+.shell > div:has(video) > div:first-child {
+  position: relative;
+  z-index: 30;
+  min-height: 2.5rem;
+  padding: 0 7.25rem 0 0.25rem;
+}
+
+/*
+ * QuestionStage: remove the second "hero card" feeling. Avery remains visible,
+ * while the question occupies the central reading area with restrained type.
+ */
+.shell
+  > div:has(video)
+  > div:has(> div > :global(.text-center)) {
+  position: absolute;
+  inset: 2.5rem 0 0;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(> div > :global(.text-center))
+  > div {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 1rem 8.5rem !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(> div > :global(.text-center))
+  > div
+  > div:first-child {
+  position: absolute;
+  inset: 0.4rem 0.75rem auto;
+  z-index: 10;
 }
 
 .shell :global(.text-center) {
-  margin-top: 0.35rem !important;
-  text-align: left !important;
+  width: min(100%, 48rem);
+  margin: 0 auto !important;
+  text-align: center !important;
+}
+
+/* Question number already exists in the compact progress row. */
+.shell :global(.text-center) > div:first-child {
+  display: none;
 }
 
 .shell :global(.text-center) > p {
-  margin-top: 0.35rem !important;
+  margin-top: 0 !important;
   max-width: none !important;
-  font-size: clamp(1.05rem, 1.5vw, 1.35rem) !important;
+  font-size: clamp(1.05rem, 1.45vw, 1.3rem) !important;
   line-height: 1.45 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Guidance is secondary: hide its preview until the existing control expands it. */
+.shell :global(.text-center) :global(.line-clamp-2) {
+  display: none !important;
+}
+
+.shell :global(.text-center) > div:not(:first-child) {
+  margin-top: 0.6rem !important;
 }
 
 .shell :global(.text-center) :global(.justify-center) {
-  justify-content: flex-start !important;
-}
-
-/* Keep the camera as the primary stage, but avoid forcing a second viewport. */
-.shell > div > div:has(video) {
-  min-height: 0 !important;
-  flex: 0 0 auto !important;
-}
-
-.shell video {
-  min-height: 240px;
-  max-height: 46vh !important;
-  object-fit: cover;
+  justify-content: center !important;
 }
 
 /*
- * Recording controls are critical interaction affordances. The camera component
- * already renders them; make the desktop overlay explicit so layout changes or
- * breakpoint utility ordering cannot hide the controls in focus mode.
+ * Camera becomes a supporting self-preview rather than a second large stage.
+ * Recording/transcription remain entirely inside the existing UserCamera.
  */
+.shell > div:has(video) > div:has(video) {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 20;
+  width: clamp(15rem, 25vw, 21rem);
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.16);
+}
+
+.shell > div:has(video) > div:has(video) > div {
+  padding: 0.3rem !important;
+}
+
+.shell video {
+  width: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: 16 / 9;
+  border-width: 2px !important;
+  object-fit: cover;
+}
+
+/* Existing record/stop controls and waveform stay visible above the self-preview. */
 @media (min-width: 640px) {
   .shell :global(.bottom-4):has(button[aria-label='Record answer']) {
-    z-index: 20;
+    z-index: 25;
     display: flex !important;
   }
 
   .shell :global(.bottom-20) {
-    z-index: 20;
+    z-index: 25;
     display: flex !important;
   }
 }
@@ -72,9 +150,116 @@
   opacity: 1 !important;
 }
 
-@media (max-width: 639px) {
-  .shell video {
-    min-height: 220px;
-    max-height: 52vh !important;
+/*
+ * Existing streamed feedback becomes a temporary insight surface. It overlays
+ * the stage rather than adding page height and pushing the candidate downward.
+ */
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square)) {
+  position: absolute;
+  right: calc(clamp(15rem, 25vw, 21rem) + 1.5rem);
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 30;
+  max-height: 13.5rem;
+  overflow-y: auto;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.14);
+}
+
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  > div {
+  padding: 0.85rem 1rem !important;
+}
+
+/* Preserve End practice without letting it consume another row of the viewport. */
+.shell > div:has(video) > div:has(> button) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 35;
+  height: 2.5rem;
+  align-items: center;
+}
+
+/* Mobile is intentionally composed, not desktop squeezed narrower. */
+@media (max-width: 767px) {
+  .shell {
+    height: calc(100dvh - 7.75rem);
+  }
+
+  .shell > div:has(video) > div:first-child {
+    min-height: 2.25rem;
+    padding-right: 5.75rem;
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(> div > :global(.text-center)) {
+    inset-top: 2.25rem;
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(> div > :global(.text-center))
+    > div {
+    justify-content: flex-start;
+    padding: 3.4rem 0.75rem 12.5rem !important;
+  }
+
+  .shell :global(.text-center) {
+    width: min(100%, 34rem);
+  }
+
+  .shell :global(.text-center) > p {
+    font-size: clamp(1rem, 4.6vw, 1.18rem) !important;
+    line-height: 1.42 !important;
+  }
+
+  .shell > div:has(video) > div:has(video) {
+    right: 50%;
+    bottom: 0.5rem;
+    width: min(calc(100% - 1rem), 20rem);
+    transform: translateX(50%);
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(:global(.lucide-message-square)) {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    z-index: 40;
+    max-height: 42%;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 768px) {
+  .shell {
+    height: calc(100dvh - 8rem);
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(> div > :global(.text-center))
+    > div {
+    padding-bottom: 7.25rem !important;
+  }
+
+  .shell :global(.text-center) > p {
+    font-size: clamp(1rem, 1.35vw, 1.18rem) !important;
+  }
+
+  .shell > div:has(video) > div:has(video) {
+    width: clamp(13rem, 22vw, 18rem);
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(:global(.lucide-message-square)) {
+    right: calc(clamp(13rem, 22vw, 18rem) + 1.5rem);
+    max-height: 11rem;
   }
 }

@@ -2,18 +2,13 @@
   width: 100%;
   min-width: 0;
   min-height: 0;
-  height: calc(100dvh - 8.75rem);
+  flex: 1 1 auto;
 }
 
 /*
- * Active Practice focus mode is deliberately viewport-bound. The session route
- * still owns its normal V2 shell, but the live question itself should behave like
- * one stage rather than a vertically stacked page of cards.
+ * Active Practice focus mode is viewport-bound by the session page. The live
+ * question behaves like one stage rather than a vertically stacked page of cards.
  */
-:global(body):has(.shell > div:has(video)) {
-  overflow: hidden;
-}
-
 .shell > div:has(video) {
   position: relative;
   width: 100%;
@@ -186,10 +181,6 @@
 
 /* Mobile is intentionally composed, not desktop squeezed narrower. */
 @media (max-width: 767px) {
-  .shell {
-    height: calc(100dvh - 7.75rem);
-  }
-
   .shell > div:has(video) > div:first-child {
     min-height: 2.25rem;
     padding-right: 5.75rem;
@@ -237,10 +228,6 @@
 }
 
 @media (max-height: 720px) and (min-width: 768px) {
-  .shell {
-    height: calc(100dvh - 8rem);
-  }
-
   .shell
     > div:has(video)
     > div:has(> div > :global(.text-center))

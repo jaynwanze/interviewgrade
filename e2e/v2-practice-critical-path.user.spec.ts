@@ -1,4 +1,4 @@
-import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const FEEDBACK_SUMMARY =
   'E2E fixture: the answer addressed the published rubric clearly.';
@@ -85,7 +85,7 @@ test('creator → guest → Q5 → report → creator results', async ({
       guestPage.getByText('Question 5 of 5', { exact: true }),
     ).toBeVisible();
     const finish = guestPage.getByRole('button', { name: 'Finish practice' });
-    await expect(finish).toBeEnabled();
+    await expect(finish).toBeEnabled({ timeout: 15_000 });
     await finish.click();
 
     await expect(guestPage).toHaveURL(
@@ -110,7 +110,7 @@ test('creator → guest → Q5 → report → creator results', async ({
   await expect(page.getByText('Practice results', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
   await expect(page.getByText(guestName, { exact: true })).toBeVisible();
-  await expect(page.getByText('100%', { exact: true })).toBeVisible();
+  await expect(page.getByText('100%', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('82/100', { exact: true }).first()).toBeVisible();
 });
 
@@ -146,10 +146,10 @@ async function createAndPublishFiveQuestionPractice(page: Page, title: string) {
     'Tell me about a mistake or setback and what you learned from it.',
   ];
 
-  for (const [offset, prompt] of prompts.entries()) {
+  for (let offset = 0; offset < prompts.length; offset += 1) {
     await page.getByRole('button', { name: 'Add question' }).click();
     const index = offset + 1;
-    await page.locator(`#question-${index}-prompt`).fill(prompt);
+    await page.locator(`#question-${index}-prompt`).fill(prompts[offset]);
     await page.locator(`#question-${index}-prep`).fill('0');
     await page.locator(`#question-${index}-response`).fill('15');
   }

@@ -46,8 +46,9 @@ export default function HeroSection() {
             transition={{ delay: 0.12, duration: 0.5 }}
             className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg"
           >
-            Create or choose a Practice, answer naturally with Avery, and get
-            rubric-based feedback plus a detailed report after every session.
+            Create or choose a Practice for the role you are preparing for,
+            answer naturally with Avery, and get rubric-based feedback plus a
+            detailed report after every session.
           </motion.p>
 
           <motion.div
@@ -90,7 +91,7 @@ export default function HeroSection() {
           <div className="relative flex items-center justify-between border-b border-border/70 bg-muted/20 px-4 py-3 sm:px-5">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Sparkles className="h-4 w-4 text-primary" />
-              Frontend Engineer Practice
+              Customer Success Manager Practice
             </div>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <div className="hidden h-1.5 w-28 overflow-hidden rounded-full bg-muted sm:block">
@@ -127,8 +128,8 @@ export default function HeroSection() {
                 </div>
 
                 <h2 className="mt-6 max-w-3xl text-2xl font-semibold leading-tight sm:text-3xl">
-                  Walk me through a complex UI you built. What were the biggest
-                  challenges and how did you solve them?
+                  Tell me about a time you handled a difficult customer situation.
+                  What did you do, and what was the outcome?
                 </h2>
                 <p className="mt-3 text-sm text-muted-foreground">
                   Suggested answer time: 2–3 minutes
@@ -197,7 +198,7 @@ export default function HeroSection() {
                     <Target className="h-4 w-4 text-primary" /> Rubric focus
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {['Problem solving', 'System design', 'Communication'].map((item, index) => (
+                    {['Communication', 'Judgement', 'Problem solving'].map((item, index) => (
                       <motion.span
                         key={item}
                         animate={{

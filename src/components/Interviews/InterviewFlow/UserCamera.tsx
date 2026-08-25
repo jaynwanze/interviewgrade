@@ -334,30 +334,30 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   };
 
   const recordingControls = (
-    <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+    <div className="flex items-center justify-center space-x-1.5 sm:space-x-3">
       <Button
         onClick={handleRecord}
         disabled={isRecording || isTranscribing || disabled}
         className={
           controlsOverlay
-            ? 'h-10 w-10 rounded-full p-0 shadow-lg sm:h-11 sm:w-11'
+            ? 'h-9 w-9 rounded-full p-0 shadow-lg sm:h-11 sm:w-11'
             : undefined
         }
         aria-label="Record answer"
       >
-        <MicrophoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+        <MicrophoneIcon className="h-4.5 w-4.5 sm:h-6 sm:w-6" />
       </Button>
       <Button
         onClick={() => void handleEndRecord()}
         disabled={!isRecording || isTranscribing}
         className={`bg-red-500 hover:bg-red-600 ${
           controlsOverlay
-            ? 'h-10 w-10 rounded-full p-0 shadow-lg sm:h-11 sm:w-11'
+            ? 'h-9 w-9 rounded-full p-0 shadow-lg sm:h-11 sm:w-11'
             : ''
         }`}
         aria-label="Stop recording"
       >
-        <StopCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+        <StopCircle className="h-4.5 w-4.5 sm:h-6 sm:w-6" />
       </Button>
     </div>
   );
@@ -375,8 +375,8 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         />
 
         {controlsOverlay && isRecording && mediaStreamRef.current && audioContextRef.current && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-16 flex justify-center sm:bottom-20">
-            <div className="scale-90 rounded-full border border-white/15 bg-black/50 px-2 py-1.5 shadow-lg backdrop-blur-sm sm:scale-100 sm:px-3 sm:py-2">
+          <div className="pointer-events-none absolute inset-x-0 bottom-20 hidden justify-center sm:flex">
+            <div className="rounded-full border border-white/15 bg-black/50 px-3 py-2 shadow-lg backdrop-blur-sm">
               <Meter
                 audioContext={audioContextRef.current}
                 stream={mediaStreamRef.current}
@@ -387,15 +387,32 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         )}
 
         {controlsOverlay && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-2.5 flex justify-center sm:bottom-4">
-            <div className="pointer-events-auto rounded-full border border-white/15 bg-black/55 p-1.5 shadow-xl backdrop-blur-sm sm:p-2">
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 hidden justify-center sm:flex">
+            <div className="pointer-events-auto rounded-full border border-white/15 bg-black/55 p-2 shadow-xl backdrop-blur-sm">
+              {recordingControls}
+            </div>
+          </div>
+        )}
+
+        {controlsOverlay && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-2.5 flex justify-center sm:hidden">
+            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-2 py-1.5 shadow-xl backdrop-blur-md">
+              {isRecording && mediaStreamRef.current && audioContextRef.current && (
+                <div className="pointer-events-none flex min-w-[62px] items-center justify-center px-1">
+                  <Meter
+                    audioContext={audioContextRef.current}
+                    stream={mediaStreamRef.current}
+                    settings={{ bars: 12, spacing: 1, width: 2, height: 18 }}
+                  />
+                </div>
+              )}
               {recordingControls}
             </div>
           </div>
         )}
 
         {controlsOverlay && (isRecording || isTranscribing) && (
-          <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
+          <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
             {isTranscribing ? 'Transcribing…' : `Recording ${recordingTime}s`}
           </div>
         )}

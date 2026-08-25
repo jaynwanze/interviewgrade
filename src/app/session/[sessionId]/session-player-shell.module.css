@@ -1,4 +1,287 @@
 .shell {
   width: 100%;
   min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+/*
+ * Focus mode stays inside the active-session viewport. The goal is a balanced
+ * interview composition: compact progress, one question/Avery surface, then a
+ * meaningful camera stage with the existing recording UI overlaid on it.
+ */
+.shell > div:has(video) {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  max-width: 72rem;
+  flex-direction: column;
+  gap: 0.65rem !important;
+  overflow: hidden;
+}
+
+/* Progress is visible but peripheral. */
+.shell > div:has(video) > div:first-child {
+  position: relative;
+  z-index: 20;
+  min-height: 2.35rem;
+  flex: 0 0 auto;
+  padding: 0 6.75rem 0 0.25rem;
+}
+
+/*
+ * QuestionStage: keep Avery, Listen, the full prompt and timing together as one
+ * compact surface. It should read like part of the interview, not a second hero.
+ */
+.shell
+  > div:has(video)
+  > div:has(> div > :global(.text-center)) {
+  flex: 0 0 auto;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(> div > :global(.text-center))
+  > div {
+  padding: 0.35rem 0.5rem 0.55rem !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(> div > :global(.text-center))
+  > div
+  > div:first-child {
+  margin-bottom: 0.45rem;
+}
+
+.shell :global(.text-center) {
+  width: min(calc(100% - 3.5rem), 50rem);
+  margin: 0 0 0 3rem !important;
+  text-align: left !important;
+}
+
+/* Question number already exists in the progress row. */
+.shell :global(.text-center) > div:first-child {
+  display: none;
+}
+
+.shell :global(.text-center) > p {
+  margin-top: 0 !important;
+  max-width: none !important;
+  font-size: clamp(1.05rem, 1.35vw, 1.28rem) !important;
+  line-height: 1.42 !important;
+  letter-spacing: -0.012em;
+}
+
+/* Guidance is secondary. Keep only the existing disclosure control until opened. */
+.shell :global(.text-center) :global(.line-clamp-2) {
+  display: none !important;
+}
+
+.shell :global(.text-center) > div:not(:first-child) {
+  margin-top: 0.5rem !important;
+}
+
+.shell :global(.text-center) :global(.justify-center) {
+  justify-content: flex-start !important;
+}
+
+/*
+ * CameraStage: this is the main visual interaction surface, but it is capped so
+ * the question and controls remain visible in the same viewport.
+ */
+.shell > div:has(video) > div:has(video) {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden;
+  border-color: hsl(var(--border));
+  background: hsl(var(--card));
+  box-shadow: none;
+}
+
+.shell > div:has(video) > div:has(video) > div {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem !important;
+}
+
+.shell > div:has(video) > div:has(video) > div > div {
+  width: min(100%, 62rem) !important;
+}
+
+.shell video {
+  width: 100% !important;
+  height: min(43vh, 390px) !important;
+  min-height: 220px !important;
+  max-height: 100% !important;
+  border-width: 2px !important;
+  object-fit: cover;
+}
+
+/* Existing record/stop controls and waveform remain obvious on the camera. */
+@media (min-width: 640px) {
+  .shell :global(.bottom-4):has(button[aria-label='Record answer']) {
+    z-index: 25;
+    display: flex !important;
+  }
+
+  .shell :global(.bottom-20) {
+    z-index: 25;
+    display: flex !important;
+  }
+}
+
+.shell button[aria-label='Record answer'],
+.shell button[aria-label='Stop recording'] {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/*
+ * Feedback uses the current SSE/state logic but appears as an insight overlay,
+ * preserving the one-screen interview instead of pushing the camera downward.
+ */
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square)) {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 35;
+  max-height: min(15rem, 38%);
+  overflow-y: auto;
+  border-color: hsl(var(--border));
+  background: hsl(var(--card) / 0.97);
+  box-shadow: 0 16px 45px rgb(0 0 0 / 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  > div {
+  padding: 0.85rem 1rem !important;
+}
+
+/* Preserve End practice as a low-emphasis utility in the progress row. */
+.shell > div:has(video) > div:has(> button) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 30;
+  height: 2.35rem;
+  align-items: center;
+}
+
+/*
+ * Mobile is deliberately recomposed. The question remains readable, the camera
+ * gets a meaningful lower-stage area, and controls stay thumb-reachable without
+ * turning the page into a long vertical feed.
+ */
+@media (max-width: 767px) {
+  .shell > div:has(video) {
+    gap: 0.45rem !important;
+  }
+
+  .shell > div:has(video) > div:first-child {
+    min-height: 2.1rem;
+    padding-right: 5.35rem;
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(> div > :global(.text-center))
+    > div {
+    padding: 0.2rem 0.25rem 0.4rem !important;
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(> div > :global(.text-center))
+    > div
+    > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .shell :global(.text-center) {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
+  .shell :global(.text-center) > p {
+    max-height: 24vh;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+    font-size: clamp(0.98rem, 4.4vw, 1.12rem) !important;
+    line-height: 1.4 !important;
+  }
+
+  .shell :global(.text-center) > div:not(:first-child) {
+    margin-top: 0.4rem !important;
+  }
+
+  .shell > div:has(video) > div:has(video) {
+    flex: 1 1 0 !important;
+  }
+
+  .shell > div:has(video) > div:has(video) > div {
+    padding: 0.25rem !important;
+  }
+
+  .shell video {
+    height: min(39vh, 330px) !important;
+    min-height: 185px !important;
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(:global(.lucide-message-square)) {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    max-height: 48%;
+  }
+}
+
+/* Short laptops get a denser question stage before the camera is sacrificed. */
+@media (max-height: 760px) and (min-width: 768px) {
+  .shell > div:has(video) {
+    gap: 0.4rem !important;
+  }
+
+  .shell
+    > div:has(video)
+    > div:has(> div > :global(.text-center))
+    > div {
+    padding-top: 0.15rem !important;
+    padding-bottom: 0.3rem !important;
+  }
+
+  .shell :global(.text-center) > p {
+    font-size: clamp(1rem, 1.25vw, 1.15rem) !important;
+    line-height: 1.36 !important;
+  }
+
+  .shell :global(.text-center) > div:not(:first-child) {
+    margin-top: 0.35rem !important;
+  }
+
+  .shell video {
+    height: min(39vh, 320px) !important;
+    min-height: 195px !important;
+  }
 }

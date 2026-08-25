@@ -32,7 +32,7 @@ export function TermsDetailDialog({ userType, onConfirm, isLoading }: Props) {
     fetch(path)
       .then((r) => r.text())
       .then(setMd)
-      .catch(() => setMd('# Error loading terms '));
+      .catch(() => setMd('# Error loading terms '));
   }, [userType]);
 
   return (
@@ -41,20 +41,20 @@ export function TermsDetailDialog({ userType, onConfirm, isLoading }: Props) {
         <Button className="w-full">View Terms</Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle className="text-lg mb-4">Terms & Conditions</DialogTitle>
+      <DialogContent className="flex max-h-[88svh] w-[calc(100vw-1.5rem)] max-w-3xl flex-col gap-4 p-4 sm:w-full sm:p-6">
+        <DialogHeader className="shrink-0 pr-6">
+          <DialogTitle className="text-lg sm:text-xl">Terms of Service</DialogTitle>
         </DialogHeader>
 
         {!md ? (
-          <Skeleton className="w-full h-40" />
+          <Skeleton className="h-40 w-full" />
         ) : (
-          <div className="prose max-h-[60vh] overflow-auto">
+          <div className="prose prose-sm min-h-0 max-w-none flex-1 overflow-y-auto pr-2 text-foreground dark:prose-invert prose-headings:scroll-mt-4 prose-h1:text-2xl prose-h2:text-lg sm:prose-base sm:prose-h1:text-3xl sm:prose-h2:text-xl">
             <ReactMarkdown>{md}</ReactMarkdown>
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0 border-t pt-4">
           <Button onClick={onConfirm} disabled={isLoading} className="w-full">
             {isLoading ? 'Accepting…' : 'Accept Terms'}
           </Button>

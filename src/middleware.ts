@@ -21,13 +21,6 @@ const protectedPagePrefixes = [
   onboardingPaths,
 ];
 
-function isCandidateRoute(pathname: string) {
-  return (
-    pathname.startsWith('/candidate') ||
-    pathname.startsWith('/dashboard/candidate')
-  );
-}
-
 function isEmployerRoute(pathname: string) {
   return (
     pathname.startsWith('/employer') ||
@@ -60,8 +53,6 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
       onboardingHasCompletedCandidateDetails,
-      onboardingHasCreatedOrganization,
-      onboardingHasSetEmployerPrefs,
     } = userMetadata;
 
     if (
@@ -69,15 +60,6 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       (!onboardingHasAcceptedTerms ||
         !onboardingHasCompletedProfile ||
         !onboardingHasCompletedCandidateDetails)
-    ) {
-      return true;
-    }
-
-    if (
-      legacyUserType === 'employer' &&
-      (!onboardingHasAcceptedTerms ||
-        !onboardingHasCreatedOrganization ||
-        !onboardingHasSetEmployerPrefs)
     ) {
       return true;
     }
@@ -139,32 +121,18 @@ export async function middleware(req: NextRequest) {
   }
 
   if (maybeUser) {
-    const legacyUserType = maybeUser.user_metadata?.userType;
+    if (isEmployerRoute(req.nextUrl.pathname)) {
+      const redirectResponse = NextResponse.redirect(
+        toSiteURL('/candidate/dashboard'),
+      );
+      supabaseResponse.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value);
+      });
+      return redirectResponse;
+    }
 
     if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
       const redirectResponse = NextResponse.redirect(toSiteURL('/onboarding'));
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        redirectResponse.cookies.set(cookie.name, cookie.value);
-      });
-      return redirectResponse;
-    }
-
-    if (
-      isCandidateRoute(req.nextUrl.pathname) &&
-      legacyUserType === 'employer'
-    ) {
-      const redirectResponse = NextResponse.redirect(toSiteURL('/employer'));
-      supabaseResponse.cookies.getAll().forEach((cookie) => {
-        redirectResponse.cookies.set(cookie.name, cookie.value);
-      });
-      return redirectResponse;
-    }
-
-    if (
-      isEmployerRoute(req.nextUrl.pathname) &&
-      legacyUserType !== 'employer'
-    ) {
-      const redirectResponse = NextResponse.redirect(toSiteURL('/candidate'));
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value);
       });

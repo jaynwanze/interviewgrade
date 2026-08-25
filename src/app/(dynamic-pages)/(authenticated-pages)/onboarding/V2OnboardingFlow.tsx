@@ -37,8 +37,8 @@ const experienceOptions: Array<{ value: V2ExperienceLevel; label: string }> = [
 
 const focusOptions: Array<{ value: V2InterviewFocus; label: string }> = [
   { value: 'behavioral', label: 'Behavioral' },
+  { value: 'role-specific', label: 'Role-specific' },
   { value: 'technical', label: 'Technical' },
-  { value: 'system-design', label: 'System design' },
   { value: 'mixed', label: 'Mixed' },
 ];
 
@@ -66,10 +66,12 @@ export function V2OnboardingFlow({
     useState<V2ExperienceLevel | undefined>(
       onboardingStatus.practiceExperienceLevel,
     );
+  const savedInterviewFocus =
+    onboardingStatus.practiceInterviewFocus === 'system-design'
+      ? 'role-specific'
+      : onboardingStatus.practiceInterviewFocus;
   const [interviewFocus, setInterviewFocus] =
-    useState<V2InterviewFocus | undefined>(
-      onboardingStatus.practiceInterviewFocus,
-    );
+    useState<V2InterviewFocus | undefined>(savedInterviewFocus);
   const [error, setError] = useState<string | null>(null);
 
   function finish(firstAction: V2OnboardingFirstAction) {

@@ -1,4 +1,5 @@
 'use client';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,67 +13,50 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { OnboardingModal } from './OnboardingModal';
 
-// TODO: Add valid pics
 const applicationFeatures = [
   {
-    title: 'Mock Interviews',
+    title: 'Create a Practice',
     description: (
       <p>
-        Conduct realistic, AI-powered mock interviews that simulate real-world
-        scenarios. Get personalized questions and responses to help users
-        prepare for job interviews effectively. Each mock interview session is
-        tailored to improve skills and confidence.
+        Build an editable Practice with AI, turn a PDF or TXT document into one,
+        or start manually with your own questions and rubric.
       </p>
     ),
-    image: '',
+    href: '/candidate/practices/new',
+    actionLabel: 'Create a Practice',
   },
   {
-    title: 'Interview History',
+    title: 'Practise with Avery',
     description: (
       <p>
-        Track and revisit all past interview sessions in one place. Interview
-        history allows users to review previous responses, identify areas for
-        improvement, and measure progress over time, helping them better prepare
-        for future interviews.
+        Open a published Practice, listen to each question, record your answer,
+        and move through the session at your own pace.
       </p>
     ),
-    image: '',
+    href: '/candidate/practices',
+    actionLabel: 'View My Practices',
   },
   {
-    title: 'Interview Analytics',
+    title: 'Feedback and reports',
     description: (
       <p>
-        Gain insights into performance with detailed analytics on interview
-        sessions. View metrics like accuracy, response time, and communication
-        skills to understand strengths and areas needing improvement, enabling a
-        data-driven approach to interview preparation.
+        Answers are evaluated against the Practice rubric. After the session,
+        review your score, strengths, improvements, and response-by-response feedback.
       </p>
     ),
-    image: '',
+    href: '/candidate/interview-history',
+    actionLabel: 'Open History',
   },
   {
-    title: 'Interview Feedback',
+    title: 'Plan and usage',
     description: (
       <p>
-        Receive comprehensive feedback after each interview session. Feedback
-        includes AI-generated suggestions and benchmarks to help users refine
-        their answers and presentation skills, ensuring they’re ready for the
-        real interview experience.
+        Free includes 3 AI Practice runs and 3 AI-created Practices each month.
+        Pro raises both monthly allowances to 30.
       </p>
     ),
-    image: '',
-  },
-  {
-    title: 'Job Tracker',
-    description: (
-      <p>
-        Keep track of job applications with the integrated job tracker. Users
-        can log job applications, manage interview stages, and monitor their
-        progress across different opportunities, making it easier to stay
-        organized in the job search process.
-      </p>
-    ),
-    image: '',
+    href: '/candidate/settings/billing',
+    actionLabel: 'View Plan & Usage',
   },
 ];
 
@@ -89,13 +73,15 @@ export function UserNavDropDownMenu({
   userId: string;
   userType: string;
 }) {
+  void userType;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <div
           data-testid="user-nav-avatar"
           data-user-id={userId}
-          className="h-[24px] w-[24px] border rounded-full focus:ring-0"
+          className="h-[24px] w-[24px] rounded-full border focus:ring-0"
         >
           <Image
             src={avatarUrl}
@@ -106,15 +92,13 @@ export function UserNavDropDownMenu({
             sizes="100vw"
             alt="User avatar"
             className="h-full w-full"
-            style={{
-              borderRadius: '50%',
-            }}
+            style={{ borderRadius: '50%' }}
           />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 p-2" sideOffset={10}>
-        <div className="w-full p-4 flex gap-2 items-center">
-          <div className="h-[28px] w-[28px]  rounded-full border">
+        <div className="flex w-full items-center gap-2 p-4">
+          <div className="h-[28px] w-[28px] rounded-full border">
             <Image
               src={avatarUrl}
               width={28}
@@ -124,20 +108,15 @@ export function UserNavDropDownMenu({
               quality={100}
               sizes="100vw"
               alt="User avatar"
-              className="h-full w-full"
-              objectFit="cover"
-              style={{
-                borderRadius: '50%',
-              }}
+              className="h-full w-full object-cover"
+              style={{ borderRadius: '50%' }}
             />
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium truncate text-foreground">
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-medium text-foreground">
               {userFullname}
             </span>
-            <span className="text-xs truncate text-muted-foreground">
-              {userEmail}
-            </span>
+            <span className="truncate text-xs text-muted-foreground">{userEmail}</span>
           </div>
         </div>
         <DropdownMenuSeparator />
@@ -149,23 +128,19 @@ export function UserNavDropDownMenu({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link
-              href="/candidate/settings/security"
-              className="flex cursor-pointer"
-            >
+            <Link href="/candidate/settings/security" className="flex cursor-pointer">
               <Lock className="mr-2 h-5 w-5" />
-              <span>Security Settings</span>
+              <span>Security settings</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <OnboardingModal
             featureList={applicationFeatures}
-            className="cursor-pointer flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+            className="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
           >
-            <div data-testid="">
+            <div>
               <HelpCircle className="mr-2 h-5 w-5" />
               <span>Help</span>
             </div>

@@ -16,6 +16,8 @@ import type {
 import { createPublicSessionService } from '@/modules/session/session.service';
 import type { SessionResponse } from '@/modules/session/session.schema';
 
+import { canUseCoachForSession } from './coach.authorization';
+
 export type CoachGroundingContext = {
   sessionId: string;
   practiceTitle: string;
@@ -42,7 +44,7 @@ export async function getCoachGroundingContext(input: {
   const context = await sessionService.getContext(input.sessionId);
 
   if (!context) return { status: 'not_found' };
-  if (context.session.participantUserId !== input.userId) {
+  if (!canUseCoachForSession(context.session.participantUserId, input.userId)) {
     return { status: 'forbidden' };
   }
   if (context.session.status !== 'completed') {

@@ -53,10 +53,10 @@ export function V2CandidateAnalytics({
   }
 
   return (
-    <section className="container mx-auto w-3/4 px-4 pt-4">
+    <section className="container mx-auto w-full px-4 pt-4 sm:w-11/12 lg:w-3/4">
       <div className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
         <Card>
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <CardTitle className="text-lg">Score trend</CardTitle>
@@ -68,15 +68,15 @@ export function V2CandidateAnalytics({
               <Momentum value={analytics.scoreChange} />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <ChartContainer
               config={scoreChartConfig}
-              className="h-[240px] w-full aspect-auto"
+              className="h-[220px] w-full aspect-auto sm:h-[240px]"
             >
               <LineChart
                 accessibilityLayer
                 data={analytics.scoreTrend}
-                margin={{ left: 4, right: 12, top: 8 }}
+                margin={{ left: 0, right: 8, top: 8 }}
               >
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -84,7 +84,7 @@ export function V2CandidateAnalytics({
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  minTickGap={28}
+                  minTickGap={24}
                   tickFormatter={formatShortDate}
                 />
                 <YAxis
@@ -92,7 +92,7 @@ export function V2CandidateAnalytics({
                   ticks={[0, 25, 50, 75, 100]}
                   tickLine={false}
                   axisLine={false}
-                  width={32}
+                  width={30}
                 />
                 <ChartTooltip
                   cursor={false}
@@ -116,13 +116,13 @@ export function V2CandidateAnalytics({
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg">Performance focus</CardTitle>
             <CardDescription>
               Strongest and lowest-scoring rubric areas across your reports.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
             {analytics.strongestCriterion && (
               <InsightCard
                 label="Strongest area"
@@ -155,14 +155,14 @@ export function V2CandidateAnalytics({
 
       {analytics.criterionPerformance.length > 0 && (
         <Card className="mt-4">
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg">Rubric performance</CardTitle>
             <CardDescription>
               Average scores only use sessions where that criterion was actually
               mapped and evaluated.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
+          <CardContent className="grid gap-4 p-4 pt-0 sm:p-6 sm:pt-0 md:grid-cols-2">
             {analytics.criterionPerformance.map((criterion) => (
               <CriterionBar key={criterion.name} criterion={criterion} />
             ))}
@@ -172,28 +172,28 @@ export function V2CandidateAnalytics({
 
       {analytics.practicePerformance.length > 0 && (
         <Card className="mt-4">
-          <CardHeader>
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg">Practice performance</CardTitle>
             <CardDescription>
               Compare repeat attempts across the same stable Practice.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 lg:grid-cols-2">
+          <CardContent className="grid gap-3 p-4 pt-0 sm:p-6 sm:pt-0 lg:grid-cols-2">
             {analytics.practicePerformance.map((practice) => (
               <div
                 key={practice.practiceId}
                 className="rounded-lg border bg-background p-4"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-semibold">{practice.title}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="break-words font-semibold">{practice.title}</div>
+                    <div className="mt-1 text-xs leading-5 text-muted-foreground">
                       {practice.scoredAttempts} scored attempt
                       {practice.scoredAttempts === 1 ? '' : 's'} · latest{' '}
                       {formatLongDate(practice.latestCompletedAt)}
                     </div>
                   </div>
-                  <Button asChild variant="ghost" size="sm">
+                  <Button asChild variant="ghost" size="sm" className="w-full justify-center sm:w-auto">
                     <Link href={`/session/${practice.latestSessionId}/report`}>
                       Report
                       <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -218,7 +218,7 @@ export function V2CandidateAnalytics({
 function Momentum({ value }: { value: number | null }) {
   if (value == null) {
     return (
-      <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs text-muted-foreground">
+      <div className="flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-xs text-muted-foreground">
         <Minus className="h-3.5 w-3.5" />
         Need 2 reports
       </div>
@@ -230,7 +230,7 @@ function Momentum({ value }: { value: number | null }) {
   const Icon = improved ? TrendingUp : declined ? TrendingDown : Minus;
 
   return (
-    <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
+    <div className="flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
       <Icon className="h-3.5 w-3.5" />
       {value > 0 ? '+' : ''}
       {Math.round(value)} pts vs previous
@@ -250,18 +250,18 @@ function InsightCard({
   return (
     <div className="rounded-lg border p-4">
       <div className="flex items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {icon}
             {label}
           </div>
-          <div className="mt-2 font-semibold">{criterion.name}</div>
+          <div className="mt-2 break-words font-semibold">{criterion.name}</div>
         </div>
-        <div className="text-2xl font-semibold">
+        <div className="shrink-0 text-2xl font-semibold">
           {Math.round(criterion.averageScore)}
         </div>
       </div>
-      <div className="mt-2 text-xs text-muted-foreground">
+      <div className="mt-2 text-xs leading-5 text-muted-foreground">
         {criterion.evidenceCount} scored response
         {criterion.evidenceCount === 1 ? '' : 's'}
         {criterion.change == null
@@ -282,9 +282,9 @@ function CriterionBar({
   return (
     <div className="rounded-lg border p-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm font-semibold">{criterion.name}</div>
-          <div className="mt-1 text-xs text-muted-foreground">
+        <div className="min-w-0">
+          <div className="break-words text-sm font-semibold">{criterion.name}</div>
+          <div className="mt-1 text-xs leading-5 text-muted-foreground">
             {criterion.evidenceCount} evaluation
             {criterion.evidenceCount === 1 ? '' : 's'}
             {criterion.change == null
@@ -292,7 +292,7 @@ function CriterionBar({
               : ` · latest ${criterion.change > 0 ? '+' : ''}${Math.round(criterion.change)} pts`}
           </div>
         </div>
-        <div className="text-lg font-semibold">
+        <div className="shrink-0 text-lg font-semibold">
           {Math.round(criterion.averageScore)}
         </div>
       </div>
@@ -308,9 +308,9 @@ function CriterionBar({
 
 function SmallMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md bg-muted/40 px-2 py-3">
+    <div className="min-w-0 rounded-md bg-muted/40 px-1.5 py-3 sm:px-2">
       <div className="text-lg font-semibold">{Math.round(value)}</div>
-      <div className="mt-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+      <div className="mt-0.5 break-words text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
         {label}
       </div>
     </div>

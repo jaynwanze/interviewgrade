@@ -161,7 +161,10 @@ function PracticeCard({ practice }: { practice: Practice }) {
   const publicPath = practice.shareSlug ? `/p/${practice.shareSlug}` : null;
 
   return (
-    <Card className="flex min-h-[292px] flex-col overflow-hidden transition-shadow hover:shadow-md">
+    <Card
+      data-testid={`practice-card-${practice.id}`}
+      className="flex min-h-[292px] flex-col overflow-hidden transition-shadow hover:shadow-md"
+    >
       <CardHeader className="space-y-3 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

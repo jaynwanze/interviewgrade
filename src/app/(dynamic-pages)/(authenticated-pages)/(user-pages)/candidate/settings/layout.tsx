@@ -14,28 +14,28 @@ export default function UserSettingsClientLayout({
   const tabs = useMemo(() => {
     return [
       {
-        label: 'Account Settings',
+        label: 'Account',
         href: `/candidate/settings`,
-        icon: <User />,
+        icon: <User className="h-4 w-4" />,
       },
       {
         label: 'Security',
         href: `/candidate/settings/security`,
-        icon: <Lock />,
+        icon: <Lock className="h-4 w-4" />,
       },
       {
         label: 'Plan & Usage',
         href: `/candidate/settings/billing`,
-        icon: <CreditCard />,
+        icon: <CreditCard className="h-4 w-4" />,
       },
     ];
   }, []);
 
   return (
-    <div className="min-h-screen space-y-6">
+    <div className="min-h-screen space-y-5 sm:space-y-6">
       <PageHeading
-        title="User Settings"
-        subTitle="Manage your account, security, plan and monthly usage."
+        title="Settings"
+        subTitle="Manage your profile, sign-in security, plan and monthly usage."
       />
       <TabsNavigation tabs={tabs} />
       {children}

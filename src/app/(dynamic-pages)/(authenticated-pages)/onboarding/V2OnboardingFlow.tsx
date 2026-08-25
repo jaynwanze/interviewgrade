@@ -136,7 +136,7 @@ export function V2OnboardingFlow({
             value={targetRole}
             maxLength={120}
             onChange={(event) => setTargetRole(event.target.value)}
-            placeholder="e.g. Software Engineer"
+            placeholder="e.g. Business Analyst, Product Manager, Software Engineer"
           />
         </div>
 

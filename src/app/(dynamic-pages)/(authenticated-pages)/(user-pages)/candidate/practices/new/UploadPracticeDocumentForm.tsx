@@ -45,7 +45,7 @@ export function UploadPracticeDocumentForm() {
           name="instruction"
           maxLength={1500}
           className="min-h-28"
-          placeholder="Example: Focus on the most important technical requirements and make it a 5-question spoken interview."
+          placeholder="Example: Focus on stakeholder communication, decision making, and the most important requirements in this role."
         />
       </div>
 

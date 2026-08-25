@@ -53,7 +53,7 @@ export async function generatePracticeDraft(input: {
   brief: string;
   questionCount: number;
 }): Promise<PracticeDraft> {
-  const brief = z.string().trim().min(20).max(12000).parse(input.brief);
+  const brief = z.string().trim().min(20).max(30_000).parse(input.brief);
   const questionCount = z.number().int().min(3).max(8).parse(input.questionCount);
 
   const openai = createOpenAIClient();

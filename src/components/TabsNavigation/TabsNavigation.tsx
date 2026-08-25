@@ -3,8 +3,8 @@ import { TabsNavigationProps } from './types';
 
 export const TabsNavigation = ({ tabs }: TabsNavigationProps) => {
   return (
-    <div className="border-b ">
-      <div className="flex space-x-5">
+    <div className="overflow-x-auto border-b">
+      <div className="flex min-w-max gap-3 sm:gap-5">
         {tabs.map((tab) => {
           return <Tab key={tab.href} {...tab} />;
         })}

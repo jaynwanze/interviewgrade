@@ -1,6 +1,7 @@
 'use client';
 
-import { Loader2, Send, Sparkles } from 'lucide-react';
+import { Loader2, PlusCircle, Send, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -21,11 +22,14 @@ const SUGGESTED_QUESTIONS = [
 ] as const;
 
 export function PracticeCoachCard({ sessionId }: { sessionId: string }) {
+  const router = useRouter();
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [followUpError, setFollowUpError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [creatingFollowUp, setCreatingFollowUp] = useState(false);
 
   async function askCoach(nextQuestion: string) {
     const normalized = nextQuestion.trim();
@@ -61,6 +65,42 @@ export function PracticeCoachCard({ sessionId }: { sessionId: string }) {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function createFollowUpPractice() {
+    if (creatingFollowUp) return;
+
+    setCreatingFollowUp(true);
+    setFollowUpError(null);
+
+    try {
+      const response = await fetch('/api/v2/practice-follow-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+      const result = (await response.json()) as {
+        practiceId?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !result.practiceId) {
+        throw new Error(
+          result.error ?? 'A follow-up Practice could not be created right now.',
+        );
+      }
+
+      router.push(
+        `/candidate/practices/${result.practiceId}?generated=1&followup=1`,
+      );
+    } catch (cause) {
+      setFollowUpError(
+        cause instanceof Error
+          ? cause.message
+          : 'A follow-up Practice could not be created right now.',
+      );
+      setCreatingFollowUp(false);
     }
   }
 
@@ -122,17 +162,48 @@ export function PracticeCoachCard({ sessionId }: { sessionId: string }) {
         </form>
 
         {answer && (
-          <div className="rounded-lg border bg-muted/20 p-4">
-            <div className="text-sm font-medium">Coach</div>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-              {answer}
-            </p>
+          <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+            <div>
+              <div className="text-sm font-medium">Coach</div>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                {answer}
+              </p>
+            </div>
+
+            <div className="border-t pt-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={creatingFollowUp}
+                onClick={() => void createFollowUpPractice()}
+              >
+                {creatingFollowUp ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                )}
+                {creatingFollowUp
+                  ? 'Creating follow-up…'
+                  : 'Create a follow-up Practice'}
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Uses your saved report to create a fresh editable Practice and counts
+                as one AI-created Practice.
+              </p>
+            </div>
           </div>
         )}
 
         {error && (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
             {error}
+          </div>
+        )}
+
+        {followUpError && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+            {followUpError}
           </div>
         )}
 

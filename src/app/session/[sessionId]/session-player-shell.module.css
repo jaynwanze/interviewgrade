@@ -198,7 +198,7 @@
   .shell
     > div:has(video)
     > div:has(> div > :global(.text-center)) {
-    inset-top: 2.25rem;
+    inset: 2.25rem 0 0;
   }
 
   .shell

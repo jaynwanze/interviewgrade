@@ -27,7 +27,7 @@ export function GeneratePracticeDraftForm() {
           minLength={20}
           maxLength={12000}
           className="min-h-40"
-          placeholder="Example: Senior Java backend interview at a fintech company. Focus on system design, concurrency, APIs, trade-offs, and communicating technical decisions."
+          placeholder="Examples: Graduate Business Analyst — stakeholder communication and requirements gathering. Customer Success Manager — difficult conversations and retention. Software Engineer — technical decisions and problem solving."
         />
       </div>
 

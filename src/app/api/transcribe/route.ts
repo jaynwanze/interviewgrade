@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { reservePublicAiRequest } from '@/modules/security/public-ai-rate-limit';
 import { createOpenAIClient } from '@/utils/openai/config';
 
 export const runtime = 'nodejs';
@@ -25,6 +26,30 @@ export async function POST(request: NextRequest) {
   }
   if (file.size > MAX_AUDIO_BYTES) {
     return NextResponse.json({ error: 'The audio recording is too large.' }, { status: 413 });
+  }
+
+  let reservation;
+  try {
+    reservation = await reservePublicAiRequest(request, 'transcribe');
+  } catch (error) {
+    console.error(
+      'Transcription rate limit unavailable:',
+      error instanceof Error ? error.message : error,
+    );
+    return NextResponse.json(
+      { error: 'AI transcription is temporarily unavailable.' },
+      { status: 503 },
+    );
+  }
+
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: 'Too many transcription requests. Please try again shortly.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(reservation.retryAfterSeconds) },
+      },
+    );
   }
 
   try {

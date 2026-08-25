@@ -25,6 +25,7 @@ const generatePracticeFormSchema = z.object({
 });
 
 const generateDocumentPracticeFormSchema = z.object({
+  contextKind: z.enum(['job-description', 'resume', 'other']),
   instruction: z.string().trim().max(1500),
   questionCount: z.coerce.number().int().min(3).max(8),
 });
@@ -96,6 +97,7 @@ export async function generatePracticeDraftFromDocumentAction(
 
   const document = formData.get('document');
   const parsed = generateDocumentPracticeFormSchema.safeParse({
+    contextKind: formData.get('contextKind'),
     instruction: formData.get('instruction') ?? '',
     questionCount: formData.get('questionCount'),
   });
@@ -153,6 +155,7 @@ export async function generatePracticeDraftFromDocumentAction(
     generatedDraft = await generatePracticeDraftFromSource({
       sourceText: extracted.text,
       sourceLabel: extracted.filename,
+      contextKind: parsed.data.contextKind,
       instruction: parsed.data.instruction,
       questionCount: parsed.data.questionCount,
     });

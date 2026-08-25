@@ -2,6 +2,8 @@ import 'server-only';
 
 import path from 'node:path';
 
+import pdfParse from 'pdf-parse';
+
 export const MAX_PRACTICE_DOCUMENT_BYTES = 5 * 1024 * 1024;
 export const MAX_PRACTICE_SOURCE_CHARACTERS = 10_000;
 export const MIN_PRACTICE_SOURCE_CHARACTERS = 40;
@@ -50,8 +52,10 @@ export async function extractPracticeDocument(
 
   try {
     if (extension === '.pdf' && isAllowedMime(file.type, 'application/pdf')) {
-      const pdfModule = await import('pdf-parse');
-      const parsed = await pdfModule.default(buffer);
+      // `pdf-parse` is externalized in Next.js. Use the same static CommonJS
+      // interop path as the existing resume parser rather than relying on the
+      // shape of a dynamic import in Vercel serverless bundles.
+      const parsed = await pdfParse(buffer);
       extractedText = parsed.text;
     } else if (extension === '.txt' && isAllowedMime(file.type, 'text/plain')) {
       extractedText = buffer.toString('utf8');
@@ -65,6 +69,13 @@ export async function extractPracticeDocument(
     if (error instanceof PracticeDocumentError) {
       throw error;
     }
+
+    console.error(
+      'extractPracticeDocument: PDF/text parsing failed',
+      error instanceof Error
+        ? { name: error.name, message: error.message }
+        : String(error),
+    );
 
     throw new PracticeDocumentError(
       'parse-failed',

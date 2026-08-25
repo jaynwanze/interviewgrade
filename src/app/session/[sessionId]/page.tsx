@@ -91,17 +91,19 @@ export default async function PracticeSessionPage({
 
   return (
     <main
-      className={`min-h-screen bg-gradient-to-b from-background via-background to-muted/30 ${
-        sessionStarted ? 'px-3 py-3 sm:px-5 sm:py-4' : 'px-4 py-5 sm:px-6 sm:py-6'
+      className={`bg-gradient-to-b from-background via-background to-muted/30 ${
+        sessionStarted
+          ? 'h-[calc(100dvh-3.5rem)] overflow-hidden px-3 py-3 sm:px-5 sm:py-4'
+          : 'min-h-screen px-4 py-5 sm:px-6 sm:py-6'
       }`}
     >
       <div
         className={`mx-auto w-full max-w-[1440px] ${
-          sessionStarted ? 'space-y-3' : 'space-y-5'
+          sessionStarted ? 'flex h-full min-h-0 flex-col gap-3' : 'space-y-5'
         }`}
       >
         {sessionStarted ? (
-          <header className="flex min-w-0 items-center justify-between gap-3 border-b pb-3">
+          <header className="flex min-w-0 shrink-0 items-center justify-between gap-3 border-b pb-3">
             <div className="flex min-w-0 items-center gap-2">
               <Sparkles className="h-4 w-4 shrink-0 text-primary" />
               <span className="shrink-0 text-sm font-medium text-primary">

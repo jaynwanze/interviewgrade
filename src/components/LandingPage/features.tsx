@@ -61,7 +61,7 @@ function FeatureVisual({ index }: { index: number }) {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Practice builder</div>
-              <div className="mt-1 text-sm font-semibold">Backend Engineer Practice</div>
+              <div className="mt-1 text-sm font-semibold">Business Analyst Practice</div>
             </div>
             <Sparkles className="h-4 w-4 text-primary" />
           </div>
@@ -73,7 +73,7 @@ function FeatureVisual({ index }: { index: number }) {
             ))}
           </div>
           <div className="mt-4 space-y-2">
-            {['System design trade-offs', 'API reliability under load', 'Technical communication'].map((item, itemIndex) => (
+            {['Stakeholder requirements', 'Prioritising competing needs', 'Clear communication'].map((item, itemIndex) => (
               <div key={item} className="flex items-center gap-3 rounded-lg border bg-muted/10 px-3 py-2 text-xs">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[9px] font-semibold text-primary">
                   {itemIndex + 1}
@@ -96,7 +96,7 @@ function FeatureVisual({ index }: { index: number }) {
             <span className="rounded-full border px-2 py-1 text-[9px] text-muted-foreground">Recording</span>
           </div>
           <p className="mt-4 text-sm font-semibold leading-5">
-            How would you diagnose a production API slowdown?
+            Tell me about a time you had to influence a stakeholder without direct authority.
           </p>
           <div className="mt-5 flex items-center justify-between rounded-lg border bg-muted/10 p-3">
             <div className="flex h-8 items-center gap-1">
@@ -127,9 +127,9 @@ function FeatureVisual({ index }: { index: number }) {
           </div>
           <div className="mt-4 space-y-3">
             {[
-              ['Problem solving', 86],
-              ['Technical depth', 78],
-              ['Communication', 82],
+              ['Communication', 86],
+              ['Evidence', 78],
+              ['Judgement', 82],
             ].map(([label, score], scoreIndex) => (
               <div key={String(label)}>
                 <div className="flex items-center justify-between text-xs">
@@ -149,7 +149,7 @@ function FeatureVisual({ index }: { index: number }) {
             ))}
           </div>
           <div className="mt-4 rounded-lg bg-primary/5 px-3 py-2 text-[10px] leading-4 text-muted-foreground">
-            Strong structure. Add one concrete production metric to make the answer more specific.
+            Strong structure. Add one concrete outcome to make the answer more specific.
           </div>
         </div>
       </div>
@@ -160,9 +160,9 @@ function FeatureVisual({ index }: { index: number }) {
     <div className="h-56 overflow-hidden bg-muted/10 p-5 sm:p-6">
       <div className="mx-auto max-w-md space-y-2 transition-transform duration-300 group-hover:-translate-y-1">
         {[
-          ['Frontend Engineer Practice', '82/100', 'Today'],
+          ['Product Manager Practice', '82/100', 'Today'],
           ['Leadership Practice', '76/100', '21 Aug'],
-          ['System Design Practice', '88/100', '18 Aug'],
+          ['Software Engineer Practice', '88/100', '18 Aug'],
         ].map(([title, score, date]) => (
           <div key={title} className="flex items-center gap-3 rounded-xl border bg-background/80 p-3 shadow-sm">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">

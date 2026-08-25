@@ -9,6 +9,34 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
+export async function GET(request: NextRequest) {
+  const sessionId = request.nextUrl.searchParams.get('sessionId')?.trim();
+  if (!sessionId) {
+    return NextResponse.json({ available: false }, { status: 400 });
+  }
+
+  let user;
+  try {
+    user = await serverGetLoggedInUser();
+  } catch {
+    return NextResponse.json({ available: false }, { status: 401 });
+  }
+
+  try {
+    const grounding = await getCoachGroundingContext({
+      sessionId,
+      userId: user.id,
+    });
+    return NextResponse.json({ available: grounding.status === 'ready' });
+  } catch (error) {
+    console.error(
+      'Practice Coach availability check failed:',
+      error instanceof Error ? error.message : error,
+    );
+    return NextResponse.json({ available: false }, { status: 503 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   let body: unknown;
   try {

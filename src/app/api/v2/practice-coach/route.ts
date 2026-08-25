@@ -79,6 +79,9 @@ export async function POST(request: NextRequest) {
         { status: 409 },
       );
     }
+    if (grounding.status !== 'ready') {
+      return NextResponse.json({ error: 'Coach context was not found.' }, { status: 404 });
+    }
 
     const reservation = await reserveCoachRequest(user.id, parsed.data.sessionId);
     if (!reservation.allowed) {

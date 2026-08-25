@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { reservePublicAiRequest } from '@/modules/security/public-ai-rate-limit';
 import { createOpenAIClient } from '@/utils/openai/config';
 
 export const runtime = 'nodejs';
@@ -8,7 +9,7 @@ export const maxDuration = 30;
 
 const requestSchema = z.object({
   text: z.string().trim().min(1).max(5000),
-  model: z.string().trim().min(1).default('tts-1'),
+  model: z.literal('tts-1').default('tts-1'),
   voice: z.enum(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']).default('alloy'),
 });
 
@@ -16,6 +17,30 @@ export async function POST(request: NextRequest) {
   const parsed = requestSchema.safeParse(await request.json());
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid text-to-speech request.' }, { status: 400 });
+  }
+
+  let reservation;
+  try {
+    reservation = await reservePublicAiRequest(request, 'tts');
+  } catch (error) {
+    console.error(
+      'TTS rate limit unavailable:',
+      error instanceof Error ? error.message : error,
+    );
+    return NextResponse.json(
+      { error: 'AI question audio is temporarily unavailable.' },
+      { status: 503 },
+    );
+  }
+
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: 'Too many text-to-speech requests. Please try again shortly.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(reservation.retryAfterSeconds) },
+      },
+    );
   }
 
   try {

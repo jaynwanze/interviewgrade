@@ -4,7 +4,8 @@ import { Download } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { PracticeCoachButton } from './PracticeCoachButton';
+// AI Coach is intentionally hidden while core product work is prioritized.
+// import { PracticeCoachButton } from './PracticeCoachButton';
 
 export function ExportReportButton({ title }: { title: string }) {
   const exportReport = () => {
@@ -20,7 +21,7 @@ export function ExportReportButton({ title }: { title: string }) {
 
   return (
     <>
-      <PracticeCoachButton />
+      {/* <PracticeCoachButton /> */}
       <Button type="button" variant="outline" size="sm" onClick={exportReport}>
         <Download className="mr-2 h-4 w-4" />
         Export PDF

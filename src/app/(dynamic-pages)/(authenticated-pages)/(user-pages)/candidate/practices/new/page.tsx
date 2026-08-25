@@ -216,7 +216,7 @@ export default function CreatePracticePage({
                     required
                     minLength={2}
                     maxLength={120}
-                    placeholder="Senior frontend interview"
+                    placeholder="Stakeholder communication Practice"
                   />
                 </Field>
 
@@ -231,7 +231,7 @@ export default function CreatePracticePage({
                     required
                     minLength={10}
                     maxLength={1000}
-                    placeholder="Prepare for a senior frontend engineering interview focused on React, architecture, and communication."
+                    placeholder="Prepare for a role-specific interview focused on communication, prioritisation, and problem solving."
                   />
                 </Field>
 
@@ -247,7 +247,7 @@ export default function CreatePracticePage({
                     minLength={10}
                     maxLength={1500}
                     className="min-h-28"
-                    placeholder="You are interviewing for a senior frontend role at a product company. The interview should test technical judgement and how clearly you explain trade-offs."
+                    placeholder="You are interviewing for a role where you need to work across teams, make sound decisions, and explain your reasoning clearly."
                   />
                 </Field>
               </CardContent>
@@ -274,7 +274,7 @@ export default function CreatePracticePage({
                       minLength={5}
                       maxLength={1000}
                       className="min-h-28"
-                      placeholder="Tell me about a difficult frontend architecture decision you made and how you evaluated the trade-offs."
+                      placeholder="Tell me about a time you had to balance competing stakeholder needs. How did you decide what to prioritise?"
                     />
                   </Field>
                 </CardContent>
@@ -299,7 +299,7 @@ export default function CreatePracticePage({
                       required
                       minLength={2}
                       maxLength={120}
-                      placeholder="Technical judgement"
+                      placeholder="Decision quality"
                     />
                   </Field>
 
@@ -314,7 +314,7 @@ export default function CreatePracticePage({
                       required
                       minLength={5}
                       maxLength={1000}
-                      placeholder="Explains alternatives, trade-offs, constraints, and why the final decision was appropriate."
+                      placeholder="Explains the context, options considered, trade-offs, decision, and a clear outcome."
                     />
                   </Field>
                 </CardContent>

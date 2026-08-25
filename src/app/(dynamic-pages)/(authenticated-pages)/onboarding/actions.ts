@@ -9,7 +9,7 @@ export type V2ExperienceLevel = 'intern' | 'graduate' | 'mid' | 'senior';
 export type V2InterviewFocus =
   | 'behavioral'
   | 'technical'
-  | 'system-design'
+  | 'role-specific'
   | 'mixed';
 
 export async function completeV2OnboardingAction(input: {

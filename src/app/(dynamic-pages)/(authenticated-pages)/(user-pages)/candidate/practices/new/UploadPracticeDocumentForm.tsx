@@ -13,12 +13,34 @@ export function UploadPracticeDocumentForm() {
     <form action={generatePracticeDraftFromDocumentAction} className="space-y-5">
       <div className="space-y-2">
         <div className="space-y-1">
-          <label htmlFor="document" className="text-sm font-medium">
-            Source document
+          <label htmlFor="contextKind" className="text-sm font-medium">
+            What are you uploading?
           </label>
           <p className="text-xs text-muted-foreground">
-            Text-based PDF or TXT, up to 5 MB. The source is used to create the draft
-            and is not stored by this flow.
+            Tell InterviewGrade how to use the source so the generated Practice is
+            tailored appropriately.
+          </p>
+        </div>
+        <select
+          id="contextKind"
+          name="contextKind"
+          defaultValue="job-description"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:max-w-xs"
+        >
+          <option value="job-description">Job description</option>
+          <option value="resume">Résumé / CV</option>
+          <option value="other">Other source document</option>
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <div className="space-y-1">
+          <label htmlFor="document" className="text-sm font-medium">
+            Practice context
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Text-based PDF or TXT, up to 5 MB. The file and extracted text are used
+            only for this generation request and are not stored by this flow.
           </p>
         </div>
         <input
@@ -37,7 +59,7 @@ export function UploadPracticeDocumentForm() {
             Optional focus
           </label>
           <p className="text-xs text-muted-foreground">
-            Add any role, skill, or interview focus you want reflected in the Practice.
+            Add any role, skill, scenario, or interview focus you want emphasized.
           </p>
         </div>
         <Textarea
@@ -45,7 +67,7 @@ export function UploadPracticeDocumentForm() {
           name="instruction"
           maxLength={1500}
           className="min-h-28"
-          placeholder="Example: Focus on stakeholder communication, decision making, and the most important requirements in this role."
+          placeholder="Example: Focus on stakeholder communication, decision making, and the most important requirements for this role."
         />
       </div>
 
@@ -73,7 +95,8 @@ export function UploadPracticeDocumentForm() {
       </div>
 
       <p className="text-xs leading-5 text-muted-foreground">
-        You can review and edit everything before publishing.
+        You can review and edit everything before publishing. Résumé-based generation
+        is instructed to use only experience explicitly present in your source.
       </p>
     </form>
   );
@@ -89,7 +112,7 @@ function GenerateDocumentButton() {
       ) : (
         <FileText className="mr-2 h-4 w-4" />
       )}
-      {pending ? 'Creating draft…' : 'Create from document'}
+      {pending ? 'Creating draft…' : 'Create from context'}
     </Button>
   );
 }

@@ -2,3 +2,79 @@
   width: 100%;
   min-width: 0;
 }
+
+/*
+ * Focus mode should read as one interview stage, not a stack of dashboard cards.
+ * Keep the existing V2 components/tokens, but let the active session size itself
+ * to the viewport instead of reserving a large fixed-height canvas.
+ */
+@media (min-width: 1024px) {
+  .shell > div {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+}
+
+/* Compact the Avery/question surface without changing its component structure. */
+.shell > div > div:has(> div > :global(.text-center)) > div {
+  padding: 0.75rem 1rem !important;
+}
+
+.shell :global(.text-center) {
+  margin-top: 0.35rem !important;
+  text-align: left !important;
+}
+
+.shell :global(.text-center) > p {
+  margin-top: 0.35rem !important;
+  max-width: none !important;
+  font-size: clamp(1.05rem, 1.5vw, 1.35rem) !important;
+  line-height: 1.45 !important;
+}
+
+.shell :global(.text-center) :global(.justify-center) {
+  justify-content: flex-start !important;
+}
+
+/* Keep the camera as the primary stage, but avoid forcing a second viewport. */
+.shell > div > div:has(video) {
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.shell video {
+  min-height: 240px;
+  max-height: 46vh !important;
+  object-fit: cover;
+}
+
+/*
+ * Recording controls are critical interaction affordances. The camera component
+ * already renders them; make the desktop overlay explicit so layout changes or
+ * breakpoint utility ordering cannot hide the controls in focus mode.
+ */
+@media (min-width: 640px) {
+  .shell :global(.bottom-4):has(button[aria-label='Record answer']) {
+    z-index: 20;
+    display: flex !important;
+  }
+
+  .shell :global(.bottom-20) {
+    z-index: 20;
+    display: flex !important;
+  }
+}
+
+.shell button[aria-label='Record answer'],
+.shell button[aria-label='Stop recording'] {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 639px) {
+  .shell video {
+    min-height: 220px;
+    max-height: 52vh !important;
+  }
+}

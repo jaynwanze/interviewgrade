@@ -781,19 +781,21 @@ export function V2SessionPlayer({
         </Card>
       )}
 
-      {!showFeedbackPanel && canEndPractice && (
-        <div className="flex shrink-0 justify-end">
-          <Button
-            onClick={finishSession}
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            disabled={busy || feedbackLoading}
-          >
-            End practice
-          </Button>
-        </div>
-      )}
+      {canEndPractice &&
+        !canMoveNext &&
+        !(isFinalQuestion && answeredCurrentQuestion) && (
+          <div className="flex shrink-0 justify-end">
+            <Button
+              onClick={finishSession}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              disabled={busy || feedbackLoading}
+            >
+              End practice
+            </Button>
+          </div>
+        )}
     </div>
   );
 }

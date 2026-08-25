@@ -3,6 +3,18 @@ import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/cr
 import type { AuthProvider, SAPayload } from '@/types';
 import { UserType } from '@/types/userTypes';
 import { toSiteURL } from '@/utils/helpers';
+
+function authMetadataForUserType(userType: UserType) {
+  if (userType === 'candidate') {
+    return {
+      onboardingVersion: 2,
+      onboardingV2Complete: false,
+    };
+  }
+
+  return { userType };
+}
+
 export const signUp = async (
   email: string,
   password: string,
@@ -15,19 +27,14 @@ export const signUp = async (
     password,
     options: {
       emailRedirectTo: toSiteURL('/auth/callback'),
-      data: { userType },
+      data: authMetadataForUserType(userType),
     },
   });
   if (error) {
-    return {
-      status: 'error',
-      message: error.message,
-    };
+    return { status: 'error', message: error.message };
   }
 
-  return {
-    status: 'success',
-  };
+  return { status: 'success' };
 };
 
 export const signInWithPassword = async (
@@ -35,23 +42,14 @@ export const signInWithPassword = async (
   password: string,
 ): Promise<SAPayload> => {
   const supabase = createSupabaseUserServerActionClient();
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     console.log(error);
-    return {
-      status: 'error',
-      message: error.message,
-    };
+    return { status: 'error', message: error.message };
   }
 
-  return {
-    status: 'success',
-  };
+  return { status: 'success' };
 };
 
 export const signInWithMagicLink = async (
@@ -61,43 +59,30 @@ export const signInWithMagicLink = async (
 ): Promise<SAPayload> => {
   const supabase = createSupabaseUserServerActionClient();
   const redirectUrl = new URL(toSiteURL('/auth/callback'));
-  if (next) {
-    redirectUrl.searchParams.set('next', next);
-  }
+  if (next) redirectUrl.searchParams.set('next', next);
+
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       emailRedirectTo: redirectUrl.toString(),
-      data: { userType },
+      data: authMetadataForUserType(userType),
     },
   });
 
-  if (error) {
-    return {
-      status: 'error',
-      message: error.message,
-    };
-  }
-
-  return {
-    status: 'success',
-  };
+  if (error) return { status: 'error', message: error.message };
+  return { status: 'success' };
 };
 
 export const signInWithProvider = async (
   provider: AuthProvider,
-  // Accept userType as a parameter
   next?: string,
-): Promise<
-  SAPayload<{
-    url: string;
-  }>
-> => {
+  v2Onboarding = true,
+): Promise<SAPayload<{ url: string }>> => {
   const supabase = createSupabaseUserServerActionClient();
   const redirectToURL = new URL(toSiteURL('/auth/callback'));
-  if (next) {
-    redirectToURL.searchParams.set('next', next);
-  }
+  if (next) redirectToURL.searchParams.set('next', next);
+  if (v2Onboarding) redirectToURL.searchParams.set('v2Onboarding', '1');
+
   const { error, data } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -106,17 +91,11 @@ export const signInWithProvider = async (
     },
   });
 
-  if (error) {
-    return { status: 'error', message: error.message };
-  }
-
-  const providerUrl = data.url;
+  if (error) return { status: 'error', message: error.message };
 
   return {
     status: 'success',
-    data: {
-      url: providerUrl,
-    },
+    data: { url: data.url },
   };
 };
 
@@ -128,14 +107,6 @@ export const resetPassword = async (email: string): Promise<SAPayload> => {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: redirectToURL.toString(),
   });
-  if (error) {
-    return {
-      status: 'error',
-      message: error.message,
-    };
-  }
-
-  return {
-    status: 'success',
-  };
+  if (error) return { status: 'error', message: error.message };
+  return { status: 'success' };
 };

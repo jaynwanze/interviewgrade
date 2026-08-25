@@ -1,14 +1,15 @@
+import { Database } from '@/lib/database.types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
-import { Database } from '@/lib/database.types';
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next');
+  const wantsV2Onboarding = requestUrl.searchParams.get('v2Onboarding') === '1';
 
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -21,6 +22,8 @@ export async function GET(request: Request) {
       },
     });
   }
+
+  let initializedV2Onboarding = false;
 
   if (code) {
     const cookieStore = cookies();
@@ -38,8 +41,7 @@ export async function GET(request: Request) {
                 cookieStore.set(name, value, options),
               );
             } catch {
-              // The `setAll` method was called from a Server Component.
-              // This can be ignored if middleware is refreshing user sessions.
+              // Middleware refreshes the session cookies when needed.
             }
           },
         },
@@ -51,17 +53,52 @@ export async function GET(request: Request) {
       console.error('Failed to exchange code for session:', error);
       return NextResponse.redirect(new URL('/c/login', requestUrl.origin));
     }
+
+    if (wantsV2Onboarding) {
+      const {
+        data: { user: oauthUser },
+      } = await supabase.auth.getUser();
+
+      if (
+        oauthUser &&
+        !oauthUser.user_metadata?.userType &&
+        oauthUser.user_metadata?.onboardingVersion == null
+      ) {
+        const createdAt = Date.parse(oauthUser.created_at);
+        const isNewAccount =
+          Number.isFinite(createdAt) && Date.now() - createdAt < 5 * 60 * 1000;
+
+        if (isNewAccount) {
+          const { error: metadataError } = await supabase.auth.updateUser({
+            data: {
+              onboardingVersion: 2,
+              onboardingV2Complete: false,
+            },
+          });
+
+          if (metadataError) {
+            console.error('Failed to initialize V2 onboarding:', metadataError);
+          } else {
+            initializedV2Onboarding = true;
+          }
+        }
+      }
+    }
   }
 
   revalidatePath('/');
 
   const user = await serverGetLoggedInUser();
   const legacyUserType = user.user_metadata?.userType;
+  const hasPendingV2Onboarding =
+    initializedV2Onboarding ||
+    (user.user_metadata?.onboardingVersion === 2 &&
+      user.user_metadata?.onboardingV2Complete !== true);
 
-  // Employer is the only legacy account type that needs its old shell. New V2
-  // OAuth users do not carry userType metadata and should enter the V2 candidate
-  // shell, where Creator/Participant behavior is resource-based rather than a
-  // permanent account role.
+  if (hasPendingV2Onboarding) {
+    return NextResponse.redirect(new URL('/onboarding', requestUrl.origin));
+  }
+
   let redirectTo = new URL(
     legacyUserType === 'employer' ? '/employer' : '/candidate',
     requestUrl.origin,

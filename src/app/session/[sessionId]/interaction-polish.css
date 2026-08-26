@@ -18,33 +18,37 @@
 }
 
 .session-interaction-shell button[aria-label='Record answer'] {
-  border-color: rgb(255 255 255 / 0.24) !important;
-  background: rgb(80 84 92 / 0.34) !important;
-  color: rgb(255 255 255 / 0.96) !important;
+  border-color: rgb(255 255 255 / 0.3) !important;
+  background: rgb(96 100 110 / 0.44) !important;
+  color: rgb(255 255 255 / 0.98) !important;
 }
 
 .session-interaction-shell button[aria-label='Record answer']:not(:disabled):hover {
-  border-color: rgb(255 255 255 / 0.36) !important;
-  background: rgb(96 100 110 / 0.46) !important;
+  border-color: rgb(255 255 255 / 0.4) !important;
+  background: rgb(112 116 126 / 0.52) !important;
   transform: translateY(-1px);
 }
 
 .session-interaction-shell button[aria-label='Stop recording'] {
-  border-color: rgb(248 113 113 / 0.34) !important;
-  background: rgb(185 69 78 / 0.55) !important;
+  border-color: rgb(244 114 130 / 0.28) !important;
+  background: rgb(160 72 82 / 0.48) !important;
   color: rgb(255 248 248 / 0.96) !important;
 }
 
 .session-interaction-shell button[aria-label='Stop recording']:not(:disabled):hover {
-  border-color: rgb(252 165 165 / 0.46) !important;
-  background: rgb(190 72 82 / 0.68) !important;
+  border-color: rgb(251 146 160 / 0.38) !important;
+  background: rgb(168 76 88 / 0.58) !important;
   transform: translateY(-1px);
 }
 
-.session-interaction-shell button[aria-label='Record answer']:disabled,
+.session-interaction-shell button[aria-label='Record answer']:disabled {
+  opacity: 0.68 !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16) !important;
+}
+
 .session-interaction-shell button[aria-label='Stop recording']:disabled {
-  opacity: 0.48 !important;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14) !important;
+  opacity: 0.42 !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12) !important;
 }
 
 /* Keep the waveform as the visual anchor while making its surrounding chrome lighter. */
@@ -70,20 +74,46 @@
 }
 
 @media (max-width: 767px) {
-  /* A collapsed feedback checkpoint should not force the camera into a tiny preview. */
+  /* Keep the live camera close to the prompt instead of vertically centering it in spare space. */
+  .session-interaction-shell .flex.min-h-0.flex-1.items-center.justify-center:has(video) {
+    align-items: flex-start !important;
+  }
+
+  /* Long prompts remain scrollable, with a soft edge instead of looking abruptly clipped. */
+  .session-interaction-shell .text-center > p {
+    padding-bottom: 0.45rem !important;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 1) calc(100% - 0.6rem),
+      rgb(0 0 0 / 0.18) 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 1) 0,
+      rgb(0 0 0 / 1) calc(100% - 0.6rem),
+      rgb(0 0 0 / 0.18) 100%
+    );
+  }
+
+  /* A collapsed feedback checkpoint still reads as a useful live camera preview. */
   .session-interaction-shell:has(.lucide-message-square) video {
-    height: clamp(175px, 27dvh, 230px) !important;
+    height: clamp(190px, 29dvh, 240px) !important;
     transition: height 220ms ease, border-radius 220ms ease !important;
   }
 
-  /* Guidance expanded: give reading space back without hiding the live camera. */
+  /* Guidance expanded: yield reading space without reducing the camera to a thin strip. */
   .session-interaction-shell:has(.text-center > div > p.text-sm:not(.line-clamp-2)) video {
-    height: clamp(125px, 19dvh, 170px) !important;
+    height: clamp(150px, 22dvh, 195px) !important;
   }
 
-  /* Previous feedback expanded adds a bordered detail region; compact the camera while it is open. */
+  /* Previous feedback expanded keeps enough face context while prioritising the detail panel. */
   .session-interaction-shell:has(.lucide-message-square):has(.border-t p.text-sm) video {
-    height: clamp(125px, 19dvh, 170px) !important;
+    height: clamp(150px, 22dvh, 195px) !important;
+  }
+
+  .session-interaction-shell:has(.lucide-message-square) .flex.min-h-0.flex-1.items-center.justify-center:has(video) {
+    padding-bottom: 0.3rem !important;
   }
 
   .session-interaction-shell button[aria-label='Record answer'],

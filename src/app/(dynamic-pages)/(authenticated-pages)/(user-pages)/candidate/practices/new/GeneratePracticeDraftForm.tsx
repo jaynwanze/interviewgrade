@@ -10,37 +10,32 @@ import { generatePracticeDraftAction } from './actions';
 
 export function GeneratePracticeDraftForm() {
   return (
-    <form action={generatePracticeDraftAction} className="space-y-5">
+    <form action={generatePracticeDraftAction} className="space-y-4">
       <div className="space-y-2">
-        <div className="space-y-1">
-          <label htmlFor="brief" className="text-sm font-medium">
-            What do you want to practise?
-          </label>
-          <p className="text-xs text-muted-foreground">
-            Describe the role, skill, scenario, or paste a job description.
-          </p>
-        </div>
+        <label htmlFor="brief" className="text-sm font-medium">
+          What are you preparing for?
+        </label>
         <Textarea
           id="brief"
           name="brief"
           required
           minLength={20}
           maxLength={12000}
-          className="min-h-40"
-          placeholder="Examples: Graduate Business Analyst — stakeholder communication and requirements gathering. Customer Success Manager — difficult conversations and retention. Software Engineer — technical decisions and problem solving."
+          className="min-h-32"
+          placeholder="Role, skills, scenario, or paste a job description…"
         />
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <label htmlFor="questionCount" className="text-sm font-medium">
+      <div className="flex items-end justify-between gap-3">
+        <div className="space-y-1.5">
+          <label htmlFor="questionCount" className="text-xs font-medium text-muted-foreground">
             Questions
           </label>
           <select
             id="questionCount"
             name="questionCount"
             defaultValue="5"
-            className="flex h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex h-9 w-36 rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <option value="3">3 questions</option>
             <option value="4">4 questions</option>
@@ -53,10 +48,6 @@ export function GeneratePracticeDraftForm() {
 
         <GenerateButton />
       </div>
-
-      <p className="text-xs leading-5 text-muted-foreground">
-        You can review and edit everything before publishing.
-      </p>
     </form>
   );
 }
@@ -65,13 +56,9 @@ function GenerateButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending} className="sm:min-w-44">
-      {pending ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      ) : (
-        <Sparkles className="mr-2 h-4 w-4" />
-      )}
-      {pending ? 'Creating draft…' : 'Create with AI'}
+    <Button type="submit" disabled={pending} size="sm" className="sm:min-w-40">
+      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+      {pending ? 'Creating…' : 'Create draft'}
     </Button>
   );
 }

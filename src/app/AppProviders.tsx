@@ -46,7 +46,13 @@ export function AppProviders({
                 <ProgressBar
                   height="4px"
                   color="#0047ab"
-                  options={{ showSpinner: false }}
+                  options={{
+                    showSpinner: false,
+                    minimum: 0.16,
+                    trickle: true,
+                    trickleSpeed: 180,
+                    speed: 240,
+                  }}
                   shallowRouting
                 />
               </Suspense>

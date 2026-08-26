@@ -5,7 +5,6 @@ import { InterviewHistoryList } from '@/components/Interviews/InterviewHistory/I
 import { V2PracticeHistoryList } from '@/components/Interviews/InterviewHistory/V2PracticeHistoryList';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type {
   LegacyCandidateHistoryPage,
@@ -50,26 +49,18 @@ export default function InterviewHistoryPage({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const activeTab = tabByFilter[filter];
-  const activeSwitch =
-    legacyMode === 'interview' ? 'Interview Mode' : 'Practice Mode';
+  const activeSwitch = legacyMode === 'interview' ? 'Interview Mode' : 'Practice Mode';
   const counts = legacyView ? legacyPage.counts : v2Page.counts;
 
   const replaceParams = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(updates)) {
-      if (value == null) {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
+      if (value == null) params.delete(key);
+      else params.set(key, value);
     }
     const query = params.toString();
     startTransition(() => {
-      router.replace(
-        query
-          ? `/candidate/interview-history?${query}`
-          : '/candidate/interview-history',
-      );
+      router.replace(query ? `/candidate/interview-history?${query}` : '/candidate/interview-history');
     });
   };
 
@@ -85,56 +76,45 @@ export default function InterviewHistoryPage({
   };
 
   return (
-    <div className={`mx-auto max-w-5xl ${isPending ? 'opacity-70' : ''}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className={`mx-auto max-w-5xl space-y-4 ${isPending ? 'opacity-70' : ''}`}>
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-semibold tracking-tight">
             {legacyView ? 'Legacy history' : 'History'}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {legacyView
-              ? 'Sessions from the original InterviewGrade interview and practice experience.'
-              : 'Review your Practice attempts, continue unfinished sessions, and open completed reports.'}
+            {legacyView ? 'Previous InterviewGrade sessions.' : 'Resume sessions or open completed reports.'}
           </p>
         </div>
 
         {legacyView ? (
           <Button asChild variant="outline" size="sm">
             <Link href="/candidate/interview-history">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to History
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
+              Back
             </Link>
           </Button>
         ) : (
           <Button asChild variant="ghost" size="sm">
             <Link href="/candidate/interview-history?legacy=1">
-              <Archive className="mr-2 h-4 w-4" />
-              Legacy history
+              <Archive className="mr-1.5 h-4 w-4" />
+              Legacy
             </Link>
           </Button>
         )}
       </div>
 
-      <Separator className="my-5" />
-
       {legacyView && (
-        <div className="mb-5 rounded-lg border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-          This archive contains sessions created with InterviewGrade&apos;s previous
-          interview and practice experience. It is not included in current Practice
-          scores or analytics.
+        <div className="rounded-lg border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+          Legacy sessions are excluded from current Practice scores and analytics.
         </div>
       )}
 
-      <div className="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
-        <InterviewHistoryFilter
-          activeTab={activeTab}
-          counts={counts}
-          onTabChange={handleTabChange}
-        />
-
+      <div className="flex w-full flex-col gap-3 rounded-xl border bg-card/40 p-3 md:flex-row md:items-center md:justify-between">
+        <InterviewHistoryFilter activeTab={activeTab} counts={counts} onTabChange={handleTabChange} />
         {legacyView && (
           <div className="flex items-center gap-3 whitespace-nowrap">
-            <Label htmlFor="history-mode" className="text-sm font-medium">
+            <Label htmlFor="history-mode" className="text-xs font-medium">
               {activeSwitch}
             </Label>
             <Switch
@@ -147,31 +127,16 @@ export default function InterviewHistoryPage({
         )}
       </div>
 
-      <Separator className="my-5" />
-
-      {!legacyView && v2Error && (
-        <StatusNotice>
-          Practice history could not be loaded right now. Please refresh and try
-          again.
-        </StatusNotice>
-      )}
-      {legacyView && legacyError && (
-        <StatusNotice>
-          Legacy history could not be loaded right now. Your current Practice
-          history is unaffected.
-        </StatusNotice>
-      )}
+      {!legacyView && v2Error && <StatusNotice>Practice history could not be loaded. Refresh and try again.</StatusNotice>}
+      {legacyView && legacyError && <StatusNotice>Legacy history could not be loaded.</StatusNotice>}
 
       {!legacyView && !v2Error && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {v2Page.totalItems > 0 ? (
             <>
-              <V2PracticeHistoryList
-                sessions={v2Page.items}
-                totalCount={v2Page.totalItems}
-              />
+              <V2PracticeHistoryList sessions={v2Page.items} totalCount={v2Page.totalItems} />
               <HistoryPager
-                label="Practice sessions"
+                label="Sessions"
                 page={v2Page.page}
                 totalPages={v2Page.totalPages}
                 disabled={isPending}
@@ -179,27 +144,18 @@ export default function InterviewHistoryPage({
               />
             </>
           ) : (
-            <EmptyHistory>
-              No Practice sessions found for this filter.
-            </EmptyHistory>
+            <EmptyHistory>No sessions for this filter.</EmptyHistory>
           )}
         </div>
       )}
 
       {legacyView && !legacyError && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {legacyPage.totalItems > 0 ? (
             <>
-              <InterviewHistoryList
-                interviews={legacyPage.items}
-                interviewModeToggle={activeSwitch}
-              />
+              <InterviewHistoryList interviews={legacyPage.items} interviewModeToggle={activeSwitch} />
               <HistoryPager
-                label={
-                  legacyMode === 'interview'
-                    ? 'Legacy interviews'
-                    : 'Legacy Practice sessions'
-                }
+                label="Legacy"
                 page={legacyPage.page}
                 totalPages={legacyPage.totalPages}
                 disabled={isPending}
@@ -207,10 +163,7 @@ export default function InterviewHistoryPage({
               />
             </>
           ) : (
-            <EmptyHistory>
-              No legacy {legacyMode === 'interview' ? 'interviews' : 'Practice sessions'}{' '}
-              found for this filter.
-            </EmptyHistory>
+            <EmptyHistory>No legacy sessions for this filter.</EmptyHistory>
           )}
         </div>
       )}
@@ -231,31 +184,15 @@ function HistoryPager({
   disabled: boolean;
   onPageChange: (page: number) => void;
 }) {
-  if (totalPages <= 1) {
-    return null;
-  }
+  if (totalPages <= 1) return null;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-1">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={disabled || page <= 1}
-        onClick={() => onPageChange(page - 1)}
-      >
+      <Button type="button" variant="outline" size="sm" disabled={disabled || page <= 1} onClick={() => onPageChange(page - 1)}>
         Previous
       </Button>
-      <span className="text-xs text-muted-foreground">
-        {label}: page {page} of {totalPages}
-      </span>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={disabled || page >= totalPages}
-        onClick={() => onPageChange(page + 1)}
-      >
+      <span className="text-xs text-muted-foreground">{label} · {page}/{totalPages}</span>
+      <Button type="button" variant="outline" size="sm" disabled={disabled || page >= totalPages} onClick={() => onPageChange(page + 1)}>
         Next
       </Button>
     </div>
@@ -263,31 +200,19 @@ function HistoryPager({
 }
 
 function StatusNotice({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto mb-4 w-full max-w-4xl rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
-      {children}
-    </div>
-  );
+  return <div className="mx-auto w-full max-w-4xl rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm">{children}</div>;
 }
 
 function EmptyHistory({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto max-w-2xl rounded-lg border p-6 text-center text-sm text-muted-foreground">
-      {children}
-    </div>
-  );
+  return <div className="mx-auto max-w-2xl rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
 function filterForTab(tab: HistoryTab): CandidateSessionHistoryFilter {
   switch (tab) {
-    case 'Completed':
-      return 'completed';
-    case 'Not Completed':
-      return 'not_completed';
-    case 'Not Started':
-      return 'not_started';
+    case 'Completed': return 'completed';
+    case 'Not Completed': return 'not_completed';
+    case 'Not Started': return 'not_started';
     case 'All':
-    default:
-      return 'all';
+    default: return 'all';
   }
 }

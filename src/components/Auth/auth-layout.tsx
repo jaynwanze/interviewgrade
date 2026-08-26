@@ -53,7 +53,11 @@ function SidebarContent({ userType }: { userType: 'candidate' | 'employer' }) {
           quality={100} // Optional: set image quality
         />
       )}
-      <div className="relative z-20 flex items-center text-lg font-medium">
+      <Link
+        href="/"
+        aria-label="Back to InterviewGrade home"
+        className="relative z-20 flex w-fit items-center text-lg font-medium"
+      >
         <Image
           width={36}
           src={logo}
@@ -61,7 +65,7 @@ function SidebarContent({ userType }: { userType: 'candidate' | 'employer' }) {
           className="mr-1"
         />{' '}
         InterviewGrade
-      </div>
+      </Link>
       <div className="relative z-20 mt-auto">
         <div className="relative">
           <div className="absolute inset-0 bg-white bg-opacity-5 backdrop-blur-md rounded-lg"></div>

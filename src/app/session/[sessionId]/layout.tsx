@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import './interaction-polish.css';
+import './avery-stage.css';
 
 export default async function SessionLayout({
   children,

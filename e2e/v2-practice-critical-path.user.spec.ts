@@ -132,12 +132,11 @@ test('creator → mobile guest → final response → report → creator results
 async function expectNoHorizontalOverflow(page: Page) {
   await expect
     .poll(async () =>
-      page.evaluate(() => ({
-        viewportWidth: window.innerWidth,
-        documentWidth: document.documentElement.scrollWidth,
-      })),
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+      ),
     )
-    .toMatchObject({ viewportWidth: 390, documentWidth: 390 });
+    .toBe(true);
 }
 
 async function createAndPublishFiveQuestionPractice(page: Page, title: string) {

@@ -334,30 +334,30 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   };
 
   const recordingControls = (
-    <div className="flex items-center justify-center space-x-1.5 sm:space-x-3">
+    <div className="flex items-center justify-center space-x-1.5 sm:space-x-2">
       <Button
         onClick={handleRecord}
         disabled={isRecording || isTranscribing || disabled}
         className={
           controlsOverlay
-            ? 'h-9 w-9 rounded-full p-0 shadow-lg sm:h-11 sm:w-11'
+            ? 'h-9 w-9 rounded-full border border-white/30 bg-white/85 p-0 text-black shadow-md hover:bg-white/95 sm:h-10 sm:w-10'
             : undefined
         }
         aria-label="Record answer"
       >
-        <MicrophoneIcon className="h-4.5 w-4.5 sm:h-6 sm:w-6" />
+        <MicrophoneIcon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
       </Button>
       <Button
         onClick={() => void handleEndRecord()}
         disabled={!isRecording || isTranscribing}
-        className={`bg-red-500 hover:bg-red-600 ${
+        className={`bg-red-500/90 hover:bg-red-500 ${
           controlsOverlay
-            ? 'h-9 w-9 rounded-full p-0 shadow-lg sm:h-11 sm:w-11'
+            ? 'h-9 w-9 rounded-full border border-white/20 p-0 shadow-md sm:h-10 sm:w-10'
             : ''
         }`}
         aria-label="Stop recording"
       >
-        <StopCircle className="h-4.5 w-4.5 sm:h-6 sm:w-6" />
+        <StopCircle className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
       </Button>
     </div>
   );
@@ -375,20 +375,20 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         />
 
         {controlsOverlay && isRecording && mediaStreamRef.current && audioContextRef.current && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-20 hidden justify-center sm:flex">
-            <div className="rounded-full border border-white/15 bg-black/50 px-3 py-2 shadow-lg backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-x-0 bottom-16 hidden justify-center sm:flex">
+            <div className="rounded-full border border-white/15 bg-black/25 px-3 py-1.5 shadow-md backdrop-blur-xl">
               <Meter
                 audioContext={audioContextRef.current}
                 stream={mediaStreamRef.current}
-                settings={{ bars: 18, spacing: 2, width: 3, height: 28 }}
+                settings={{ bars: 18, spacing: 2, width: 3, height: 24 }}
               />
             </div>
           </div>
         )}
 
         {controlsOverlay && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-4 hidden justify-center sm:flex">
-            <div className="pointer-events-auto rounded-full border border-white/15 bg-black/55 p-2 shadow-xl backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 hidden justify-center sm:flex">
+            <div className="pointer-events-auto rounded-full border border-white/15 bg-black/25 p-1.5 shadow-lg backdrop-blur-xl">
               {recordingControls}
             </div>
           </div>
@@ -396,13 +396,13 @@ export const UserCamera: React.FC<UserCameraProps> = ({
 
         {controlsOverlay && (
           <div className="pointer-events-none absolute inset-x-0 bottom-2.5 flex justify-center sm:hidden">
-            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-2 py-1.5 shadow-xl backdrop-blur-md">
+            <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/15 bg-black/25 px-1.5 py-1 shadow-lg backdrop-blur-xl">
               {isRecording && mediaStreamRef.current && audioContextRef.current && (
-                <div className="pointer-events-none flex min-w-[62px] items-center justify-center px-1">
+                <div className="pointer-events-none flex min-w-[54px] items-center justify-center px-1">
                   <Meter
                     audioContext={audioContextRef.current}
                     stream={mediaStreamRef.current}
-                    settings={{ bars: 12, spacing: 1, width: 2, height: 18 }}
+                    settings={{ bars: 11, spacing: 1, width: 2, height: 16 }}
                   />
                 </div>
               )}
@@ -412,7 +412,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         )}
 
         {controlsOverlay && (isRecording || isTranscribing) && (
-          <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm sm:left-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
+          <div className="absolute left-2 top-2 rounded-full border border-white/15 bg-black/25 px-2 py-0.5 text-[10px] font-medium text-white shadow-sm backdrop-blur-xl sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs">
             {isTranscribing ? 'Transcribing…' : `Recording ${recordingTime}s`}
           </div>
         )}

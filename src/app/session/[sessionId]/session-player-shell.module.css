@@ -276,34 +276,83 @@
 }
 
 /*
- * Feedback is intentionally unmistakable. It still uses the existing streamed
- * feedback state, but presents as a focused insight surface over the stage.
+ * Feedback stays concise and in the normal stage flow. It should feel like a
+ * quick checkpoint between questions, not another dashboard or modal layered
+ * over the candidate's video.
  */
 .shell
   > div:has(video)
   > div:has(:global(.lucide-message-square)) {
-  position: absolute;
+  position: relative;
   right: auto;
-  bottom: 1rem;
-  left: 50%;
-  z-index: 35;
-  width: min(calc(100% - 2rem), 46rem);
-  max-height: min(14rem, 40%);
-  transform: translateX(-50%);
-  overflow-y: auto;
-  border-color: hsl(var(--primary) / 0.28);
-  background: hsl(var(--card) / 0.985);
-  box-shadow:
-    0 20px 55px rgb(0 0 0 / 0.18),
-    0 0 0 1px hsl(var(--primary) / 0.06);
-  backdrop-filter: blur(18px);
+  bottom: auto;
+  left: auto;
+  z-index: 20;
+  width: min(100%, 46rem);
+  max-height: none;
+  margin: 0.35rem auto 0;
+  transform: none;
+  overflow: visible;
+  border-color: hsl(var(--border) / 0.82);
+  background: hsl(var(--card) / 0.94);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .shell
   > div:has(video)
   > div:has(:global(.lucide-message-square))
   > div {
-  padding: 0.8rem 0.95rem !important;
+  gap: 0.55rem !important;
+  padding: 0.65rem 0.8rem !important;
+}
+
+/* Remove the nested-card feel from streamed summary/advice blocks. */
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  :global(.grid) {
+  display: block !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  :global(.grid)
+  > div {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  :global(.grid)
+  > div
+  + div {
+  margin-top: 0.45rem;
+}
+
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  :global(.grid)
+  p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  line-height: 1.45 !important;
+}
+
+.shell
+  > div:has(video)
+  > div:has(:global(.lucide-message-square))
+  :global(.border-t) {
+  margin-top: 0.2rem;
+  padding-top: 0.55rem !important;
 }
 
 .shell > div:has(video) > div:has(> button) {
@@ -408,9 +457,8 @@
   .shell
     > div:has(video)
     > div:has(:global(.lucide-message-square)) {
-    bottom: 0.55rem;
-    width: calc(100% - 1rem);
-    max-height: 48%;
+    width: 100%;
+    margin-top: 0.3rem;
   }
 }
 

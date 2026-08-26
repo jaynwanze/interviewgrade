@@ -1,0 +1,215 @@
+/* Avery-first session composition. Presentation only: existing Practice state/media/feedback remain unchanged. */
+.session-interaction-shell main > div > div:has(video) {
+  position: relative;
+}
+
+/* Question/Avery becomes the visual stage instead of a header above a large webcam. */
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) {
+  display: flex !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) > div {
+  width: min(100%, 52rem);
+  padding: clamp(0.75rem, 2.2vh, 1.4rem) 1rem !important;
+}
+
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) > div > div:first-child {
+  justify-content: center !important;
+  gap: 0.8rem !important;
+}
+
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) > div > div:first-child > div:first-child {
+  width: 4.4rem !important;
+  height: 4.4rem !important;
+  border-color: hsl(var(--primary) / 0.22) !important;
+  background:
+    radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.1), transparent 68%),
+    hsl(var(--background) / 0.82) !important;
+  box-shadow:
+    inset 0 1px 0 hsl(var(--background) / 0.85),
+    0 12px 34px rgb(0 0 0 / 0.1);
+}
+
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) .text-center {
+  width: min(100%, 46rem) !important;
+  margin: 1rem auto 0 !important;
+  text-align: center !important;
+}
+
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) .text-center > p {
+  max-height: min(24vh, 13rem) !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: clamp(1.05rem, 2vw, 1.45rem) !important;
+  line-height: 1.42 !important;
+  text-wrap: balance;
+}
+
+.session-interaction-shell div:has(> div > .text-center):has(+ div video) .text-center :is(.justify-center) {
+  justify-content: center !important;
+}
+
+/* Camera is a confidence/self-view, not the primary stage. */
+.session-interaction-shell div:has(video):not(:has(.lucide-message-square)) {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.session-interaction-shell div:has(> div > video),
+.session-interaction-shell div:has(> div > div > video) {
+  min-height: 0 !important;
+}
+
+.session-interaction-shell div:has(video):has(+ div .lucide-message-square),
+.session-interaction-shell div:has(video):not(:has(.lucide-message-square)):has(button[aria-label='Record answer']) {
+  position: absolute !important;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 35;
+  width: clamp(13rem, 21vw, 18rem) !important;
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+
+.session-interaction-shell div:has(video):has(button[aria-label='Record answer']) > div {
+  padding: 0 !important;
+}
+
+.session-interaction-shell div:has(video):has(button[aria-label='Record answer']) > div > div {
+  width: 100% !important;
+}
+
+.session-interaction-shell div:has(video):has(button[aria-label='Record answer']) video {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  max-height: none !important;
+  border-width: 1px !important;
+  border-color: hsl(var(--border) / 0.88) !important;
+  border-radius: 1rem !important;
+  box-shadow:
+    0 18px 48px rgb(0 0 0 / 0.2),
+    inset 0 1px 0 rgb(255 255 255 / 0.08) !important;
+}
+
+/* Feedback becomes a temporary intelligence layer beneath the Avery stage. */
+.session-interaction-shell div:has(.lucide-message-square) {
+  position: relative;
+  z-index: 40;
+}
+
+.session-interaction-shell div:has(> div > .lucide-message-square) {
+  width: min(100%, 48rem) !important;
+  max-height: min(32vh, 18rem) !important;
+  margin: 0 auto !important;
+  overflow-y: auto !important;
+  border-color: hsl(var(--border) / 0.8) !important;
+  background: hsl(var(--background) / 0.76) !important;
+  box-shadow: 0 16px 44px rgb(0 0 0 / 0.12) !important;
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+/* Leave breathing room for the self-view on wide screens. */
+@media (min-width: 768px) {
+  .session-interaction-shell main > div > div:has(video) {
+    padding-bottom: 1rem !important;
+  }
+
+  .session-interaction-shell main > div > div:has(video):has(.lucide-message-square) div:has(video):has(button[aria-label='Record answer']) {
+    bottom: min(34vh, 19rem) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  /* The stage gets the viewport; camera floats as a compact self-view. */
+  .session-interaction-shell main > div > div:has(video) {
+    gap: 0.3rem !important;
+    padding: 0.3rem 0.45rem calc(0.45rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) {
+    align-items: flex-start;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) > div {
+    padding: 0.35rem 0.35rem 0.5rem !important;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) > div > div:first-child {
+    justify-content: flex-start !important;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) > div > div:first-child > div:first-child {
+    width: 3.4rem !important;
+    height: 3.4rem !important;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) .text-center {
+    margin-top: 0.45rem !important;
+    text-align: left !important;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) .text-center > p {
+    position: relative;
+    max-height: 25dvh !important;
+    padding-right: 0.2rem;
+    font-size: clamp(1rem, 4.4vw, 1.13rem) !important;
+    line-height: 1.38 !important;
+    text-wrap: pretty;
+  }
+
+  .session-interaction-shell div:has(> div > .text-center):has(+ div video) .text-center :is(.justify-center) {
+    justify-content: flex-start !important;
+  }
+
+  .session-interaction-shell div:has(video):has(button[aria-label='Record answer']) {
+    right: 0.75rem !important;
+    bottom: 0.75rem !important;
+    width: clamp(10.5rem, 45vw, 12.75rem) !important;
+    transition:
+      width 200ms ease,
+      bottom 220ms ease,
+      transform 200ms ease !important;
+  }
+
+  .session-interaction-shell div:has(video):has(button[aria-label='Record answer']) video {
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: 0.85rem !important;
+  }
+
+  /* When feedback appears, lift the self-view above the intelligence layer instead of resizing it. */
+  .session-interaction-shell main > div > div:has(video):has(.lucide-message-square) div:has(video):has(button[aria-label='Record answer']) {
+    bottom: min(31dvh, 17rem) !important;
+    width: clamp(9.75rem, 40vw, 11.75rem) !important;
+  }
+
+  .session-interaction-shell div:has(> div > .lucide-message-square) {
+    max-height: 29dvh !important;
+    width: 100% !important;
+    margin-top: auto !important;
+    border-radius: 1rem !important;
+  }
+
+  /* Guidance/feedback detail gets reading space without changing the camera into a thin strip. */
+  .session-interaction-shell:has(.text-center > div > p.text-sm:not(.line-clamp-2)) div:has(video):has(button[aria-label='Record answer']),
+  .session-interaction-shell:has(.lucide-message-square):has(.border-t p.text-sm) div:has(video):has(button[aria-label='Record answer']) {
+    width: clamp(9.25rem, 38vw, 11rem) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-interaction-shell div:has(video):has(button[aria-label='Record answer']) {
+    transition: none !important;
+  }
+}

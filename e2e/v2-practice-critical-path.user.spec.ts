@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 const FEEDBACK_SUMMARY =
   'E2E fixture: the answer addressed the published rubric clearly.';
 
-test('creator → guest → Q5 → report → creator results', async ({
+test('creator → mobile guest → final response → report → creator results', async ({
   page,
   browser,
   baseURL,
@@ -30,9 +30,14 @@ test('creator → guest → Q5 → report → creator results', async ({
     .getAttribute('href');
   expect(sharePath).toMatch(/^\/p\//);
 
+  // Exercise the candidate-facing flow at an iPhone-class viewport. This is
+  // where the focused session and visual-first report have had the most layout
+  // pressure, so the critical path also protects against accidental horizontal
+  // overflow or a shell collapsing into a corner.
   const guestContext = await browser.newContext({
     baseURL: baseURL ?? undefined,
     permissions: ['camera', 'microphone'],
+    viewport: { width: 390, height: 844 },
   });
 
   try {
@@ -41,6 +46,8 @@ test('creator → guest → Q5 → report → creator results', async ({
 
     await guestPage.goto(sharePath!);
     await expect(guestPage.getByRole('heading', { name: title })).toBeVisible();
+    await expectNoHorizontalOverflow(guestPage);
+
     await guestPage.getByLabel('Name (optional)').fill(guestName);
     await guestPage
       .getByLabel('Email (optional)')
@@ -55,6 +62,7 @@ test('creator → guest → Q5 → report → creator results', async ({
     await expect(guestPage).toHaveURL(
       new RegExp(`/session/${sessionId}\\?started=1$`),
     );
+    await expectNoHorizontalOverflow(guestPage);
 
     for (let questionNumber = 1; questionNumber <= 5; questionNumber += 1) {
       await expect(
@@ -70,17 +78,18 @@ test('creator → guest → Q5 → report → creator results', async ({
       await guestPage.waitForTimeout(350);
       await stop.click();
 
-      await expect(guestPage.getByText(FEEDBACK_SUMMARY)).toBeVisible({
-        timeout: 30_000,
-      });
-
       if (questionNumber < 5) {
+        await expect(guestPage.getByText(FEEDBACK_SUMMARY)).toBeVisible({
+          timeout: 30_000,
+        });
         await guestPage.getByRole('button', { name: 'Next question' }).click();
+        await expectNoHorizontalOverflow(guestPage);
       }
     }
 
-    // This is the regression boundary that previously caused trouble: Q5 must
-    // finish only after its persisted response evaluation is ready.
+    // Final-question regression boundary: once Q5 is saved, completion must not
+    // be blocked on the live feedback stream. The report path is responsible for
+    // waiting for/persisting the complete evaluation as needed.
     await expect(
       guestPage.getByText('Question 5 of 5', { exact: true }),
     ).toBeVisible();
@@ -102,6 +111,12 @@ test('creator → guest → Q5 → report → creator results', async ({
     await expect(guestPage.getByText('5 evaluated responses')).toBeVisible();
     await expect(guestPage.getByText('Overall score')).toBeVisible();
     await expect(guestPage.getByText('82', { exact: true }).first()).toBeVisible();
+    await expect(guestPage.getByText('Rubric performance')).toBeVisible();
+    await expect(guestPage.getByText('What went well')).toBeVisible();
+    await expect(guestPage.getByText('Focus next')).toBeVisible();
+    await expect(guestPage.getByText('Recommended next step')).toBeVisible();
+    await expect(guestPage.getByText('Response review')).toBeVisible();
+    await expectNoHorizontalOverflow(guestPage);
   } finally {
     await guestContext.close();
   }
@@ -113,6 +128,17 @@ test('creator → guest → Q5 → report → creator results', async ({
   await expect(page.getByText('100%', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('82/100', { exact: true }).first()).toBeVisible();
 });
+
+async function expectNoHorizontalOverflow(page: Page) {
+  await expect
+    .poll(async () =>
+      page.evaluate(() => ({
+        viewportWidth: window.innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+      })),
+    )
+    .toMatchObject({ viewportWidth: 390, documentWidth: 390 });
+}
 
 async function createAndPublishFiveQuestionPractice(page: Page, title: string) {
   await page.goto('/candidate/practices/new');

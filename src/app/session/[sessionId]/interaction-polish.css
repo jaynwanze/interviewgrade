@@ -1,0 +1,102 @@
+/* Session-only interaction polish layered over the shared camera implementation. */
+.session-interaction-shell button[aria-label='Record answer'],
+.session-interaction-shell button[aria-label='Stop recording'] {
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  border-radius: 9999px !important;
+  border-width: 1px !important;
+  backdrop-filter: blur(16px) saturate(135%);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    0 5px 16px rgb(0 0 0 / 0.2) !important;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.session-interaction-shell button[aria-label='Record answer'] {
+  border-color: rgb(255 255 255 / 0.24) !important;
+  background: rgb(80 84 92 / 0.34) !important;
+  color: rgb(255 255 255 / 0.96) !important;
+}
+
+.session-interaction-shell button[aria-label='Record answer']:not(:disabled):hover {
+  border-color: rgb(255 255 255 / 0.36) !important;
+  background: rgb(96 100 110 / 0.46) !important;
+  transform: translateY(-1px);
+}
+
+.session-interaction-shell button[aria-label='Stop recording'] {
+  border-color: rgb(248 113 113 / 0.34) !important;
+  background: rgb(185 69 78 / 0.55) !important;
+  color: rgb(255 248 248 / 0.96) !important;
+}
+
+.session-interaction-shell button[aria-label='Stop recording']:not(:disabled):hover {
+  border-color: rgb(252 165 165 / 0.46) !important;
+  background: rgb(190 72 82 / 0.68) !important;
+  transform: translateY(-1px);
+}
+
+.session-interaction-shell button[aria-label='Record answer']:disabled,
+.session-interaction-shell button[aria-label='Stop recording']:disabled {
+  opacity: 0.48 !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14) !important;
+}
+
+/* Keep the waveform as the visual anchor while making its surrounding chrome lighter. */
+.session-interaction-shell div:has(> button[aria-label='Record answer']):has(> button[aria-label='Stop recording']) {
+  gap: 0.42rem !important;
+}
+
+.session-interaction-shell .pointer-events-auto:has(button[aria-label='Record answer']) {
+  border-color: rgb(255 255 255 / 0.16) !important;
+  background: rgb(72 76 84 / 0.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 8px 24px rgb(0 0 0 / 0.18) !important;
+  backdrop-filter: blur(18px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+}
+
+.session-interaction-shell .absolute.left-2.top-2,
+.session-interaction-shell .absolute.left-3.top-3 {
+  border-color: rgb(255 255 255 / 0.16) !important;
+  background: rgb(72 76 84 / 0.26) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1) !important;
+}
+
+@media (max-width: 767px) {
+  /* A collapsed feedback checkpoint should not force the camera into a tiny preview. */
+  .session-interaction-shell:has(.lucide-message-square) video {
+    height: clamp(175px, 27dvh, 230px) !important;
+    transition: height 220ms ease, border-radius 220ms ease !important;
+  }
+
+  /* Guidance expanded: give reading space back without hiding the live camera. */
+  .session-interaction-shell:has(.text-center > div > p.text-sm:not(.line-clamp-2)) video {
+    height: clamp(125px, 19dvh, 170px) !important;
+  }
+
+  /* Previous feedback expanded adds a bordered detail region; compact the camera while it is open. */
+  .session-interaction-shell:has(.lucide-message-square):has(.border-t p.text-sm) video {
+    height: clamp(125px, 19dvh, 170px) !important;
+  }
+
+  .session-interaction-shell button[aria-label='Record answer'],
+  .session-interaction-shell button[aria-label='Stop recording'] {
+    width: 2.3rem !important;
+    height: 2.3rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-interaction-shell button[aria-label='Record answer'],
+  .session-interaction-shell button[aria-label='Stop recording'],
+  .session-interaction-shell video {
+    transition: none !important;
+  }
+}

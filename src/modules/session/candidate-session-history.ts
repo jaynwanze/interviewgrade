@@ -108,6 +108,9 @@ export async function getCandidateSessionHistoryPage(
   const page = Math.min(requestedPage, totalPages);
   const statusCondition = statusConditionForFilter(filter);
 
+  // History only renders a handful of rows. Pull the latest score with each row
+  // so the normal page load does not need a third database round trip after the
+  // count + page query.
   const rows = await database
     .select({
       id: sessions.id,
@@ -120,6 +123,13 @@ export async function getCandidateSessionHistoryPage(
       completedAt: sessions.completedAt,
       createdAt: sessions.createdAt,
       updatedAt: sessions.updatedAt,
+      overallScore: sql<number | null>`(
+        select ${sessionEvaluations.overallScore}
+        from ${sessionEvaluations}
+        where ${sessionEvaluations.sessionId} = ${sessions.id}
+        order by ${sessionEvaluations.createdAt} desc
+        limit 1
+      )`,
     })
     .from(sessions)
     .innerJoin(
@@ -136,7 +146,24 @@ export async function getCandidateSessionHistoryPage(
     .offset((page - 1) * pageSize);
 
   return {
-    items: await attachLatestScores(rows, database),
+    items: rows.map((row) => {
+      const overallScore =
+        row.overallScore == null ? null : Number(row.overallScore);
+      return {
+        id: row.id,
+        practiceId: row.practiceId,
+        practiceVersionId: row.practiceVersionId,
+        title: row.title,
+        status: sessionStatusSchema.parse(row.status),
+        currentQuestionOrder: row.currentQuestionOrder,
+        startedAt: row.startedAt?.toISOString() ?? null,
+        completedAt: row.completedAt?.toISOString() ?? null,
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+        overallScore,
+        hasReport: overallScore != null,
+      };
+    }),
     counts,
     page,
     pageSize,

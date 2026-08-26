@@ -11,12 +11,14 @@ export const EmailAndPassword = ({
   isLoading,
   signUpUrl,
   loginUrl,
+  showSignUpLink = true,
 }: {
   onSubmit: (data: { email: string; password: string }) => void;
   view: 'sign-in' | 'sign-up';
   isLoading: boolean;
   signUpUrl: string;
   loginUrl: string;
+  showSignUpLink?: boolean;
 }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -77,14 +79,18 @@ export const EmailAndPassword = ({
 
         <div className="flex items-center justify-between">
           {view === 'sign-in' ? (
-            <div className="text-sm">
-              <Link
-                href={signUpUrl}
-                className="font-medium text-muted-foreground hover:text-foreground"
-              >
-                Sign up instead?
-              </Link>
-            </div>
+            showSignUpLink ? (
+              <div className="text-sm">
+                <Link
+                  href={signUpUrl}
+                  className="font-medium text-muted-foreground hover:text-foreground"
+                >
+                  Sign up instead?
+                </Link>
+              </div>
+            ) : (
+              <div />
+            )
           ) : (
             <div className="text-sm">
               <Link

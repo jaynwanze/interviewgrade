@@ -161,6 +161,7 @@ export function Login({
                     isLoading={passwordMutation.isLoading}
                     signUpUrl="/e/sign-up"
                     loginUrl="/e/login"
+                    showSignUpLink={false}
                     onSubmit={(data) => {
                       passwordMutation.mutate(data);
                     }}

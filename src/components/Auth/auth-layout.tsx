@@ -100,8 +100,8 @@ export function AuthLayout({
   userType,
 }: {
   children: ReactNode;
-  link: string;
-  text: string;
+  link?: string;
+  text?: string;
   userType: 'candidate' | 'employer';
 }) {
   return (
@@ -110,15 +110,17 @@ export function AuthLayout({
         <SidebarContent userType={userType} />
         <div className="lg:p-8 flex-grow">
           <div className="mx-auto flex w-full flex-col justify-center space-y-6 ">
-            <Link
-              href={link}
-              className={cn(
-                buttonVariants({ variant: 'ghost' }),
-                'md:absolute md:right-8 md:top-8 block right-4 top-4',
-              )}
-            >
-              {text}
-            </Link>
+            {link && text ? (
+              <Link
+                href={link}
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'sm' }),
+                  'md:absolute md:right-8 md:top-8 block right-4 top-4 rounded-full',
+                )}
+              >
+                {text}
+              </Link>
+            ) : null}
 
             {children}
             {/* <p className="px-8 text-center text-sm text-muted-foreground">

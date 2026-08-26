@@ -3,7 +3,13 @@ import ConfirmationPendingCard from '@/components/Auth/ConfirmationPendingCard';
 import { Email } from '@/components/Auth/Email';
 import { EmailAndPassword } from '@/components/Auth/EmailAndPassword';
 import { RenderProviders } from '@/components/Auth/RenderProviders';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   signInWithMagicLink,
@@ -28,6 +34,7 @@ export function Login({
   userType: UserType;
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const router = useRouter();
 
   function redirectToDashboard() {
@@ -47,14 +54,18 @@ export function Login({
       loadingMessage: 'Sending magic link...',
       errorMessage(error) {
         try {
-          if (error instanceof Error) return String(error.message);
+          if (error instanceof Error) {
+            return String(error.message);
+          }
           return `Send magic link failed ${String(error)}`;
         } catch (_err) {
           console.warn(_err);
           return 'Send magic link failed ';
         }
       },
-      onSuccess: () => setSuccessMessage('A magic link has been sent to your email!'),
+      onSuccess: () => {
+        setSuccessMessage('A magic link has been sent to your email!');
+      },
       successMessage: 'A magic link has been sent to your email!',
     },
   );
@@ -68,7 +79,9 @@ export function Login({
       loadingMessage: 'Logging in...',
       errorMessage(error) {
         try {
-          if (error instanceof Error) return String(error.message);
+          if (error instanceof Error) {
+            return String(error.message);
+          }
           return `Sign in account failed ${String(error)}`;
         } catch (_err) {
           console.warn(_err);
@@ -80,7 +93,9 @@ export function Login({
   );
 
   const providerMutation = useSAToastMutation(
-    async (provider: AuthProvider) => signInWithProvider(provider, next),
+    async (provider: AuthProvider) => {
+      return signInWithProvider(provider, next);
+    },
     {
       loadingMessage: 'Opening Google...',
       successMessage: 'Redirecting...',
@@ -117,16 +132,20 @@ export function Login({
     >
       {successMessage ? (
         <ConfirmationPendingCard
-          type="login"
-          heading="Confirmation Link Sent"
+          type={'login'}
+          heading={`Confirmation Link Sent`}
           message={successMessage}
           resetSuccessMessage={setSuccessMessage}
         />
       ) : (
-        <div className="space-y-5 rounded-lg bg-background p-4 shadow dark:border sm:p-6">
+        <div className="space-y-5 rounded-lg bg-background p-4 shadow dark:border sm:space-y-6 sm:p-6">
           <header className="space-y-1 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Welcome back</h1>
-            <p className="text-sm text-muted-foreground">Sign in to continue to InterviewGrade.</p>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Welcome back
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Sign in to create Practices and track your progress.
+            </p>
           </header>
 
           <div className="space-y-4">
@@ -147,21 +166,36 @@ export function Login({
               <TabsTrigger value="password">Password</TabsTrigger>
               <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
             </TabsList>
-            <TabsContent value="password" className="mt-4">
+            <TabsContent value="password">
               <Card className="border-none shadow-none">
+                <CardHeader className="px-0 py-5 sm:py-6">
+                  <CardTitle>Login to InterviewGrade</CardTitle>
+                  <CardDescription>
+                    Login with the account you used to signup.
+                  </CardDescription>
+                </CardHeader>
                 <CardContent className="space-y-2 p-0">
                   <EmailAndPassword
                     isLoading={passwordMutation.isLoading}
                     signUpUrl="/c/sign-up"
                     loginUrl="/c/login"
-                    onSubmit={(data) => passwordMutation.mutate(data)}
+                    onSubmit={(data) => {
+                      passwordMutation.mutate(data);
+                    }}
                     view="sign-in"
                   />
                 </CardContent>
               </Card>
             </TabsContent>
-            <TabsContent value="magic-link" className="mt-4">
+
+            <TabsContent value="magic-link">
               <Card className="border-none shadow-none">
+                <CardHeader className="px-0 py-5 sm:py-6">
+                  <CardTitle>Login to InterviewGrade</CardTitle>
+                  <CardDescription>
+                    Login with a magic link sent to your email.
+                  </CardDescription>
+                </CardHeader>
                 <CardContent className="space-y-2 p-0">
                   <Email
                     onSubmit={(email) => magicLinkMutation.mutate(email)}

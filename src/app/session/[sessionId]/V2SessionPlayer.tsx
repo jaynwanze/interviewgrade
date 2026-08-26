@@ -455,7 +455,7 @@ export function V2SessionPlayer({
   }
 
   async function finishSession() {
-    if (busy || feedbackLoading || complete) return;
+    if (busy || complete) return;
 
     try {
       setBusy(true);
@@ -731,7 +731,11 @@ export function V2SessionPlayer({
                   </div>
                   <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
                     Evaluating against your rubric…
-                    {canMoveNext ? ' You can continue now or wait for feedback.' : ''}
+                    {canMoveNext
+                      ? ' You can continue now or wait for feedback.'
+                      : isFinalQuestion
+                        ? ' You can finish now or wait for feedback.'
+                        : ''}
                   </p>
                 </div>
               ) : hasFeedback ? (
@@ -761,7 +765,7 @@ export function V2SessionPlayer({
                       onClick={finishSession}
                       variant="ghost"
                       className="sm:order-1"
-                      disabled={busy || feedbackLoading}
+                      disabled={busy}
                     >
                       End practice
                     </Button>
@@ -771,8 +775,8 @@ export function V2SessionPlayer({
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={finishSession} disabled={busy || feedbackLoading}>
-                    {feedbackLoading ? 'Finishing feedback…' : 'Finish practice'}
+                  <Button onClick={finishSession} disabled={busy}>
+                    Finish practice
                   </Button>
                 )}
               </div>
@@ -790,7 +794,7 @@ export function V2SessionPlayer({
               variant="ghost"
               size="sm"
               className="text-muted-foreground"
-              disabled={busy || feedbackLoading}
+              disabled={busy}
             >
               End practice
             </Button>

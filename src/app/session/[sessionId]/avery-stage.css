@@ -208,6 +208,19 @@
   }
 }
 
+/* Never let the broad self-view selector capture the full session shell/player. */
+.session-interaction-shell main > div > div:has(video):has(button[aria-label='Record answer']),
+.session-interaction-shell main > div > div:has(video) > div:has(video):has(button[aria-label='Record answer']) {
+  position: relative !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  flex: 1 1 auto !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .session-interaction-shell div:has(video):has(button[aria-label='Record answer']) {
     transition: none !important;

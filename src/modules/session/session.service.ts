@@ -89,16 +89,16 @@ export class SessionService {
   }
 
   private async hydrateContext(session: Session): Promise<SessionContext> {
-    const practiceVersion = await getPublishedPracticeVersionById(
-      session.practiceVersionId,
-    );
+    const [practiceVersion, responses] = await Promise.all([
+      getPublishedPracticeVersionById(session.practiceVersionId),
+      this.repository.listResponses(session.id),
+    ]);
+
     if (!practiceVersion) {
       throw new Error(
         `Published practice version ${session.practiceVersionId} was not found.`,
       );
     }
-
-    const responses = await this.repository.listResponses(session.id);
 
     return { session, practiceVersion, responses };
   }

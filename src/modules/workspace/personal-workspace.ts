@@ -24,6 +24,52 @@ export function getPersonalWorkspaceId(userId: string): string {
 }
 
 /**
+ * Resolve the existing personal workspace in one read on the common path.
+ *
+ * Older callers provisioned/verifed the same deterministic workspace through a
+ * transaction containing multiple round trips on every request. Existing v2
+ * users already have this workspace, so read-heavy routes can verify ownership
+ * and membership with one joined query and only fall back to provisioning when
+ * the workspace is genuinely missing.
+ */
+export async function resolvePersonalWorkspace(
+  userId: string,
+  database: InterviewGradeDatabase = db,
+): Promise<string> {
+  const normalizedUserId = userId.trim();
+  const workspaceId = getPersonalWorkspaceId(normalizedUserId);
+
+  const [existing] = await database
+    .select({
+      workspaceId: workspaces.id,
+      createdBy: workspaces.createdBy,
+      memberId: workspaceMembers.memberId,
+      memberRole: workspaceMembers.memberRole,
+    })
+    .from(workspaces)
+    .innerJoin(
+      workspaceMembers,
+      and(
+        eq(workspaceMembers.organizationId, workspaces.id),
+        eq(workspaceMembers.memberId, normalizedUserId),
+      ),
+    )
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  if (
+    existing?.workspaceId === workspaceId &&
+    existing.createdBy === normalizedUserId &&
+    existing.memberId === normalizedUserId &&
+    existing.memberRole === 'owner'
+  ) {
+    return workspaceId;
+  }
+
+  return ensurePersonalWorkspace(normalizedUserId, database);
+}
+
+/**
  * Ensure the invisible personal workspace used by candidate-first v2 exists.
  *
  * The physical tables remain `organizations` / `organization_members` during

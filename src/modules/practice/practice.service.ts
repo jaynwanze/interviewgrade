@@ -16,7 +16,7 @@ import {
   retirePractice,
   type PracticeRetireMode,
 } from '@/modules/practice/practice.lifecycle';
-import { ensurePersonalWorkspace } from '@/modules/workspace/personal-workspace';
+import { resolvePersonalWorkspace } from '@/modules/workspace/personal-workspace';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 /**
@@ -40,33 +40,34 @@ export class PracticeService {
   }
 
   async listMine(): Promise<Practice[]> {
-    const practices = await this.repository.listByOrganization(this.workspaceId);
-    const activePractices = practices.filter(
-      (practice) => practice.status !== 'archived',
-    );
-
     if (!this.actorUserId) {
-      return activePractices;
+      const practices = await this.repository.listByOrganization(this.workspaceId);
+      return practices.filter((practice) => practice.status !== 'archived');
     }
 
-    // Built-in catalog templates are materialized into ordinary v2 Practice
-    // containers for runtime/versioning, but they are not authored content and
-    // should not pollute the candidate's "My Practices" library.
-    //
-    // Vercel does not apply SQL migrations during `next build`. If code reaches
-    // production before the transitional bridge migration, keep the authored
-    // library usable and simply skip this hiding layer until the table exists.
+    // Both reads are independent once the actor/workspace are known, so run them
+    // together instead of adding another database round trip to My Practices.
     try {
-      const importedPracticeIds = await listLegacyImportedPracticeIds(
-        this.actorUserId,
-      );
+      const [practices, importedPracticeIds] = await Promise.all([
+        this.repository.listByOrganization(this.workspaceId),
+        listLegacyImportedPracticeIds(this.actorUserId),
+      ]);
 
-      return activePractices.filter(
-        (practice) => !importedPracticeIds.has(practice.id),
+      return practices.filter(
+        (practice) =>
+          practice.status !== 'archived' && !importedPracticeIds.has(practice.id),
       );
     } catch (error) {
+      // Built-in catalog templates are materialized into ordinary v2 Practice
+      // containers for runtime/versioning, but they are not authored content and
+      // should not pollute the candidate's "My Practices" library.
+      //
+      // Vercel does not apply SQL migrations during `next build`. If code reaches
+      // production before the transitional bridge migration, keep the authored
+      // library usable and simply skip this hiding layer until the table exists.
       if (isLegacyPracticeImportBridgeUnavailable(error)) {
-        return activePractices;
+        const practices = await this.repository.listByOrganization(this.workspaceId);
+        return practices.filter((practice) => practice.status !== 'archived');
       }
       throw error;
     }
@@ -128,12 +129,13 @@ export class PracticeService {
 }
 
 /**
- * Resolve the logged-in user, provision their hidden personal workspace on
- * first v2 use, then construct an actor-scoped Drizzle repository.
+ * Resolve the logged-in user and their hidden personal workspace, then
+ * construct an actor-scoped Drizzle repository. Existing workspaces use a
+ * single read fast path; first-use provisioning still falls back safely.
  */
 export async function createAuthenticatedPracticeService(): Promise<PracticeService> {
   const user = await serverGetLoggedInUser();
-  const workspaceId = await ensurePersonalWorkspace(user.id);
+  const workspaceId = await resolvePersonalWorkspace(user.id);
   const repository = new DrizzlePracticeRepository(user.id);
 
   return new PracticeService(repository, workspaceId, user.id);

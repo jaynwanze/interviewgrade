@@ -40,9 +40,7 @@ async function loadV2Analytics(
 
 async function V2ProgressSection({ userId }: { userId: string }) {
   const progress = await loadV2Progress(userId);
-  if (!progress) {
-    return null;
-  }
+  if (!progress) return null;
 
   return (
     <V2CandidateProgress
@@ -54,10 +52,7 @@ async function V2ProgressSection({ userId }: { userId: string }) {
 
 async function V2AnalyticsSection({ userId }: { userId: string }) {
   const analytics = await loadV2Analytics(userId);
-  if (!analytics) {
-    return null;
-  }
-
+  if (!analytics) return null;
   return <V2CandidateAnalytics analytics={analytics} />;
 }
 
@@ -65,56 +60,57 @@ export default async function CandidateDashboardPage() {
   const user = await serverGetLoggedInUser();
 
   return (
-    <main className="pb-10">
-      <section className="container mx-auto w-full px-4 pt-6 sm:w-11/12 lg:w-3/4">
-        <div className="flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-end lg:justify-between">
+    <main className="pb-8">
+      <section className="container mx-auto w-full px-4 pt-5 sm:w-11/12 lg:w-3/4">
+        <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Your progress</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Track your Practice sessions, rubric performance, and improvement over
-              time.
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your progress</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Scores, momentum and recent Practice activity.
             </p>
           </div>
 
-          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap">
-            <Button asChild className="w-full sm:w-auto">
+          <div className="flex flex-wrap gap-2">
+            <Button asChild size="sm">
               <Link href="/candidate/practices/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create practice
+                <Plus className="mr-1.5 h-4 w-4" />
+                New practice
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Button asChild variant="outline" size="sm">
               <Link href="/candidate/practices">
-                <Library className="mr-2 h-4 w-4" />
-                My practices
+                <Library className="mr-1.5 h-4 w-4" />
+                Practices
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Button asChild variant="ghost" size="sm">
               <Link href="/candidate/interview-history">
-                <History className="mr-2 h-4 w-4" />
-                View history
+                <History className="mr-1.5 h-4 w-4" />
+                History
               </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      <Suspense fallback={<DashboardSectionFallback label="Loading progress…" />}>
+      <Suspense fallback={<DashboardSectionFallback />}>
         <V2ProgressSection userId={user.id} />
       </Suspense>
 
-      <Suspense fallback={<DashboardSectionFallback label="Loading analytics…" />}>
+      <Suspense fallback={<DashboardSectionFallback />}>
         <V2AnalyticsSection userId={user.id} />
       </Suspense>
     </main>
   );
 }
 
-function DashboardSectionFallback({ label }: { label: string }) {
+function DashboardSectionFallback() {
   return (
-    <div className="container mx-auto w-full px-4 pt-4 sm:w-11/12 lg:w-3/4">
-      <div className="h-24 animate-pulse rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-        {label}
+    <div className="container mx-auto w-full px-4 pt-3 sm:w-11/12 lg:w-3/4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="h-20 animate-pulse rounded-lg border bg-muted/25" />
+        ))}
       </div>
     </div>
   );

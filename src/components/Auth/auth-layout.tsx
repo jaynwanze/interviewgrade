@@ -53,7 +53,11 @@ function SidebarContent({ userType }: { userType: 'candidate' | 'employer' }) {
           quality={100} // Optional: set image quality
         />
       )}
-      <div className="relative z-20 flex items-center text-lg font-medium">
+      <Link
+        href="/"
+        aria-label="Back to InterviewGrade home"
+        className="relative z-20 inline-flex w-fit items-center text-lg font-medium transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+      >
         <Image
           width={36}
           src={logo}
@@ -61,7 +65,7 @@ function SidebarContent({ userType }: { userType: 'candidate' | 'employer' }) {
           className="mr-1"
         />{' '}
         InterviewGrade
-      </div>
+      </Link>
       <div className="relative z-20 mt-auto">
         <div className="relative">
           <div className="absolute inset-0 bg-white bg-opacity-5 backdrop-blur-md rounded-lg"></div>

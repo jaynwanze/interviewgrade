@@ -15,20 +15,16 @@ export function V2PracticeHistoryList({
   sessions: CandidateSessionHistoryItem[];
   totalCount?: number;
 }) {
-  if (sessions.length === 0) {
-    return null;
-  }
+  if (sessions.length === 0) return null;
 
   return (
-    <section className="mx-auto w-full max-w-4xl space-y-3">
-      <div className="flex items-center justify-between gap-4 px-1">
+    <section className="mx-auto w-full max-w-4xl space-y-2.5">
+      <div className="flex items-center justify-between px-1">
         <h2 className="text-sm font-semibold">Practice sessions</h2>
-        <span className="text-xs text-muted-foreground">
-          {totalCount} session{totalCount === 1 ? '' : 's'}
-        </span>
+        <span className="text-xs text-muted-foreground">{totalCount}</span>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {sessions.map((session) => (
           <V2PracticeHistoryItem key={session.id} session={session} />
         ))}
@@ -37,68 +33,41 @@ export function V2PracticeHistoryList({
   );
 }
 
-function V2PracticeHistoryItem({
-  session,
-}: {
-  session: CandidateSessionHistoryItem;
-}) {
+function V2PracticeHistoryItem({ session }: { session: CandidateSessionHistoryItem }) {
   const status = statusDisplay(session.status);
   const activityDate = session.completedAt ?? session.startedAt;
   const score = session.overallScore == null ? null : Math.round(session.overallScore);
 
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-sm">
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge className={`${status.className} border px-2.5 py-0.5 text-xs font-medium`}>
-                {status.label}
-              </Badge>
-              {activityDate && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  {formatDate(activityDate)}
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-              <h3 className="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">
-                {session.title}
-              </h3>
-
-              {session.status === 'completed' && (
-                <div className="shrink-0 sm:text-right">
-                  {score == null ? (
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Report pending
-                    </span>
-                  ) : (
-                    <div className={`text-xl font-bold ${scoreClass(score)}`}>
-                      {score}
-                      <span className="text-sm font-medium text-muted-foreground">/100</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <p className="mt-1 text-xs text-muted-foreground">
-              {session.status === 'completed'
-                ? session.hasReport
-                  ? 'Evaluation ready'
-                  : 'Responses complete · report not generated yet'
-                : session.status === 'in_progress'
-                  ? 'Continue where you left off'
-                  : session.status === 'created'
-                    ? 'Ready to start'
-                    : 'This session was ended before completion'}
-            </p>
+    <Card className="overflow-hidden">
+      <CardContent className="flex flex-col gap-3 p-3.5 sm:flex-row sm:items-center sm:p-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="min-w-0 flex-1 truncate text-sm font-semibold sm:text-base">
+              {session.title}
+            </h3>
+            {session.status === 'completed' && score != null && (
+              <div className={`shrink-0 text-lg font-bold ${scoreClass(score)}`}>
+                {score}<span className="text-xs font-medium text-muted-foreground">/100</span>
+              </div>
+            )}
           </div>
 
-          <SessionAction session={session} />
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <Badge className={`${status.className} border px-2 py-0 text-[11px] font-medium`}>
+              {status.label}
+            </Badge>
+            {activityDate && (
+              <span className="inline-flex items-center gap-1">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {formatDate(activityDate)}
+              </span>
+            )}
+            {session.status === 'completed' && score == null && <span>Report pending</span>}
+          </div>
         </div>
+
+        <SessionAction session={session} />
       </CardContent>
     </Card>
   );
@@ -107,15 +76,11 @@ function V2PracticeHistoryItem({
 function SessionAction({ session }: { session: CandidateSessionHistoryItem }) {
   if (session.status === 'completed') {
     return (
-      <Button
-        asChild
-        variant={session.hasReport ? 'default' : 'outline'}
-        className="w-full shrink-0 sm:w-auto"
-      >
+      <Button asChild variant={session.hasReport ? 'default' : 'outline'} size="sm" className="w-full shrink-0 sm:w-auto">
         <Link href={`/session/${session.id}/report`}>
-          <FileText className="mr-2 h-4 w-4" />
-          {session.hasReport ? 'View report' : 'Generate report'}
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <FileText className="mr-1.5 h-4 w-4" />
+          {session.hasReport ? 'Report' : 'Generate'}
+          <ArrowRight className="ml-1.5 h-4 w-4" />
         </Link>
       </Button>
     );
@@ -123,60 +88,34 @@ function SessionAction({ session }: { session: CandidateSessionHistoryItem }) {
 
   if (session.status === 'created' || session.status === 'in_progress') {
     return (
-      <Button asChild className="w-full shrink-0 sm:w-auto">
+      <Button asChild size="sm" className="w-full shrink-0 sm:w-auto">
         <Link href={`/session/${session.id}`}>
-          {session.status === 'created' ? (
-            <Play className="mr-2 h-4 w-4" />
-          ) : (
-            <RotateCcw className="mr-2 h-4 w-4" />
-          )}
+          {session.status === 'created' ? <Play className="mr-1.5 h-4 w-4" /> : <RotateCcw className="mr-1.5 h-4 w-4" />}
           {session.status === 'created' ? 'Start' : 'Resume'}
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ml-1.5 h-4 w-4" />
         </Link>
       </Button>
     );
   }
 
-  return (
-    <Button variant="outline" className="w-full shrink-0 sm:w-auto" disabled>
-      Ended
-    </Button>
-  );
+  return <Button variant="outline" size="sm" className="w-full shrink-0 sm:w-auto" disabled>Ended</Button>;
 }
 
 function statusDisplay(status: CandidateSessionHistoryItem['status']) {
   switch (status) {
     case 'completed':
-      return {
-        label: 'Completed',
-        className:
-          'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-      };
+      return { label: 'Completed', className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' };
     case 'in_progress':
-      return {
-        label: 'In progress',
-        className:
-          'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
-      };
+      return { label: 'In progress', className: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300' };
     case 'created':
-      return {
-        label: 'Not started',
-        className: 'border-border bg-muted text-muted-foreground',
-      };
+      return { label: 'Not started', className: 'border-border bg-muted text-muted-foreground' };
     case 'abandoned':
-      return {
-        label: 'Ended',
-        className: 'border-destructive/30 bg-destructive/10 text-destructive',
-      };
+      return { label: 'Ended', className: 'border-destructive/30 bg-destructive/10 text-destructive' };
   }
 }
 
 function formatDate(value: string | Date) {
-  return new Intl.DateTimeFormat('en', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(value));
 }
 
 function scoreClass(score: number) {

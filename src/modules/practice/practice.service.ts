@@ -16,7 +16,7 @@ import {
   retirePractice,
   type PracticeRetireMode,
 } from '@/modules/practice/practice.lifecycle';
-import { ensurePersonalWorkspace } from '@/modules/workspace/personal-workspace';
+import { resolvePersonalWorkspace } from '@/modules/workspace/personal-workspace';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 /**
@@ -128,12 +128,13 @@ export class PracticeService {
 }
 
 /**
- * Resolve the logged-in user, provision their hidden personal workspace on
- * first v2 use, then construct an actor-scoped Drizzle repository.
+ * Resolve the logged-in user and their hidden personal workspace, then
+ * construct an actor-scoped Drizzle repository. Existing workspaces use a
+ * single read fast path; first-use provisioning still falls back safely.
  */
 export async function createAuthenticatedPracticeService(): Promise<PracticeService> {
   const user = await serverGetLoggedInUser();
-  const workspaceId = await ensurePersonalWorkspace(user.id);
+  const workspaceId = await resolvePersonalWorkspace(user.id);
   const repository = new DrizzlePracticeRepository(user.id);
 
   return new PracticeService(repository, workspaceId, user.id);

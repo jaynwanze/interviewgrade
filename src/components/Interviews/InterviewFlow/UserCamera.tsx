@@ -5,7 +5,7 @@ import { transcribeInterviewAudio } from '@/utils/openai/transcribeInterviewAudi
 import { MediaRecorderHandler } from '@/utils/webspeech/mediaRecorder';
 import { useSpeechRecognition } from '@/utils/webspeech/speechRecognition';
 import { MicrophoneIcon } from '@heroicons/react/solid';
-import { StopCircle } from 'lucide-react';
+import { Loader2, StopCircle } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Meter } from './SoundMeter';
@@ -35,10 +35,18 @@ const microphoneConstraints: MediaTrackConstraints = {
   autoGainControl: true,
 };
 
-async function acquirePracticeMedia(): Promise<{
+async function acquirePracticeMedia(audioOnly = false): Promise<{
   stream: MediaStream;
   cameraAvailable: boolean;
 }> {
+  if (audioOnly) {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: microphoneConstraints,
+    });
+    return { stream, cameraAvailable: false };
+  }
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -50,11 +58,11 @@ async function acquirePracticeMedia(): Promise<{
       'Default camera + microphone request failed; trying microphone only:',
       error,
     );
-    const audioOnly = await navigator.mediaDevices.getUserMedia({
+    const audioOnlyStream = await navigator.mediaDevices.getUserMedia({
       video: false,
       audio: microphoneConstraints,
     });
-    return { stream: audioOnly, cameraAvailable: false };
+    return { stream: audioOnlyStream, cameraAvailable: false };
   }
 }
 
@@ -94,7 +102,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   } = useSpeechRecognition();
   const pathname = usePathname();
 
-  void interviewMode;
+  const audioFirstPractice = interviewMode === 'Practice' && controlsOverlay;
 
   useEffect(() => {
     async function checkMicPermission() {
@@ -112,15 +120,15 @@ export const UserCamera: React.FC<UserCameraProps> = ({
   }, []);
 
   useEffect(() => {
-    const startCamera = async () => {
+    const startMedia = async () => {
       try {
         setProcessingError(null);
         setMediaWarning(null);
 
-        const { stream, cameraAvailable } = await acquirePracticeMedia();
+        const { stream, cameraAvailable } = await acquirePracticeMedia(audioFirstPractice);
         mediaStreamRef.current = stream;
 
-        if (!cameraAvailable) {
+        if (!audioFirstPractice && !cameraAvailable) {
           setMediaWarning(
             'Camera unavailable. Your microphone still works, so you can continue the practice.',
           );
@@ -159,7 +167,7 @@ export const UserCamera: React.FC<UserCameraProps> = ({
     };
 
     if (isCameraOn) {
-      void startCamera();
+      void startMedia();
     }
 
     return () => {
@@ -188,7 +196,13 @@ export const UserCamera: React.FC<UserCameraProps> = ({
         audioContextRef.current = null;
       }
     };
-  }, [isCameraOn, pathname, resetTranscript, stopRecognition]);
+  }, [
+    audioFirstPractice,
+    isCameraOn,
+    pathname,
+    resetTranscript,
+    stopRecognition,
+  ]);
 
   const handleAnswer = useCallback(
     (answer: string) => {
@@ -332,6 +346,99 @@ export const UserCamera: React.FC<UserCameraProps> = ({
       });
     }, 1000);
   };
+
+  if (audioFirstPractice) {
+    const status = isTranscribing
+      ? 'Transcribing your answer…'
+      : isRecording
+        ? `Listening · ${recordingTime}s`
+        : 'Ready when you are';
+
+    return (
+      <div className="practice-voice-recorder relative isolate flex w-full flex-col items-center overflow-hidden py-5 text-center sm:py-7">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl sm:h-56 sm:w-56"
+        />
+
+        <div className="text-xs font-medium tracking-wide text-muted-foreground">
+          {status}
+        </div>
+
+        <div className="mt-3 flex h-10 min-w-40 items-center justify-center sm:h-12">
+          {isRecording && mediaStreamRef.current && audioContextRef.current ? (
+            <Meter
+              audioContext={audioContextRef.current}
+              stream={mediaStreamRef.current}
+              settings={{ bars: 28, spacing: 2, width: 3, height: 34 }}
+            />
+          ) : isTranscribing ? (
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          ) : (
+            <div className="flex items-center gap-1 opacity-35" aria-hidden="true">
+              {[10, 18, 26, 16, 22, 12, 18].map((height, index) => (
+                <span
+                  key={`${height}-${index}`}
+                  className="w-1 rounded-full bg-muted-foreground"
+                  style={{ height }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3">
+          {isRecording ? (
+            <Button
+              onClick={() => void handleEndRecord()}
+              disabled={isTranscribing}
+              aria-label="Stop recording"
+              className="h-12 w-12 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-200 shadow-[0_10px_32px_hsl(var(--foreground)/0.08)] hover:bg-red-500/25 sm:h-14 sm:w-14"
+            >
+              <StopCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleRecord}
+              disabled={isTranscribing || disabled}
+              aria-label="Record answer"
+              className="h-12 w-12 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-[0_10px_32px_hsl(var(--foreground)/0.08)] hover:bg-primary/20 sm:h-14 sm:w-14"
+            >
+              {isTranscribing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <MicrophoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
+            </Button>
+          )}
+        </div>
+
+        <p className="mt-3 max-w-md px-4 text-xs leading-5 text-muted-foreground/75">
+          {isRecording
+            ? 'Speak naturally. Finish when you are ready.'
+            : 'Your answer is recorded as audio and transcribed when you finish.'}
+        </p>
+
+        {mediaWarning && (
+          <p className="mt-3 max-w-lg px-4 text-center text-xs text-amber-600">
+            {mediaWarning}
+          </p>
+        )}
+
+        {processingError && (
+          <p className="mt-3 max-w-lg px-4 text-center text-xs text-red-500">
+            {processingError}
+          </p>
+        )}
+
+        {isMicMuted && (
+          <p className="mt-3 text-center text-xs text-red-500">
+            Your microphone is muted. Please unmute to record audio.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   const recordingControls = (
     <div className="flex items-center justify-center space-x-1.5 sm:space-x-2">

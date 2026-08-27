@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1180" viewBox="0 0 1800 1180">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#09090b"/><stop offset="1" stop-color="#111217"/></linearGradient>
+    <radialGradient id="purpleGlow"><stop stop-color="#8b5cf6" stop-opacity=".7"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+    <radialGradient id="greenGlow"><stop stop-color="#22c55e" stop-opacity=".55"/><stop offset="1" stop-color="#22c55e" stop-opacity="0"/></radialGradient>
+    <radialGradient id="blueGlow"><stop stop-color="#3b82f6" stop-opacity=".62"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></radialGradient>
+    <style>
+      .bg{fill:url(#bg)} .panel{fill:#0d0e12;stroke:#2a2d35;stroke-width:2}.card{fill:#111216;stroke:#30333c;stroke-width:2}.sub{fill:#17181e;stroke:#30333c}.t{font-family:Inter,Arial,sans-serif;fill:#f5f5f5}.m{font-family:Inter,Arial,sans-serif;fill:#a4a7b2}.tiny{font-size:15px}.small{font-size:18px}.med{font-size:23px;font-weight:600}.big{font-size:34px;font-weight:700}.label{font-size:24px;font-weight:700}.line{stroke:#353843;stroke-width:2}.wave{stroke-linecap:round;stroke-width:5}.btn{fill:#f4f4f5}.btnText{font-family:Inter,Arial,sans-serif;fill:#111;font-size:18px;font-weight:700}.pill{fill:#1b1c22;stroke:#343741}.good{fill:#22c55e}.warn{fill:#f59e0b}.blue{fill:#3b82f6}.purple{fill:#8b5cf6}
+    </style>
+  </defs>
+  <rect class="bg" width="1800" height="1180" rx="24"/>
+  <text class="t" x="42" y="52" font-size="30" font-weight="700">Practice Session UI Directions — A / B / C</text>
+  <text class="m small" x="42" y="84">Desktop + mobile mockups for tomorrow's selection. Same session logic underneath; only composition changes.</text>
+
+  <!-- column headers -->
+  <text class="t label" x="55" y="132">A. Structured landing-page mockup</text>
+  <text class="t label" x="625" y="132">B. Light single-stage</text>
+  <text class="t label" x="1195" y="132">C. Avery voice-first</text>
+
+  <!-- A desktop -->
+  <rect class="panel" x="40" y="155" width="530" height="540" rx="22"/>
+  <text class="m tiny" x="64" y="188">QUESTION 3 OF 5</text><line class="line" x1="175" y1="183" x2="530" y2="183"/>
+  <rect class="card" x="65" y="210" width="440" height="235" rx="16"/>
+  <circle cx="92" cy="244" r="15" fill="#1f2030" stroke="#8b5cf6"/><text class="t small" x="118" y="250">Avery · Interviewer</text>
+  <text class="m tiny" x="118" y="274">Current question</text>
+  <text class="t med" x="88" y="316">Tell me about a time you handled</text><text class="t med" x="88" y="347">a difficult customer situation.</text><text class="t med" x="88" y="378">What did you do, and what was the outcome?</text>
+  <rect class="pill" x="88" y="398" width="92" height="28" rx="14"/><text class="m tiny" x="105" y="418">Prep: 30s</text>
+  <rect class="pill" x="188" y="398" width="118" height="28" rx="14"/><text class="m tiny" x="205" y="418">Response: 120s</text>
+  <rect class="card" x="65" y="460" width="440" height="200" rx="16"/>
+  <text class="t small" x="88" y="494" font-weight="700">Your response</text><text class="m tiny" x="88" y="518">Answer naturally. Retry before moving on if you want.</text>
+  <rect class="sub" x="88" y="540" width="122" height="88" rx="14"/><circle cx="149" cy="584" r="20" fill="#242631"/><text class="t med" x="140" y="592">🎙</text>
+  <g transform="translate(252 570)"><line class="wave" stroke="#a4a7b2" x1="0" y1="16" x2="0" y2="32"/><line class="wave" stroke="#a4a7b2" x1="12" y1="9" x2="12" y2="39"/><line class="wave" stroke="#a4a7b2" x1="24" y1="13" x2="24" y2="35"/><line class="wave" stroke="#a4a7b2" x1="36" y1="4" x2="36" y2="44"/><line class="wave" stroke="#a4a7b2" x1="48" y1="11" x2="48" y2="37"/><line class="wave" stroke="#a4a7b2" x1="60" y1="6" x2="60" y2="42"/><line class="wave" stroke="#a4a7b2" x1="72" y1="15" x2="72" y2="33"/></g>
+  <rect class="btn" x="245" y="615" width="162" height="36" rx="9"/><text class="btnText" x="269" y="639">Start recording</text>
+
+  <!-- B desktop -->
+  <rect class="panel" x="610" y="155" width="530" height="540" rx="22"/>
+  <text class="m tiny" x="635" y="188">QUESTION 3 OF 5</text><line class="line" x1="745" y1="183" x2="1100" y2="183"/>
+  <circle cx="875" cy="270" r="78" fill="url(#purpleGlow)"/><circle cx="875" cy="270" r="25" fill="#101016" stroke="#9b6cff" stroke-width="4"/>
+  <text class="t small" x="852" y="318">Avery</text><text class="m tiny" x="844" y="340">Interviewer</text>
+  <text class="t med" text-anchor="middle" x="875" y="390">Tell me about a time you handled a difficult</text><text class="t med" text-anchor="middle" x="875" y="421">customer situation. What did you do,</text><text class="t med" text-anchor="middle" x="875" y="452">and what was the outcome?</text>
+  <text class="m tiny" text-anchor="middle" x="875" y="486">Prep 30s  ·  Response 120s  ·  Show guidance</text>
+  <text class="m small" text-anchor="middle" x="875" y="535">Ready when you are</text>
+  <g transform="translate(825 555)"><line class="wave" stroke="#d6d7dc" x1="0" y1="16" x2="0" y2="30"/><line class="wave" stroke="#d6d7dc" x1="12" y1="8" x2="12" y2="38"/><line class="wave" stroke="#d6d7dc" x1="24" y1="12" x2="24" y2="34"/><line class="wave" stroke="#d6d7dc" x1="36" y1="5" x2="36" y2="41"/><line class="wave" stroke="#d6d7dc" x1="48" y1="10" x2="48" y2="36"/><line class="wave" stroke="#d6d7dc" x1="60" y1="4" x2="60" y2="42"/><line class="wave" stroke="#d6d7dc" x1="72" y1="13" x2="72" y2="33"/><line class="wave" stroke="#d6d7dc" x1="84" y1="9" x2="84" y2="37"/></g>
+  <circle cx="875" cy="634" r="54" fill="url(#greenGlow)"/><circle cx="875" cy="634" r="28" fill="#1e6f38" stroke="#5ee98c" stroke-width="3"/><text class="t med" x="861" y="643">🎙</text>
+
+  <!-- C desktop -->
+  <rect class="panel" x="1180" y="155" width="580" height="540" rx="22"/>
+  <text class="m tiny" x="1206" y="188">QUESTION 3 OF 5</text><line class="line" x1="1315" y1="183" x2="1720" y2="183"/>
+  <circle cx="1470" cy="315" r="118" fill="url(#blueGlow)"/><circle cx="1470" cy="315" r="46" fill="#0c1020" stroke="#5e7cff" stroke-width="5"/>
+  <text class="t med" text-anchor="middle" x="1470" y="407">Avery</text><text class="m tiny" text-anchor="middle" x="1470" y="431">Interviewer</text>
+  <text class="t med" text-anchor="middle" x="1470" y="478">Tell me about a time you handled a difficult</text><text class="t med" text-anchor="middle" x="1470" y="510">customer situation. What did you do?</text>
+  <text class="m tiny" text-anchor="middle" x="1470" y="545">Prep 30s · Response 120s</text>
+  <g transform="translate(1410 565)"><line class="wave" stroke="#7aa2ff" x1="0" y1="18" x2="0" y2="30"/><line class="wave" stroke="#7aa2ff" x1="14" y1="8" x2="14" y2="40"/><line class="wave" stroke="#7aa2ff" x1="28" y1="13" x2="28" y2="35"/><line class="wave" stroke="#7aa2ff" x1="42" y1="5" x2="42" y2="43"/><line class="wave" stroke="#7aa2ff" x1="56" y1="11" x2="56" y2="37"/><line class="wave" stroke="#7aa2ff" x1="70" y1="4" x2="70" y2="44"/><line class="wave" stroke="#7aa2ff" x1="84" y1="10" x2="84" y2="38"/><line class="wave" stroke="#7aa2ff" x1="98" y1="15" x2="98" y2="33"/></g>
+  <circle cx="1470" cy="638" r="58" fill="url(#blueGlow)"/><circle cx="1470" cy="638" r="31" fill="#315be8" stroke="#8ea6ff" stroke-width="3"/><text class="t med" x="1456" y="647">🎙</text>
+
+  <!-- mobile labels -->
+  <text class="t med" x="55" y="742">Mobile states</text><text class="m small" x="185" y="742">390×844 target — question → recording → feedback</text>
+
+  <!-- A mobile -->
+  <rect class="panel" x="80" y="775" width="420" height="340" rx="28"/>
+  <text class="m tiny" x="108" y="810">Q 3 of 5</text><line class="line" x1="185" y1="805" x2="458" y2="805"/>
+  <text class="t small" x="110" y="850">Avery · Interviewer</text><text class="t med" x="110" y="892">Tell me about a time you handled</text><text class="t med" x="110" y="922">a difficult customer situation...</text>
+  <rect class="card" x="105" y="955" width="365" height="125" rx="16"/><text class="t small" x="128" y="988">Your response</text><text class="m tiny" x="128" y="1014">Not recording</text><circle cx="160" cy="1052" r="20" fill="#252731"/><text class="t small" x="152" y="1059">🎙</text><rect class="btn" x="210" y="1034" width="150" height="36" rx="9"/><text class="btnText" x="234" y="1058">Start recording</text>
+
+  <!-- B mobile -->
+  <rect class="panel" x="690" y="775" width="420" height="340" rx="28"/>
+  <text class="m tiny" x="718" y="810">Q 3 of 5</text><line class="line" x1="795" y1="805" x2="1068" y2="805"/>
+  <circle cx="900" cy="875" r="62" fill="url(#purpleGlow)"/><circle cx="900" cy="875" r="22" fill="#101016" stroke="#9b6cff" stroke-width="4"/>
+  <text class="t med" text-anchor="middle" x="900" y="944">Tell me about a time you handled</text><text class="t med" text-anchor="middle" x="900" y="975">a difficult customer situation...</text>
+  <text class="m tiny" text-anchor="middle" x="900" y="1005">Prep 30s · Response 120s</text>
+  <g transform="translate(855 1022)"><line class="wave" stroke="#d6d7dc" x1="0" y1="12" x2="0" y2="26"/><line class="wave" stroke="#d6d7dc" x1="12" y1="5" x2="12" y2="33"/><line class="wave" stroke="#d6d7dc" x1="24" y1="9" x2="24" y2="29"/><line class="wave" stroke="#d6d7dc" x1="36" y1="2" x2="36" y2="36"/><line class="wave" stroke="#d6d7dc" x1="48" y1="8" x2="48" y2="30"/><line class="wave" stroke="#d6d7dc" x1="60" y1="4" x2="60" y2="34"/><line class="wave" stroke="#d6d7dc" x1="72" y1="10" x2="72" y2="28"/></g>
+  <circle cx="900" cy="1080" r="28" fill="#1e6f38" stroke="#5ee98c" stroke-width="3"/><text class="t small" x="891" y="1087">🎙</text>
+
+  <!-- C mobile -->
+  <rect class="panel" x="1300" y="775" width="420" height="340" rx="28"/>
+  <text class="m tiny" x="1328" y="810">Q 3 of 5</text><line class="line" x1="1405" y1="805" x2="1678" y2="805"/>
+  <circle cx="1510" cy="900" r="82" fill="url(#blueGlow)"/><circle cx="1510" cy="900" r="34" fill="#0c1020" stroke="#5e7cff" stroke-width="4"/>
+  <text class="t small" text-anchor="middle" x="1510" y="985">Avery</text>
+  <text class="t med" text-anchor="middle" x="1510" y="1023">Tell me about a time you handled</text><text class="t med" text-anchor="middle" x="1510" y="1053">a difficult customer situation...</text>
+  <circle cx="1510" cy="1090" r="28" fill="#315be8" stroke="#8ea6ff" stroke-width="3"/><text class="t small" x="1501" y="1097">🎙</text>
+
+  <text class="m tiny" x="42" y="1152">Decision bias: A = safest for structured feedback; B = likely best balance; C = most immersive but hardest to extend with rubric/coaching.</text>
+</svg>

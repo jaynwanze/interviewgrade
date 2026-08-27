@@ -73,105 +73,12 @@
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1) !important;
 }
 
-/*
- * Audio-first Practice stage.
- *
- * Keep UserCamera mounted so the proven microphone, MediaRecorder,
- * transcription and answer callbacks remain untouched, but remove the live
- * self-view from the normal V2 Practice experience. The exact camera wrapper
- * is scoped to the session shell so legacy interview routes keep their video.
- */
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) {
-  min-height: clamp(150px, 22vh, 210px);
-  border: 1px solid hsl(var(--border));
-  border-radius: 1.5rem !important;
-  background:
-    radial-gradient(circle at 50% 34%, hsl(var(--primary) / 0.12), transparent 36%),
-    linear-gradient(to bottom, hsl(var(--muted) / 0.22), hsl(var(--background) / 0.86));
-  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.035);
-}
-
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video)::before {
-  content: 'Ready when you are';
-  position: absolute;
-  inset: 2rem 1rem auto;
-  z-index: 1;
-  text-align: center;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: hsl(var(--muted-foreground));
-}
-
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video)::after {
-  content: 'Speak naturally. InterviewGrade will transcribe your answer when you stop.';
-  position: absolute;
-  inset: 3.6rem 1.5rem auto;
-  z-index: 1;
-  margin: 0 auto;
-  max-width: 32rem;
-  text-align: center;
-  font-size: 0.78rem;
-  line-height: 1.25rem;
-  color: hsl(var(--muted-foreground) / 0.78);
-}
-
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > video {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Turn the former camera overlay into a centred voice control surface. */
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .pointer-events-none.absolute.inset-x-0.bottom-16 {
-  inset: auto 0 4.15rem !important;
-  display: flex !important;
-}
-
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .pointer-events-none.absolute.inset-x-0.bottom-3,
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .pointer-events-none.absolute.inset-x-0.bottom-2\.5 {
-  inset: auto 0 1.15rem !important;
-  display: flex !important;
-}
-
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) .pointer-events-auto:has(button[aria-label='Record answer']) {
-  background: hsl(var(--background) / 0.7) !important;
-  border-color: hsl(var(--border) / 0.9) !important;
-  box-shadow: 0 10px 30px hsl(var(--foreground) / 0.08) !important;
-}
-
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .absolute.left-2.top-2,
-.session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .absolute.left-3.top-3 {
-  left: 50% !important;
-  top: auto !important;
-  bottom: 6.7rem !important;
-  transform: translateX(-50%);
-  border-color: hsl(var(--border)) !important;
-  background: hsl(var(--background) / 0.74) !important;
-  color: hsl(var(--foreground)) !important;
-}
-
-/* Remove the large video-call footprint while keeping the answer controls easy to hit. */
-.session-interaction-shell .flex.min-h-0.flex-1.items-center.justify-center:has(video) {
-  align-items: center !important;
-  padding: 0.15rem !important;
-}
-
-.session-interaction-shell .flex.min-h-0.flex-1.items-center.justify-center:has(video) > div {
-  max-width: 46rem !important;
-}
-
-.session-interaction-shell .flex.min-h-0.flex-1.flex-col.overflow-hidden:has(video) {
-  min-height: auto !important;
-  flex: 0 0 auto !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
 @media (max-width: 767px) {
+  /* Keep the live camera close to the prompt instead of vertically centering it in spare space. */
+  .session-interaction-shell .flex.min-h-0.flex-1.items-center.justify-center:has(video) {
+    align-items: flex-start !important;
+  }
+
   /* Long prompts remain scrollable, with a soft edge instead of looking abruptly clipped. */
   .session-interaction-shell .text-center > p {
     padding-bottom: 0.45rem !important;
@@ -189,37 +96,30 @@
     );
   }
 
-  .session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) {
-    min-height: 150px;
-    border-radius: 1.25rem !important;
+  /* A collapsed feedback checkpoint still reads as a useful live camera preview. */
+  .session-interaction-shell:has(.lucide-message-square) video {
+    height: clamp(190px, 29dvh, 240px) !important;
+    transition: height 220ms ease, border-radius 220ms ease !important;
   }
 
-  .session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video)::before {
-    inset-block-start: 1.35rem;
+  /* Guidance expanded: yield reading space without reducing the camera to a thin strip. */
+  .session-interaction-shell:has(.text-center > div > p.text-sm:not(.line-clamp-2)) video {
+    height: clamp(150px, 22dvh, 195px) !important;
   }
 
-  .session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video)::after {
-    inset: 2.85rem 1rem auto;
-    font-size: 0.72rem;
-    line-height: 1.1rem;
+  /* Previous feedback expanded keeps enough face context while prioritising the detail panel. */
+  .session-interaction-shell:has(.lucide-message-square):has(.border-t p.text-sm) video {
+    height: clamp(150px, 22dvh, 195px) !important;
   }
 
-  .session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .pointer-events-none.absolute.inset-x-0.bottom-16 {
-    inset-block-end: 3.95rem !important;
-  }
-
-  .session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .pointer-events-none.absolute.inset-x-0.bottom-2\.5 {
-    inset-block-end: 0.85rem !important;
-  }
-
-  .session-interaction-shell .relative.overflow-hidden.rounded-md:has(> video) > .absolute.left-2.top-2 {
-    bottom: 6.15rem !important;
+  .session-interaction-shell:has(.lucide-message-square) .flex.min-h-0.flex-1.items-center.justify-center:has(video) {
+    padding-bottom: 0.3rem !important;
   }
 
   .session-interaction-shell button[aria-label='Record answer'],
   .session-interaction-shell button[aria-label='Stop recording'] {
-    width: 2.55rem !important;
-    height: 2.55rem !important;
+    width: 2.3rem !important;
+    height: 2.3rem !important;
   }
 }
 

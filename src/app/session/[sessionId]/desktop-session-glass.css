@@ -30,29 +30,32 @@
     -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
   }
 
-  /* Keep progress and the interview stage on the same physical centre axis. */
+  /* Progress, Avery/question and the voice controls are one compact centred
+     cluster. This must not depend on whether the recorder is currently mounted. */
   .session-interaction-shell .max-w-4xl {
+    display: flex !important;
+    width: 100% !important;
     max-width: 50rem !important;
+    min-height: 0 !important;
+    flex-direction: column !important;
+    gap: 0.7rem !important;
   }
 
-  /* Keep one stable desktop anchor for both answering and feedback states.
-     The old recorder-dependent centering made the whole stage jump upward as soon
-     as the recorder was replaced by feedback. Feedback should grow downward
-     without moving Avery, the question, or progress. */
+  /* Neutralise the older recorder-dependent auto margins. They were creating the
+     large gap between progress and the Avery card and made the stage move when
+     feedback replaced the recorder. */
+  .session-interaction-shell .max-w-4xl > section {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* On taller desktops use one stable top anchor for the whole cluster. Feedback
+     then grows downward without moving progress, Avery, the question or recorder. */
   @media (min-height: 760px) {
     .session-interaction-shell .max-w-4xl {
-      display: flex !important;
       height: 100% !important;
-      min-height: 0 !important;
-      flex-direction: column !important;
       justify-content: flex-start !important;
-      gap: 0.7rem !important;
-      padding-top: clamp(5rem, 13vh, 8.5rem) !important;
-    }
-
-    .session-interaction-shell .max-w-4xl > section {
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
+      padding-top: clamp(4.5rem, 11vh, 7rem) !important;
     }
   }
 

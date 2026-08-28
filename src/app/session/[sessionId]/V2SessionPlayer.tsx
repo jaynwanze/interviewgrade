@@ -12,7 +12,6 @@ import {
   Volume2,
 } from 'lucide-react';
 
-import { UserCamera } from '@/components/Interviews/InterviewFlow/UserCamera';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -32,6 +31,7 @@ import {
 } from '@/utils/openai/clientSpeechFallback';
 import { generateTTS, releaseTTSUrl } from '@/utils/openai/textToSpeech';
 
+import { PracticeVoiceRecorder } from './PracticeVoiceRecorder';
 import {
   advancePracticeSessionAction,
   completePracticeSessionAction,
@@ -85,7 +85,6 @@ export function V2SessionPlayer({
   const [preparedNextOrder, setPreparedNextOrder] = useState<number | null>(null);
   const [complete, setComplete] = useState(false);
   const [speaking, setSpeaking] = useState(false);
-  const [cameraOn, setCameraOn] = useState(true);
   const [guidanceExpanded, setGuidanceExpanded] = useState(false);
   const [answeredCurrentQuestion, setAnsweredCurrentQuestion] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -463,7 +462,6 @@ export function V2SessionPlayer({
       stopCurrentSpeech();
       feedbackRequestRef.current += 1;
       await completePracticeSessionAction(sessionId);
-      setCameraOn(false);
       setComplete(true);
     } catch (cause) {
       console.error('V2SessionPlayer: completion failed', cause);
@@ -520,234 +518,142 @@ export function V2SessionPlayer({
   const showPreviousFeedback =
     previousFeedback != null &&
     previousFeedback.questionOrder !== currentQuestionOrder;
-  const showFeedbackPanel =
-    answeredCurrentQuestion || feedbackLoading || hasFeedback || showPreviousFeedback;
+  const showCurrentInteraction = !answeredCurrentQuestion;
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-col gap-3 lg:h-[calc(100vh-150px)] lg:min-h-[620px] lg:max-h-[900px]">
-      <div className="flex shrink-0 items-center gap-3 px-1 sm:gap-4">
-        <div className="min-w-[96px]">
+    <div className="mx-auto w-full max-w-4xl">
+      <div className="mb-3 flex items-center gap-3 px-1 sm:gap-4">
+        <div className="min-w-[94px]">
           <div className="text-sm font-medium text-primary">
             Question {safeIndex + 1} of {orderedQuestions.length}
           </div>
           <div className="text-xs text-muted-foreground">{responseCount} saved</div>
         </div>
-        <Progress value={progress} className="h-2 flex-1" />
+        <Progress value={progress} className="h-1.5 flex-1" />
+        {canEndPractice && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="hidden shrink-0 text-muted-foreground sm:inline-flex"
+            onClick={finishSession}
+            disabled={busy}
+          >
+            End practice
+          </Button>
+        )}
       </div>
 
       {error && (
-        <div className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2.5 text-sm">
+        <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-2.5 text-sm">
           {error}
         </div>
       )}
 
-      <Card className="shrink-0 overflow-hidden">
-        <CardContent className="p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border bg-background">
-                <Lottie
-                  animationData={talkingInterviewer}
-                  loop
-                  autoplay={false}
-                  lottieRef={lottieRef}
-                  className="h-full w-full"
-                />
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-semibold">Avery</div>
-                <div className="text-xs text-muted-foreground">Interviewer</div>
-              </div>
-            </div>
+      <section className="relative overflow-hidden rounded-2xl border bg-background/80 px-4 py-5 shadow-sm sm:px-8 sm:py-7">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-28 -z-0 h-48 w-48 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl"
+        />
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void speakCurrentQuestion(false)}
-              disabled={speaking || busy}
-            >
-              {speaking ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Volume2 className="mr-2 h-4 w-4" />
-              )}
-              Listen
-            </Button>
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full border bg-background/80 shadow-sm sm:h-20 sm:w-20">
+            <Lottie
+              animationData={talkingInterviewer}
+              loop
+              autoplay={false}
+              lottieRef={lottieRef}
+              className="h-full w-full"
+            />
           </div>
+          <div className="mt-2 text-sm font-semibold">Avery</div>
+          <div className="text-xs text-muted-foreground">Interviewer</div>
 
-          <div className="mx-auto mt-4 max-w-4xl text-center sm:mt-5">
-            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Question {safeIndex + 1}
-            </div>
-            <p className="mt-2 break-words text-xl font-semibold leading-7 tracking-tight sm:text-2xl sm:leading-8">
+          <div className="mt-4 w-full max-w-3xl sm:mt-5">
+            <p className="break-words text-xl font-semibold leading-7 tracking-tight sm:text-2xl sm:leading-8">
               {currentQuestion.prompt}
             </p>
 
-            {currentQuestion.guidance && (
-              <div className="mx-auto mt-2 max-w-3xl">
-                <p
-                  className={`text-sm leading-6 text-muted-foreground ${
-                    guidanceExpanded ? '' : 'line-clamp-2'
-                  }`}
-                >
-                  {currentQuestion.guidance}
-                </p>
-                {currentQuestion.guidance.length > 120 && (
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    className="h-auto p-0 text-xs"
-                    onClick={() => setGuidanceExpanded((expanded) => !expanded)}
-                  >
-                    {guidanceExpanded ? 'Show less' : 'Show guidance'}
-                  </Button>
-                )}
-              </div>
-            )}
-
-            <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
               <TimePill label="Prep" seconds={currentQuestion.preparationSeconds} />
               <TimePill label="Response" seconds={currentQuestion.responseSeconds} />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => void speakCurrentQuestion(false)}
+                disabled={speaking || busy}
+              >
+                {speaking ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Volume2 className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Listen
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      <Card className="flex min-h-[360px] min-w-0 flex-1 flex-col overflow-hidden sm:min-h-[420px] lg:min-h-0">
-        <CardContent className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-2 sm:p-3">
-          <div className="w-full max-w-5xl">
-            <UserCamera
-              answerCallback={handleTranscript}
-              isCameraOn={cameraOn}
-              onRecordEnd={null}
-              interviewMode="Practice"
+            {currentQuestion.guidance && (
+              <div className="mx-auto mt-2 max-w-2xl">
+                {guidanceExpanded && (
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {currentQuestion.guidance}
+                  </p>
+                )}
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-xs"
+                  onClick={() => setGuidanceExpanded((expanded) => !expanded)}
+                >
+                  {guidanceExpanded ? 'Hide guidance' : 'Show guidance'}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="relative z-10 mx-auto mt-5 max-w-2xl border-t pt-5 sm:mt-6 sm:pt-6">
+          {showCurrentInteraction ? (
+            <PracticeVoiceRecorder
+              onAnswer={handleTranscript}
               disabled={busy || speaking}
               maxRecordingSeconds={currentQuestion.responseSeconds ?? 120}
-              controlsOverlay
             />
-          </div>
-        </CardContent>
-      </Card>
-
-      {showFeedbackPanel && (
-        <Card className="shrink-0 overflow-hidden">
-          <CardContent className="space-y-3 p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
-                <div>
-                  <div className="text-sm font-semibold">
-                    {answeredCurrentQuestion ? 'Response feedback' : 'Previous feedback'}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {answeredCurrentQuestion
-                      ? 'Your saved response is evaluated against this Practice rubric.'
-                      : `Question ${previousFeedback?.questionNumber ?? safeIndex} feedback`}
-                  </div>
-                </div>
-              </div>
-
-              {feedback.score != null && answeredCurrentQuestion && (
-                <div className={`text-2xl font-bold ${scoreClass(feedback.score)}`}>
-                  {Math.round(feedback.score)}
-                  <span className="text-sm font-medium text-muted-foreground">/100</span>
-                </div>
-              )}
-            </div>
-
-            {showPreviousFeedback && previousFeedback && !answeredCurrentQuestion && (
-              <div
-                className={`rounded-lg border p-3 transition-colors ${
-                  previousFeedback.status === 'ready'
-                    ? 'border-primary/25 bg-primary/5'
-                    : 'bg-muted/15'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                      {previousFeedback.status === 'processing' ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                          Feedback processing…
-                        </>
-                      ) : previousFeedback.status === 'ready' ? (
-                        <>
-                          <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                          Feedback ready
-                          {previousFeedback.feedback.score != null && (
-                            <span className={scoreClass(previousFeedback.feedback.score)}>
-                              · {Math.round(previousFeedback.feedback.score)}/100
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        'Feedback unavailable'
-                      )}
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-2 text-left">
+                  <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div>
+                    <div className="text-sm font-semibold">Response feedback</div>
+                    <div className="text-xs text-muted-foreground">
+                      Your answer is saved. Feedback appears here as it arrives.
                     </div>
                   </div>
-
-                  {previousFeedback.status === 'ready' &&
-                    previousFeedback.feedback.summary && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0"
-                        onClick={() =>
-                          setPreviousFeedbackExpanded((expanded) => !expanded)
-                        }
-                      >
-                        {previousFeedbackExpanded ? 'Hide' : 'View'}
-                      </Button>
-                    )}
                 </div>
-
-                {previousFeedbackExpanded && previousFeedback.feedback.summary && (
-                  <div className="mt-3 border-t pt-3">
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      {previousFeedback.feedback.summary}
-                    </p>
-                    {previousFeedback.feedback.advice &&
-                      previousFeedback.feedback.advice !== 'N/A' && (
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                          <span className="font-medium text-foreground">Next focus:</span>{' '}
-                          {previousFeedback.feedback.advice}
-                        </p>
-                      )}
+                {feedback.score != null && (
+                  <div className={`shrink-0 text-2xl font-bold ${scoreClass(feedback.score)}`}>
+                    {Math.round(feedback.score)}
+                    <span className="text-sm font-medium text-muted-foreground">/100</span>
                   </div>
                 )}
               </div>
-            )}
 
-            {answeredCurrentQuestion &&
-              (feedbackLoading && !hasFeedback ? (
-                <div className="rounded-lg border bg-muted/15 p-3">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    Response saved
-                  </div>
-                  <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
-                    Evaluating against your rubric…
-                    {canMoveNext
-                      ? ' You can continue now or wait for feedback.'
-                      : isFinalQuestion
-                        ? ' You can finish now or wait for feedback.'
-                        : ''}
-                  </p>
+              {feedbackLoading && !hasFeedback ? (
+                <div className="flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  Evaluating against your rubric…
                 </div>
               ) : hasFeedback ? (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 text-left sm:grid-cols-2">
                   {feedback.summary && (
                     <FeedbackBlock label="Summary" text={feedback.summary} />
                   )}
                   {nextQuestion && feedback.advice && feedback.advice !== 'N/A' && (
-                    <FeedbackBlock
-                      label="For the next question"
-                      text={feedback.advice}
-                    />
+                    <FeedbackBlock label="Next focus" text={feedback.advice} />
                   )}
                   {!feedback.summary && feedbackText && (
                     <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground sm:col-span-2">
@@ -755,51 +661,85 @@ export function V2SessionPlayer({
                     </p>
                   )}
                 </div>
-              ) : null)}
+              ) : null}
 
-            {(canMoveNext || (isFinalQuestion && answeredCurrentQuestion)) && (
-              <div className="flex flex-col gap-2 border-t pt-3 sm:flex-row sm:items-center sm:justify-end">
+              <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-end">
                 {canMoveNext ? (
                   <>
                     <Button
                       onClick={finishSession}
                       variant="ghost"
-                      className="sm:order-1"
                       disabled={busy}
                     >
                       End practice
                     </Button>
-                    <Button onClick={showNextQuestion} className="sm:order-2">
+                    <Button onClick={showNextQuestion}>
                       Next question
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </>
-                ) : (
+                ) : isFinalQuestion ? (
                   <Button onClick={finishSession} disabled={busy}>
                     Finish practice
                   </Button>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {showPreviousFeedback && previousFeedback && showCurrentInteraction && (
+          <div className="relative z-10 mx-auto mt-4 max-w-2xl border-t pt-3">
+            <div className="flex items-center justify-between gap-3 text-left">
+              <div className="flex items-center gap-2 text-sm">
+                {previousFeedback.status === 'processing' ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                ) : previousFeedback.status === 'ready' ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                ) : null}
+                <span className="font-medium">
+                  Question {previousFeedback.questionNumber} feedback
+                </span>
+                {previousFeedback.feedback.score != null && (
+                  <span className={scoreClass(previousFeedback.feedback.score)}>
+                    · {Math.round(previousFeedback.feedback.score)}/100
+                  </span>
                 )}
               </div>
+              {previousFeedback.status === 'ready' && previousFeedback.feedback.summary && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPreviousFeedbackExpanded((expanded) => !expanded)}
+                >
+                  {previousFeedbackExpanded ? 'Hide' : 'View'}
+                </Button>
+              )}
+            </div>
+            {previousFeedbackExpanded && previousFeedback.feedback.summary && (
+              <div className="mt-2 text-left text-sm leading-6 text-muted-foreground">
+                {previousFeedback.feedback.summary}
+              </div>
             )}
-          </CardContent>
-        </Card>
-      )}
-
-      {canEndPractice &&
-        !canMoveNext &&
-        !(isFinalQuestion && answeredCurrentQuestion) && (
-          <div className="flex shrink-0 justify-end">
-            <Button
-              onClick={finishSession}
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground"
-              disabled={busy}
-            >
-              End practice
-            </Button>
           </div>
         )}
+      </section>
+
+      {canEndPractice && (
+        <div className="mt-2 flex justify-center sm:hidden">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={finishSession}
+            disabled={busy}
+          >
+            End practice
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -22,7 +22,7 @@ import type { AuthProvider } from '@/types';
 import { UserType } from '@/types/userTypes';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function Login({
   next,
@@ -34,17 +34,17 @@ export function Login({
   userType: UserType;
 }) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const hasRedirectedRef = useRef(false);
 
   const router = useRouter();
 
-  function redirectToDashboard() {
+  const redirectToDashboard = useCallback(() => {
+    if (hasRedirectedRef.current) return;
+    hasRedirectedRef.current = true;
+
     router.refresh();
-    if (next) {
-      router.push(`/auth/callback?next=${encodeURIComponent(next)}`);
-    } else {
-      router.push('/auth/callback');
-    }
-  }
+    router.replace(next || '/candidate/dashboard');
+  }, [next, router]);
 
   const magicLinkMutation = useSAToastMutation(
     async (email: string) => {
@@ -123,7 +123,11 @@ export function Login({
     },
   );
 
-  isLoggedIn && redirectToDashboard();
+  useEffect(() => {
+    if (isLoggedIn) {
+      redirectToDashboard();
+    }
+  }, [isLoggedIn, redirectToDashboard]);
 
   return (
     <div

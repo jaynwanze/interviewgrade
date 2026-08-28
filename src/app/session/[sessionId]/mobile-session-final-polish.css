@@ -1,1 +1,62 @@
-placeholder
+/* Final mobile-only Practice stage cleanup. Desktop remains unchanged. */
+@media (max-width: 767px) {
+  /* On phones the viewport is already the shell. Remove the large framed outer stage
+     so the question reads as one clean surface rather than a card inside a card. */
+  .session-interaction-shell .max-w-4xl > section {
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding-inline: 0.65rem !important;
+    padding-top: 0.55rem !important;
+    padding-bottom: 0.65rem !important;
+  }
+
+  /* Keep Avery present, but reclaim enough height for long interview prompts. */
+  .session-interaction-shell [data-avery-presence] {
+    width: 3.75rem !important;
+    min-width: 3.75rem !important;
+    height: 3.75rem !important;
+    min-height: 3.75rem !important;
+    flex-basis: 3.75rem !important;
+  }
+
+  .session-interaction-shell [data-avery-presence] + div {
+    margin-top: 0.3rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) {
+    margin-top: 0.5rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
+    max-height: 8rem !important;
+    font-size: clamp(0.98rem, 4.35vw, 1.12rem) !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Tighten the lower interaction region so waveform/mic and feedback do not feel
+     detached from the question. */
+  .session-interaction-shell section > div.relative.z-10.mx-auto {
+    margin-top: 0.5rem !important;
+    padding-top: 0.55rem !important;
+  }
+
+  /* Expanded previous-question feedback is a preview, not a second report. */
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4 > div.mt-2 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    font-size: 0.8rem !important;
+    line-height: 1.3rem !important;
+  }
+
+  /* Give iPhone browser chrome a little breathing room without creating another
+     full-height card beneath the active stage. */
+  .session-interaction-shell main:has(.max-w-4xl) {
+    padding-bottom: calc(0.7rem + env(safe-area-inset-bottom)) !important;
+  }
+}

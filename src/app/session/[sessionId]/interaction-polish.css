@@ -2,64 +2,81 @@
  * Keep this file presentation-only: recorder/session state lives in explicit components.
  */
 
-/* Avery should remain visibly present even when the speaking-rings Lottie is paused. */
-.session-interaction-shell section > .relative.z-10.flex.flex-col.items-center.text-center > .relative.flex:first-child {
-  width: 5.75rem !important;
-  height: 5.75rem !important;
-  border-color: rgb(125 211 252 / 0.22) !important;
+/* Avery is a real stage anchor, not something that depends on a visible Lottie frame. */
+.session-interaction-shell [data-avery-presence] {
+  position: relative;
+  isolation: isolate;
+  width: 6rem !important;
+  height: 6rem !important;
+  flex: 0 0 auto;
+  overflow: visible !important;
+  border-color: rgb(125 211 252 / 0.38) !important;
   background:
-    radial-gradient(circle at 50% 48%, rgb(125 211 252 / 0.15), transparent 42%),
-    hsl(var(--background) / 0.86) !important;
+    radial-gradient(circle at 50% 50%, rgb(186 230 253 / 0.2) 0 10%, rgb(56 189 248 / 0.14) 11% 28%, rgb(14 165 233 / 0.055) 29% 52%, transparent 53%),
+    hsl(var(--background) / 0.96) !important;
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.025),
-    0 0 0 8px rgb(125 211 252 / 0.025),
-    0 16px 42px rgb(0 0 0 / 0.18) !important;
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    0 0 0 7px rgb(56 189 248 / 0.04),
+    0 0 38px rgb(56 189 248 / 0.11),
+    0 16px 42px rgb(0 0 0 / 0.2) !important;
 }
 
-.session-interaction-shell section > .relative.z-10.flex.flex-col.items-center.text-center > .relative.flex:first-child::before {
+.session-interaction-shell [data-avery-presence]::before,
+.session-interaction-shell [data-avery-presence]::after {
   content: '';
   position: absolute;
-  inset: 22%;
   border-radius: 9999px;
-  border: 1px solid rgb(125 211 252 / 0.34);
-  background: radial-gradient(circle, rgb(125 211 252 / 0.24), rgb(125 211 252 / 0.04) 58%, transparent 62%);
   pointer-events: none;
+  z-index: 0;
 }
 
-.session-interaction-shell section > .relative.z-10.flex.flex-col.items-center.text-center > .relative.flex:first-child > div {
-  position: relative;
+.session-interaction-shell [data-avery-presence]::before {
+  inset: 0.8rem;
+  border: 1px solid rgb(125 211 252 / 0.48);
+  box-shadow: inset 0 0 18px rgb(56 189 248 / 0.09);
+}
+
+.session-interaction-shell [data-avery-presence]::after {
+  inset: 2.35rem;
+  background: rgb(186 230 253 / 0.92);
+  box-shadow: 0 0 18px rgb(125 211 252 / 0.72);
+}
+
+.session-interaction-shell [data-avery-presence] > span {
   z-index: 1;
 }
 
-/* The question is important, but Avery is the visual anchor rather than a giant paragraph. */
-.session-interaction-shell section .break-words.text-xl {
-  max-width: 43rem;
-  margin-inline: auto;
-  font-size: clamp(1.15rem, 1.9vw, 1.48rem) !important;
-  line-height: 1.36 !important;
-  letter-spacing: -0.018em;
+.session-interaction-shell [data-avery-presence] > div {
+  z-index: 2;
 }
 
-/* Recorder: one aligned voice language. Idle is quiet grey; live audio is blue. */
+/* Question supports Avery rather than becoming the entire visual identity. */
+.session-interaction-shell [data-avery-presence] ~ div + div {
+  max-width: 42rem;
+}
+
+/* Recorder: idle is calm; once Stop appears, the whole control visibly becomes live. */
 .session-interaction-shell [data-practice-voice-recorder] {
+  position: relative;
   max-width: 30rem;
   margin-inline: auto;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:first-child {
   min-height: 1.1rem;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] div[style*='position: relative'] > div[style*='background: lightblue'] {
   background: rgb(125 211 252) !important;
-  box-shadow: 0 0 10px rgb(125 211 252 / 0.18);
+  box-shadow: 0 0 9px rgb(125 211 252 / 0.32);
 }
 
 .session-interaction-shell button[aria-label='Record answer'],
 .session-interaction-shell button[aria-label='Stop recording'] {
-  width: 2.85rem !important;
-  height: 2.85rem !important;
+  position: relative;
+  width: 3.15rem !important;
+  height: 3.15rem !important;
   border-radius: 9999px !important;
   border-width: 1px !important;
   backdrop-filter: blur(16px) saturate(130%);
@@ -72,75 +89,70 @@
 }
 
 .session-interaction-shell button[aria-label='Record answer'] {
-  border-color: rgb(148 163 184 / 0.28) !important;
-  background: rgb(71 85 105 / 0.26) !important;
-  color: rgb(226 232 240 / 0.95) !important;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.16) !important;
+  border-color: rgb(148 163 184 / 0.34) !important;
+  background: rgb(51 65 85 / 0.48) !important;
+  color: rgb(241 245 249 / 0.98) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 10px 30px rgb(0 0 0 / 0.2) !important;
 }
 
 .session-interaction-shell button[aria-label='Record answer']:not(:disabled):hover {
-  border-color: rgb(125 211 252 / 0.42) !important;
-  background: rgb(125 211 252 / 0.12) !important;
-  color: rgb(186 230 253) !important;
-  transform: translateY(-1px);
+  border-color: rgb(125 211 252 / 0.55) !important;
+  background: rgb(14 165 233 / 0.18) !important;
+  color: rgb(224 242 254) !important;
+  transform: translateY(-1px) scale(1.02);
 }
 
 .session-interaction-shell button[aria-label='Stop recording'] {
-  border-color: rgb(244 114 130 / 0.32) !important;
-  background: rgb(160 72 82 / 0.35) !important;
-  color: rgb(255 228 230 / 0.96) !important;
-  box-shadow: 0 10px 30px rgb(127 29 29 / 0.14) !important;
+  border-color: rgb(251 113 133 / 0.62) !important;
+  background: rgb(159 18 57 / 0.52) !important;
+  color: rgb(255 241 242 / 0.98) !important;
+  box-shadow:
+    0 0 0 7px rgb(244 63 94 / 0.07),
+    0 0 34px rgb(244 63 94 / 0.2),
+    0 10px 30px rgb(0 0 0 / 0.2) !important;
+  animation: practice-live-mic 1.8s ease-in-out infinite;
 }
 
 .session-interaction-shell button[aria-label='Stop recording']:not(:disabled):hover {
-  background: rgb(168 76 88 / 0.48) !important;
+  background: rgb(190 24 93 / 0.58) !important;
   transform: translateY(-1px);
 }
 
-/* Feedback stays in the same interaction slot, but reads as intelligence rather than another card stack. */
-.session-interaction-shell section .grid.gap-3.text-left > div {
+/* Live waveform is intentionally brighter and visually tied to the active stop control. */
+.session-interaction-shell [data-practice-voice-recorder]:has(button[aria-label='Stop recording']) > div:first-child {
+  color: rgb(186 230 253) !important;
+}
+
+.session-interaction-shell [data-practice-voice-recorder]:has(button[aria-label='Stop recording']) div[style*='position: relative'] {
+  filter: drop-shadow(0 0 5px rgb(56 189 248 / 0.25));
+}
+
+@keyframes practice-live-mic {
+  0%, 100% { box-shadow: 0 0 0 7px rgb(244 63 94 / 0.055), 0 0 24px rgb(244 63 94 / 0.14), 0 10px 30px rgb(0 0 0 / 0.2); }
+  50% { box-shadow: 0 0 0 11px rgb(244 63 94 / 0.08), 0 0 38px rgb(244 63 94 / 0.24), 0 10px 30px rgb(0 0 0 / 0.2); }
+}
+
+/* Feedback stays in one stage and uses a compact intelligence split, never a second dashboard. */
+.session-interaction-shell section .grid.text-left > div {
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
-  padding: 0.2rem 0.2rem 0.25rem !important;
-}
-
-@media (min-width: 640px) {
-  .session-interaction-shell section .grid.gap-3.text-left {
-    gap: 0 !important;
-  }
-
-  .session-interaction-shell section .grid.gap-3.text-left > div + div {
-    border-left: 1px solid hsl(var(--border)) !important;
-    padding-left: 1.1rem !important;
-    margin-left: 1.1rem;
-  }
-}
-
-.session-interaction-shell section .grid.gap-3.text-left > div > div:first-child {
-  font-size: 0.72rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.035em;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
-}
-
-.session-interaction-shell section .grid.gap-3.text-left > div > p {
-  margin-top: 0.35rem !important;
-  font-size: 0.86rem !important;
-  line-height: 1.45rem !important;
-  color: hsl(var(--foreground) / 0.86) !important;
 }
 
 @media (max-width: 767px) {
-  .session-interaction-shell section > .relative.z-10.flex.flex-col.items-center.text-center > .relative.flex:first-child {
-    width: 4.75rem !important;
-    height: 4.75rem !important;
+  .session-interaction-shell [data-avery-presence] {
+    width: 5rem !important;
+    height: 5rem !important;
   }
 
-  .session-interaction-shell section .break-words.text-xl {
-    font-size: clamp(1.08rem, 5vw, 1.3rem) !important;
-    line-height: 1.34 !important;
+  .session-interaction-shell [data-avery-presence]::before {
+    inset: 0.68rem;
+  }
+
+  .session-interaction-shell [data-avery-presence]::after {
+    inset: 1.95rem;
   }
 
   .session-interaction-shell [data-practice-voice-recorder] {
@@ -149,17 +161,8 @@
 
   .session-interaction-shell button[aria-label='Record answer'],
   .session-interaction-shell button[aria-label='Stop recording'] {
-    width: 3rem !important;
-    height: 3rem !important;
-  }
-
-  .session-interaction-shell section .grid.gap-3.text-left > div {
-    padding-block: 0.35rem !important;
-  }
-
-  .session-interaction-shell section .grid.gap-3.text-left > div + div {
-    border-top: 1px solid hsl(var(--border)) !important;
-    padding-top: 0.8rem !important;
+    width: 3.25rem !important;
+    height: 3.25rem !important;
   }
 }
 
@@ -167,5 +170,6 @@
   .session-interaction-shell button[aria-label='Record answer'],
   .session-interaction-shell button[aria-label='Stop recording'] {
     transition: none !important;
+    animation: none !important;
   }
 }

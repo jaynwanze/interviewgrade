@@ -5,22 +5,22 @@
   display: grid !important;
   place-items: center !important;
   isolation: isolate;
-  width: 6.5rem !important;
-  min-width: 6.5rem !important;
-  height: 6.5rem !important;
-  min-height: 6.5rem !important;
-  flex: 0 0 6.5rem !important;
+  width: 5.75rem !important;
+  min-width: 5.75rem !important;
+  height: 5.75rem !important;
+  min-height: 5.75rem !important;
+  flex: 0 0 5.75rem !important;
   overflow: visible !important;
   opacity: 1 !important;
   visibility: visible !important;
-  border: 1px solid rgb(125 211 252 / 0.5) !important;
+  border: 1px solid rgb(125 211 252 / 0.38) !important;
   background:
-    radial-gradient(circle at center, rgb(224 242 254 / 0.95) 0 6%, rgb(125 211 252 / 0.34) 7% 18%, rgb(14 165 233 / 0.18) 19% 34%, rgb(14 165 233 / 0.07) 35% 52%, rgb(15 23 42 / 0.88) 53%) !important;
+    radial-gradient(circle at center, rgb(224 242 254 / 0.9) 0 5%, rgb(125 211 252 / 0.24) 6% 18%, rgb(14 165 233 / 0.11) 19% 34%, rgb(14 165 233 / 0.04) 35% 52%, rgb(15 23 42 / 0.82) 53%) !important;
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.06),
-    0 0 0 8px rgb(56 189 248 / 0.05),
-    0 0 42px rgb(56 189 248 / 0.2),
-    0 18px 44px rgb(0 0 0 / 0.25) !important;
+    inset 0 0 0 1px rgb(255 255 255 / 0.045),
+    0 0 0 6px rgb(56 189 248 / 0.035),
+    0 0 30px rgb(56 189 248 / 0.13),
+    0 14px 34px rgb(0 0 0 / 0.2) !important;
 }
 
 .session-interaction-shell [data-avery-presence]::before,
@@ -32,16 +32,16 @@
 }
 
 .session-interaction-shell [data-avery-presence]::before {
-  inset: 0.8rem;
-  border: 1px solid rgb(186 230 253 / 0.62);
-  box-shadow: inset 0 0 22px rgb(56 189 248 / 0.12);
+  inset: 0.72rem;
+  border: 1px solid rgb(186 230 253 / 0.42);
+  box-shadow: inset 0 0 18px rgb(56 189 248 / 0.08);
 }
 
 .session-interaction-shell [data-avery-presence]::after {
-  width: 0.9rem;
-  height: 0.9rem;
-  background: rgb(224 242 254);
-  box-shadow: 0 0 20px rgb(125 211 252 / 0.95);
+  width: 0.72rem;
+  height: 0.72rem;
+  background: rgb(224 242 254 / 0.94);
+  box-shadow: 0 0 14px rgb(125 211 252 / 0.7);
 }
 
 .session-interaction-shell [data-avery-presence] > span,
@@ -54,49 +54,49 @@
 
 .session-interaction-shell [data-avery-presence] > div {
   z-index: 2;
-  opacity: 0.9 !important;
+  opacity: 0.72 !important;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] {
-  max-width: 28rem;
+  max-width: 26rem;
   margin-inline: auto;
-  padding-block: 0.15rem 0.25rem;
+  padding-block: 0.05rem 0.15rem;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:first-child {
-  min-height: 1.15rem;
-  font-size: 0.76rem !important;
-  letter-spacing: 0.015em;
+  min-height: 1.05rem;
+  font-size: 0.74rem !important;
+  letter-spacing: 0.012em;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) {
-  margin-top: 0.45rem !important;
-  height: 2.5rem !important;
+  margin-top: 0.3rem !important;
+  height: 2.25rem !important;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(3) {
-  margin-top: 0.45rem !important;
+  margin-top: 0.3rem !important;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] div[style*='position: relative'] > div[style*='background: lightblue'] {
   background: rgb(125 211 252) !important;
-  box-shadow: 0 0 10px rgb(56 189 248 / 0.36);
+  box-shadow: 0 0 8px rgb(56 189 248 / 0.28);
 }
 
 .session-interaction-shell button[aria-label='Record answer'],
 .session-interaction-shell button[aria-label='Stop recording'] {
-  width: 3.35rem !important;
-  height: 3.35rem !important;
+  width: 3.1rem !important;
+  height: 3.1rem !important;
   border-radius: 9999px !important;
   border-width: 1px !important;
   transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease !important;
 }
 
 .session-interaction-shell button[aria-label='Record answer'] {
-  border-color: rgb(148 163 184 / 0.38) !important;
-  background: rgb(51 65 85 / 0.58) !important;
+  border-color: rgb(148 163 184 / 0.34) !important;
+  background: rgb(51 65 85 / 0.5) !important;
   color: rgb(248 250 252) !important;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 10px 30px rgb(0 0 0 / 0.22) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 8px 22px rgb(0 0 0 / 0.18) !important;
 }
 
 .session-interaction-shell button[aria-label='Record answer']:disabled {
@@ -104,18 +104,18 @@
 }
 
 .session-interaction-shell button[aria-label='Record answer']:not(:disabled):hover {
-  border-color: rgb(125 211 252 / 0.62) !important;
-  background: rgb(14 165 233 / 0.2) !important;
+  border-color: rgb(125 211 252 / 0.52) !important;
+  background: rgb(14 165 233 / 0.16) !important;
   color: rgb(224 242 254) !important;
   transform: translateY(-1px) scale(1.02);
 }
 
 .session-interaction-shell button[aria-label='Stop recording'] {
-  border-color: rgb(251 113 133 / 0.72) !important;
-  background: rgb(190 24 93 / 0.58) !important;
+  border-color: rgb(251 113 133 / 0.58) !important;
+  background: rgb(159 18 57 / 0.5) !important;
   color: rgb(255 241 242) !important;
-  box-shadow: 0 0 0 8px rgb(244 63 94 / 0.08), 0 0 38px rgb(244 63 94 / 0.24), 0 10px 30px rgb(0 0 0 / 0.22) !important;
-  animation: practice-live-mic 1.65s ease-in-out infinite;
+  box-shadow: 0 0 0 6px rgb(244 63 94 / 0.06), 0 0 28px rgb(244 63 94 / 0.18), 0 8px 24px rgb(0 0 0 / 0.2) !important;
+  animation: practice-live-mic 1.8s ease-in-out infinite;
 }
 
 .session-interaction-shell [data-practice-voice-recorder]:has(button[aria-label='Stop recording']) > div:first-child {
@@ -124,12 +124,12 @@
 }
 
 .session-interaction-shell [data-practice-voice-recorder]:has(button[aria-label='Stop recording']) > div:nth-child(2) {
-  filter: drop-shadow(0 0 7px rgb(56 189 248 / 0.34));
+  filter: drop-shadow(0 0 5px rgb(56 189 248 / 0.25));
 }
 
 @keyframes practice-live-mic {
-  0%, 100% { box-shadow: 0 0 0 7px rgb(244 63 94 / 0.06), 0 0 26px rgb(244 63 94 / 0.16), 0 10px 30px rgb(0 0 0 / 0.22); }
-  50% { box-shadow: 0 0 0 12px rgb(244 63 94 / 0.09), 0 0 42px rgb(244 63 94 / 0.28), 0 10px 30px rgb(0 0 0 / 0.22); }
+  0%, 100% { box-shadow: 0 0 0 6px rgb(244 63 94 / 0.05), 0 0 20px rgb(244 63 94 / 0.12), 0 8px 24px rgb(0 0 0 / 0.2); }
+  50% { box-shadow: 0 0 0 9px rgb(244 63 94 / 0.075), 0 0 30px rgb(244 63 94 / 0.2), 0 8px 24px rgb(0 0 0 / 0.2); }
 }
 
 .session-interaction-shell section .grid.text-left > div {
@@ -140,21 +140,21 @@
 
 @media (max-width: 767px) {
   .session-interaction-shell [data-avery-presence] {
-    width: 5.25rem !important;
-    min-width: 5.25rem !important;
-    height: 5.25rem !important;
-    min-height: 5.25rem !important;
-    flex-basis: 5.25rem !important;
+    width: 4.75rem !important;
+    min-width: 4.75rem !important;
+    height: 4.75rem !important;
+    min-height: 4.75rem !important;
+    flex-basis: 4.75rem !important;
   }
 
   .session-interaction-shell [data-practice-voice-recorder] {
-    max-width: 22rem;
+    max-width: 21rem;
   }
 
   .session-interaction-shell button[aria-label='Record answer'],
   .session-interaction-shell button[aria-label='Stop recording'] {
-    width: 3.5rem !important;
-    height: 3.5rem !important;
+    width: 3.25rem !important;
+    height: 3.25rem !important;
   }
 }
 

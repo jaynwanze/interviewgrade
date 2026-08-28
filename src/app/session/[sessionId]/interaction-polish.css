@@ -47,47 +47,60 @@
   box-shadow: none !important;
 }
 
-/*
- * Direction B: keep a clear question area, but make the response interaction a
- * lightweight continuation of the same stage instead of a second large card.
- * These utility-class selectors match the existing V2SessionPlayer recorder
- * wrapper only; no media/state logic is changed here.
- */
+/* Direction B: the session should size to its content rather than reserving a video-call viewport. */
+.session-interaction-shell .mx-auto.flex.min-h-0.w-full.max-w-6xl.flex-col.gap-3 {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* Collapse the old media card into a lightweight continuation of the question stage. */
 .session-interaction-shell .flex.min-h-\[360px\].min-w-0.flex-1.flex-col.overflow-hidden {
   min-height: 0 !important;
   flex: 0 0 auto !important;
+  margin-top: -0.15rem !important;
   border-color: transparent !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 
 .session-interaction-shell .flex.min-h-\[360px\].min-w-0.flex-1.flex-col.overflow-hidden > div {
-  padding: 0.1rem 0.5rem 0.25rem !important;
+  padding: 0 0.5rem 0.1rem !important;
   overflow: visible !important;
 }
 
 .session-interaction-shell .practice-voice-recorder {
-  min-height: 154px;
-  max-width: 42rem;
+  min-height: 112px;
+  max-width: 36rem;
   margin-inline: auto;
-  padding-block: 0.9rem 0.65rem !important;
-  border-radius: 1.5rem;
+  padding-block: 0.55rem 0.35rem !important;
+  border-radius: 1.35rem;
   background:
-    radial-gradient(circle at 50% 42%, hsl(var(--primary) / 0.105), transparent 33%),
-    linear-gradient(to bottom, hsl(var(--muted) / 0.08), transparent 70%);
+    radial-gradient(circle at 50% 48%, hsl(var(--primary) / 0.12), transparent 31%),
+    linear-gradient(to bottom, hsl(var(--muted) / 0.055), transparent 72%);
 }
 
 .session-interaction-shell .practice-voice-recorder::after {
   content: '';
   position: absolute;
-  inset: 12% 22% auto;
+  inset: 6% 28% auto;
   height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.55), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.42), transparent);
   pointer-events: none;
 }
 
-.session-interaction-shell .practice-voice-recorder p {
-  max-width: 24rem !important;
+/* The state label is enough during an interview; remove repeated instructional prose. */
+.session-interaction-shell .practice-voice-recorder > p {
+  display: none;
+}
+
+/* Keep the answer interaction visually attached to the current question. */
+.session-interaction-shell .practice-voice-recorder > div:nth-of-type(2) {
+  margin-top: 0.3rem !important;
+}
+
+.session-interaction-shell .practice-voice-recorder > div:nth-of-type(3) {
+  margin-top: 0.2rem !important;
 }
 
 @media (max-width: 767px) {
@@ -110,12 +123,14 @@
 
   .session-interaction-shell .flex.min-h-\[360px\].min-w-0.flex-1.flex-col.overflow-hidden {
     min-height: 0 !important;
+    margin-top: -0.25rem !important;
   }
 
   .session-interaction-shell .practice-voice-recorder {
-    min-height: 138px;
-    padding-block: 0.65rem 0.45rem !important;
-    border-radius: 1.25rem;
+    min-height: 104px;
+    max-width: 100%;
+    padding-block: 0.4rem 0.25rem !important;
+    border-radius: 1.1rem;
   }
 
   .session-interaction-shell button[aria-label='Record answer'],

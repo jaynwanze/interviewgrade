@@ -7,9 +7,12 @@ export function speakWithBrowserVoice(
   onStart?: () => void,
   onEnd?: () => void,
 ): boolean {
+  if (isSpeechPlaybackCancelled()) {
+    return true;
+  }
+
   if (
     typeof window === 'undefined' ||
-    isSpeechPlaybackCancelled() ||
     !('speechSynthesis' in window) ||
     typeof SpeechSynthesisUtterance === 'undefined'
   ) {

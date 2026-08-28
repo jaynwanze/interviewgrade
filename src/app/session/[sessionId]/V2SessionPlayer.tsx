@@ -553,24 +553,53 @@ export function V2SessionPlayer({
       <section className="relative overflow-hidden rounded-2xl border bg-background/80 px-4 py-5 shadow-sm sm:px-8 sm:py-7">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-28 -z-0 h-48 w-48 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-24 h-56 w-56 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl"
         />
 
         <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-full border bg-background/80 shadow-sm sm:h-20 sm:w-20">
+          <div
+            className={`relative flex h-20 w-20 items-center justify-center rounded-full border bg-background/90 shadow-sm transition-all sm:h-24 sm:w-24 ${
+              speaking
+                ? 'border-primary/40 shadow-[0_0_36px_rgba(125,211,252,0.13)]'
+                : 'border-border/80'
+            }`}
+            data-avery-presence
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute inset-2 rounded-full border transition-colors ${
+                speaking ? 'border-sky-300/35 bg-sky-400/5' : 'border-muted-foreground/15'
+              }`}
+            />
+            <span
+              aria-hidden="true"
+              className={`absolute inset-[1.15rem] rounded-full border transition-colors sm:inset-[1.35rem] ${
+                speaking ? 'border-sky-300/45 bg-sky-300/10' : 'border-muted-foreground/20 bg-muted/20'
+              }`}
+            />
+            <span
+              aria-hidden="true"
+              className={`absolute h-3 w-3 rounded-full transition-colors ${
+                speaking ? 'bg-sky-300 shadow-[0_0_18px_rgba(125,211,252,0.75)]' : 'bg-muted-foreground/55'
+              }`}
+            />
             <Lottie
               animationData={talkingInterviewer}
               loop
               autoplay={false}
               lottieRef={lottieRef}
-              className="h-full w-full"
+              className={`absolute inset-0 h-full w-full transition-opacity ${
+                speaking ? 'opacity-100' : 'opacity-35'
+              }`}
             />
           </div>
-          <div className="mt-2 text-sm font-semibold">Avery</div>
-          <div className="text-xs text-muted-foreground">Interviewer</div>
+          <div className="mt-2.5 text-sm font-semibold">Avery</div>
+          <div className="text-xs text-muted-foreground">
+            {speaking ? 'Speaking' : 'Interviewer'}
+          </div>
 
-          <div className="mt-4 w-full max-w-3xl sm:mt-5">
-            <p className="break-words text-xl font-semibold leading-7 tracking-tight sm:text-2xl sm:leading-8">
+          <div className="mt-4 w-full max-w-[42rem] sm:mt-5">
+            <p className="break-words text-lg font-semibold leading-7 tracking-tight sm:text-[1.35rem] sm:leading-7">
               {currentQuestion.prompt}
             </p>
 
@@ -648,7 +677,7 @@ export function V2SessionPlayer({
                   Evaluating against your rubric…
                 </div>
               ) : hasFeedback ? (
-                <div className="grid gap-3 text-left sm:grid-cols-2">
+                <div className="grid gap-x-6 gap-y-3 text-left sm:grid-cols-2 sm:divide-x sm:divide-border/70">
                   {feedback.summary && (
                     <FeedbackBlock label="Summary" text={feedback.summary} />
                   )}
@@ -778,9 +807,11 @@ function TimePill({
 
 function FeedbackBlock({ label, text }: { label: string; text: string }) {
   return (
-    <div className="rounded-lg border bg-muted/10 p-3">
-      <div className="text-sm font-semibold">{label}</div>
-      <p className="mt-1 text-sm leading-6 text-muted-foreground">{text}</p>
+    <div className="px-1 py-1 first:sm:pr-6 last:sm:pl-6">
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </div>
+      <p className="mt-1.5 text-sm leading-6 text-foreground/90">{text}</p>
     </div>
   );
 }

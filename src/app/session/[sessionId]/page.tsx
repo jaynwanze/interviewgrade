@@ -202,8 +202,8 @@ export default async function PracticeSessionPage({
                 <CardHeader>
                   <CardTitle>Begin when you’re ready</CardTitle>
                   <CardDescription>
-                    Starting begins your Practice. Your camera and microphone are used
-                    only to capture each response during the session.
+                    Starting begins your Practice. Your microphone is used to capture
+                    each response and transcribe it for feedback.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -1,8 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import {
   CalendarIcon,
   ChevronLeft,
@@ -260,28 +258,7 @@ export const InterviewHistoryDetails = ({
       return;
     }
 
-    if (!interview || !evaluation) return;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Interview Report', 14, 22);
-    doc.setFontSize(12);
-    doc.text(`Title: ${interview.title}`, 14, 32);
-    doc.text(
-      `Date: ${new Date(interview.start_time).toLocaleString()}`,
-      14,
-      42,
-    );
-    doc.text(`Duration: ${interview.duration} mins`, 14, 52);
-    autoTable(doc, {
-      startY: 62,
-      head: [['Criteria', 'Score', 'Feedback']],
-      body: evaluation.evaluation_scores.map((score) => [
-        score.name || 'N/A',
-        `${score.score}/10`,
-        score.feedback,
-      ]),
-    });
-    doc.save('interview_report.pdf');
+    window.print();
   };
   const renderCoach = (evaluationData: InterviewEvaluation) => {
     if (!isProUser) {

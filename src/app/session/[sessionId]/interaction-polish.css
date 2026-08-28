@@ -43,38 +43,48 @@
   filter: none !important;
 }
 
-/* Keep Avery, question copy and controls on one optical centre line. */
-.session-interaction-shell [data-avery-presence] + div + div + div {
+/* The active stage has one real centre axis. This deliberately overrides the old
+   camera-era .text-center rules in session-player-shell.module.css. */
+.session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: auto !important;
+  text-align: center !important;
+}
+
+.session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) {
+  width: min(100%, 38rem) !important;
   max-width: 38rem !important;
   margin-inline: auto !important;
   text-align: center !important;
 }
 
-.session-interaction-shell [data-avery-presence] + div + div + div > p {
+.session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
+  width: 100% !important;
+  margin-inline: auto !important;
   text-align: center !important;
 }
 
-.session-interaction-shell [data-avery-presence] + div + div + div .justify-center {
+.session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) .justify-center {
   justify-content: center !important;
 }
 
-/* Tighten the lower interaction slot so it belongs to the same stage. */
+/* The lower slot uses exactly the same reading width as the question block. */
 .session-interaction-shell section > div.relative.z-10.mx-auto {
-  width: 100% !important;
+  width: min(100%, 38rem) !important;
   max-width: 38rem !important;
+  margin-inline: auto !important;
   margin-top: 1rem !important;
   padding-top: 1rem !important;
 }
 
-/* One optical centre for status, waveform and record/stop control. */
+/* Status, waveform and record/stop control share one physical centre. Avoid
+   translate/left tricks so the control cannot drift relative to its parent. */
 .session-interaction-shell [data-practice-voice-recorder] {
-  position: relative !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
   display: grid !important;
   width: min(100%, 20rem) !important;
   max-width: 20rem !important;
-  margin: 0 !important;
+  margin-inline: auto !important;
   padding-block: 0 !important;
   justify-items: center !important;
   align-items: center !important;
@@ -172,8 +182,8 @@
   background: transparent !important;
 }
 
-/* On larger screens, centre only the active answering stage in the available viewport.
-   Once feedback replaces the recorder this selector stops matching, so feedback stays top-anchored. */
+/* On taller desktop displays centre the unanswered stage in the usable session
+   viewport. Feedback remains naturally top-flowing because the recorder is gone. */
 @media (min-width: 768px) and (min-height: 760px) {
   .session-interaction-shell div:has(> section [data-practice-voice-recorder]) {
     display: flex !important;
@@ -197,9 +207,21 @@
     flex-basis: 4.7rem !important;
   }
 
-  .session-interaction-shell [data-avery-presence] + div + div + div,
+  /* Mobile stays top-flowing and left-aligns long prompts for readability, while
+     Avery and the voice control keep the same centre axis. */
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4),
   .session-interaction-shell section > div.relative.z-10.mx-auto {
+    width: 100% !important;
     max-width: 100% !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4),
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
+    text-align: left !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) .justify-center {
+    justify-content: flex-start !important;
   }
 
   .session-interaction-shell section > div.relative.z-10.mx-auto {

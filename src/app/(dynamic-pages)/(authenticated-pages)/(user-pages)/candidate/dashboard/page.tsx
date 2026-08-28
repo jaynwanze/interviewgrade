@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Library, Plus } from 'lucide-react';
+import { History, Library, Plus } from 'lucide-react';
 import { Suspense } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -81,6 +81,12 @@ export default async function CandidateDashboardPage() {
               <Link href="/candidate/practices">
                 <Library className="mr-1.5 h-4 w-4" />
                 Practices
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/candidate/interview-history">
+                <History className="mr-1.5 h-4 w-4" />
+                History
               </Link>
             </Button>
           </div>

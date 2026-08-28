@@ -105,19 +105,20 @@
     padding-inline: 0.42rem !important;
   }
 
-  /* Keep waveform/mic visually attached to the question rather than floating low. */
+  /* Keep waveform/mic visually attached to the question while preserving the
+     known-good internal recorder spacing from the previous mobile layout. */
   .session-interaction-shell section > div.relative.z-10.mx-auto {
     margin-top: 0.32rem !important;
     padding-top: 0.42rem !important;
   }
 
   .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) {
-    height: 1.65rem !important;
-    margin-top: 0.05rem !important;
+    height: 1.8rem !important;
+    margin-top: 0 !important;
   }
 
   .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(3) {
-    margin-top: 0 !important;
+    margin-top: 0.05rem !important;
   }
 
   /* Live feedback uses the space below the fixed top cluster and scrolls internally. */

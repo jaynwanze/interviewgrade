@@ -1,6 +1,7 @@
 import { Database } from '@/lib/database.types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { createServerClient } from '@supabase/ssr';
+import type { User } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -24,6 +25,7 @@ export async function GET(request: Request) {
   }
 
   let initializedV2Onboarding = false;
+  let authenticatedUser: User | null = null;
 
   if (code) {
     const cookieStore = cookies();
@@ -54,33 +56,39 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/c/login', requestUrl.origin));
     }
 
-    if (wantsV2Onboarding) {
-      const {
-        data: { user: oauthUser },
-      } = await supabase.auth.getUser();
+    const {
+      data: { user: oauthUser },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-      if (
-        oauthUser &&
-        !oauthUser.user_metadata?.userType &&
-        oauthUser.user_metadata?.onboardingVersion == null
-      ) {
-        const createdAt = Date.parse(oauthUser.created_at);
-        const isNewAccount =
-          Number.isFinite(createdAt) && Date.now() - createdAt < 5 * 60 * 1000;
+    if (userError || !oauthUser) {
+      console.error('Failed to read user after code exchange:', userError);
+      return NextResponse.redirect(new URL('/c/login', requestUrl.origin));
+    }
 
-        if (isNewAccount) {
-          const { error: metadataError } = await supabase.auth.updateUser({
-            data: {
-              onboardingVersion: 2,
-              onboardingV2Complete: false,
-            },
-          });
+    authenticatedUser = oauthUser;
 
-          if (metadataError) {
-            console.error('Failed to initialize V2 onboarding:', metadataError);
-          } else {
-            initializedV2Onboarding = true;
-          }
+    if (
+      wantsV2Onboarding &&
+      !oauthUser.user_metadata?.userType &&
+      oauthUser.user_metadata?.onboardingVersion == null
+    ) {
+      const createdAt = Date.parse(oauthUser.created_at);
+      const isNewAccount =
+        Number.isFinite(createdAt) && Date.now() - createdAt < 5 * 60 * 1000;
+
+      if (isNewAccount) {
+        const { error: metadataError } = await supabase.auth.updateUser({
+          data: {
+            onboardingVersion: 2,
+            onboardingV2Complete: false,
+          },
+        });
+
+        if (metadataError) {
+          console.error('Failed to initialize V2 onboarding:', metadataError);
+        } else {
+          initializedV2Onboarding = true;
         }
       }
     }
@@ -88,7 +96,10 @@ export async function GET(request: Request) {
 
   revalidatePath('/');
 
-  const user = await serverGetLoggedInUser();
+  // OAuth callbacks already have a verified user from the same Supabase client
+  // that exchanged the code. Avoid immediately constructing a second auth read
+  // from fresh cookies, which can make the post-login handoff unnecessarily racy.
+  const user = authenticatedUser ?? (await serverGetLoggedInUser());
   const legacyUserType = user.user_metadata?.userType;
   const hasPendingV2Onboarding =
     initializedV2Onboarding ||
@@ -100,7 +111,7 @@ export async function GET(request: Request) {
   }
 
   let redirectTo = new URL(
-    legacyUserType === 'employer' ? '/employer' : '/candidate',
+    legacyUserType === 'employer' ? '/employer' : '/candidate/dashboard',
     requestUrl.origin,
   );
 

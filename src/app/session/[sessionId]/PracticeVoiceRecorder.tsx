@@ -297,7 +297,7 @@ export function PracticeVoiceRecorder({
             onClick={() => void finishRecording()}
             disabled={isTranscribing}
             aria-label="Stop recording"
-            className="h-12 w-12 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 hover:bg-red-500/25"
+            className="h-12 w-12 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25"
           >
             <StopCircle className="h-5 w-5" />
           </Button>
@@ -307,7 +307,7 @@ export function PracticeVoiceRecorder({
             onClick={startRecording}
             disabled={disabled || isTranscribing}
             aria-label="Record answer"
-            className="h-12 w-12 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary hover:bg-primary/20"
+            className="h-12 w-12 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20"
           >
             {isTranscribing ? (
               <Loader2 className="h-5 w-5 animate-spin" />

@@ -2,8 +2,8 @@ import Link from 'next/link';
 import {
   ArrowRight,
   CheckCircle2,
-  CircleGauge,
   Clock3,
+  Target,
   Trophy,
 } from 'lucide-react';
 
@@ -38,7 +38,7 @@ export function V2CandidateProgress({
         <MetricCard
           label="Average"
           value={formatScore(summary.averageScore)}
-          icon={<CircleGauge className="h-4 w-4" />}
+          icon={<Target className="h-4 w-4" />}
         />
         <MetricCard
           label="Best"

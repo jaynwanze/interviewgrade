@@ -6,6 +6,7 @@ import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalL
 
 import './interaction-polish.css';
 import './mobile-session-polish.css';
+import './mobile-session-final-polish.css';
 
 export default async function SessionLayout({
   children,

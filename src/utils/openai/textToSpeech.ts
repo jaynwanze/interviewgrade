@@ -1,5 +1,19 @@
 'use client';
 
+import {
+  beginSpeechPlaybackRequest,
+  cancelSpeechPlaybackRequests,
+  isSpeechPlaybackRequestCurrent,
+} from './speechPlaybackState';
+
+function automaticSpeechStorageKey(text: string): string {
+  let hash = 5381;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 33) ^ text.charCodeAt(index);
+  }
+  return `interviewgrade:auto-spoken:${hash >>> 0}`;
+}
+
 export async function generateTTS(
   text: string,
   model: string = 'tts-1',
@@ -9,11 +23,28 @@ export async function generateTTS(
     throw new Error('No text provided');
   }
 
+  const userActivated =
+    typeof navigator !== 'undefined' && navigator.userActivation?.isActive === true;
+
+  if (typeof window !== 'undefined' && !userActivated) {
+    const storageKey = automaticSpeechStorageKey(text);
+    if (window.sessionStorage.getItem(storageKey) === '1') {
+      cancelSpeechPlaybackRequests();
+      throw new DOMException('Automatic question audio already played.', 'AbortError');
+    }
+    window.sessionStorage.setItem(storageKey, '1');
+  }
+
+  const generation = beginSpeechPlaybackRequest();
   const response = await fetch('/api/tts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, model, voice }),
   });
+
+  if (!isSpeechPlaybackRequestCurrent(generation)) {
+    throw new DOMException('Question audio request was cancelled.', 'AbortError');
+  }
 
   if (!response.ok) {
     let message = 'AI question audio is temporarily unavailable.';
@@ -27,6 +58,10 @@ export async function generateTTS(
   }
 
   const audio = await response.blob();
+  if (!isSpeechPlaybackRequestCurrent(generation)) {
+    throw new DOMException('Question audio request was cancelled.', 'AbortError');
+  }
+
   if (audio.size === 0) {
     throw new Error('AI question audio returned an empty response.');
   }
@@ -35,7 +70,12 @@ export async function generateTTS(
 }
 
 export function releaseTTSUrl(url: string | null | undefined) {
-  if (url?.startsWith('blob:')) {
+  if (!url) {
+    cancelSpeechPlaybackRequests();
+    return;
+  }
+
+  if (url.startsWith('blob:')) {
     URL.revokeObjectURL(url);
   }
 }

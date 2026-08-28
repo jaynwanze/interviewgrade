@@ -141,6 +141,16 @@
   transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease !important;
 }
 
+/* Keep the existing mic/stop artwork, but force the SVG itself onto the exact
+   centre of the circular control so its viewBox cannot introduce a visual drift. */
+.session-interaction-shell button[aria-label='Record answer'] > svg,
+.session-interaction-shell button[aria-label='Stop recording'] > svg {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: auto !important;
+  transform: none !important;
+}
+
 .session-interaction-shell button[aria-label='Record answer'] {
   border-color: rgb(148 163 184 / 0.3) !important;
   background: rgb(51 65 85 / 0.46) !important;

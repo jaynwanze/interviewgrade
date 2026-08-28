@@ -1,10 +1,16 @@
 'use client';
 
+import { isSpeechPlaybackCancelled } from './speechPlaybackState';
+
 export function speakWithBrowserVoice(
   text: string,
   onStart?: () => void,
   onEnd?: () => void,
 ): boolean {
+  if (isSpeechPlaybackCancelled()) {
+    return true;
+  }
+
   if (
     typeof window === 'undefined' ||
     !('speechSynthesis' in window) ||

@@ -6,6 +6,14 @@ import {
   isSpeechPlaybackRequestCurrent,
 } from './speechPlaybackState';
 
+function automaticSpeechStorageKey(text: string): string {
+  let hash = 5381;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 33) ^ text.charCodeAt(index);
+  }
+  return `interviewgrade:auto-spoken:${hash >>> 0}`;
+}
+
 export async function generateTTS(
   text: string,
   model: string = 'tts-1',
@@ -13,6 +21,18 @@ export async function generateTTS(
 ): Promise<string> {
   if (!text.trim()) {
     throw new Error('No text provided');
+  }
+
+  const userActivated =
+    typeof navigator !== 'undefined' && navigator.userActivation?.isActive === true;
+
+  if (typeof window !== 'undefined' && !userActivated) {
+    const storageKey = automaticSpeechStorageKey(text);
+    if (window.sessionStorage.getItem(storageKey) === '1') {
+      cancelSpeechPlaybackRequests();
+      throw new DOMException('Automatic question audio already played.', 'AbortError');
+    }
+    window.sessionStorage.setItem(storageKey, '1');
   }
 
   const generation = beginSpeechPlaybackRequest();

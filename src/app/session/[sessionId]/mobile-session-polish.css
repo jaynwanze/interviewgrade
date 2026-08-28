@@ -8,7 +8,7 @@
   .session-interaction-shell main:has(.max-w-4xl) {
     height: calc(100dvh - 3rem) !important;
     overflow: hidden !important;
-    padding: 0.45rem 0.45rem calc(0.45rem + env(safe-area-inset-bottom)) !important;
+    padding: 0.45rem 0.45rem calc(0.7rem + env(safe-area-inset-bottom)) !important;
   }
 
   .session-interaction-shell main:has(.max-w-4xl) > div > header {
@@ -36,34 +36,38 @@
     line-height: 0.9rem !important;
   }
 
-  /* The interview stage should fit the phone viewport before feedback expands. */
+  /* On phones the viewport is already the shell. Avoid a card inside a card. */
   .session-interaction-shell .max-w-4xl > section {
-    border-radius: 0.95rem !important;
-    padding: 0.9rem 0.8rem 0.85rem !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0.55rem 0.65rem 0.65rem !important;
   }
 
   .session-interaction-shell [data-avery-presence] {
-    width: 4.1rem !important;
-    min-width: 4.1rem !important;
-    height: 4.1rem !important;
-    min-height: 4.1rem !important;
-    flex-basis: 4.1rem !important;
+    width: 3.75rem !important;
+    min-width: 3.75rem !important;
+    height: 3.75rem !important;
+    min-height: 3.75rem !important;
+    flex-basis: 3.75rem !important;
   }
 
   .session-interaction-shell [data-avery-presence] + div {
-    margin-top: 0.45rem !important;
+    margin-top: 0.3rem !important;
   }
 
   .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) {
-    margin-top: 0.7rem !important;
+    margin-top: 0.5rem !important;
   }
 
   .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
-    max-height: 8.6rem !important;
+    max-height: 8rem !important;
     overflow-y: auto !important;
     padding-right: 0.1rem;
-    font-size: clamp(1.02rem, 4.6vw, 1.2rem) !important;
-    line-height: 1.32 !important;
+    font-size: clamp(0.98rem, 4.35vw, 1.12rem) !important;
+    line-height: 1.3 !important;
     letter-spacing: -0.012em !important;
     overscroll-behavior: contain;
   }
@@ -84,8 +88,8 @@
   }
 
   .session-interaction-shell section > div.relative.z-10.mx-auto {
-    margin-top: 0.65rem !important;
-    padding-top: 0.65rem !important;
+    margin-top: 0.5rem !important;
+    padding-top: 0.55rem !important;
   }
 
   .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) {
@@ -143,6 +147,16 @@
   .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4 {
     margin-top: 0.55rem !important;
     padding-top: 0.55rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4 > div.mt-2 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    font-size: 0.8rem !important;
+    line-height: 1.3rem !important;
   }
 
   /* Avoid a second large End practice row beneath the stage on phones. */

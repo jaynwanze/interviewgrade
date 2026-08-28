@@ -43,19 +43,35 @@
   filter: none !important;
 }
 
+/* Keep the question visually subordinate to Avery and centred as one reading block. */
+.session-interaction-shell [data-avery-presence] + div + div + div {
+  max-width: 38rem !important;
+  margin-inline: auto !important;
+}
+
+/* Tighten the lower interaction slot so it belongs to the same stage. */
+.session-interaction-shell section > div.relative.z-10.mx-auto {
+  max-width: 38rem !important;
+  margin-top: 1rem !important;
+  padding-top: 1rem !important;
+}
+
 /* One optical centre for status, waveform and record/stop control. */
 .session-interaction-shell [data-practice-voice-recorder] {
+  position: relative !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
   display: grid !important;
-  width: 100% !important;
-  max-width: 20rem;
-  margin-inline: auto !important;
-  padding-block: 0.05rem 0.1rem;
+  width: min(100%, 20rem) !important;
+  max-width: 20rem !important;
+  margin: 0 !important;
+  padding-block: 0 !important;
   justify-items: center !important;
   align-items: center !important;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:first-child {
-  min-height: 1.05rem;
+  min-height: 1rem;
   width: 100% !important;
   text-align: center !important;
   font-size: 0.74rem !important;
@@ -73,8 +89,8 @@
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) {
-  height: 2.25rem !important;
-  margin-top: 0.28rem !important;
+  height: 2.1rem !important;
+  margin-top: 0.2rem !important;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) > div {
@@ -82,7 +98,7 @@
 }
 
 .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(3) {
-  margin-top: 0.28rem !important;
+  margin-top: 0.2rem !important;
 }
 
 .session-interaction-shell [data-practice-voice-recorder] div[style*='position: relative'] > div[style*='background: lightblue'] {
@@ -155,8 +171,19 @@
     flex-basis: 4.7rem !important;
   }
 
+  .session-interaction-shell [data-avery-presence] + div + div + div,
+  .session-interaction-shell section > div.relative.z-10.mx-auto {
+    max-width: 100% !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto {
+    margin-top: 0.85rem !important;
+    padding-top: 0.85rem !important;
+  }
+
   .session-interaction-shell [data-practice-voice-recorder] {
-    max-width: 18rem;
+    width: min(100%, 18rem) !important;
+    max-width: 18rem !important;
   }
 
   .session-interaction-shell button[aria-label='Record answer'],

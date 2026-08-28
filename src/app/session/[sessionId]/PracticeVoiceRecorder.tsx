@@ -309,11 +309,7 @@ export function PracticeVoiceRecorder({
             aria-label="Record answer"
             className="h-12 w-12 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20"
           >
-            {isTranscribing ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <MicrophoneIcon className="h-5 w-5" />
-            )}
+            <MicrophoneIcon className={`h-5 w-5 ${isTranscribing ? 'opacity-35' : ''}`} />
           </Button>
         )}
       </div>

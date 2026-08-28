@@ -1,0 +1,40 @@
+name: Security jsPDF prune
+
+on:
+  push:
+    branches: [security/remove-unused-jspdf]
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: security/remove-unused-jspdf
+          fetch-depth: 0
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Remove unused jsPDF dependencies
+        run: pnpm remove jspdf jspdf-autotable @types/jspdf
+
+      - name: Remove temporary workflow
+        run: rm .github/workflows/security-jspdf-prune.yml
+
+      - name: Commit lockfile cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml .github/workflows/security-jspdf-prune.yml
+          git commit -m "security: remove unused jsPDF dependency chain"
+          git push origin HEAD:security/remove-unused-jspdf

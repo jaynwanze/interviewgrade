@@ -1,0 +1,152 @@
+/* Mobile-only active Practice cleanup. Keep desktop #172 alignment unchanged. */
+@media (max-width: 767px) {
+  /* Reclaim vertical space from the active session chrome. */
+  .session-interaction-shell > div.sticky > div {
+    height: 3rem !important;
+  }
+
+  .session-interaction-shell main:has(.max-w-4xl) {
+    height: calc(100dvh - 3rem) !important;
+    overflow: hidden !important;
+    padding: 0.45rem 0.45rem calc(0.45rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  .session-interaction-shell main:has(.max-w-4xl) > div > header {
+    display: none !important;
+  }
+
+  /* Progress stays visible but consumes less height. */
+  .session-interaction-shell .max-w-4xl > div:first-child {
+    margin-bottom: 0.45rem !important;
+    gap: 0.5rem !important;
+    padding-inline: 0.2rem !important;
+  }
+
+  .session-interaction-shell .max-w-4xl > div:first-child > div:first-child {
+    min-width: 5.25rem !important;
+  }
+
+  .session-interaction-shell .max-w-4xl > div:first-child .text-sm {
+    font-size: 0.78rem !important;
+    line-height: 1rem !important;
+  }
+
+  .session-interaction-shell .max-w-4xl > div:first-child .text-xs {
+    font-size: 0.68rem !important;
+    line-height: 0.9rem !important;
+  }
+
+  /* The interview stage should fit the phone viewport before feedback expands. */
+  .session-interaction-shell .max-w-4xl > section {
+    border-radius: 0.95rem !important;
+    padding: 0.9rem 0.8rem 0.85rem !important;
+  }
+
+  .session-interaction-shell [data-avery-presence] {
+    width: 4.1rem !important;
+    min-width: 4.1rem !important;
+    height: 4.1rem !important;
+    min-height: 4.1rem !important;
+    flex-basis: 4.1rem !important;
+  }
+
+  .session-interaction-shell [data-avery-presence] + div {
+    margin-top: 0.45rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) {
+    margin-top: 0.7rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
+    max-height: 8.6rem !important;
+    overflow-y: auto !important;
+    padding-right: 0.1rem;
+    font-size: clamp(1.02rem, 4.6vw, 1.2rem) !important;
+    line-height: 1.32 !important;
+    letter-spacing: -0.012em !important;
+    overscroll-behavior: contain;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > div {
+    margin-top: 0.55rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) span.rounded-full {
+    padding: 0.28rem 0.48rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) button {
+    min-height: 1.85rem !important;
+    padding-inline: 0.45rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto {
+    margin-top: 0.65rem !important;
+    padding-top: 0.65rem !important;
+  }
+
+  .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) {
+    height: 1.8rem !important;
+  }
+
+  .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(3) {
+    margin-top: 0.05rem !important;
+  }
+
+  /* Live feedback becomes a compact scroll region with actions always reachable. */
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) {
+    max-height: 31dvh !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) > div {
+    gap: 0.7rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) .grid.text-left {
+    gap: 0.45rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) .grid.text-left p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    margin-top: 0.3rem !important;
+    font-size: 0.82rem !important;
+    line-height: 1.35rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) > div > div.border-t {
+    position: sticky;
+    bottom: -1px;
+    z-index: 3;
+    margin-top: 0.25rem !important;
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.1rem !important;
+    background: hsl(var(--background) / 0.97);
+    backdrop-filter: blur(10px);
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) > div > div.border-t button {
+    min-height: 2.35rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Previous-question feedback remains one compact row unless explicitly opened. */
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4 {
+    margin-top: 0.55rem !important;
+    padding-top: 0.55rem !important;
+  }
+
+  /* Avoid a second large End practice row beneath the stage on phones. */
+  .session-interaction-shell .max-w-4xl > div.sm\:hidden {
+    display: none !important;
+  }
+}

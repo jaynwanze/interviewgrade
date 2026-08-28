@@ -54,7 +54,7 @@ export function V2CandidateAnalytics({
 
   return (
     <section className="container mx-auto w-full px-4 pt-4 sm:w-11/12 lg:w-3/4">
-      <div className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
+      <div className="grid items-start gap-4 xl:grid-cols-[1.35fr_1fr]">
         <Card>
           <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

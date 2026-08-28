@@ -14,7 +14,7 @@ import type {
   CandidateSessionHistoryFilter,
   CandidateSessionHistoryPage,
 } from '@/modules/session/candidate-session-history';
-import { Archive, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
@@ -87,18 +87,11 @@ export default function InterviewHistoryPage({
           </p>
         </div>
 
-        {legacyView ? (
+        {legacyView && (
           <Button asChild variant="outline" size="sm">
             <Link href="/candidate/interview-history">
               <ArrowLeft className="mr-1.5 h-4 w-4" />
               Back
-            </Link>
-          </Button>
-        ) : (
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/candidate/interview-history?legacy=1">
-              <Archive className="mr-1.5 h-4 w-4" />
-              Legacy
             </Link>
           </Button>
         )}

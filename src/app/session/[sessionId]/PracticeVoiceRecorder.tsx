@@ -1,6 +1,7 @@
 'use client';
 
-import { Loader2, Mic, Square } from 'lucide-react';
+import { MicrophoneIcon } from '@heroicons/react/solid';
+import { Loader2, StopCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Meter } from '@/components/Interviews/InterviewFlow/SoundMeter';
@@ -289,7 +290,7 @@ export function PracticeVoiceRecorder({
         )}
       </div>
 
-      <div className="mt-2 flex items-center justify-center">
+      <div className="mt-2">
         {isRecording ? (
           <Button
             type="button"
@@ -298,7 +299,7 @@ export function PracticeVoiceRecorder({
             aria-label="Stop recording"
             className="h-12 w-12 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25"
           >
-            <Square className="h-4 w-4" strokeWidth={2.4} />
+            <StopCircle className="h-5 w-5" />
           </Button>
         ) : (
           <Button
@@ -311,7 +312,7 @@ export function PracticeVoiceRecorder({
             {isTranscribing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Mic className="h-5 w-5" strokeWidth={2.2} />
+              <MicrophoneIcon className="h-5 w-5" />
             )}
           </Button>
         )}

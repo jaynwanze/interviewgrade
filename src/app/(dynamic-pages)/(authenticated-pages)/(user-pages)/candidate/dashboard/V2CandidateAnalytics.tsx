@@ -54,8 +54,8 @@ export function V2CandidateAnalytics({
 
   return (
     <section className="container mx-auto w-full px-4 pt-4 sm:w-11/12 lg:w-3/4">
-      <div className="grid items-start gap-4 xl:grid-cols-[1.35fr_1fr]">
-        <Card>
+      <div className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
+        <Card className="flex h-full flex-col">
           <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -68,10 +68,10 @@ export function V2CandidateAnalytics({
               <Momentum value={analytics.scoreChange} />
             </div>
           </CardHeader>
-          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+          <CardContent className="flex flex-1 p-4 pt-0 sm:p-6 sm:pt-0">
             <ChartContainer
               config={scoreChartConfig}
-              className="h-[220px] w-full aspect-auto sm:h-[240px]"
+              className="h-full min-h-[240px] w-full aspect-auto"
             >
               <LineChart
                 accessibilityLayer
@@ -115,14 +115,14 @@ export function V2CandidateAnalytics({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="h-full">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg">Performance focus</CardTitle>
             <CardDescription>
               Strongest and lowest-scoring rubric areas across your reports.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+          <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
             {analytics.strongestCriterion && (
               <InsightCard
                 label="Strongest area"
@@ -139,12 +139,12 @@ export function V2CandidateAnalytics({
             )}
 
             {analytics.latestRecommendation && (
-              <div className="rounded-lg border bg-muted/30 p-4">
+              <div className="rounded-lg border bg-muted/30 p-3.5">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <Sparkles className="h-4 w-4 text-primary" />
                   Latest recommendation
                 </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                <p className="mt-1.5 line-clamp-3 text-sm leading-5 text-muted-foreground">
                   {analytics.latestRecommendation}
                 </p>
               </div>
@@ -248,20 +248,20 @@ function InsightCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border p-4">
+    <div className="rounded-lg border p-3.5">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {icon}
             {label}
           </div>
-          <div className="mt-2 break-words font-semibold">{criterion.name}</div>
+          <div className="mt-1.5 break-words font-semibold">{criterion.name}</div>
         </div>
         <div className="shrink-0 text-2xl font-semibold">
           {Math.round(criterion.averageScore)}
         </div>
       </div>
-      <div className="mt-2 text-xs leading-5 text-muted-foreground">
+      <div className="mt-1.5 text-xs leading-5 text-muted-foreground">
         {criterion.evidenceCount} scored response
         {criterion.evidenceCount === 1 ? '' : 's'}
         {criterion.change == null

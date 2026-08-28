@@ -1,5 +1,11 @@
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  Target,
+  Trophy,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,10 +30,26 @@ export function V2CandidateProgress({
   return (
     <section className="container mx-auto w-full px-4 pt-3 sm:w-11/12 lg:w-3/4">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard label="Completed" value={`${summary.completedSessions}`} />
-        <MetricCard label="Average" value={formatScore(summary.averageScore)} />
-        <MetricCard label="Best" value={formatScore(summary.bestScore)} />
-        <MetricCard label="In progress" value={`${summary.inProgressSessions}`} />
+        <MetricCard
+          label="Completed"
+          value={`${summary.completedSessions}`}
+          icon={<CheckCircle2 className="h-4 w-4" />}
+        />
+        <MetricCard
+          label="Average"
+          value={formatScore(summary.averageScore)}
+          icon={<Target className="h-4 w-4" />}
+        />
+        <MetricCard
+          label="Best"
+          value={formatScore(summary.bestScore)}
+          icon={<Trophy className="h-4 w-4" />}
+        />
+        <MetricCard
+          label="In progress"
+          value={`${summary.inProgressSessions}`}
+          icon={<Clock3 className="h-4 w-4" />}
+        />
       </div>
 
       {latestCompleted && (
@@ -63,13 +85,18 @@ export function V2CandidateProgress({
 function MetricCard({
   label,
   value,
+  icon,
 }: {
   label: string;
   value: string;
+  icon: React.ReactNode;
 }) {
   return (
     <div className="min-w-0 rounded-xl border bg-card px-3 py-3 sm:px-4">
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>{label}</span>
+        <span className="shrink-0 opacity-75">{icon}</span>
+      </div>
       <div className="mt-1.5 text-2xl font-semibold tracking-tight">{value}</div>
     </div>
   );

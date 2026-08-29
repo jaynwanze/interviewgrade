@@ -1,0 +1,28 @@
+name: Fresh production dependency audit
+
+on:
+  push:
+    branches:
+      - security/fresh-prod-audit
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Production audit
+        run: |
+          set +e
+          pnpm audit --prod
+          EXIT_CODE=$?
+          echo "audit_exit_code=$EXIT_CODE"
+          exit 0

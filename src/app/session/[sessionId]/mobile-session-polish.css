@@ -22,7 +22,7 @@
     content: none !important;
   }
 
-  /* Progress + Avery stage form one compact top-flowing module. */
+  /* Progress + Avery stage remain one responsive module. */
   .session-interaction-shell .max-w-4xl {
     display: flex !important;
     height: 100% !important;
@@ -31,6 +31,23 @@
     justify-content: flex-start !important;
     gap: 0.35rem !important;
     padding-top: 0.15rem !important;
+  }
+
+  /* While answering, centre the whole progress + Avery/question/recorder cluster
+     in the usable mobile viewport instead of pinning it to the top. The slight
+     upward bias compensates for Safari's bottom browser chrome. */
+  .session-interaction-shell .max-w-4xl:has([data-practice-voice-recorder]) {
+    justify-content: center !important;
+    padding-top: 0 !important;
+    padding-bottom: clamp(3.25rem, 8dvh, 5.25rem) !important;
+  }
+
+  /* The progress row belongs to the same visual module as Avery. Pull only the
+     painted row toward the stage without changing the recorder/question geometry. */
+  .session-interaction-shell .max-w-4xl:has([data-practice-voice-recorder]) > div:first-child {
+    position: relative !important;
+    top: clamp(1.25rem, 3dvh, 1.75rem) !important;
+    z-index: 2;
   }
 
   .session-interaction-shell .max-w-4xl > div:first-child {
@@ -112,6 +129,10 @@
     padding-top: 0.42rem !important;
   }
 
+  .session-interaction-shell [data-practice-voice-recorder] {
+    margin-inline: auto !important;
+  }
+
   .session-interaction-shell [data-practice-voice-recorder] > div:nth-child(2) {
     height: 1.8rem !important;
     margin-top: 0 !important;
@@ -121,7 +142,7 @@
     margin-top: 0.05rem !important;
   }
 
-  /* Live feedback uses the space below the fixed top cluster and scrolls internally. */
+  /* Live feedback uses the space below the stable top cluster and scrolls internally. */
   .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) {
     max-height: 29dvh !important;
     overflow-y: auto !important;

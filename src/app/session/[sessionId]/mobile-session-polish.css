@@ -42,6 +42,14 @@
     padding-bottom: clamp(3.25rem, 8dvh, 5.25rem) !important;
   }
 
+  /* The progress row belongs to the same visual module as Avery. Pull only the
+     painted row toward the stage without changing the recorder/question geometry. */
+  .session-interaction-shell .max-w-4xl:has([data-practice-voice-recorder]) > div:first-child {
+    position: relative !important;
+    top: clamp(1.25rem, 3dvh, 1.75rem) !important;
+    z-index: 2;
+  }
+
   .session-interaction-shell .max-w-4xl > div:first-child {
     margin: 0 !important;
     gap: 0.45rem !important;

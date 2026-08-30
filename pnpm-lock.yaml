@@ -26,9 +26,6 @@ importers:
       '@headlessui/react':
         specifier: ^1.7.19
         version: 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@headlessui/tailwindcss':
-        specifier: ^0.2.2
-        version: 0.2.2(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
       '@heroicons/react':
         specifier: ^1.0.6
         version: 1.0.6(react@18.3.1)
@@ -167,15 +164,6 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.50.3
         version: 2.50.3
-      '@tailwindcss/forms':
-        specifier: ^0.5.11
-        version: 0.5.11(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
-      '@tailwindcss/line-clamp':
-        specifier: ^0.4.4
-        version: 0.4.4(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
-      '@tailwindcss/typography':
-        specifier: ^0.5.19
-        version: 0.5.19(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
       '@tanstack/react-query':
         specifier: ^4.42.0
         version: 4.42.0(react-dom@18.3.1(react@18.3.1))(react-native@0.83.1(@babel/core@7.28.5)(@types/react@18.2.23)(react@18.3.1))(react@18.3.1)
@@ -395,9 +383,6 @@ importers:
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.0
-      tailwindcss-animate:
-        specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
       url-join:
         specifier: ^5.0.0
         version: 5.0.0
@@ -417,12 +402,24 @@ importers:
       '@babel/eslint-parser':
         specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.5)(eslint@8.57.1)
+      '@headlessui/tailwindcss':
+        specifier: ^0.2.2
+        version: 0.2.2(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
       '@next/eslint-plugin-next':
         specifier: ^13.5.11
         version: 13.5.11
       '@playwright/test':
         specifier: ^1.57.0
         version: 1.57.0
+      '@tailwindcss/forms':
+        specifier: ^0.5.11
+        version: 0.5.11(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
+      '@tailwindcss/line-clamp':
+        specifier: ^0.4.4
+        version: 0.4.4(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
+      '@tailwindcss/typography':
+        specifier: ^0.5.19
+        version: 0.5.19(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
       '@testing-library/react':
         specifier: ^14.3.1
         version: 14.3.1(@types/react@18.2.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -549,6 +546,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.0
         version: 3.4.19(tsx@4.23.12)(yaml@2.8.2)
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.19(tsx@4.23.12)(yaml@2.8.2))
       tailwindcss-cli:
         specifier: ^0.1.2
         version: 0.1.2(ts-node@10.9.1(@types/node@22.19.3)(typescript@5.9.3))

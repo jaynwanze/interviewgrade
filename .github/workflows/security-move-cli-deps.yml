@@ -1,0 +1,40 @@
+name: Security move CLI deps to dev
+
+on:
+  push:
+    branches:
+      - security/move-cli-deps-to-dev
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: security/move-cli-deps-to-dev
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm remove supabase vercel
+      - run: pnpm add -D supabase@1.226.4 vercel@48.12.1
+      - run: pnpm install --lockfile-only
+      - run: pnpm exec tsc --noEmit
+      - name: Production audit summary
+        run: pnpm audit --prod --json > audit.json || true; node -e "const a=require('./audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
+      - name: Commit cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          if git diff --cached --quiet; then
+            echo "No dependency changes to commit"
+          else
+            git commit -m "security: keep CLI tooling out of production dependencies"
+            git push
+          fi

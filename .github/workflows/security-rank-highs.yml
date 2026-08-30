@@ -1,0 +1,23 @@
+name: Rank production high vulnerabilities
+
+on:
+  push:
+    branches:
+      - security/rank-high-vulnerabilities
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Production audit
+        run: pnpm audit --prod --json > audit.json || true
+      - name: Rank high advisories and roots
+        run: |
+          node -e "const a=require('./audit.json'); const adv=Object.values(a.advisories||{}).filter(v=>v.severity==='high'); const roots={}; for(const v of adv){ for(const f of v.findings||[]){ for(const p of f.paths||[]){ const m=p.match(/^\. > ([^@ >]+|@[^/ >]+\/[^@ >]+)/); const r=m?m[1]:'unknown'; roots[r]=(roots[r]||0)+1; } } } console.log('SUMMARY',a.metadata?.vulnerabilities||{}); console.log('ROOTS',Object.entries(roots).sort((a,b)=>b[1]-a[1]).slice(0,25)); console.log('HIGH_ADVISORIES',adv.map(v=>({module:v.module_name,title:v.title,recommendation:v.recommendation,patched:v.patched_versions,paths:(v.findings||[]).flatMap(f=>f.paths||[]).slice(0,8)})));"

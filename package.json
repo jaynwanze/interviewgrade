@@ -208,5 +208,10 @@
     "vercel": "48.12.1",
     "vitest": "^0.34.6"
   },
-  "packageManager": "pnpm@9.0.6"
+  "packageManager": "pnpm@9.0.6",
+  "pnpm": {
+    "overrides": {
+      "shell-quote": "1.8.4"
+    }
+  }
 }

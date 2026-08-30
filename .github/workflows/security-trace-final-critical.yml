@@ -19,13 +19,7 @@ jobs:
       - name: Production audit
         run: pnpm audit --prod --json > audit.json || true
       - name: Print critical advisories
-        run: node - <<'NODE'
-          const a = require('./audit.json');
-          const advisories = a.advisories || {};
-          const critical = Object.entries(advisories).filter(([,v]) => v.severity === 'critical');
-          console.log(JSON.stringify(critical, null, 2));
-          console.log('summary', JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2));
-          NODE
+        run: node -e "const a=require('./audit.json'); const advisories=a.advisories||{}; const critical=Object.entries(advisories).filter(([,v])=>v.severity==='critical'); console.log(JSON.stringify(critical,null,2)); console.log('summary',JSON.stringify(a.metadata?.vulnerabilities||{},null,2));"
       - uses: actions/upload-artifact@v4
         with:
           name: final-critical-audit

@@ -1,0 +1,26 @@
+name: Security audit post Transformers
+
+on:
+  push:
+    branches:
+      - security/audit-post-transformers
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Production audit
+        run: pnpm audit --prod --json > audit.json || true
+      - name: Print audit summary
+        run: node -e "const a=require('./audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? a.metadata ?? {}, null, 2))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-post-transformers
+          path: audit.json

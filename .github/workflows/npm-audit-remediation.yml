@@ -1,0 +1,51 @@
+name: NPM Audit Remediation
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  validate-remediation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Resolve targeted overrides
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm tsc
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run production dependency audit
+        shell: bash
+        run: |
+          set +e
+          pnpm audit --prod --json > audit-prod.json
+          status=$?
+          echo "pnpm audit exit code: $status"
+          node -e "const a=require('./audit-prod.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
+          exit 0
+
+      - name: Upload resolved lockfile and audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-remediation
+          path: |
+            pnpm-lock.yaml
+            audit-prod.json
+          if-no-files-found: error
+          retention-days: 7

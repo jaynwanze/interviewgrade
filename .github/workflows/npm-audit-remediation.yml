@@ -9,9 +9,11 @@ jobs:
   validate-remediation:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: security/npm-audit-remediation-1
 
       - name: Enable pnpm
         run: corepack enable
@@ -44,6 +46,20 @@ jobs:
           echo "pnpm audit exit code: $status"
           node -e "const a=require('./audit-prod.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
           exit 0
+
+      - name: Persist validated package and lockfile
+        if: always()
+        shell: bash
+        run: |
+          if git diff --quiet -- package.json pnpm-lock.yaml; then
+            echo "No package or lockfile changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore: refresh security remediation lockfile"
+          git push origin HEAD:security/npm-audit-remediation-1
 
       - name: Upload resolved package, lockfile and audit
         if: always()

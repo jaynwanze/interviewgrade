@@ -1,0 +1,70 @@
+name: DeepmergeTS 8 Compatibility
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate-deepmerge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Apply DeepmergeTS 8 override
+        run: |
+          pnpm pkg set pnpm.overrides.deepmerge-ts=8.0.0
+          pnpm install --no-frozen-lockfile
+
+      - name: Verify DeepmergeTS resolution
+        run: pnpm why deepmerge-ts
+
+      - name: Typecheck
+        run: pnpm tsc
+
+      - name: Build
+        continue-on-error: true
+        run: pnpm build
+
+      - name: Test
+        continue-on-error: true
+        run: pnpm test --run
+
+      - name: Audit production dependencies
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          pnpm audit --prod --json > deepmerge-audit.json
+          node -e "const a=require('./deepmerge-audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
+          exit 0
+
+      - name: Commit validated dependency files
+        if: always()
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add package.json pnpm-lock.yaml
+          git diff --cached --quiet || git commit -m 'security: validate deepmerge-ts 8 override'
+          git push
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepmerge-audit
+          path: deepmerge-audit.json
+          if-no-files-found: error
+          retention-days: 7

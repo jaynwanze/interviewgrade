@@ -191,7 +191,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "jsdom": "^22.1.0",
-    "lodash": "^4.18.0",
+    "lodash": "^4.18.1",
     "postcss": "^8.5.6",
     "postcss-nesting": "^12.0.0",
     "prettier": "^3.7.4",
@@ -227,7 +227,7 @@
       "nanoid": "3.3.18",
       "browserslist": "4.28.7",
       "sharp": "0.35.0",
-      "lodash": "4.18.0",
+      "lodash": "4.18.1",
       "deepmerge-ts": "8.0.0"
     }
   }

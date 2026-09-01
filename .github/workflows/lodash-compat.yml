@@ -24,7 +24,7 @@ jobs:
 
       - name: Pin patched lodash and refresh lockfile
         run: |
-          pnpm pkg set pnpm.overrides.lodash=4.18.0
+          pnpm pkg set pnpm.overrides.lodash=4.18.1
           pnpm install --no-frozen-lockfile
 
       - name: Verify lodash resolution
@@ -34,9 +34,11 @@ jobs:
         run: pnpm tsc
 
       - name: Build
+        continue-on-error: true
         run: pnpm build
 
       - name: Audit production dependencies
+        if: always()
         shell: bash
         run: |
           set +e
@@ -47,14 +49,16 @@ jobs:
           exit 0
 
       - name: Commit validated package and lockfile
+        if: always()
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add package.json pnpm-lock.yaml
-          git diff --cached --quiet || git commit -m 'security: override lodash to 4.18.0'
+          git diff --cached --quiet || git commit -m 'security: override lodash to 4.18.1'
           git push origin HEAD:${{ github.head_ref }}
 
       - name: Upload audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lodash-audit

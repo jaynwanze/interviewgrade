@@ -1,5 +1,6 @@
 'use server';
 import { PRODUCT_NAME } from '@/constants';
+import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 import { createSupabaseUserServerActionClient } from '@/supabase-clients/user/createSupabaseUserServerActionClient';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import type { SAPayload, SupabaseFileUploadOptions, Table } from '@/types';
@@ -235,12 +236,11 @@ export const acceptTermsOfService = async (
 export async function requestAccountDeletion(): Promise<
   SAPayload<Table<'account_delete_tokens'>>
 > {
-  const supabaseClient = createSupabaseUserServerActionClient();
   const user = await serverGetLoggedInUser();
   if (!user.email) {
     return { status: 'error', message: 'User email not found' };
   }
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabaseAdminClient
     .from('account_delete_tokens')
     .upsert({
       user_id: user.id,

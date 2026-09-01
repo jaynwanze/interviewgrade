@@ -197,7 +197,7 @@
     "prettier": "^3.7.4",
     "react-email": "^1.10.1",
     "react-spring": "^9.7.5",
-    "style-loader": "^4.0.0",
+    "style-loader": "^4.1.2",
     "supabase": "1.226.4",
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
@@ -225,7 +225,8 @@
       "shell-quote": "1.9.0",
       "postcss": "8.5.18",
       "nanoid": "3.3.18",
-      "browserslist": "4.28.7"
+      "browserslist": "4.28.7",
+      "sharp": "0.35.0"
     }
   }
 }

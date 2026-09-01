@@ -21,6 +21,9 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Apply latest targeted axios patch
+        run: pnpm pkg set pnpm.overrides.axios=1.18.0
+
       - name: Resolve targeted overrides
         run: pnpm install --no-frozen-lockfile
 
@@ -42,12 +45,13 @@ jobs:
           node -e "const a=require('./audit-prod.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
           exit 0
 
-      - name: Upload resolved lockfile and audit
+      - name: Upload resolved package, lockfile and audit
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: npm-audit-remediation
           path: |
+            package.json
             pnpm-lock.yaml
             audit-prod.json
           if-no-files-found: error

@@ -1,0 +1,61 @@
+name: Lodash 4.18.1 Fix
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate-lodash:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Pin lodash 4.18.1 and refresh lockfile
+        run: |
+          pnpm pkg set devDependencies.lodash='^4.18.1'
+          pnpm pkg set pnpm.overrides.lodash=4.18.1
+          pnpm install --no-frozen-lockfile
+
+      - name: Verify lodash resolution
+        run: pnpm why lodash
+
+      - name: Typecheck
+        run: pnpm tsc
+
+      - name: Audit production dependencies
+        shell: bash
+        run: |
+          set +e
+          pnpm audit --prod --json > lodash-audit.json
+          status=$?
+          echo "pnpm audit exit code: $status"
+          node -e "const a=require('./lodash-audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
+          exit 0
+
+      - name: Persist package and lockfile
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add package.json pnpm-lock.yaml
+          git diff --cached --quiet || git commit -m 'security: use lodash 4.18.1'
+          git push origin HEAD:${{ github.head_ref }}
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lodash-4181-audit
+          path: lodash-audit.json
+          if-no-files-found: error
+          retention-days: 7

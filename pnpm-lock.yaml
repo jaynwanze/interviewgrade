@@ -23,7 +23,7 @@ overrides:
   nanoid: 3.3.18
   browserslist: 4.28.7
   sharp: 0.35.0
-  lodash: 4.18.0
+  lodash: 4.18.1
   deepmerge-ts: 8.0.0
 
 importers:
@@ -533,8 +533,8 @@ importers:
         specifier: ^22.1.0
         version: 22.1.0
       lodash:
-        specifier: 4.18.0
-        version: 4.18.0
+        specifier: 4.18.1
+        version: 4.18.1
       postcss:
         specifier: 8.5.18
         version: 8.5.18
@@ -6852,9 +6852,8 @@ packages:
   lodash.topath@4.5.2:
     resolution: {integrity: sha512-1/W4dM+35DwvE/iEd1M9ekewOSTlpFekhw9mhAtrwjVqUr83/ilQiyAvmg4tVX7Unkcfl1KC+i9WdaT4B6aQcg==}
 
-  lodash@4.18.0:
-    resolution: {integrity: sha512-l1mfj2atMqndAHI3ls7XqPxEjV2J9ZkcNyHpoZA3r2T1LLwDB69jgkMWh71YKwhBbK0G2f4WSn05ahmQXVxupA==}
-    deprecated: Bad release. Please use lodash@4.17.21 instead.
+  lodash@4.18.1:
+    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
@@ -13704,7 +13703,7 @@ snapshots:
     dependencies:
       chalk: 4.1.2
       date-fns: 2.30.0
-      lodash: 4.18.0
+      lodash: 4.18.1
       rxjs: 7.8.2
       shell-quote: 1.9.0
       spawn-command: 0.0.2
@@ -15856,7 +15855,7 @@ snapshots:
 
   lodash.topath@4.5.2: {}
 
-  lodash@4.18.0: {}
+  lodash@4.18.1: {}
 
   log-symbols@4.1.0:
     dependencies:
@@ -16518,7 +16517,7 @@ snapshots:
 
   node-emoji@1.11.0:
     dependencies:
-      lodash: 4.18.0
+      lodash: 4.18.1
 
   node-ensure@0.0.0: {}
 
@@ -17121,7 +17120,7 @@ snapshots:
 
   react-confetti-explosion@2.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      lodash: 4.18.0
+      lodash: 4.18.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-jss: 10.10.0(react@18.3.1)
@@ -17510,7 +17509,7 @@ snapshots:
     dependencies:
       clsx: 2.1.1
       eventemitter3: 4.0.7
-      lodash: 4.18.0
+      lodash: 4.18.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-is: 18.3.1
@@ -18203,7 +18202,7 @@ snapshots:
       html-tags: 3.3.1
       is-color-stop: 1.1.0
       is-glob: 4.0.3
-      lodash: 4.18.0
+      lodash: 4.18.1
       lodash.topath: 4.5.2
       modern-normalize: 1.1.0
       node-emoji: 1.11.0

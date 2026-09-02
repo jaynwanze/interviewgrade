@@ -93,29 +93,29 @@ export default async function PracticeSessionPage({
     <main
       className={`bg-gradient-to-b from-background via-background to-muted/30 ${
         sessionStarted
-          ? 'h-[calc(100dvh-3rem)] overflow-hidden px-2.5 py-2 sm:px-5 sm:py-3'
+          ? 'h-[calc(100dvh-3.5rem)] overflow-hidden px-3 py-3 sm:px-5 sm:py-4'
           : 'min-h-screen px-4 py-5 sm:px-6 sm:py-6'
       }`}
     >
       <div
         className={`mx-auto w-full max-w-[1440px] ${
-          sessionStarted ? 'flex h-full min-h-0 flex-col gap-2' : 'space-y-5'
+          sessionStarted ? 'flex h-full min-h-0 flex-col gap-3' : 'space-y-5'
         }`}
       >
         {sessionStarted ? (
-          <header className="hidden min-w-0 shrink-0 items-center justify-between gap-3 border-b pb-2 sm:flex">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />
-              <span className="shrink-0 text-xs font-medium text-primary">
+          <header className="flex min-w-0 shrink-0 items-center justify-between gap-3 border-b pb-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+              <span className="shrink-0 text-sm font-medium text-primary">
                 InterviewGrade
               </span>
-              <span className="text-xs text-muted-foreground">/</span>
-              <h1 className="truncate text-xs font-medium text-foreground/90">
+              <span className="text-muted-foreground">/</span>
+              <h1 className="truncate text-sm font-medium text-foreground">
                 {snapshot.title}
               </h1>
             </div>
 
-            <span className="hidden shrink-0 text-[11px] text-muted-foreground lg:inline">
+            <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">
               Version {practiceVersion.version}
             </span>
           </header>

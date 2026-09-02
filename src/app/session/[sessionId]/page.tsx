@@ -93,7 +93,7 @@ export default async function PracticeSessionPage({
     <main
       className={`bg-gradient-to-b from-background via-background to-muted/30 ${
         sessionStarted
-          ? 'h-[calc(100dvh-3rem)] overflow-hidden px-2.5 py-2 sm:h-[calc(100dvh-3.25rem)] sm:px-5 sm:py-3'
+          ? 'h-[calc(100dvh-3rem)] overflow-hidden px-2.5 py-2 sm:px-5 sm:py-3'
           : 'min-h-screen px-4 py-5 sm:px-6 sm:py-6'
       }`}
     >

@@ -5,7 +5,7 @@
   .session-interaction-shell main > div > div:has(> .max-w-4xl) {
     width: min(100%, 66rem) !important;
     margin-inline: auto !important;
-    padding: 0.3rem !important;
+    padding: 0.24rem !important;
   }
 
   .session-interaction-shell main > div > div:has(> .max-w-4xl)::before {
@@ -35,9 +35,6 @@
     max-width: 50rem !important;
   }
 
-  /* Use the same physical anchor before and after feedback. Keeping a fixed,
-     modest top offset prevents feedback from recentering the whole module while
-     avoiding the large gap that the previous desktop anchor introduced. */
   @media (min-height: 760px) {
     .session-interaction-shell .max-w-4xl {
       display: flex !important;
@@ -45,8 +42,8 @@
       min-height: 0 !important;
       flex-direction: column !important;
       justify-content: flex-start !important;
-      gap: 0.55rem !important;
-      padding-top: clamp(1.25rem, 4vh, 2.5rem) !important;
+      gap: 0.42rem !important;
+      padding-top: clamp(0.8rem, 2.5vh, 1.6rem) !important;
     }
 
     .session-interaction-shell .max-w-4xl > section {
@@ -57,12 +54,12 @@
 
   .session-interaction-shell .max-w-4xl > div:first-child {
     display: grid !important;
-    grid-template-columns: 6.75rem minmax(0, 1fr) 6.75rem !important;
+    grid-template-columns: 6.4rem minmax(0, 1fr) 6.4rem !important;
     align-items: center !important;
-    gap: 0.8rem !important;
+    gap: 0.65rem !important;
     width: 100% !important;
     margin: 0 auto !important;
-    padding-inline: 0.2rem !important;
+    padding-inline: 0.15rem !important;
   }
 
   .session-interaction-shell .max-w-4xl > div:first-child > div:first-child {
@@ -77,8 +74,7 @@
     justify-self: end !important;
   }
 
-  /* Avery's stage is the primary card: a little more defined than the outer shell,
-     but still quiet enough for the interview content to lead. */
+  /* Avery's stage is the primary card: defined, but not dashboard-heavy. */
   .session-interaction-shell .max-w-4xl > section {
     border-color: hsl(var(--border) / 0.7) !important;
     background:
@@ -89,5 +85,30 @@
       0 18px 48px rgb(0 0 0 / 0.1) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
+    padding-top: 1.35rem !important;
+    padding-bottom: 1.35rem !important;
+  }
+
+  .session-interaction-shell [data-avery-presence] {
+    width: 4.6rem !important;
+    height: 4.6rem !important;
+  }
+
+  .session-interaction-shell [data-avery-presence] + div {
+    margin-top: 0.35rem !important;
+  }
+
+  /* Keep the answer control visually connected to the question rather than
+     reading as a second card/section. */
+  .session-interaction-shell section > div.relative.z-10.mx-auto {
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
+    border-color: hsl(var(--border) / 0.55) !important;
+  }
+
+  .session-interaction-shell [data-practice-voice-recorder] button[aria-label='Record answer'],
+  .session-interaction-shell [data-practice-voice-recorder] button[aria-label='Stop recording'] {
+    width: 3.75rem !important;
+    height: 3.75rem !important;
   }
 }

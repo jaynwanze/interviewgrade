@@ -1,9 +1,12 @@
 import { Database } from '@/lib/database.types';
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
 export const createSupabaseUserRouteHandlerClient = () => {
-  const cookieStore = cookies();
+  // Next 15 keeps synchronous request API access as a compatibility path.
+  // Preserve this factory's synchronous contract for existing callers during
+  // the security upgrade; a later refactor can make the whole call chain async.
+  const cookieStore = cookies() as unknown as UnsafeUnwrappedCookies;
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

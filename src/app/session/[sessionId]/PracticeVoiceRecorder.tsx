@@ -302,9 +302,9 @@ export function PracticeVoiceRecorder({
             onClick={() => void finishRecording()}
             disabled={isTranscribing}
             aria-label="Stop recording"
-            className="h-14 w-14 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25 sm:h-16 sm:w-16"
+            className="h-12 w-12 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25"
           >
-            <StopCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+            <StopCircle className="h-5 w-5" />
           </Button>
         ) : (
           <Button
@@ -312,18 +312,18 @@ export function PracticeVoiceRecorder({
             onClick={startRecording}
             disabled={disabled || isTranscribing}
             aria-label="Record answer"
-            className="h-14 w-14 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20 sm:h-16 sm:w-16"
+            className="h-12 w-12 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20"
           >
             {isTranscribing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <MicrophoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+              <MicrophoneIcon className="h-5 w-5" />
             )}
           </Button>
         )}
       </div>
 
-      <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{helper}</p>
+      <p className="mt-2 text-[11px] leading-4 text-muted-foreground sm:hidden">{helper}</p>
 
       {warning && (
         <p className="mt-2 max-w-lg text-xs leading-5 text-amber-600">{warning}</p>

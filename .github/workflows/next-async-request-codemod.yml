@@ -27,8 +27,6 @@ jobs:
         run: npx --yes @next/codemod@canary next-async-request-api . --force
       - name: Show changed files
         run: git diff --name-only
-      - name: Typecheck
-        run: pnpm tsc
       - name: Persist migration
         run: |
           git config user.name github-actions[bot]
@@ -37,3 +35,5 @@ jobs:
           git diff --cached --quiet || git commit -m 'refactor: migrate Next async request APIs'
           git pull --rebase origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}
+      - name: Typecheck
+        run: pnpm tsc

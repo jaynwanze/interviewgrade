@@ -34,7 +34,7 @@ jobs:
           pnpm why next react react-dom
 
       - name: Migrate async request APIs
-        run: pnpm dlx @next/codemod@latest next-async-request-api .
+        run: pnpm dlx @next/codemod@latest next-async-request-api . --force
 
       - name: Typecheck
         run: pnpm tsc

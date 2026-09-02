@@ -7,6 +7,7 @@ import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalL
 import './interaction-polish.css';
 import './mobile-session-polish.css';
 import './desktop-session-glass.css';
+import './feedback-checkpoint.css';
 
 export default async function SessionLayout({
   children,

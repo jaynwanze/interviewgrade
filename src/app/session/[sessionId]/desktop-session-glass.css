@@ -90,4 +90,15 @@
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
   }
+
+  /* Once an answer is saved, keep the lower feedback region at one stable height
+     while evaluation streams in. This prevents the evaluating -> loaded transition
+     from changing the stage footprint, without making the compact recorder state
+     taller or changing the approved Avery/question anchor above it. */
+  .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) {
+    height: clamp(10.5rem, 22vh, 13rem) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
 }

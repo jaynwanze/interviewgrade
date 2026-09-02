@@ -28,13 +28,38 @@ jobs:
       - name: Upgrade framework security baseline
         run: |
           pnpm pkg set dependencies.next='15.5.21'
-          pnpm pkg set dependencies.react='19.1.1'
-          pnpm pkg set dependencies.react-dom='19.1.1'
+          pnpm pkg set dependencies.@next/env='15.5.21'
+          pnpm pkg set devDependencies.@next/eslint-plugin-next='15.5.21'
           pnpm install --no-frozen-lockfile
-          pnpm why next react react-dom
+          pnpm why next react react-dom @next/env @next/eslint-plugin-next
 
       - name: Migrate async request APIs
         run: pnpm dlx @next/codemod@latest next-async-request-api . --force
+
+      - name: Fix practice editor async search params
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/app/(dynamic-pages)/(authenticated-pages)/(user-pages)/candidate/practices/[practiceId]/page.tsx')
+          s = p.read_text()
+          s = s.replace("  const result = await loadPractice(params.practiceId);", "  const { practiceId } = await params;\n  const resolvedSearchParams = searchParams ? await searchParams : undefined;\n  const result = await loadPractice(practiceId);")
+          s = s.replace("<EditorNotice searchParams={searchParams} />", "<EditorNotice searchParams={resolvedSearchParams} />")
+          s = s.replace("  searchParams: PracticeEditorPageProps['searchParams'];", "  searchParams: Awaited<PracticeEditorPageProps['searchParams']>;")
+          p.write_text(s)
+          PY
+
+      - name: Migrate Next config external packages option
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('next.config.js')
+          s = p.read_text()
+          old = "  experimental: {\n    serverComponentsExternalPackages: ['@node-rs/argon2', '@node-rs/bcrypt'],\n  },"
+          new = "  serverExternalPackages: ['@node-rs/argon2', '@node-rs/bcrypt'],"
+          if old in s:
+              s = s.replace(old, new)
+          p.write_text(s)
+          PY
 
       - name: Typecheck
         run: pnpm tsc
@@ -56,7 +81,7 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add package.json pnpm-lock.yaml src
+          git add package.json pnpm-lock.yaml next.config.js src
           git diff --cached --quiet || git commit -m 'security: upgrade Next to patched 15.5.21'
           git push origin HEAD:${{ github.head_ref }}
 

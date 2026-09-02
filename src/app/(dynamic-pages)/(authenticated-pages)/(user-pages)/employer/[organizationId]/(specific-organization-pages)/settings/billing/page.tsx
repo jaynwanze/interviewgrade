@@ -25,11 +25,12 @@ async function Subscription({ organizationId }: { organizationId: string }) {
   // );
 }
 
-export default async function OrganizationSettingsPage({
-  params,
-}: {
-  params: unknown;
-}) {
+export default async function OrganizationSettingsPage(
+  props: {
+    params: Promise<unknown>;
+  }
+) {
+  const params = await props.params;
   const { organizationId } = paramsSchema.parse(params);
   return (
     <Suspense fallback={<T.Subtle>Loading billing details...</T.Subtle>}>

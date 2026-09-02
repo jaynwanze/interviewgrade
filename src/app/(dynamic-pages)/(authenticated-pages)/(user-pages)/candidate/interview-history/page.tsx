@@ -15,11 +15,12 @@ const PAGE_SIZE = 5;
 
 type HistorySearchParams = Record<string, string | string[] | undefined>;
 
-export default async function InterviewHistory({
-  searchParams,
-}: {
-  searchParams?: HistorySearchParams;
-}) {
+export default async function InterviewHistory(
+  props: {
+    searchParams?: Promise<HistorySearchParams>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const user = await serverGetLoggedInUser();
   const legacyView = firstValue(searchParams?.legacy) === '1';
   const legacyMode = parseMode(searchParams?.mode);

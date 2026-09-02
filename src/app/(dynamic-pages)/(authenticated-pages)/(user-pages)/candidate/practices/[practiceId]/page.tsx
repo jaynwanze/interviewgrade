@@ -13,17 +13,17 @@ import styles from './editor-layout.module.css';
 import { PracticeEditor } from './PracticeEditor';
 
 type PracticeEditorPageProps = {
-  params: {
+  params: Promise<{
     practiceId: string;
-  };
-  searchParams?: {
+  }>;
+  searchParams?: Promise<{
     saved?: string;
     published?: string;
     created?: string;
     generated?: string;
     document?: string;
     error?: string;
-  };
+  }>;
 };
 
 type PracticeLoadResult =
@@ -68,10 +68,9 @@ async function loadPractice(practiceId: string): Promise<PracticeLoadResult> {
   }
 }
 
-export default async function PracticeEditorPage({
-  params,
-  searchParams,
-}: PracticeEditorPageProps) {
+export default async function PracticeEditorPage(props: PracticeEditorPageProps) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const result = await loadPractice(params.practiceId);
 
   if (!result.ready) {

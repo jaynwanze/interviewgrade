@@ -7,11 +7,12 @@ const paramsSchema = z.object({
   organizationId: z.coerce.string(),
 });
 
-export default async function OrganizationPage({
-  params,
-}: {
-  params: unknown;
-}) {
+export default async function OrganizationPage(
+  props: {
+    params: Promise<unknown>;
+  }
+) {
+  const params = await props.params;
   const parsedParams = paramsSchema.parse(params);
   const { organizationId } = parsedParams;
   return (

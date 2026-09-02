@@ -31,8 +31,8 @@ import { ExportReportButton } from './ExportReportButton';
 import styles from './report-layout.module.css';
 
 type ReportPageProps = {
-  params: { sessionId: string };
-  searchParams?: { error?: string };
+  params: Promise<{ sessionId: string }>;
+  searchParams?: Promise<{ error?: string }>;
 };
 
 type ReportLoadResult =
@@ -68,10 +68,9 @@ async function loadReport(sessionId: string): Promise<ReportLoadResult> {
   }
 }
 
-export default async function PracticeReportPage({
-  params,
-  searchParams,
-}: ReportPageProps) {
+export default async function PracticeReportPage(props: ReportPageProps) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const result = await loadReport(params.sessionId);
 
   if (result.state === 'not-found') {

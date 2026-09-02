@@ -11,7 +11,8 @@ const paramsSchema = z.object({
   organizationId: z.string(),
 });
 
-export async function generateMetadata({ params }: { params: unknown }) {
+export async function generateMetadata(props: { params: Promise<unknown> }) {
+  const params = await props.params;
   const parsedParams = paramsSchema.parse(params);
   const { organizationId } = parsedParams;
   const organizationTitle = await getOrganizationTitle(organizationId);
@@ -37,11 +38,12 @@ async function Title({ organizationId }: { organizationId: string }) {
   );
 }
 
-export default async function OrganizationNavbar({
-  params,
-}: {
-  params: unknown;
-}) {
+export default async function OrganizationNavbar(
+  props: {
+    params: Promise<unknown>;
+  }
+) {
+  const params = await props.params;
   const { organizationId } = paramsSchema.parse(params);
   return (
     <div className="flex items-center">

@@ -1,0 +1,113 @@
+/* Practice feedback should read like a brief coaching checkpoint, not a report panel.
+   Keep this stylesheet presentation-only so the approved Avery/session geometry stays frozen. */
+
+/* Previous-question feedback shown while the next question is active. */
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 {
+  width: 100%;
+  margin-top: 0.75rem !important;
+  padding: 0.7rem 0.8rem !important;
+  border: 1px solid hsl(var(--border) / 0.65) !important;
+  border-radius: 0.9rem !important;
+  background: hsl(var(--muted) / 0.12) !important;
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div:first-child {
+  min-height: 2rem;
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div:first-child > div:first-child {
+  min-width: 0;
+  gap: 0.45rem !important;
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div:first-child > div:first-child > span.font-medium {
+  font-size: 0.76rem !important;
+  color: hsl(var(--muted-foreground));
+}
+
+/* The score is useful context, not the dominant emotional signal. Add a plain-language
+   status while keeping the original numeric score available. */
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-red-600,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-orange-600,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-yellow-600,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-lime-600,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-green-600 {
+  font-size: 0.75rem !important;
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.78) !important;
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-red-600::before {
+  content: 'Needs work ';
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-orange-600::before,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-yellow-600::before {
+  content: 'Developing ';
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-lime-600::before,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-green-600::before {
+  content: 'Strong ';
+}
+
+/* Re-label the existing View/Hide control without changing component logic. */
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div:first-child > button {
+  height: 1.9rem !important;
+  padding-inline: 0.55rem !important;
+  font-size: 0 !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div:first-child > button::after {
+  content: 'Review details';
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3:has(> div.mt-2) > div:first-child > button::after {
+  content: 'Hide details';
+}
+
+/* Detailed prose remains available on demand, but reads as secondary material. */
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div.mt-2 {
+  max-height: 7.5rem;
+  margin-top: 0.55rem !important;
+  padding: 0.65rem 0.7rem;
+  overflow-y: auto;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+  font-size: 0.78rem !important;
+  line-height: 1.35rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+  overscroll-behavior: contain;
+}
+
+/* Current-answer feedback: reduce report-like density while it streams. The existing
+   Summary/Next focus content is preserved; this only tightens its visual weight. */
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-5.max-w-2xl.border-t.pt-5 > div.space-y-4,
+.session-interaction-shell section > div.relative.z-10.mx-auto.mt-5.max-w-2xl.border-t.pt-5.sm\:mt-6.sm\:pt-6 > div.space-y-4 {
+  gap: 0.65rem !important;
+}
+
+@media (max-width: 767px) {
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 {
+    margin-top: 0.45rem !important;
+    padding: 0.55rem 0.6rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div:first-child > div:first-child > span.font-medium,
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-red-600,
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-orange-600,
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-yellow-600,
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-lime-600,
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 .text-green-600 {
+    font-size: 0.68rem !important;
+  }
+
+  .session-interaction-shell section > div.relative.z-10.mx-auto.mt-4.max-w-2xl.border-t.pt-3 > div.mt-2 {
+    max-height: 5.5rem;
+    font-size: 0.72rem !important;
+    line-height: 1.2rem !important;
+  }
+}

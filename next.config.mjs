@@ -8,8 +8,8 @@ export default {
       bodySizeLimit: '10mb',
       allowedOrigins: ['my-proxy.com', '*.my-proxy.com'],
     },
-    serverComponentsExternalPackages: ['pdf-parse'],
   },
+  serverExternalPackages: ['pdf-parse'],
   eslint:{
   },
   images: {

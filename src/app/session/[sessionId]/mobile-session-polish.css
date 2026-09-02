@@ -22,29 +22,17 @@
     content: none !important;
   }
 
-  /* Progress + Avery stage remain one responsive module. */
+  /* Progress, Avery, question and the answer/feedback region share one fixed
+     vertical anchor. Do not recenter the parent when recorder state changes: that
+     caused the entire stage to jump as soon as feedback mounted. */
   .session-interaction-shell .max-w-4xl {
     display: flex !important;
     height: 100% !important;
     min-height: 0 !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
-    gap: 0.25rem !important;
-    padding-top: 0.08rem !important;
-  }
-
-  /* Keep the active interview cluster centred, but reduce the old bottom bias so
-     the question and answer control read as one compact stage. */
-  .session-interaction-shell .max-w-4xl:has([data-practice-voice-recorder]) {
-    justify-content: center !important;
-    padding-top: 0 !important;
-    padding-bottom: clamp(2rem, 5dvh, 3.25rem) !important;
-  }
-
-  .session-interaction-shell .max-w-4xl:has([data-practice-voice-recorder]) > div:first-child {
-    position: relative !important;
-    top: clamp(0.55rem, 1.6dvh, 0.9rem) !important;
-    z-index: 2;
+    gap: 0.3rem !important;
+    padding-top: clamp(0.8rem, 2.4dvh, 1.35rem) !important;
   }
 
   .session-interaction-shell .max-w-4xl > div:first-child {
@@ -174,7 +162,7 @@
 
   /* Live feedback uses the space below the stable top cluster and scrolls internally. */
   .session-interaction-shell section > div.relative.z-10.mx-auto:has(.lucide-message-square) {
-    max-height: 29dvh !important;
+    max-height: 34dvh !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
     scrollbar-width: thin;

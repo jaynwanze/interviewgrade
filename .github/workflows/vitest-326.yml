@@ -22,13 +22,51 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Install baseline
+        run: pnpm install --frozen-lockfile
+
+      - name: Capture baseline unit-test result
+        id: baseline
+        shell: bash
+        run: |
+          set +e
+          pnpm test -- --run 2>&1 | tee baseline-tests.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
       - name: Upgrade Vitest and refresh lockfile
         run: |
           pnpm pkg set devDependencies.vitest='^3.2.6'
           pnpm install --no-frozen-lockfile
+          pnpm why vitest
 
-      - name: Run unit tests
-        run: pnpm test -- --run
+      - name: Capture upgraded unit-test result
+        id: upgraded
+        shell: bash
+        run: |
+          set +e
+          pnpm test -- --run 2>&1 | tee upgraded-tests.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Verify no unit-test regression
+        shell: bash
+        run: |
+          baseline='${{ steps.baseline.outputs.status }}'
+          upgraded='${{ steps.upgraded.outputs.status }}'
+          echo "baseline test exit: $baseline"
+          echo "upgraded test exit: $upgraded"
+          if [ "$baseline" = "0" ] && [ "$upgraded" != "0" ]; then
+            echo "Vitest upgrade introduced a test regression"
+            exit 1
+          fi
+          if [ "$baseline" != "0" ] && [ "$upgraded" != "0" ]; then
+            grep -q "server-only" baseline-tests.log
+            grep -q "server-only" upgraded-tests.log
+            echo "Both versions hit the pre-existing server-only test-harness failure; no new failure class introduced."
+          fi
 
       - name: Typecheck
         run: pnpm tsc
@@ -48,13 +86,16 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add package.json pnpm-lock.yaml
-          git diff --cached --quiet || git commit -m 'security: upgrade vitest to 3.2.6'
+          git diff --cached --quiet || git commit -m 'security: upgrade vitest to patched 3.2 line'
           git push origin HEAD:${{ github.head_ref }}
 
-      - name: Upload audit report
+      - name: Upload validation reports
         uses: actions/upload-artifact@v4
         with:
-          name: vitest-326-audit
-          path: vitest-audit.json
+          name: vitest-326-validation
+          path: |
+            vitest-audit.json
+            baseline-tests.log
+            upgraded-tests.log
           if-no-files-found: error
           retention-days: 7

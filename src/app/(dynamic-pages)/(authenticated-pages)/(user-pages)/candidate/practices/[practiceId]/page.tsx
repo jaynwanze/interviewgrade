@@ -12,18 +12,20 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import styles from './editor-layout.module.css';
 import { PracticeEditor } from './PracticeEditor';
 
+type PracticeEditorSearchParams = {
+  saved?: string;
+  published?: string;
+  created?: string;
+  generated?: string;
+  document?: string;
+  error?: string;
+};
+
 type PracticeEditorPageProps = {
   params: Promise<{
     practiceId: string;
   }>;
-  searchParams?: Promise<{
-    saved?: string;
-    published?: string;
-    created?: string;
-    generated?: string;
-    document?: string;
-    error?: string;
-  }>;
+  searchParams?: Promise<PracticeEditorSearchParams>;
 };
 
 type PracticeLoadResult =
@@ -109,7 +111,7 @@ export default async function PracticeEditorPage(props: PracticeEditorPageProps)
 function EditorNotice({
   searchParams,
 }: {
-  searchParams: PracticeEditorPageProps['searchParams'];
+  searchParams: PracticeEditorSearchParams | undefined;
 }) {
   if (searchParams?.published === '1') {
     return (

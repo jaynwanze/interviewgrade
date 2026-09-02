@@ -266,31 +266,24 @@ export function PracticeVoiceRecorder({
   const helper = isTranscribing
     ? 'Transcribing your response'
     : isRecording
-      ? 'Speak naturally, then tap again to finish'
+      ? 'Tap again when you are finished'
       : 'Answer naturally when you are ready';
 
   return (
-    <div
-      className="flex w-full flex-col items-center text-center"
-      data-practice-voice-recorder
-      data-recorder-state={isTranscribing ? 'transcribing' : isRecording ? 'recording' : 'ready'}
-    >
-      <div className="min-h-10">
-        <div className="text-sm font-medium text-foreground">{status}</div>
-        <div className="mt-0.5 text-xs text-muted-foreground">{helper}</div>
-      </div>
+    <div className="flex w-full flex-col items-center text-center" data-practice-voice-recorder>
+      <div className="text-xs font-medium text-foreground/85">{status}</div>
 
-      <div className="mt-3 flex h-10 min-w-44 items-center justify-center sm:h-11">
+      <div className="mt-2 flex h-9 min-w-36 items-center justify-center sm:h-10">
         {isRecording && mediaStreamRef.current && audioContextRef.current ? (
           <Meter
             audioContext={audioContextRef.current}
             stream={mediaStreamRef.current}
-            settings={{ bars: 24, spacing: 2, width: 3, height: 34 }}
+            settings={{ bars: 24, spacing: 2, width: 3, height: 30 }}
           />
         ) : isTranscribing ? (
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         ) : (
-          <div className="flex items-center gap-1 opacity-35" aria-hidden="true">
+          <div className="flex items-center gap-1 opacity-30" aria-hidden="true">
             {[10, 17, 24, 14, 20, 12, 16].map((height, index) => (
               <span
                 key={`${height}-${index}`}
@@ -302,16 +295,16 @@ export function PracticeVoiceRecorder({
         )}
       </div>
 
-      <div className="mt-3">
+      <div className="mt-2">
         {isRecording ? (
           <Button
             type="button"
             onClick={() => void finishRecording()}
             disabled={isTranscribing}
             aria-label="Stop recording"
-            className="h-16 w-16 rounded-full border border-red-400/35 bg-red-500/15 p-0 text-red-300 shadow-[0_10px_35px_rgba(239,68,68,0.10)] transition-transform hover:bg-red-500/25 active:scale-95"
+            className="h-14 w-14 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25 sm:h-16 sm:w-16"
           >
-            <StopCircle className="h-6 w-6" />
+            <StopCircle className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         ) : (
           <Button
@@ -319,25 +312,27 @@ export function PracticeVoiceRecorder({
             onClick={startRecording}
             disabled={disabled || isTranscribing}
             aria-label="Record answer"
-            className="h-16 w-16 rounded-full border border-primary/30 bg-primary/15 p-0 text-primary shadow-[0_10px_35px_rgba(125,211,252,0.10)] transition-transform hover:bg-primary/20 active:scale-95 disabled:opacity-45"
+            className="h-14 w-14 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20 sm:h-16 sm:w-16"
           >
             {isTranscribing ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <MicrophoneIcon className="h-6 w-6" />
+              <MicrophoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             )}
           </Button>
         )}
       </div>
 
+      <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{helper}</p>
+
       {warning && (
-        <p className="mt-3 max-w-lg text-xs leading-5 text-amber-600">{warning}</p>
+        <p className="mt-2 max-w-lg text-xs leading-5 text-amber-600">{warning}</p>
       )}
       {error && (
-        <p className="mt-3 max-w-lg text-xs leading-5 text-red-500">{error}</p>
+        <p className="mt-2 max-w-lg text-xs leading-5 text-red-500">{error}</p>
       )}
       {isMicMuted && (
-        <p className="mt-3 text-xs text-red-500">
+        <p className="mt-2 text-xs text-red-500">
           Your microphone is muted. Please unmute to record audio.
         </p>
       )}

@@ -259,14 +259,19 @@ export function PracticeVoiceRecorder({
   }
 
   const status = isTranscribing
-    ? 'Transcribing…'
+    ? 'Preparing your answer…'
     : isRecording
       ? `Listening · ${recordingTime}s`
-      : 'Ready when you are';
+      : 'Tap to answer';
+  const helper = isTranscribing
+    ? 'Transcribing your response'
+    : isRecording
+      ? 'Tap again when you are finished'
+      : 'Answer naturally when you are ready';
 
   return (
     <div className="flex w-full flex-col items-center text-center" data-practice-voice-recorder>
-      <div className="text-xs font-medium text-muted-foreground">{status}</div>
+      <div className="text-xs font-medium text-foreground/85">{status}</div>
 
       <div className="mt-2 flex h-9 min-w-36 items-center justify-center sm:h-10">
         {isRecording && mediaStreamRef.current && audioContextRef.current ? (
@@ -297,9 +302,9 @@ export function PracticeVoiceRecorder({
             onClick={() => void finishRecording()}
             disabled={isTranscribing}
             aria-label="Stop recording"
-            className="h-12 w-12 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25"
+            className="h-14 w-14 rounded-full border border-red-400/30 bg-red-500/15 p-0 text-red-300 shadow-sm hover:bg-red-500/25 sm:h-16 sm:w-16"
           >
-            <StopCircle className="h-5 w-5" />
+            <StopCircle className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         ) : (
           <Button
@@ -307,16 +312,18 @@ export function PracticeVoiceRecorder({
             onClick={startRecording}
             disabled={disabled || isTranscribing}
             aria-label="Record answer"
-            className="h-12 w-12 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20"
+            className="h-14 w-14 rounded-full border border-primary/25 bg-primary/15 p-0 text-primary shadow-sm hover:bg-primary/20 sm:h-16 sm:w-16"
           >
             {isTranscribing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <MicrophoneIcon className="h-5 w-5" />
+              <MicrophoneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             )}
           </Button>
         )}
       </div>
+
+      <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{helper}</p>
 
       {warning && (
         <p className="mt-2 max-w-lg text-xs leading-5 text-amber-600">{warning}</p>

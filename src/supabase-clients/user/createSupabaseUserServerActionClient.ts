@@ -1,6 +1,6 @@
 import { Database } from '@/lib/database.types';
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
 export const createSupabaseUserServerActionClient = () =>
   createServerClient<Database>(
@@ -9,12 +9,12 @@ export const createSupabaseUserServerActionClient = () =>
     {
       cookies: {
         getAll() {
-          return cookies().getAll();
+          return (cookies() as unknown as UnsafeUnwrappedCookies).getAll();
         },
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookies().set(name, value, options),
+              (cookies() as unknown as UnsafeUnwrappedCookies).set(name, value, options),
             );
           } catch {
             // The `setAll` method was called from a Server Component.

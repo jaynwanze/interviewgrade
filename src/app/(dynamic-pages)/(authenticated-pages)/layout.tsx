@@ -5,12 +5,12 @@ import { SidebarVisibilityProvider } from '@/contexts/SidebarVisibilityContext';
 import { errors } from '@/utils/errors';
 
 import { verifySession } from '@/utils/server/verifySession';
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 import { type ReactNode, Suspense } from 'react';
 import { ClientLayout } from './ClientLayout';
 
 function getSidebarVisibility() {
-  const cookieStore = cookies();
+  const cookieStore = (cookies() as unknown as UnsafeUnwrappedCookies);
   const cookieValue = cookieStore.get(SIDEBAR_VISIBILITY_COOKIE_KEY)?.value;
   if (cookieValue) {
     return cookieValue === 'true';

@@ -15,8 +15,8 @@ import type { Practice } from '@/modules/practice/practice.schema';
 import { startPublicPracticeSessionAction } from './actions';
 
 type PublicPracticePageProps = {
-  params: { slug: string };
-  searchParams?: { error?: string };
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ error?: string }>;
 };
 
 type PublicPracticeLoadResult =
@@ -38,9 +38,8 @@ async function loadPublishedPractice(slug: string): Promise<PublicPracticeLoadRe
   }
 }
 
-export async function generateMetadata({
-  params,
-}: PublicPracticePageProps): Promise<Metadata> {
+export async function generateMetadata(props: PublicPracticePageProps): Promise<Metadata> {
+  const params = await props.params;
   const result = await loadPublishedPractice(params.slug);
 
   if (result.state !== 'ready') {
@@ -53,10 +52,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function PublicPracticePage({
-  params,
-  searchParams,
-}: PublicPracticePageProps) {
+export default async function PublicPracticePage(props: PublicPracticePageProps) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const result = await loadPublishedPractice(params.slug);
 
   if (result.state === 'unavailable') {

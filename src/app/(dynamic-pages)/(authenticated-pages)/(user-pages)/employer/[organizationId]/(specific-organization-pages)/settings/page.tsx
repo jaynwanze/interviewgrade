@@ -19,13 +19,14 @@ async function EditOrganization({
   );
 }
 
-export default async function EditOrganizationPage({
-  params,
-}: {
-  params: {
-    organizationId: string;
-  };
-}) {
+export default async function EditOrganizationPage(
+  props: {
+    params: Promise<{
+      organizationId: string;
+    }>;
+  }
+) {
+  const params = await props.params;
   const { organizationId } = params;
   return (
     <div className="space-y-4">

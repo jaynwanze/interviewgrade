@@ -1,18 +1,19 @@
 'use client';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { z } from 'zod';
 
 const paramsSchema = z.object({
   interviewId: z.string().optional(),
 });
 
-export default function InterviewSessionPage({
-  params,
-}: {
-  params: { interviewId?: string };
-}) {
+export default function InterviewSessionPage(
+  props: {
+    params: Promise<{ interviewId?: string }>;
+  }
+) {
+  const params = use(props.params);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 

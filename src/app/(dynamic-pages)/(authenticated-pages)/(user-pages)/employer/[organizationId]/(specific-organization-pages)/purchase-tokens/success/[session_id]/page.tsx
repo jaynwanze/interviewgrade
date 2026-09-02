@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { z } from 'zod';
 import PurchaseTokenSuccess from './PurchaseTokenSuccess';
 const paramsSchema = z.object({
   session_id: z.string().nonempty(),
 });
 
-export default function PurchaseTokenSuccessPage({
-  params,
-}: {
-  params: { session_id: string };
-}) {
+export default function PurchaseTokenSuccessPage(
+  props: {
+    params: Promise<{ session_id: string }>;
+  }
+) {
+  const params = use(props.params);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkoutSessionId, setCheckoutSessionId] = useState<string>('');

@@ -1,4 +1,5 @@
-'use client';
+'use client';;
+import { use } from "react";
 
 import { z } from 'zod';
 import { InterviewTemplates } from './InterviewTemplates';
@@ -7,11 +8,12 @@ const paramsSchema = z.object({
   interviewTemplateCategoryId: z.string(),
 });
 
-export default function InterviewsPage({
-  params,
-}: {
-  params: { interviewTemplateCategoryId: string };
-}) {
+export default function InterviewsPage(
+  props: {
+    params: Promise<{ interviewTemplateCategoryId: string }>;
+  }
+) {
+  const params = use(props.params);
   const parsedParams = paramsSchema.parse(params);
   const { interviewTemplateCategoryId } = parsedParams;
 

@@ -30,10 +30,11 @@ jobs:
           pnpm pkg set dependencies.next='15.5.21'
           pnpm pkg set dependencies.react='19.1.1'
           pnpm pkg set dependencies.react-dom='19.1.1'
-          pnpm pkg set devDependencies.'@types/react'='^19.1.10'
-          pnpm pkg set devDependencies.'@types/react-dom'='^19.1.7'
           pnpm install --no-frozen-lockfile
           pnpm why next react react-dom
+
+      - name: Migrate async request APIs
+        run: pnpm dlx @next/codemod@latest next-async-request-api .
 
       - name: Typecheck
         run: pnpm tsc
@@ -51,11 +52,11 @@ jobs:
           node -e "const a=require('./next-audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
           exit 0
 
-      - name: Persist validated package and lockfile
+      - name: Persist validated migration
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add package.json pnpm-lock.yaml
+          git add package.json pnpm-lock.yaml src
           git diff --cached --quiet || git commit -m 'security: upgrade Next to patched 15.5.21'
           git push origin HEAD:${{ github.head_ref }}
 

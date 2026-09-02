@@ -9,8 +9,8 @@ import { cookies } from 'next/headers';
 import { type ReactNode, Suspense } from 'react';
 import { ClientLayout } from './ClientLayout';
 
-function getSidebarVisibility() {
-  const cookieStore = cookies();
+async function getSidebarVisibility() {
+  const cookieStore = await cookies();
   const cookieValue = cookieStore.get(SIDEBAR_VISIBILITY_COOKIE_KEY)?.value;
   if (cookieValue) {
     return cookieValue === 'true';
@@ -22,7 +22,7 @@ async function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const user = await verifySession();
 
   try {
-    const sidebarVisibility = getSidebarVisibility();
+    const sidebarVisibility = await getSidebarVisibility();
 
     return (
       <SidebarVisibilityProvider initialValue={sidebarVisibility}>

@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
 const getCookieStore = () =>
-  cookies() as unknown as UnsafeUnwrappedCookies;
+  (cookies() as unknown as UnsafeUnwrappedCookies) as unknown as UnsafeUnwrappedCookies;
 
 export const createSupabaseUserServerActionClient = () =>
   createServerClient<Database>(

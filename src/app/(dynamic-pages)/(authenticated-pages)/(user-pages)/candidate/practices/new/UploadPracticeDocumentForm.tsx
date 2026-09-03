@@ -10,7 +10,7 @@ import { generatePracticeDraftFromDocumentAction } from './actions';
 
 export function UploadPracticeDocumentForm() {
   return (
-    <form action={generatePracticeDraftFromDocumentAction} className="space-y-4">
+    <form action={generatePracticeDraftFromDocumentAction} className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
         <div className="space-y-1.5">
           <label htmlFor="contextKind" className="text-xs font-medium text-muted-foreground">
@@ -45,14 +45,14 @@ export function UploadPracticeDocumentForm() {
 
       <div className="space-y-1.5">
         <label htmlFor="documentInstruction" className="text-sm font-medium">
-          Focus <span className="font-normal text-muted-foreground">(optional)</span>
+          Optional focus
         </label>
         <Textarea
           id="documentInstruction"
           name="instruction"
           maxLength={1500}
-          className="min-h-24"
-          placeholder="e.g. stakeholder communication and decision making"
+          className="min-h-20"
+          placeholder="Stakeholder communication, technical depth, leadership…"
         />
       </div>
 
@@ -80,7 +80,7 @@ export function UploadPracticeDocumentForm() {
       </div>
 
       <p className="text-[11px] leading-4 text-muted-foreground">
-        Source content is used for generation and is not stored by this flow.
+        Used for generation only. The source file is not stored.
       </p>
     </form>
   );
@@ -92,7 +92,7 @@ function GenerateDocumentButton() {
   return (
     <Button type="submit" disabled={pending} size="sm" className="sm:min-w-40">
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
-      {pending ? 'Creating…' : 'Create draft'}
+      {pending ? 'Creating…' : 'Upload material'}
     </Button>
   );
 }

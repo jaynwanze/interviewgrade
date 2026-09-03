@@ -1,0 +1,94 @@
+name: Next 15.5.21 Compatibility
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate-next:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install baseline
+        run: pnpm install --frozen-lockfile
+
+      - name: Upgrade framework security baseline
+        run: |
+          pnpm pkg set dependencies.next='15.5.21'
+          pnpm pkg set dependencies.@next/env='15.5.21'
+          pnpm pkg set devDependencies.@next/eslint-plugin-next='15.5.21'
+          pnpm install --no-frozen-lockfile
+          pnpm why next react react-dom @next/env @next/eslint-plugin-next
+
+      - name: Migrate async request APIs
+        run: pnpm dlx @next/codemod@latest next-async-request-api . --force
+
+      - name: Fix practice editor async search params
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/app/(dynamic-pages)/(authenticated-pages)/(user-pages)/candidate/practices/[practiceId]/page.tsx')
+          s = p.read_text()
+          s = s.replace("  const result = await loadPractice(params.practiceId);", "  const { practiceId } = await params;\n  const resolvedSearchParams = searchParams ? await searchParams : undefined;\n  const result = await loadPractice(practiceId);")
+          s = s.replace("<EditorNotice searchParams={searchParams} />", "<EditorNotice searchParams={resolvedSearchParams} />")
+          s = s.replace("  searchParams: PracticeEditorPageProps['searchParams'];", "  searchParams: Awaited<PracticeEditorPageProps['searchParams']>;")
+          p.write_text(s)
+          PY
+
+      - name: Migrate Next config external packages option
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('next.config.mjs')
+          s = p.read_text()
+          old = "  experimental: {\n    serverComponentsExternalPackages: ['@node-rs/argon2', '@node-rs/bcrypt'],\n  },"
+          new = "  serverExternalPackages: ['@node-rs/argon2', '@node-rs/bcrypt'],"
+          if old in s:
+              s = s.replace(old, new)
+          p.write_text(s)
+          PY
+
+      - name: Typecheck
+        run: pnpm tsc
+
+      - name: Unit tests
+        run: pnpm test -- --run
+
+      - name: Production audit
+        shell: bash
+        run: |
+          set +e
+          pnpm audit --prod --json > next-audit.json
+          status=$?
+          echo "pnpm audit exit code: $status"
+          node -e "const a=require('./next-audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2))"
+          exit 0
+
+      - name: Persist validated migration
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add package.json pnpm-lock.yaml next.config.mjs src
+          git diff --cached --quiet || git commit -m 'security: upgrade Next to patched 15.5.21'
+          git push origin HEAD:${{ github.head_ref }}
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-15-5-21-audit
+          path: next-audit.json
+          if-no-files-found: error
+          retention-days: 7

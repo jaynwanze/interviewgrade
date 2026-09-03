@@ -24,13 +24,14 @@ import { creatorOwnsPracticeSession } from '@/modules/practice/creator-practice-
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 
 type CreatorResultPageProps = {
-  params: {
+  params: Promise<{
     practiceId: string;
     sessionId: string;
-  };
+  }>;
 };
 
-export default async function CreatorResultPage({ params }: CreatorResultPageProps) {
+export default async function CreatorResultPage(props: CreatorResultPageProps) {
+  const params = await props.params;
   const user = await serverGetLoggedInUser();
   const ownsSession = await creatorOwnsPracticeSession(
     params.practiceId,

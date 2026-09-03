@@ -13,17 +13,17 @@ import styles from './editor-layout.module.css';
 import { PracticeEditor } from './PracticeEditor';
 
 type PracticeEditorPageProps = {
-  params: {
+  params: Promise<{
     practiceId: string;
-  };
-  searchParams?: {
+  }>;
+  searchParams?: Promise<{
     saved?: string;
     published?: string;
     created?: string;
     generated?: string;
     document?: string;
     error?: string;
-  };
+  }>;
 };
 
 type PracticeLoadResult =
@@ -68,11 +68,12 @@ async function loadPractice(practiceId: string): Promise<PracticeLoadResult> {
   }
 }
 
-export default async function PracticeEditorPage({
-  params,
-  searchParams,
-}: PracticeEditorPageProps) {
-  const result = await loadPractice(params.practiceId);
+export default async function PracticeEditorPage(props: PracticeEditorPageProps) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+  const { practiceId } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const result = await loadPractice(practiceId);
 
   if (!result.ready) {
     return (
@@ -99,7 +100,7 @@ export default async function PracticeEditorPage({
 
   return (
     <div className="space-y-4">
-      <EditorNotice searchParams={searchParams} />
+      <EditorNotice searchParams={resolvedSearchParams} />
       <div className={styles.shell}>
         <PracticeEditor key={editorKey} practice={result.practice} />
       </div>
@@ -110,7 +111,7 @@ export default async function PracticeEditorPage({
 function EditorNotice({
   searchParams,
 }: {
-  searchParams: PracticeEditorPageProps['searchParams'];
+  searchParams: Awaited<PracticeEditorPageProps['searchParams']>;
 }) {
   if (searchParams?.published === '1') {
     return (

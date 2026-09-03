@@ -7,11 +7,12 @@ const SearchParamsSchema = z.object({
   nextActionType: z.string().optional(),
 });
 
-export default function SignupPage({
-  searchParams,
-}: {
-  searchParams: unknown;
-}) {
+export default async function SignupPage(
+  props: {
+    searchParams: Promise<unknown>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const { next, nextActionType } = SearchParamsSchema.parse(searchParams);
   const userType: UserType = 'employer';
   return (

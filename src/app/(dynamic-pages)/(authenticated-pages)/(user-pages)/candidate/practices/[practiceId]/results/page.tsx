@@ -29,12 +29,11 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { CopyPracticeLinkButton } from '../../CopyPracticeLinkButton';
 
 type PracticeResultsPageProps = {
-  params: { practiceId: string };
+  params: Promise<{ practiceId: string }>;
 };
 
-export default async function PracticeResultsPage({
-  params,
-}: PracticeResultsPageProps) {
+export default async function PracticeResultsPage(props: PracticeResultsPageProps) {
+  const params = await props.params;
   const user = await serverGetLoggedInUser();
   const result = await getCreatorPracticeResults(params.practiceId, user.id);
 

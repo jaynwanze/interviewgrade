@@ -18,7 +18,7 @@ import { CopyPracticeLinkButton } from './CopyPracticeLinkButton';
 import { PracticeLifecycleAction } from './PracticeLifecycleAction';
 
 type MyPracticesPageProps = {
-  searchParams?: { created?: string };
+  searchParams?: Promise<{ created?: string }>;
 };
 
 type PracticeLoadResult =
@@ -40,7 +40,8 @@ async function loadMyPractices(): Promise<PracticeLoadResult> {
   }
 }
 
-export default async function MyPracticesPage({ searchParams }: MyPracticesPageProps) {
+export default async function MyPracticesPage(props: MyPracticesPageProps) {
+  const searchParams = await props.searchParams;
   const result = await loadMyPractices();
   const created = searchParams?.created === '1';
 

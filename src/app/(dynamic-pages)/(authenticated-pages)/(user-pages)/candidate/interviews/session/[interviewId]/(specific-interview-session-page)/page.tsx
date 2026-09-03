@@ -10,11 +10,12 @@ const paramsSchema = z.object({
   interviewId: z.string(),
 });
 
-export default async function InterviewSessionPage({
-  params,
-}: {
-  params: { interviewId: string };
-}) {
+export default async function InterviewSessionPage(
+  props: {
+    params: Promise<{ interviewId: string }>;
+  }
+) {
+  const params = await props.params;
   // Validate params
   const parsedParams = paramsSchema.safeParse(params);
 

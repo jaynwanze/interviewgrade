@@ -3,6 +3,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
+  Play,
   Target,
   Trophy,
 } from 'lucide-react';
@@ -23,13 +24,72 @@ export function V2CandidateProgress({
 }) {
   if (summary.totalSessions === 0) return null;
 
+  const latestInProgress = recentSessions.find(
+    (session) => session.status === 'in_progress',
+  );
   const latestCompleted = recentSessions.find(
     (session) => session.status === 'completed',
   );
 
   return (
     <section className="container mx-auto w-full px-4 pt-3 sm:w-11/12 lg:w-3/4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {latestInProgress && (
+        <Card className="border-primary/20 bg-primary/[0.035] shadow-sm">
+          <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="rounded-full bg-primary/10 p-2.5 text-primary">
+                <Play className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Continue where you left off
+                </div>
+                <div className="mt-1 truncate font-semibold">{latestInProgress.title}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Resume your current Practice before starting something new.
+                </div>
+              </div>
+            </div>
+            <Button asChild size="sm" className="w-full sm:w-auto">
+              <Link href={`/session/${latestInProgress.id}`}>
+                Continue practice
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {latestCompleted && (
+        <Card className={`${latestInProgress ? 'mt-3' : ''} border-border/80 bg-card/60`}>
+          <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="rounded-full bg-emerald-500/10 p-2 text-emerald-600">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Recent practice
+                </div>
+                <div className="mt-1 truncate text-sm font-semibold">{latestCompleted.title}</div>
+                <div className="text-xs text-muted-foreground">
+                  {latestCompleted.overallScore != null
+                    ? `${Math.round(latestCompleted.overallScore)}/100 · review what to improve next`
+                    : 'Report pending'}
+                </div>
+              </div>
+            </div>
+            <Button asChild size="sm" variant="outline" className="w-full sm:w-auto">
+              <Link href={`/session/${latestCompleted.id}/report`}>
+                {latestCompleted.hasReport ? 'Review report' : 'Generate report'}
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <MetricCard
           label="Completed"
           value={`${summary.completedSessions}`}
@@ -51,33 +111,6 @@ export function V2CandidateProgress({
           icon={<Clock3 className="h-4 w-4" />}
         />
       </div>
-
-      {latestCompleted && (
-        <Card className="mt-3 border-primary/15 bg-primary/[0.02]">
-          <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="rounded-full bg-emerald-500/10 p-2 text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{latestCompleted.title}</div>
-                <div className="text-xs text-muted-foreground">
-                  Latest completed
-                  {latestCompleted.overallScore != null
-                    ? ` · ${Math.round(latestCompleted.overallScore)}/100`
-                    : ' · report pending'}
-                </div>
-              </div>
-            </div>
-            <Button asChild size="sm" variant="outline" className="w-full sm:w-auto">
-              <Link href={`/session/${latestCompleted.id}/report`}>
-                {latestCompleted.hasReport ? 'Report' : 'Generate report'}
-                <ArrowRight className="ml-1.5 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </section>
   );
 }

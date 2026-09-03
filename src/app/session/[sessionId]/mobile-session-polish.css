@@ -87,9 +87,10 @@
     margin-top: 0.25rem !important;
   }
 
-  /* Long prompts should remain readable without becoming the whole screen. */
+  /* Most long prompts should be visible in full. Only genuinely extreme prompts
+     get an internal scroll region so they cannot consume the entire viewport. */
   .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
-    max-height: 6.6rem !important;
+    max-height: clamp(9rem, 24dvh, 12rem) !important;
     overflow-y: auto !important;
     padding-right: 0.1rem;
     font-size: clamp(0.92rem, 3.8vw, 1.02rem) !important;

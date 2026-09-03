@@ -1,0 +1,48 @@
+/* Report-only polish. Keep the existing report structure and scoring hierarchy. */
+[data-report-polish] details {
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+[data-report-polish] details > summary {
+  position: relative;
+  padding-right: 1.75rem;
+}
+
+[data-report-polish] details > summary::after {
+  content: '+';
+  position: absolute;
+  right: 0.15rem;
+  top: 50%;
+  translate: 0 -50%;
+  color: hsl(var(--muted-foreground));
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+[data-report-polish] details[open] > summary::after {
+  content: '−';
+}
+
+[data-report-polish] details:hover {
+  border-color: hsl(var(--border) / 0.9);
+  background: hsl(var(--muted) / 0.08);
+}
+
+[data-report-polish] details[open] {
+  background: hsl(var(--muted) / 0.06);
+}
+
+@media (max-width: 639px) {
+  [data-report-polish] details > summary {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-report-polish] details {
+    transition: none;
+  }
+}

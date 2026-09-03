@@ -10,7 +10,7 @@ import { generatePracticeDraftAction } from './actions';
 
 export function GeneratePracticeDraftForm() {
   return (
-    <form action={generatePracticeDraftAction} className="space-y-4">
+    <form action={generatePracticeDraftAction} className="space-y-3">
       <div className="space-y-2">
         <label htmlFor="brief" className="text-sm font-medium">
           What are you preparing for?
@@ -21,7 +21,7 @@ export function GeneratePracticeDraftForm() {
           required
           minLength={20}
           maxLength={12000}
-          className="min-h-32"
+          className="min-h-24"
           placeholder="Role, skills, scenario, or paste a job description…"
         />
       </div>
@@ -58,7 +58,7 @@ function GenerateButton() {
   return (
     <Button type="submit" disabled={pending} size="sm" className="sm:min-w-40">
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-      {pending ? 'Creating…' : 'Create draft'}
+      {pending ? 'Generating…' : 'Generate with AI'}
     </Button>
   );
 }

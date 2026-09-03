@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalLoggedInUser';
 
 import './interaction-polish.css';
+import './avery-state-polish.css';
 import './mobile-session-polish.css';
 import './desktop-session-glass.css';
 

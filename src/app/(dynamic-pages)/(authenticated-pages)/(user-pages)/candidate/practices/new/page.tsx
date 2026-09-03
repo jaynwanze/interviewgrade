@@ -19,14 +19,13 @@ import { createPracticeAction } from './actions';
 export const maxDuration = 60;
 
 type CreatePracticePageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     error?: string;
-  };
+  }>;
 };
 
-export default function CreatePracticePage({
-  searchParams,
-}: CreatePracticePageProps) {
+export default async function CreatePracticePage(props: CreatePracticePageProps) {
+  const searchParams = await props.searchParams;
   const invalid = searchParams?.error === 'invalid';
   const unavailable = searchParams?.error === 'unavailable';
   const invalidAiBrief = searchParams?.error === 'ai-input';

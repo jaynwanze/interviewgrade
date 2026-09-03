@@ -10,12 +10,11 @@ import { serverGetOptionalLoggedInUser } from '@/utils/server/serverGetOptionalL
 import { AutoGenerateReport } from '../AutoGenerateReport';
 
 type GeneratingReportPageProps = {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 };
 
-export default async function GeneratingReportPage({
-  params,
-}: GeneratingReportPageProps) {
+export default async function GeneratingReportPage(props: GeneratingReportPageProps) {
+  const params = await props.params;
   const loggedInUser = await serverGetOptionalLoggedInUser();
   const homeHref = loggedInUser ? '/candidate/dashboard' : '/';
   const homeLabel = loggedInUser ? 'Go to dashboard' : 'Go home';

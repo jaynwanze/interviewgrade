@@ -14,11 +14,12 @@ async function Title({ organizationId }: { organizationId: string }) {
   return <T.P>{title}</T.P>;
 }
 
-export default async function OrganizationNavbar({
-  params,
-}: {
-  params: unknown;
-}) {
+export default async function OrganizationNavbar(
+  props: {
+    params: Promise<unknown>;
+  }
+) {
+  const params = await props.params;
   const { organizationId } = paramsSchema.parse(params);
   return (
     <div className="flex items-center">

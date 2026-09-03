@@ -1,9 +1,12 @@
 import { Database } from '@/lib/database.types';
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
 
 export const createSupabaseUserServerComponentClient = () => {
-  const cookieStore = cookies();
+  // Keep this shared factory synchronous for the focused Next 15 security
+  // migration. Next 15 provides this compatibility type for code that cannot
+  // yet make the full caller chain asynchronous.
+  const cookieStore = (cookies() as unknown as UnsafeUnwrappedCookies) as unknown as UnsafeUnwrappedCookies;
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -6,13 +6,18 @@ const paramsSchema = z.object({
   organizationId: z.string(),
 });
 
-export default function OrganizationSettingsLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: unknown;
-}) {
+export default async function OrganizationSettingsLayout(
+  props: {
+    children: React.ReactNode;
+    params: Promise<unknown>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const { organizationId } = paramsSchema.parse(params);
   const tabs = [
     {

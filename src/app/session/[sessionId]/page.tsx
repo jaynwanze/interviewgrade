@@ -17,11 +17,11 @@ import { beginPracticeSessionAction } from './actions';
 import styles from './session-player-shell.module.css';
 
 type PracticeSessionPageProps = {
-  params: { sessionId: string };
-  searchParams?: {
+  params: Promise<{ sessionId: string }>;
+  searchParams?: Promise<{
     error?: string;
     started?: string;
-  };
+  }>;
 };
 
 type SessionLoadResult =
@@ -48,10 +48,9 @@ async function loadSessionContext(sessionId: string): Promise<SessionLoadResult>
   }
 }
 
-export default async function PracticeSessionPage({
-  params,
-  searchParams,
-}: PracticeSessionPageProps) {
+export default async function PracticeSessionPage(props: PracticeSessionPageProps) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const result = await loadSessionContext(params.sessionId);
 
   if (result.state === 'unavailable') {

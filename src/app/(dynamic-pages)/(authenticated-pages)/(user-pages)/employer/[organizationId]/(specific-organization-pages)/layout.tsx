@@ -11,15 +11,20 @@ const paramsSchema = z.object({
   organizationId: z.string(),
 });
 
-export default async function Layout({
-  children,
-  params,
-  navbar,
-}: {
-  children: ReactNode;
-  params: unknown;
-  navbar: ReactNode;
-}) {
+export default async function Layout(
+  props: {
+    children: ReactNode;
+    params: Promise<unknown>;
+    navbar: ReactNode;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    children,
+    navbar
+  } = props;
+
   const { organizationId } = paramsSchema.parse(params);
   return (
     <ApplicationLayoutShell

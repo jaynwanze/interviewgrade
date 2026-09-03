@@ -133,11 +133,12 @@ const paramsSchema = z.object({
   organizationId: z.string(),
 });
 
-export default async function OrganizationPage({
-  params,
-}: {
-  params: unknown;
-}) {
+export default async function OrganizationPage(
+  props: {
+    params: Promise<unknown>;
+  }
+) {
+  const params = await props.params;
   const { organizationId } = paramsSchema.parse(params);
   return (
     <div className="space-y-12">

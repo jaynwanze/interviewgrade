@@ -87,13 +87,15 @@
     margin-top: 0.25rem !important;
   }
 
-  /* Long prompts should remain readable without becoming the whole screen. */
+  /* Keep realistic technical prompts readable without letting them push the
+     recorder below the core one-screen stage. The smaller mobile type gives long
+     questions substantially more content per line; only extreme prompts scroll. */
   .session-interaction-shell section > div.relative.z-10.flex.flex-col.items-center.text-center > div:nth-child(4) > p {
-    max-height: 6.6rem !important;
+    max-height: clamp(8.75rem, 21dvh, 10rem) !important;
     overflow-y: auto !important;
     padding-right: 0.1rem;
-    font-size: clamp(0.92rem, 3.8vw, 1.02rem) !important;
-    line-height: 1.24 !important;
+    font-size: clamp(0.82rem, 3.35vw, 0.92rem) !important;
+    line-height: 1.18 !important;
     letter-spacing: -0.012em !important;
     text-wrap: balance;
     overscroll-behavior: contain;

@@ -5,7 +5,7 @@ import path from 'node:path';
 import pdfParse from 'pdf-parse';
 
 export const MAX_PRACTICE_DOCUMENT_BYTES = 5 * 1024 * 1024;
-export const MAX_PRACTICE_SOURCE_CHARACTERS = 10_000;
+export const MAX_PRACTICE_SOURCE_CHARACTERS = 25_000;
 export const MIN_PRACTICE_SOURCE_CHARACTERS = 40;
 
 export type PracticeDocumentErrorCode =
@@ -95,7 +95,7 @@ export async function extractPracticeDocument(
   if (text.length > MAX_PRACTICE_SOURCE_CHARACTERS) {
     throw new PracticeDocumentError(
       'too-much-text',
-      'The extracted document text is too long for this first release. Use a shorter document instead of silently truncating it.',
+      'The extracted document text is too long. Use a shorter source document; InterviewGrade will not silently truncate it.',
     );
   }
 

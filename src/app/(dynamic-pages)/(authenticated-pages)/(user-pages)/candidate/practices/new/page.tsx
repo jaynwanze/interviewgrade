@@ -51,7 +51,7 @@ export default function CreatePracticePage({
         </Button>
         <h1 className="text-3xl font-semibold tracking-tight">Create a Practice</h1>
         <p className="max-w-2xl text-muted-foreground">
-          Start with AI, a source document, or build one manually.
+          Start with AI, a job description or résumé, or build one manually.
         </p>
       </div>
 
@@ -96,7 +96,7 @@ export default function CreatePracticePage({
 
       {documentType && (
         <Alert tone="destructive">
-          Document creation currently supports text-based PDF and TXT files.
+          Context creation currently supports text-based PDF and TXT files.
         </Alert>
       )}
 
@@ -115,7 +115,7 @@ export default function CreatePracticePage({
 
       {documentLength && (
         <Alert tone="destructive">
-          The extracted document is too long. Use a shorter source document;
+          The extracted context is unusually long. Use a shorter source document;
           InterviewGrade will not silently truncate it.
         </Alert>
       )}
@@ -168,10 +168,10 @@ export default function CreatePracticePage({
                 <FileText className="h-5 w-5" />
               </div>
               <div className="space-y-1">
-                <CardTitle className="text-xl">Create from document</CardTitle>
+                <CardTitle className="text-xl">Create from context</CardTitle>
                 <CardDescription>
-                  Upload a PDF or TXT source and turn it into the same editable
-                  Practice draft.
+                  Upload a job description, résumé/CV, or other PDF/TXT source and
+                  turn it into the same editable Practice draft.
                 </CardDescription>
               </div>
             </div>

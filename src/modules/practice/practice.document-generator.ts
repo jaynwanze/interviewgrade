@@ -14,7 +14,7 @@ export const practiceContextKindSchema = z.enum([
 export type PracticeContextKind = z.infer<typeof practiceContextKindSchema>;
 
 const documentPracticeInputSchema = z.object({
-  sourceText: z.string().trim().min(40).max(10_000),
+  sourceText: z.string().trim().min(40).max(25_000),
   sourceLabel: z.string().trim().min(1).max(180),
   contextKind: practiceContextKindSchema,
   instruction: z.string().trim().max(1500).default(''),

@@ -1,0 +1,20 @@
+/* Subtle state motion only. Do not change Avery geometry or session layout. */
+.session-interaction-shell [data-avery-presence] > div {
+  transition: transform 180ms ease, opacity 180ms ease !important;
+  transform-origin: center;
+}
+
+.session-interaction-shell [data-avery-presence] > div.opacity-100 {
+  transform: scale(1.035);
+}
+
+.session-interaction-shell [data-avery-presence] > div.opacity-35 {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-interaction-shell [data-avery-presence] > div {
+    transition: none !important;
+    transform: none !important;
+  }
+}
